@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="output"></div>
+    <script src="https://unpkg.com/shiki"></script>
+    <script>
+      console.log(shiki.BUNDLED_LANGUAGES[0]);
+      const lng = {
+        id: "lng",
+        scopeName: "source.lng",
+        grammar: {
+          scopeName: "source.lng",
+          fileTypes: ["lng"],
+          name: "lng",
+          patterns: [
+            { include: "#comments" },
+            // { include: "#operators" },
+            { include: "#strings" },
+            // { include: "#reserved-words" },
+            { include: "#numbers" },
+            { include: "#ctrlStatements" },
+            { include: "#keywords" },
+          ],
+          repository: {
+            comments: {
+              patterns: [
+                {
+                  begin: "#",
+                  beginCaptures: {
+                    0: { name: "punctuation.definition.comment.lng" },
+                  },
+                  end: "\n",
+                  name: "comment.line.number-sign.lng",
+                },
+              ],
+            },
+            ctrlStatements: {
+              patterns: [
+                {
+                  name: "keyword.control.lng",
+                  match: "def|end|when|case|of|do|fn",
+                },
+              ],
+            },
+            strings: {
+              patterns: [
+                {
+                  begin: "'",
+                  beginCaptures: {
+                    0: { name: "string.quoted.double.untitled" },
+                  },
+                  end: "'",
+                  name: "string.quoted.double.untitled",
+                },
+              ],
+            },
+            numbers: {
+              patterns: [
+                {
+                  name: "keyword.other.unit.suffix.integer.lng",
+                  match: "[0-9]+",
+                },
+              ],
+            },
+            keywords: {
+              patterns: [
+                {
+                  name: "entity.name.function.lng",
+                  match: ":[a-zA-Z_]+",
+                },
+                {
+                  name: "support.variable.property",
+                  match: "[a-zA-Z_]+",
+                },
+              ],
+            },
+          },
+        },
+      };
+
+      const proxify = (o) =>
+        new Proxy(o, {
+          get(...args) {
+            console.log(args);
+            const t = Reflect.get(...args);
+            if (typeof t !== "object") {
+              return t;
+            }
+            return proxify(t);
+          },
+        });
+
+      shiki
+        .getHighlighter({
+          theme: "one-dark-pro",
+          langs: [lng],
+        })
+        .then((highlighter) => {
+          const code = highlighter.codeToHtml(
+            `
+            
+     # atoms
+    :some
+    :none
+
+    # tuple
+    { :ok, err }
+      
+
+    # pattern matching
+    { :ok, body } = file_read('hello')
+    x = 1
+
+
+    # function declaration
+    def fib(n) when n > 1 do
+      fin(n - 1) + fin(n - 2)
+    end
+    def fib(n), do: n
+        
+    def map({ :none }, f), do: { :none }
+    def map({ :some, value }, f), do: { :some, f(value) }
+        
+        
+    # function call
+    map({ :none }, fn (x), do: x * x)
+    map { :none }, fn (x), do: x * x
+        
+        
+    # pipe
+    { :none }
+    |>map(fn (x), do: x * x)
+    |>map fn (x) do
+            y = x * 3
+            y + 5
+          end
+    |>map(fn (x), do: x * 2)
+        
+        
+    # exception
+    raise 'oops'
+        
+        
+    # case
+    case file_read('hello') of
+      { :ok, body } when body do
+        io_puts('Success: \${body}')
+      end
+      { :error, reason } do
+        io_puts('Error: \${reason}')
+      end
+    end
+      `,
+            "lng"
+          );
+          document.getElementById("output").innerHTML = code;
+        });
+    </script>
+  </body>
+</html>

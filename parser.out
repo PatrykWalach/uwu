@@ -1,0 +1,2630 @@
+Grammar:
+
+Rule 0     S' -> program
+Rule 1     program -> exprs
+Rule 2     exprs -> expr
+Rule 3     exprs -> exprs exprs
+Rule 4     expr -> binary_expr
+Rule 5     expr -> variable_declaration
+Rule 6     expr -> case
+Rule 7     expr -> call
+Rule 8     expr -> _if
+Rule 9     expr -> _def
+Rule 10    expr -> literal
+Rule 11    expr -> identifier
+Rule 12    expr -> do
+Rule 13    binary_expr -> expr INT_DIV expr
+Rule 14    binary_expr -> expr / expr
+Rule 15    binary_expr -> expr - expr
+Rule 16    binary_expr -> expr + expr
+Rule 17    binary_expr -> expr CONCAT expr
+Rule 18    do -> o_type DO exprs END
+Rule 19    _def -> DEF IDENTIFIER ( params ) do
+Rule 20    o_type -> <empty>
+Rule 21    o_type -> % IDENTIFIER
+Rule 22    params -> o_type identifier
+Rule 23    params -> params , params
+Rule 24    _if -> IF expr DO exprs ELSE exprs END
+Rule 25    _if -> IF expr do
+Rule 26    case -> CASE expr OF cases END
+Rule 27    cases -> patterns do
+Rule 28    cases -> cases cases
+Rule 29    patterns -> array_pattern
+Rule 30    patterns -> list_pattern
+Rule 31    patterns -> identifier ( patterns )
+Rule 32    patterns -> identifier
+Rule 33    patterns -> patterns , patterns
+Rule 34    array_pattern -> [ ]
+Rule 35    array_pattern -> [ patterns ]
+Rule 36    array_pattern -> [ SPREAD identifier , patterns ]
+Rule 37    array_pattern -> [ patterns , SPREAD identifier , patterns ]
+Rule 38    array_pattern -> [ patterns , SPREAD identifier ]
+Rule 39    list_pattern -> { }
+Rule 40    list_pattern -> { patterns }
+Rule 41    list_pattern -> { patterns , SPREAD identifier }
+Rule 42    call -> callee ( arguments )
+Rule 43    arguments -> arguments , arguments
+Rule 44    arguments -> expr
+Rule 45    callee -> identifier
+Rule 46    identifier -> IDENTIFIER
+Rule 47    variable_declaration -> identifier = expr
+Rule 48    literal -> NUMBER
+Rule 49    literal -> STRING
+
+Terminals, with rules where they appear:
+
+%                    : 21
+(                    : 19 31 42
+)                    : 19 31 42
++                    : 16
+,                    : 23 33 36 37 37 38 41 43
+-                    : 15
+/                    : 14
+=                    : 47
+CASE                 : 26
+CONCAT               : 17
+DEF                  : 19
+DO                   : 18 24
+ELSE                 : 24
+END                  : 18 24 26
+IDENTIFIER           : 19 21 46
+IF                   : 24 25
+INT_DIV              : 13
+NUMBER               : 48
+OF                   : 26
+SPREAD               : 36 37 38 41
+STRING               : 49
+[                    : 34 35 36 37 38
+]                    : 34 35 36 37 38
+error                : 
+{                    : 39 40 41
+}                    : 39 40 41
+
+Nonterminals, with rules where they appear:
+
+_def                 : 9
+_if                  : 8
+arguments            : 42 43 43
+array_pattern        : 29
+binary_expr          : 4
+call                 : 7
+callee               : 42
+case                 : 6
+cases                : 26 28 28
+do                   : 12 19 25 27
+expr                 : 2 13 13 14 14 15 15 16 16 17 17 24 25 26 44 47
+exprs                : 1 3 3 18 24 24
+identifier           : 11 22 31 32 36 37 38 41 45 47
+list_pattern         : 30
+literal              : 10
+o_type               : 18 22
+params               : 19 23 23
+patterns             : 27 31 33 33 35 36 37 37 38 40 41
+program              : 0
+variable_declaration : 5
+
+
+state 0
+
+    (0) S' -> . program
+    (1) program -> . exprs
+    (2) exprs -> . expr
+    (3) exprs -> . exprs exprs
+    (4) expr -> . binary_expr
+    (5) expr -> . variable_declaration
+    (6) expr -> . case
+    (7) expr -> . call
+    (8) expr -> . _if
+    (9) expr -> . _def
+    (10) expr -> . literal
+    (11) expr -> . identifier
+    (12) expr -> . do
+    (13) binary_expr -> . expr INT_DIV expr
+    (14) binary_expr -> . expr / expr
+    (15) binary_expr -> . expr - expr
+    (16) binary_expr -> . expr + expr
+    (17) binary_expr -> . expr CONCAT expr
+    (47) variable_declaration -> . identifier = expr
+    (26) case -> . CASE expr OF cases END
+    (42) call -> . callee ( arguments )
+    (24) _if -> . IF expr DO exprs ELSE exprs END
+    (25) _if -> . IF expr do
+    (19) _def -> . DEF IDENTIFIER ( params ) do
+    (48) literal -> . NUMBER
+    (49) literal -> . STRING
+    (46) identifier -> . IDENTIFIER
+    (18) do -> . o_type DO exprs END
+    (45) callee -> . identifier
+    (20) o_type -> .
+    (21) o_type -> . % IDENTIFIER
+    CASE            shift and go to state 13
+    IF              shift and go to state 15
+    DEF             shift and go to state 16
+    NUMBER          shift and go to state 18
+    STRING          shift and go to state 19
+    IDENTIFIER      shift and go to state 17
+    DO              reduce using rule 20 (o_type -> .)
+    %               shift and go to state 21
+
+    program                        shift and go to state 1
+    exprs                          shift and go to state 2
+    expr                           shift and go to state 3
+    binary_expr                    shift and go to state 4
+    variable_declaration           shift and go to state 5
+    case                           shift and go to state 6
+    call                           shift and go to state 7
+    _if                            shift and go to state 8
+    _def                           shift and go to state 9
+    literal                        shift and go to state 10
+    identifier                     shift and go to state 11
+    do                             shift and go to state 12
+    callee                         shift and go to state 14
+    o_type                         shift and go to state 20
+
+state 1
+
+    (0) S' -> program .
+
+
+state 2
+
+    (1) program -> exprs .
+    (3) exprs -> exprs . exprs
+    (2) exprs -> . expr
+    (3) exprs -> . exprs exprs
+    (4) expr -> . binary_expr
+    (5) expr -> . variable_declaration
+    (6) expr -> . case
+    (7) expr -> . call
+    (8) expr -> . _if
+    (9) expr -> . _def
+    (10) expr -> . literal
+    (11) expr -> . identifier
+    (12) expr -> . do
+    (13) binary_expr -> . expr INT_DIV expr
+    (14) binary_expr -> . expr / expr
+    (15) binary_expr -> . expr - expr
+    (16) binary_expr -> . expr + expr
+    (17) binary_expr -> . expr CONCAT expr
+    (47) variable_declaration -> . identifier = expr
+    (26) case -> . CASE expr OF cases END
+    (42) call -> . callee ( arguments )
+    (24) _if -> . IF expr DO exprs ELSE exprs END
+    (25) _if -> . IF expr do
+    (19) _def -> . DEF IDENTIFIER ( params ) do
+    (48) literal -> . NUMBER
+    (49) literal -> . STRING
+    (46) identifier -> . IDENTIFIER
+    (18) do -> . o_type DO exprs END
+    (45) callee -> . identifier
+    (20) o_type -> .
+    (21) o_type -> . % IDENTIFIER
+    $end            reduce using rule 1 (program -> exprs .)
+    CASE            shift and go to state 13
+    IF              shift and go to state 15
+    DEF             shift and go to state 16
+    NUMBER          shift and go to state 18
+    STRING          shift and go to state 19
+    IDENTIFIER      shift and go to state 17
+    DO              reduce using rule 20 (o_type -> .)
+    %               shift and go to state 21
+
+    exprs                          shift and go to state 22
+    expr                           shift and go to state 3
+    binary_expr                    shift and go to state 4
+    variable_declaration           shift and go to state 5
+    case                           shift and go to state 6
+    call                           shift and go to state 7
+    _if                            shift and go to state 8
+    _def                           shift and go to state 9
+    literal                        shift and go to state 10
+    identifier                     shift and go to state 11
+    do                             shift and go to state 12
+    callee                         shift and go to state 14
+    o_type                         shift and go to state 20
+
+state 3
+
+    (2) exprs -> expr .
+    (13) binary_expr -> expr . INT_DIV expr
+    (14) binary_expr -> expr . / expr
+    (15) binary_expr -> expr . - expr
+    (16) binary_expr -> expr . + expr
+    (17) binary_expr -> expr . CONCAT expr
+    CASE            reduce using rule 2 (exprs -> expr .)
+    IF              reduce using rule 2 (exprs -> expr .)
+    DEF             reduce using rule 2 (exprs -> expr .)
+    NUMBER          reduce using rule 2 (exprs -> expr .)
+    STRING          reduce using rule 2 (exprs -> expr .)
+    IDENTIFIER      reduce using rule 2 (exprs -> expr .)
+    %               reduce using rule 2 (exprs -> expr .)
+    DO              reduce using rule 2 (exprs -> expr .)
+    $end            reduce using rule 2 (exprs -> expr .)
+    END             reduce using rule 2 (exprs -> expr .)
+    ELSE            reduce using rule 2 (exprs -> expr .)
+    INT_DIV         shift and go to state 23
+    /               shift and go to state 24
+    -               shift and go to state 25
+    +               shift and go to state 26
+    CONCAT          shift and go to state 27
+
+
+state 4
+
+    (4) expr -> binary_expr .
+    INT_DIV         reduce using rule 4 (expr -> binary_expr .)
+    /               reduce using rule 4 (expr -> binary_expr .)
+    -               reduce using rule 4 (expr -> binary_expr .)
+    +               reduce using rule 4 (expr -> binary_expr .)
+    CONCAT          reduce using rule 4 (expr -> binary_expr .)
+    CASE            reduce using rule 4 (expr -> binary_expr .)
+    IF              reduce using rule 4 (expr -> binary_expr .)
+    DEF             reduce using rule 4 (expr -> binary_expr .)
+    NUMBER          reduce using rule 4 (expr -> binary_expr .)
+    STRING          reduce using rule 4 (expr -> binary_expr .)
+    IDENTIFIER      reduce using rule 4 (expr -> binary_expr .)
+    %               reduce using rule 4 (expr -> binary_expr .)
+    DO              reduce using rule 4 (expr -> binary_expr .)
+    $end            reduce using rule 4 (expr -> binary_expr .)
+    OF              reduce using rule 4 (expr -> binary_expr .)
+    END             reduce using rule 4 (expr -> binary_expr .)
+    ELSE            reduce using rule 4 (expr -> binary_expr .)
+    )               reduce using rule 4 (expr -> binary_expr .)
+    ,               reduce using rule 4 (expr -> binary_expr .)
+
+
+state 5
+
+    (5) expr -> variable_declaration .
+    INT_DIV         reduce using rule 5 (expr -> variable_declaration .)
+    /               reduce using rule 5 (expr -> variable_declaration .)
+    -               reduce using rule 5 (expr -> variable_declaration .)
+    +               reduce using rule 5 (expr -> variable_declaration .)
+    CONCAT          reduce using rule 5 (expr -> variable_declaration .)
+    CASE            reduce using rule 5 (expr -> variable_declaration .)
+    IF              reduce using rule 5 (expr -> variable_declaration .)
+    DEF             reduce using rule 5 (expr -> variable_declaration .)
+    NUMBER          reduce using rule 5 (expr -> variable_declaration .)
+    STRING          reduce using rule 5 (expr -> variable_declaration .)
+    IDENTIFIER      reduce using rule 5 (expr -> variable_declaration .)
+    %               reduce using rule 5 (expr -> variable_declaration .)
+    DO              reduce using rule 5 (expr -> variable_declaration .)
+    $end            reduce using rule 5 (expr -> variable_declaration .)
+    OF              reduce using rule 5 (expr -> variable_declaration .)
+    END             reduce using rule 5 (expr -> variable_declaration .)
+    ELSE            reduce using rule 5 (expr -> variable_declaration .)
+    )               reduce using rule 5 (expr -> variable_declaration .)
+    ,               reduce using rule 5 (expr -> variable_declaration .)
+
+
+state 6
+
+    (6) expr -> case .
+    INT_DIV         reduce using rule 6 (expr -> case .)
+    /               reduce using rule 6 (expr -> case .)
+    -               reduce using rule 6 (expr -> case .)
+    +               reduce using rule 6 (expr -> case .)
+    CONCAT          reduce using rule 6 (expr -> case .)
+    CASE            reduce using rule 6 (expr -> case .)
+    IF              reduce using rule 6 (expr -> case .)
+    DEF             reduce using rule 6 (expr -> case .)
+    NUMBER          reduce using rule 6 (expr -> case .)
+    STRING          reduce using rule 6 (expr -> case .)
+    IDENTIFIER      reduce using rule 6 (expr -> case .)
+    %               reduce using rule 6 (expr -> case .)
+    DO              reduce using rule 6 (expr -> case .)
+    $end            reduce using rule 6 (expr -> case .)
+    OF              reduce using rule 6 (expr -> case .)
+    END             reduce using rule 6 (expr -> case .)
+    ELSE            reduce using rule 6 (expr -> case .)
+    )               reduce using rule 6 (expr -> case .)
+    ,               reduce using rule 6 (expr -> case .)
+
+
+state 7
+
+    (7) expr -> call .
+    INT_DIV         reduce using rule 7 (expr -> call .)
+    /               reduce using rule 7 (expr -> call .)
+    -               reduce using rule 7 (expr -> call .)
+    +               reduce using rule 7 (expr -> call .)
+    CONCAT          reduce using rule 7 (expr -> call .)
+    CASE            reduce using rule 7 (expr -> call .)
+    IF              reduce using rule 7 (expr -> call .)
+    DEF             reduce using rule 7 (expr -> call .)
+    NUMBER          reduce using rule 7 (expr -> call .)
+    STRING          reduce using rule 7 (expr -> call .)
+    IDENTIFIER      reduce using rule 7 (expr -> call .)
+    %               reduce using rule 7 (expr -> call .)
+    DO              reduce using rule 7 (expr -> call .)
+    $end            reduce using rule 7 (expr -> call .)
+    OF              reduce using rule 7 (expr -> call .)
+    END             reduce using rule 7 (expr -> call .)
+    ELSE            reduce using rule 7 (expr -> call .)
+    )               reduce using rule 7 (expr -> call .)
+    ,               reduce using rule 7 (expr -> call .)
+
+
+state 8
+
+    (8) expr -> _if .
+    INT_DIV         reduce using rule 8 (expr -> _if .)
+    /               reduce using rule 8 (expr -> _if .)
+    -               reduce using rule 8 (expr -> _if .)
+    +               reduce using rule 8 (expr -> _if .)
+    CONCAT          reduce using rule 8 (expr -> _if .)
+    CASE            reduce using rule 8 (expr -> _if .)
+    IF              reduce using rule 8 (expr -> _if .)
+    DEF             reduce using rule 8 (expr -> _if .)
+    NUMBER          reduce using rule 8 (expr -> _if .)
+    STRING          reduce using rule 8 (expr -> _if .)
+    IDENTIFIER      reduce using rule 8 (expr -> _if .)
+    %               reduce using rule 8 (expr -> _if .)
+    DO              reduce using rule 8 (expr -> _if .)
+    $end            reduce using rule 8 (expr -> _if .)
+    OF              reduce using rule 8 (expr -> _if .)
+    END             reduce using rule 8 (expr -> _if .)
+    ELSE            reduce using rule 8 (expr -> _if .)
+    )               reduce using rule 8 (expr -> _if .)
+    ,               reduce using rule 8 (expr -> _if .)
+
+
+state 9
+
+    (9) expr -> _def .
+    INT_DIV         reduce using rule 9 (expr -> _def .)
+    /               reduce using rule 9 (expr -> _def .)
+    -               reduce using rule 9 (expr -> _def .)
+    +               reduce using rule 9 (expr -> _def .)
+    CONCAT          reduce using rule 9 (expr -> _def .)
+    CASE            reduce using rule 9 (expr -> _def .)
+    IF              reduce using rule 9 (expr -> _def .)
+    DEF             reduce using rule 9 (expr -> _def .)
+    NUMBER          reduce using rule 9 (expr -> _def .)
+    STRING          reduce using rule 9 (expr -> _def .)
+    IDENTIFIER      reduce using rule 9 (expr -> _def .)
+    %               reduce using rule 9 (expr -> _def .)
+    DO              reduce using rule 9 (expr -> _def .)
+    $end            reduce using rule 9 (expr -> _def .)
+    OF              reduce using rule 9 (expr -> _def .)
+    END             reduce using rule 9 (expr -> _def .)
+    ELSE            reduce using rule 9 (expr -> _def .)
+    )               reduce using rule 9 (expr -> _def .)
+    ,               reduce using rule 9 (expr -> _def .)
+
+
+state 10
+
+    (10) expr -> literal .
+    INT_DIV         reduce using rule 10 (expr -> literal .)
+    /               reduce using rule 10 (expr -> literal .)
+    -               reduce using rule 10 (expr -> literal .)
+    +               reduce using rule 10 (expr -> literal .)
+    CONCAT          reduce using rule 10 (expr -> literal .)
+    CASE            reduce using rule 10 (expr -> literal .)
+    IF              reduce using rule 10 (expr -> literal .)
+    DEF             reduce using rule 10 (expr -> literal .)
+    NUMBER          reduce using rule 10 (expr -> literal .)
+    STRING          reduce using rule 10 (expr -> literal .)
+    IDENTIFIER      reduce using rule 10 (expr -> literal .)
+    %               reduce using rule 10 (expr -> literal .)
+    DO              reduce using rule 10 (expr -> literal .)
+    $end            reduce using rule 10 (expr -> literal .)
+    OF              reduce using rule 10 (expr -> literal .)
+    END             reduce using rule 10 (expr -> literal .)
+    ELSE            reduce using rule 10 (expr -> literal .)
+    )               reduce using rule 10 (expr -> literal .)
+    ,               reduce using rule 10 (expr -> literal .)
+
+
+state 11
+
+    (11) expr -> identifier .
+    (47) variable_declaration -> identifier . = expr
+    (45) callee -> identifier .
+    INT_DIV         reduce using rule 11 (expr -> identifier .)
+    /               reduce using rule 11 (expr -> identifier .)
+    -               reduce using rule 11 (expr -> identifier .)
+    +               reduce using rule 11 (expr -> identifier .)
+    CONCAT          reduce using rule 11 (expr -> identifier .)
+    CASE            reduce using rule 11 (expr -> identifier .)
+    IF              reduce using rule 11 (expr -> identifier .)
+    DEF             reduce using rule 11 (expr -> identifier .)
+    NUMBER          reduce using rule 11 (expr -> identifier .)
+    STRING          reduce using rule 11 (expr -> identifier .)
+    IDENTIFIER      reduce using rule 11 (expr -> identifier .)
+    %               reduce using rule 11 (expr -> identifier .)
+    DO              reduce using rule 11 (expr -> identifier .)
+    $end            reduce using rule 11 (expr -> identifier .)
+    OF              reduce using rule 11 (expr -> identifier .)
+    END             reduce using rule 11 (expr -> identifier .)
+    ELSE            reduce using rule 11 (expr -> identifier .)
+    )               reduce using rule 11 (expr -> identifier .)
+    ,               reduce using rule 11 (expr -> identifier .)
+    =               shift and go to state 28
+    (               reduce using rule 45 (callee -> identifier .)
+
+
+state 12
+
+    (12) expr -> do .
+    INT_DIV         reduce using rule 12 (expr -> do .)
+    /               reduce using rule 12 (expr -> do .)
+    -               reduce using rule 12 (expr -> do .)
+    +               reduce using rule 12 (expr -> do .)
+    CONCAT          reduce using rule 12 (expr -> do .)
+    CASE            reduce using rule 12 (expr -> do .)
+    IF              reduce using rule 12 (expr -> do .)
+    DEF             reduce using rule 12 (expr -> do .)
+    NUMBER          reduce using rule 12 (expr -> do .)
+    STRING          reduce using rule 12 (expr -> do .)
+    IDENTIFIER      reduce using rule 12 (expr -> do .)
+    %               reduce using rule 12 (expr -> do .)
+    DO              reduce using rule 12 (expr -> do .)
+    $end            reduce using rule 12 (expr -> do .)
+    OF              reduce using rule 12 (expr -> do .)
+    END             reduce using rule 12 (expr -> do .)
+    ELSE            reduce using rule 12 (expr -> do .)
+    )               reduce using rule 12 (expr -> do .)
+    ,               reduce using rule 12 (expr -> do .)
+
+
+state 13
+
+    (26) case -> CASE . expr OF cases END
+    (4) expr -> . binary_expr
+    (5) expr -> . variable_declaration
+    (6) expr -> . case
+    (7) expr -> . call
+    (8) expr -> . _if
+    (9) expr -> . _def
+    (10) expr -> . literal
+    (11) expr -> . identifier
+    (12) expr -> . do
+    (13) binary_expr -> . expr INT_DIV expr
+    (14) binary_expr -> . expr / expr
+    (15) binary_expr -> . expr - expr
+    (16) binary_expr -> . expr + expr
+    (17) binary_expr -> . expr CONCAT expr
+    (47) variable_declaration -> . identifier = expr
+    (26) case -> . CASE expr OF cases END
+    (42) call -> . callee ( arguments )
+    (24) _if -> . IF expr DO exprs ELSE exprs END
+    (25) _if -> . IF expr do
+    (19) _def -> . DEF IDENTIFIER ( params ) do
+    (48) literal -> . NUMBER
+    (49) literal -> . STRING
+    (46) identifier -> . IDENTIFIER
+    (18) do -> . o_type DO exprs END
+    (45) callee -> . identifier
+    (20) o_type -> .
+    (21) o_type -> . % IDENTIFIER
+    CASE            shift and go to state 13
+    IF              shift and go to state 15
+    DEF             shift and go to state 16
+    NUMBER          shift and go to state 18
+    STRING          shift and go to state 19
+    IDENTIFIER      shift and go to state 17
+    DO              reduce using rule 20 (o_type -> .)
+    %               shift and go to state 21
+
+    expr                           shift and go to state 29
+    binary_expr                    shift and go to state 4
+    variable_declaration           shift and go to state 5
+    case                           shift and go to state 6
+    call                           shift and go to state 7
+    _if                            shift and go to state 8
+    _def                           shift and go to state 9
+    literal                        shift and go to state 10
+    identifier                     shift and go to state 11
+    do                             shift and go to state 12
+    callee                         shift and go to state 14
+    o_type                         shift and go to state 20
+
+state 14
+
+    (42) call -> callee . ( arguments )
+    (               shift and go to state 30
+
+
+state 15
+
+    (24) _if -> IF . expr DO exprs ELSE exprs END
+    (25) _if -> IF . expr do
+    (4) expr -> . binary_expr
+    (5) expr -> . variable_declaration
+    (6) expr -> . case
+    (7) expr -> . call
+    (8) expr -> . _if
+    (9) expr -> . _def
+    (10) expr -> . literal
+    (11) expr -> . identifier
+    (12) expr -> . do
+    (13) binary_expr -> . expr INT_DIV expr
+    (14) binary_expr -> . expr / expr
+    (15) binary_expr -> . expr - expr
+    (16) binary_expr -> . expr + expr
+    (17) binary_expr -> . expr CONCAT expr
+    (47) variable_declaration -> . identifier = expr
+    (26) case -> . CASE expr OF cases END
+    (42) call -> . callee ( arguments )
+    (24) _if -> . IF expr DO exprs ELSE exprs END
+    (25) _if -> . IF expr do
+    (19) _def -> . DEF IDENTIFIER ( params ) do
+    (48) literal -> . NUMBER
+    (49) literal -> . STRING
+    (46) identifier -> . IDENTIFIER
+    (18) do -> . o_type DO exprs END
+    (45) callee -> . identifier
+    (20) o_type -> .
+    (21) o_type -> . % IDENTIFIER
+    CASE            shift and go to state 13
+    IF              shift and go to state 15
+    DEF             shift and go to state 16
+    NUMBER          shift and go to state 18
+    STRING          shift and go to state 19
+    IDENTIFIER      shift and go to state 17
+    DO              reduce using rule 20 (o_type -> .)
+    %               shift and go to state 21
+
+    expr                           shift and go to state 31
+    do                             shift and go to state 12
+    binary_expr                    shift and go to state 4
+    variable_declaration           shift and go to state 5
+    case                           shift and go to state 6
+    call                           shift and go to state 7
+    _if                            shift and go to state 8
+    _def                           shift and go to state 9
+    literal                        shift and go to state 10
+    identifier                     shift and go to state 11
+    callee                         shift and go to state 14
+    o_type                         shift and go to state 20
+
+state 16
+
+    (19) _def -> DEF . IDENTIFIER ( params ) do
+    IDENTIFIER      shift and go to state 32
+
+
+state 17
+
+    (46) identifier -> IDENTIFIER .
+    =               reduce using rule 46 (identifier -> IDENTIFIER .)
+    INT_DIV         reduce using rule 46 (identifier -> IDENTIFIER .)
+    /               reduce using rule 46 (identifier -> IDENTIFIER .)
+    -               reduce using rule 46 (identifier -> IDENTIFIER .)
+    +               reduce using rule 46 (identifier -> IDENTIFIER .)
+    CONCAT          reduce using rule 46 (identifier -> IDENTIFIER .)
+    CASE            reduce using rule 46 (identifier -> IDENTIFIER .)
+    IF              reduce using rule 46 (identifier -> IDENTIFIER .)
+    DEF             reduce using rule 46 (identifier -> IDENTIFIER .)
+    NUMBER          reduce using rule 46 (identifier -> IDENTIFIER .)
+    STRING          reduce using rule 46 (identifier -> IDENTIFIER .)
+    IDENTIFIER      reduce using rule 46 (identifier -> IDENTIFIER .)
+    %               reduce using rule 46 (identifier -> IDENTIFIER .)
+    DO              reduce using rule 46 (identifier -> IDENTIFIER .)
+    $end            reduce using rule 46 (identifier -> IDENTIFIER .)
+    (               reduce using rule 46 (identifier -> IDENTIFIER .)
+    OF              reduce using rule 46 (identifier -> IDENTIFIER .)
+    END             reduce using rule 46 (identifier -> IDENTIFIER .)
+    ELSE            reduce using rule 46 (identifier -> IDENTIFIER .)
+    )               reduce using rule 46 (identifier -> IDENTIFIER .)
+    ,               reduce using rule 46 (identifier -> IDENTIFIER .)
+    ]               reduce using rule 46 (identifier -> IDENTIFIER .)
+    }               reduce using rule 46 (identifier -> IDENTIFIER .)
+
+
+state 18
+
+    (48) literal -> NUMBER .
+    INT_DIV         reduce using rule 48 (literal -> NUMBER .)
+    /               reduce using rule 48 (literal -> NUMBER .)
+    -               reduce using rule 48 (literal -> NUMBER .)
+    +               reduce using rule 48 (literal -> NUMBER .)
+    CONCAT          reduce using rule 48 (literal -> NUMBER .)
+    CASE            reduce using rule 48 (literal -> NUMBER .)
+    IF              reduce using rule 48 (literal -> NUMBER .)
+    DEF             reduce using rule 48 (literal -> NUMBER .)
+    NUMBER          reduce using rule 48 (literal -> NUMBER .)
+    STRING          reduce using rule 48 (literal -> NUMBER .)
+    IDENTIFIER      reduce using rule 48 (literal -> NUMBER .)
+    %               reduce using rule 48 (literal -> NUMBER .)
+    DO              reduce using rule 48 (literal -> NUMBER .)
+    $end            reduce using rule 48 (literal -> NUMBER .)
+    OF              reduce using rule 48 (literal -> NUMBER .)
+    END             reduce using rule 48 (literal -> NUMBER .)
+    ELSE            reduce using rule 48 (literal -> NUMBER .)
+    )               reduce using rule 48 (literal -> NUMBER .)
+    ,               reduce using rule 48 (literal -> NUMBER .)
+
+
+state 19
+
+    (49) literal -> STRING .
+    INT_DIV         reduce using rule 49 (literal -> STRING .)
+    /               reduce using rule 49 (literal -> STRING .)
+    -               reduce using rule 49 (literal -> STRING .)
+    +               reduce using rule 49 (literal -> STRING .)
+    CONCAT          reduce using rule 49 (literal -> STRING .)
+    CASE            reduce using rule 49 (literal -> STRING .)
+    IF              reduce using rule 49 (literal -> STRING .)
+    DEF             reduce using rule 49 (literal -> STRING .)
+    NUMBER          reduce using rule 49 (literal -> STRING .)
+    STRING          reduce using rule 49 (literal -> STRING .)
+    IDENTIFIER      reduce using rule 49 (literal -> STRING .)
+    %               reduce using rule 49 (literal -> STRING .)
+    DO              reduce using rule 49 (literal -> STRING .)
+    $end            reduce using rule 49 (literal -> STRING .)
+    OF              reduce using rule 49 (literal -> STRING .)
+    END             reduce using rule 49 (literal -> STRING .)
+    ELSE            reduce using rule 49 (literal -> STRING .)
+    )               reduce using rule 49 (literal -> STRING .)
+    ,               reduce using rule 49 (literal -> STRING .)
+
+
+state 20
+
+    (18) do -> o_type . DO exprs END
+    DO              shift and go to state 33
+
+
+state 21
+
+    (21) o_type -> % . IDENTIFIER
+    IDENTIFIER      shift and go to state 34
+
+
+state 22
+
+    (3) exprs -> exprs exprs .
+    (3) exprs -> exprs . exprs
+    (2) exprs -> . expr
+    (3) exprs -> . exprs exprs
+    (4) expr -> . binary_expr
+    (5) expr -> . variable_declaration
+    (6) expr -> . case
+    (7) expr -> . call
+    (8) expr -> . _if
+    (9) expr -> . _def
+    (10) expr -> . literal
+    (11) expr -> . identifier
+    (12) expr -> . do
+    (13) binary_expr -> . expr INT_DIV expr
+    (14) binary_expr -> . expr / expr
+    (15) binary_expr -> . expr - expr
+    (16) binary_expr -> . expr + expr
+    (17) binary_expr -> . expr CONCAT expr
+    (47) variable_declaration -> . identifier = expr
+    (26) case -> . CASE expr OF cases END
+    (42) call -> . callee ( arguments )
+    (24) _if -> . IF expr DO exprs ELSE exprs END
+    (25) _if -> . IF expr do
+    (19) _def -> . DEF IDENTIFIER ( params ) do
+    (48) literal -> . NUMBER
+    (49) literal -> . STRING
+    (46) identifier -> . IDENTIFIER
+    (18) do -> . o_type DO exprs END
+    (45) callee -> . identifier
+    (20) o_type -> .
+    (21) o_type -> . % IDENTIFIER
+  ! shift/reduce conflict for CASE resolved as shift
+  ! shift/reduce conflict for IF resolved as shift
+  ! shift/reduce conflict for DEF resolved as shift
+  ! shift/reduce conflict for NUMBER resolved as shift
+  ! shift/reduce conflict for STRING resolved as shift
+  ! shift/reduce conflict for IDENTIFIER resolved as shift
+  ! reduce/reduce conflict for DO resolved using rule 3 (exprs -> exprs exprs .)
+  ! shift/reduce conflict for % resolved as shift
+    DO              reduce using rule 3 (exprs -> exprs exprs .)
+    $end            reduce using rule 3 (exprs -> exprs exprs .)
+    END             reduce using rule 3 (exprs -> exprs exprs .)
+    ELSE            reduce using rule 3 (exprs -> exprs exprs .)
+    CASE            shift and go to state 13
+    IF              shift and go to state 15
+    DEF             shift and go to state 16
+    NUMBER          shift and go to state 18
+    STRING          shift and go to state 19
+    IDENTIFIER      shift and go to state 17
+    %               shift and go to state 21
+
+    exprs                          shift and go to state 22
+    expr                           shift and go to state 3
+    binary_expr                    shift and go to state 4
+    variable_declaration           shift and go to state 5
+    case                           shift and go to state 6
+    call                           shift and go to state 7
+    _if                            shift and go to state 8
+    _def                           shift and go to state 9
+    literal                        shift and go to state 10
+    identifier                     shift and go to state 11
+    do                             shift and go to state 12
+    callee                         shift and go to state 14
+    o_type                         shift and go to state 20
+
+state 23
+
+    (13) binary_expr -> expr INT_DIV . expr
+    (4) expr -> . binary_expr
+    (5) expr -> . variable_declaration
+    (6) expr -> . case
+    (7) expr -> . call
+    (8) expr -> . _if
+    (9) expr -> . _def
+    (10) expr -> . literal
+    (11) expr -> . identifier
+    (12) expr -> . do
+    (13) binary_expr -> . expr INT_DIV expr
+    (14) binary_expr -> . expr / expr
+    (15) binary_expr -> . expr - expr
+    (16) binary_expr -> . expr + expr
+    (17) binary_expr -> . expr CONCAT expr
+    (47) variable_declaration -> . identifier = expr
+    (26) case -> . CASE expr OF cases END
+    (42) call -> . callee ( arguments )
+    (24) _if -> . IF expr DO exprs ELSE exprs END
+    (25) _if -> . IF expr do
+    (19) _def -> . DEF IDENTIFIER ( params ) do
+    (48) literal -> . NUMBER
+    (49) literal -> . STRING
+    (46) identifier -> . IDENTIFIER
+    (18) do -> . o_type DO exprs END
+    (45) callee -> . identifier
+    (20) o_type -> .
+    (21) o_type -> . % IDENTIFIER
+    CASE            shift and go to state 13
+    IF              shift and go to state 15
+    DEF             shift and go to state 16
+    NUMBER          shift and go to state 18
+    STRING          shift and go to state 19
+    IDENTIFIER      shift and go to state 17
+    DO              reduce using rule 20 (o_type -> .)
+    %               shift and go to state 21
+
+    expr                           shift and go to state 35
+    binary_expr                    shift and go to state 4
+    variable_declaration           shift and go to state 5
+    case                           shift and go to state 6
+    call                           shift and go to state 7
+    _if                            shift and go to state 8
+    _def                           shift and go to state 9
+    literal                        shift and go to state 10
+    identifier                     shift and go to state 11
+    do                             shift and go to state 12
+    callee                         shift and go to state 14
+    o_type                         shift and go to state 20
+
+state 24
+
+    (14) binary_expr -> expr / . expr
+    (4) expr -> . binary_expr
+    (5) expr -> . variable_declaration
+    (6) expr -> . case
+    (7) expr -> . call
+    (8) expr -> . _if
+    (9) expr -> . _def
+    (10) expr -> . literal
+    (11) expr -> . identifier
+    (12) expr -> . do
+    (13) binary_expr -> . expr INT_DIV expr
+    (14) binary_expr -> . expr / expr
+    (15) binary_expr -> . expr - expr
+    (16) binary_expr -> . expr + expr
+    (17) binary_expr -> . expr CONCAT expr
+    (47) variable_declaration -> . identifier = expr
+    (26) case -> . CASE expr OF cases END
+    (42) call -> . callee ( arguments )
+    (24) _if -> . IF expr DO exprs ELSE exprs END
+    (25) _if -> . IF expr do
+    (19) _def -> . DEF IDENTIFIER ( params ) do
+    (48) literal -> . NUMBER
+    (49) literal -> . STRING
+    (46) identifier -> . IDENTIFIER
+    (18) do -> . o_type DO exprs END
+    (45) callee -> . identifier
+    (20) o_type -> .
+    (21) o_type -> . % IDENTIFIER
+    CASE            shift and go to state 13
+    IF              shift and go to state 15
+    DEF             shift and go to state 16
+    NUMBER          shift and go to state 18
+    STRING          shift and go to state 19
+    IDENTIFIER      shift and go to state 17
+    DO              reduce using rule 20 (o_type -> .)
+    %               shift and go to state 21
+
+    expr                           shift and go to state 36
+    binary_expr                    shift and go to state 4
+    variable_declaration           shift and go to state 5
+    case                           shift and go to state 6
+    call                           shift and go to state 7
+    _if                            shift and go to state 8
+    _def                           shift and go to state 9
+    literal                        shift and go to state 10
+    identifier                     shift and go to state 11
+    do                             shift and go to state 12
+    callee                         shift and go to state 14
+    o_type                         shift and go to state 20
+
+state 25
+
+    (15) binary_expr -> expr - . expr
+    (4) expr -> . binary_expr
+    (5) expr -> . variable_declaration
+    (6) expr -> . case
+    (7) expr -> . call
+    (8) expr -> . _if
+    (9) expr -> . _def
+    (10) expr -> . literal
+    (11) expr -> . identifier
+    (12) expr -> . do
+    (13) binary_expr -> . expr INT_DIV expr
+    (14) binary_expr -> . expr / expr
+    (15) binary_expr -> . expr - expr
+    (16) binary_expr -> . expr + expr
+    (17) binary_expr -> . expr CONCAT expr
+    (47) variable_declaration -> . identifier = expr
+    (26) case -> . CASE expr OF cases END
+    (42) call -> . callee ( arguments )
+    (24) _if -> . IF expr DO exprs ELSE exprs END
+    (25) _if -> . IF expr do
+    (19) _def -> . DEF IDENTIFIER ( params ) do
+    (48) literal -> . NUMBER
+    (49) literal -> . STRING
+    (46) identifier -> . IDENTIFIER
+    (18) do -> . o_type DO exprs END
+    (45) callee -> . identifier
+    (20) o_type -> .
+    (21) o_type -> . % IDENTIFIER
+    CASE            shift and go to state 13
+    IF              shift and go to state 15
+    DEF             shift and go to state 16
+    NUMBER          shift and go to state 18
+    STRING          shift and go to state 19
+    IDENTIFIER      shift and go to state 17
+    DO              reduce using rule 20 (o_type -> .)
+    %               shift and go to state 21
+
+    expr                           shift and go to state 37
+    binary_expr                    shift and go to state 4
+    variable_declaration           shift and go to state 5
+    case                           shift and go to state 6
+    call                           shift and go to state 7
+    _if                            shift and go to state 8
+    _def                           shift and go to state 9
+    literal                        shift and go to state 10
+    identifier                     shift and go to state 11
+    do                             shift and go to state 12
+    callee                         shift and go to state 14
+    o_type                         shift and go to state 20
+
+state 26
+
+    (16) binary_expr -> expr + . expr
+    (4) expr -> . binary_expr
+    (5) expr -> . variable_declaration
+    (6) expr -> . case
+    (7) expr -> . call
+    (8) expr -> . _if
+    (9) expr -> . _def
+    (10) expr -> . literal
+    (11) expr -> . identifier
+    (12) expr -> . do
+    (13) binary_expr -> . expr INT_DIV expr
+    (14) binary_expr -> . expr / expr
+    (15) binary_expr -> . expr - expr
+    (16) binary_expr -> . expr + expr
+    (17) binary_expr -> . expr CONCAT expr
+    (47) variable_declaration -> . identifier = expr
+    (26) case -> . CASE expr OF cases END
+    (42) call -> . callee ( arguments )
+    (24) _if -> . IF expr DO exprs ELSE exprs END
+    (25) _if -> . IF expr do
+    (19) _def -> . DEF IDENTIFIER ( params ) do
+    (48) literal -> . NUMBER
+    (49) literal -> . STRING
+    (46) identifier -> . IDENTIFIER
+    (18) do -> . o_type DO exprs END
+    (45) callee -> . identifier
+    (20) o_type -> .
+    (21) o_type -> . % IDENTIFIER
+    CASE            shift and go to state 13
+    IF              shift and go to state 15
+    DEF             shift and go to state 16
+    NUMBER          shift and go to state 18
+    STRING          shift and go to state 19
+    IDENTIFIER      shift and go to state 17
+    DO              reduce using rule 20 (o_type -> .)
+    %               shift and go to state 21
+
+    expr                           shift and go to state 38
+    binary_expr                    shift and go to state 4
+    variable_declaration           shift and go to state 5
+    case                           shift and go to state 6
+    call                           shift and go to state 7
+    _if                            shift and go to state 8
+    _def                           shift and go to state 9
+    literal                        shift and go to state 10
+    identifier                     shift and go to state 11
+    do                             shift and go to state 12
+    callee                         shift and go to state 14
+    o_type                         shift and go to state 20
+
+state 27
+
+    (17) binary_expr -> expr CONCAT . expr
+    (4) expr -> . binary_expr
+    (5) expr -> . variable_declaration
+    (6) expr -> . case
+    (7) expr -> . call
+    (8) expr -> . _if
+    (9) expr -> . _def
+    (10) expr -> . literal
+    (11) expr -> . identifier
+    (12) expr -> . do
+    (13) binary_expr -> . expr INT_DIV expr
+    (14) binary_expr -> . expr / expr
+    (15) binary_expr -> . expr - expr
+    (16) binary_expr -> . expr + expr
+    (17) binary_expr -> . expr CONCAT expr
+    (47) variable_declaration -> . identifier = expr
+    (26) case -> . CASE expr OF cases END
+    (42) call -> . callee ( arguments )
+    (24) _if -> . IF expr DO exprs ELSE exprs END
+    (25) _if -> . IF expr do
+    (19) _def -> . DEF IDENTIFIER ( params ) do
+    (48) literal -> . NUMBER
+    (49) literal -> . STRING
+    (46) identifier -> . IDENTIFIER
+    (18) do -> . o_type DO exprs END
+    (45) callee -> . identifier
+    (20) o_type -> .
+    (21) o_type -> . % IDENTIFIER
+    CASE            shift and go to state 13
+    IF              shift and go to state 15
+    DEF             shift and go to state 16
+    NUMBER          shift and go to state 18
+    STRING          shift and go to state 19
+    IDENTIFIER      shift and go to state 17
+    DO              reduce using rule 20 (o_type -> .)
+    %               shift and go to state 21
+
+    expr                           shift and go to state 39
+    binary_expr                    shift and go to state 4
+    variable_declaration           shift and go to state 5
+    case                           shift and go to state 6
+    call                           shift and go to state 7
+    _if                            shift and go to state 8
+    _def                           shift and go to state 9
+    literal                        shift and go to state 10
+    identifier                     shift and go to state 11
+    do                             shift and go to state 12
+    callee                         shift and go to state 14
+    o_type                         shift and go to state 20
+
+state 28
+
+    (47) variable_declaration -> identifier = . expr
+    (4) expr -> . binary_expr
+    (5) expr -> . variable_declaration
+    (6) expr -> . case
+    (7) expr -> . call
+    (8) expr -> . _if
+    (9) expr -> . _def
+    (10) expr -> . literal
+    (11) expr -> . identifier
+    (12) expr -> . do
+    (13) binary_expr -> . expr INT_DIV expr
+    (14) binary_expr -> . expr / expr
+    (15) binary_expr -> . expr - expr
+    (16) binary_expr -> . expr + expr
+    (17) binary_expr -> . expr CONCAT expr
+    (47) variable_declaration -> . identifier = expr
+    (26) case -> . CASE expr OF cases END
+    (42) call -> . callee ( arguments )
+    (24) _if -> . IF expr DO exprs ELSE exprs END
+    (25) _if -> . IF expr do
+    (19) _def -> . DEF IDENTIFIER ( params ) do
+    (48) literal -> . NUMBER
+    (49) literal -> . STRING
+    (46) identifier -> . IDENTIFIER
+    (18) do -> . o_type DO exprs END
+    (45) callee -> . identifier
+    (20) o_type -> .
+    (21) o_type -> . % IDENTIFIER
+    CASE            shift and go to state 13
+    IF              shift and go to state 15
+    DEF             shift and go to state 16
+    NUMBER          shift and go to state 18
+    STRING          shift and go to state 19
+    IDENTIFIER      shift and go to state 17
+    DO              reduce using rule 20 (o_type -> .)
+    %               shift and go to state 21
+
+    identifier                     shift and go to state 11
+    expr                           shift and go to state 40
+    binary_expr                    shift and go to state 4
+    variable_declaration           shift and go to state 5
+    case                           shift and go to state 6
+    call                           shift and go to state 7
+    _if                            shift and go to state 8
+    _def                           shift and go to state 9
+    literal                        shift and go to state 10
+    do                             shift and go to state 12
+    callee                         shift and go to state 14
+    o_type                         shift and go to state 20
+
+state 29
+
+    (26) case -> CASE expr . OF cases END
+    (13) binary_expr -> expr . INT_DIV expr
+    (14) binary_expr -> expr . / expr
+    (15) binary_expr -> expr . - expr
+    (16) binary_expr -> expr . + expr
+    (17) binary_expr -> expr . CONCAT expr
+    OF              shift and go to state 41
+    INT_DIV         shift and go to state 23
+    /               shift and go to state 24
+    -               shift and go to state 25
+    +               shift and go to state 26
+    CONCAT          shift and go to state 27
+
+
+state 30
+
+    (42) call -> callee ( . arguments )
+    (43) arguments -> . arguments , arguments
+    (44) arguments -> . expr
+    (4) expr -> . binary_expr
+    (5) expr -> . variable_declaration
+    (6) expr -> . case
+    (7) expr -> . call
+    (8) expr -> . _if
+    (9) expr -> . _def
+    (10) expr -> . literal
+    (11) expr -> . identifier
+    (12) expr -> . do
+    (13) binary_expr -> . expr INT_DIV expr
+    (14) binary_expr -> . expr / expr
+    (15) binary_expr -> . expr - expr
+    (16) binary_expr -> . expr + expr
+    (17) binary_expr -> . expr CONCAT expr
+    (47) variable_declaration -> . identifier = expr
+    (26) case -> . CASE expr OF cases END
+    (42) call -> . callee ( arguments )
+    (24) _if -> . IF expr DO exprs ELSE exprs END
+    (25) _if -> . IF expr do
+    (19) _def -> . DEF IDENTIFIER ( params ) do
+    (48) literal -> . NUMBER
+    (49) literal -> . STRING
+    (46) identifier -> . IDENTIFIER
+    (18) do -> . o_type DO exprs END
+    (45) callee -> . identifier
+    (20) o_type -> .
+    (21) o_type -> . % IDENTIFIER
+    CASE            shift and go to state 13
+    IF              shift and go to state 15
+    DEF             shift and go to state 16
+    NUMBER          shift and go to state 18
+    STRING          shift and go to state 19
+    IDENTIFIER      shift and go to state 17
+    DO              reduce using rule 20 (o_type -> .)
+    %               shift and go to state 21
+
+    callee                         shift and go to state 14
+    arguments                      shift and go to state 42
+    expr                           shift and go to state 43
+    binary_expr                    shift and go to state 4
+    variable_declaration           shift and go to state 5
+    case                           shift and go to state 6
+    call                           shift and go to state 7
+    _if                            shift and go to state 8
+    _def                           shift and go to state 9
+    literal                        shift and go to state 10
+    identifier                     shift and go to state 11
+    do                             shift and go to state 12
+    o_type                         shift and go to state 20
+
+state 31
+
+    (24) _if -> IF expr . DO exprs ELSE exprs END
+    (25) _if -> IF expr . do
+    (13) binary_expr -> expr . INT_DIV expr
+    (14) binary_expr -> expr . / expr
+    (15) binary_expr -> expr . - expr
+    (16) binary_expr -> expr . + expr
+    (17) binary_expr -> expr . CONCAT expr
+    (18) do -> . o_type DO exprs END
+    (20) o_type -> .
+    (21) o_type -> . % IDENTIFIER
+  ! shift/reduce conflict for DO resolved as shift
+    DO              shift and go to state 44
+    INT_DIV         shift and go to state 23
+    /               shift and go to state 24
+    -               shift and go to state 25
+    +               shift and go to state 26
+    CONCAT          shift and go to state 27
+    %               shift and go to state 21
+
+    do                             shift and go to state 45
+    o_type                         shift and go to state 20
+
+state 32
+
+    (19) _def -> DEF IDENTIFIER . ( params ) do
+    (               shift and go to state 46
+
+
+state 33
+
+    (18) do -> o_type DO . exprs END
+    (2) exprs -> . expr
+    (3) exprs -> . exprs exprs
+    (4) expr -> . binary_expr
+    (5) expr -> . variable_declaration
+    (6) expr -> . case
+    (7) expr -> . call
+    (8) expr -> . _if
+    (9) expr -> . _def
+    (10) expr -> . literal
+    (11) expr -> . identifier
+    (12) expr -> . do
+    (13) binary_expr -> . expr INT_DIV expr
+    (14) binary_expr -> . expr / expr
+    (15) binary_expr -> . expr - expr
+    (16) binary_expr -> . expr + expr
+    (17) binary_expr -> . expr CONCAT expr
+    (47) variable_declaration -> . identifier = expr
+    (26) case -> . CASE expr OF cases END
+    (42) call -> . callee ( arguments )
+    (24) _if -> . IF expr DO exprs ELSE exprs END
+    (25) _if -> . IF expr do
+    (19) _def -> . DEF IDENTIFIER ( params ) do
+    (48) literal -> . NUMBER
+    (49) literal -> . STRING
+    (46) identifier -> . IDENTIFIER
+    (18) do -> . o_type DO exprs END
+    (45) callee -> . identifier
+    (20) o_type -> .
+    (21) o_type -> . % IDENTIFIER
+    CASE            shift and go to state 13
+    IF              shift and go to state 15
+    DEF             shift and go to state 16
+    NUMBER          shift and go to state 18
+    STRING          shift and go to state 19
+    IDENTIFIER      shift and go to state 17
+    DO              reduce using rule 20 (o_type -> .)
+    %               shift and go to state 21
+
+    o_type                         shift and go to state 20
+    exprs                          shift and go to state 47
+    expr                           shift and go to state 3
+    binary_expr                    shift and go to state 4
+    variable_declaration           shift and go to state 5
+    case                           shift and go to state 6
+    call                           shift and go to state 7
+    _if                            shift and go to state 8
+    _def                           shift and go to state 9
+    literal                        shift and go to state 10
+    identifier                     shift and go to state 11
+    do                             shift and go to state 12
+    callee                         shift and go to state 14
+
+state 34
+
+    (21) o_type -> % IDENTIFIER .
+    DO              reduce using rule 21 (o_type -> % IDENTIFIER .)
+    IDENTIFIER      reduce using rule 21 (o_type -> % IDENTIFIER .)
+
+
+state 35
+
+    (13) binary_expr -> expr INT_DIV expr .
+    (13) binary_expr -> expr . INT_DIV expr
+    (14) binary_expr -> expr . / expr
+    (15) binary_expr -> expr . - expr
+    (16) binary_expr -> expr . + expr
+    (17) binary_expr -> expr . CONCAT expr
+  ! shift/reduce conflict for INT_DIV resolved as shift
+  ! shift/reduce conflict for / resolved as shift
+  ! shift/reduce conflict for - resolved as shift
+  ! shift/reduce conflict for + resolved as shift
+  ! shift/reduce conflict for CONCAT resolved as shift
+    CASE            reduce using rule 13 (binary_expr -> expr INT_DIV expr .)
+    IF              reduce using rule 13 (binary_expr -> expr INT_DIV expr .)
+    DEF             reduce using rule 13 (binary_expr -> expr INT_DIV expr .)
+    NUMBER          reduce using rule 13 (binary_expr -> expr INT_DIV expr .)
+    STRING          reduce using rule 13 (binary_expr -> expr INT_DIV expr .)
+    IDENTIFIER      reduce using rule 13 (binary_expr -> expr INT_DIV expr .)
+    %               reduce using rule 13 (binary_expr -> expr INT_DIV expr .)
+    DO              reduce using rule 13 (binary_expr -> expr INT_DIV expr .)
+    $end            reduce using rule 13 (binary_expr -> expr INT_DIV expr .)
+    OF              reduce using rule 13 (binary_expr -> expr INT_DIV expr .)
+    END             reduce using rule 13 (binary_expr -> expr INT_DIV expr .)
+    ELSE            reduce using rule 13 (binary_expr -> expr INT_DIV expr .)
+    )               reduce using rule 13 (binary_expr -> expr INT_DIV expr .)
+    ,               reduce using rule 13 (binary_expr -> expr INT_DIV expr .)
+    INT_DIV         shift and go to state 23
+    /               shift and go to state 24
+    -               shift and go to state 25
+    +               shift and go to state 26
+    CONCAT          shift and go to state 27
+
+
+state 36
+
+    (14) binary_expr -> expr / expr .
+    (13) binary_expr -> expr . INT_DIV expr
+    (14) binary_expr -> expr . / expr
+    (15) binary_expr -> expr . - expr
+    (16) binary_expr -> expr . + expr
+    (17) binary_expr -> expr . CONCAT expr
+  ! shift/reduce conflict for INT_DIV resolved as shift
+  ! shift/reduce conflict for / resolved as shift
+  ! shift/reduce conflict for - resolved as shift
+  ! shift/reduce conflict for + resolved as shift
+  ! shift/reduce conflict for CONCAT resolved as shift
+    CASE            reduce using rule 14 (binary_expr -> expr / expr .)
+    IF              reduce using rule 14 (binary_expr -> expr / expr .)
+    DEF             reduce using rule 14 (binary_expr -> expr / expr .)
+    NUMBER          reduce using rule 14 (binary_expr -> expr / expr .)
+    STRING          reduce using rule 14 (binary_expr -> expr / expr .)
+    IDENTIFIER      reduce using rule 14 (binary_expr -> expr / expr .)
+    %               reduce using rule 14 (binary_expr -> expr / expr .)
+    DO              reduce using rule 14 (binary_expr -> expr / expr .)
+    $end            reduce using rule 14 (binary_expr -> expr / expr .)
+    OF              reduce using rule 14 (binary_expr -> expr / expr .)
+    END             reduce using rule 14 (binary_expr -> expr / expr .)
+    ELSE            reduce using rule 14 (binary_expr -> expr / expr .)
+    )               reduce using rule 14 (binary_expr -> expr / expr .)
+    ,               reduce using rule 14 (binary_expr -> expr / expr .)
+    INT_DIV         shift and go to state 23
+    /               shift and go to state 24
+    -               shift and go to state 25
+    +               shift and go to state 26
+    CONCAT          shift and go to state 27
+
+
+state 37
+
+    (15) binary_expr -> expr - expr .
+    (13) binary_expr -> expr . INT_DIV expr
+    (14) binary_expr -> expr . / expr
+    (15) binary_expr -> expr . - expr
+    (16) binary_expr -> expr . + expr
+    (17) binary_expr -> expr . CONCAT expr
+  ! shift/reduce conflict for INT_DIV resolved as shift
+  ! shift/reduce conflict for / resolved as shift
+  ! shift/reduce conflict for - resolved as shift
+  ! shift/reduce conflict for + resolved as shift
+  ! shift/reduce conflict for CONCAT resolved as shift
+    CASE            reduce using rule 15 (binary_expr -> expr - expr .)
+    IF              reduce using rule 15 (binary_expr -> expr - expr .)
+    DEF             reduce using rule 15 (binary_expr -> expr - expr .)
+    NUMBER          reduce using rule 15 (binary_expr -> expr - expr .)
+    STRING          reduce using rule 15 (binary_expr -> expr - expr .)
+    IDENTIFIER      reduce using rule 15 (binary_expr -> expr - expr .)
+    %               reduce using rule 15 (binary_expr -> expr - expr .)
+    DO              reduce using rule 15 (binary_expr -> expr - expr .)
+    $end            reduce using rule 15 (binary_expr -> expr - expr .)
+    OF              reduce using rule 15 (binary_expr -> expr - expr .)
+    END             reduce using rule 15 (binary_expr -> expr - expr .)
+    ELSE            reduce using rule 15 (binary_expr -> expr - expr .)
+    )               reduce using rule 15 (binary_expr -> expr - expr .)
+    ,               reduce using rule 15 (binary_expr -> expr - expr .)
+    INT_DIV         shift and go to state 23
+    /               shift and go to state 24
+    -               shift and go to state 25
+    +               shift and go to state 26
+    CONCAT          shift and go to state 27
+
+
+state 38
+
+    (16) binary_expr -> expr + expr .
+    (13) binary_expr -> expr . INT_DIV expr
+    (14) binary_expr -> expr . / expr
+    (15) binary_expr -> expr . - expr
+    (16) binary_expr -> expr . + expr
+    (17) binary_expr -> expr . CONCAT expr
+  ! shift/reduce conflict for INT_DIV resolved as shift
+  ! shift/reduce conflict for / resolved as shift
+  ! shift/reduce conflict for - resolved as shift
+  ! shift/reduce conflict for + resolved as shift
+  ! shift/reduce conflict for CONCAT resolved as shift
+    CASE            reduce using rule 16 (binary_expr -> expr + expr .)
+    IF              reduce using rule 16 (binary_expr -> expr + expr .)
+    DEF             reduce using rule 16 (binary_expr -> expr + expr .)
+    NUMBER          reduce using rule 16 (binary_expr -> expr + expr .)
+    STRING          reduce using rule 16 (binary_expr -> expr + expr .)
+    IDENTIFIER      reduce using rule 16 (binary_expr -> expr + expr .)
+    %               reduce using rule 16 (binary_expr -> expr + expr .)
+    DO              reduce using rule 16 (binary_expr -> expr + expr .)
+    $end            reduce using rule 16 (binary_expr -> expr + expr .)
+    OF              reduce using rule 16 (binary_expr -> expr + expr .)
+    END             reduce using rule 16 (binary_expr -> expr + expr .)
+    ELSE            reduce using rule 16 (binary_expr -> expr + expr .)
+    )               reduce using rule 16 (binary_expr -> expr + expr .)
+    ,               reduce using rule 16 (binary_expr -> expr + expr .)
+    INT_DIV         shift and go to state 23
+    /               shift and go to state 24
+    -               shift and go to state 25
+    +               shift and go to state 26
+    CONCAT          shift and go to state 27
+
+
+state 39
+
+    (17) binary_expr -> expr CONCAT expr .
+    (13) binary_expr -> expr . INT_DIV expr
+    (14) binary_expr -> expr . / expr
+    (15) binary_expr -> expr . - expr
+    (16) binary_expr -> expr . + expr
+    (17) binary_expr -> expr . CONCAT expr
+  ! shift/reduce conflict for INT_DIV resolved as shift
+  ! shift/reduce conflict for / resolved as shift
+  ! shift/reduce conflict for - resolved as shift
+  ! shift/reduce conflict for + resolved as shift
+  ! shift/reduce conflict for CONCAT resolved as shift
+    CASE            reduce using rule 17 (binary_expr -> expr CONCAT expr .)
+    IF              reduce using rule 17 (binary_expr -> expr CONCAT expr .)
+    DEF             reduce using rule 17 (binary_expr -> expr CONCAT expr .)
+    NUMBER          reduce using rule 17 (binary_expr -> expr CONCAT expr .)
+    STRING          reduce using rule 17 (binary_expr -> expr CONCAT expr .)
+    IDENTIFIER      reduce using rule 17 (binary_expr -> expr CONCAT expr .)
+    %               reduce using rule 17 (binary_expr -> expr CONCAT expr .)
+    DO              reduce using rule 17 (binary_expr -> expr CONCAT expr .)
+    $end            reduce using rule 17 (binary_expr -> expr CONCAT expr .)
+    OF              reduce using rule 17 (binary_expr -> expr CONCAT expr .)
+    END             reduce using rule 17 (binary_expr -> expr CONCAT expr .)
+    ELSE            reduce using rule 17 (binary_expr -> expr CONCAT expr .)
+    )               reduce using rule 17 (binary_expr -> expr CONCAT expr .)
+    ,               reduce using rule 17 (binary_expr -> expr CONCAT expr .)
+    INT_DIV         shift and go to state 23
+    /               shift and go to state 24
+    -               shift and go to state 25
+    +               shift and go to state 26
+    CONCAT          shift and go to state 27
+
+
+state 40
+
+    (47) variable_declaration -> identifier = expr .
+    (13) binary_expr -> expr . INT_DIV expr
+    (14) binary_expr -> expr . / expr
+    (15) binary_expr -> expr . - expr
+    (16) binary_expr -> expr . + expr
+    (17) binary_expr -> expr . CONCAT expr
+  ! shift/reduce conflict for INT_DIV resolved as shift
+  ! shift/reduce conflict for / resolved as shift
+  ! shift/reduce conflict for - resolved as shift
+  ! shift/reduce conflict for + resolved as shift
+  ! shift/reduce conflict for CONCAT resolved as shift
+    CASE            reduce using rule 47 (variable_declaration -> identifier = expr .)
+    IF              reduce using rule 47 (variable_declaration -> identifier = expr .)
+    DEF             reduce using rule 47 (variable_declaration -> identifier = expr .)
+    NUMBER          reduce using rule 47 (variable_declaration -> identifier = expr .)
+    STRING          reduce using rule 47 (variable_declaration -> identifier = expr .)
+    IDENTIFIER      reduce using rule 47 (variable_declaration -> identifier = expr .)
+    %               reduce using rule 47 (variable_declaration -> identifier = expr .)
+    DO              reduce using rule 47 (variable_declaration -> identifier = expr .)
+    $end            reduce using rule 47 (variable_declaration -> identifier = expr .)
+    OF              reduce using rule 47 (variable_declaration -> identifier = expr .)
+    END             reduce using rule 47 (variable_declaration -> identifier = expr .)
+    ELSE            reduce using rule 47 (variable_declaration -> identifier = expr .)
+    )               reduce using rule 47 (variable_declaration -> identifier = expr .)
+    ,               reduce using rule 47 (variable_declaration -> identifier = expr .)
+    INT_DIV         shift and go to state 23
+    /               shift and go to state 24
+    -               shift and go to state 25
+    +               shift and go to state 26
+    CONCAT          shift and go to state 27
+
+
+state 41
+
+    (26) case -> CASE expr OF . cases END
+    (27) cases -> . patterns do
+    (28) cases -> . cases cases
+    (29) patterns -> . array_pattern
+    (30) patterns -> . list_pattern
+    (31) patterns -> . identifier ( patterns )
+    (32) patterns -> . identifier
+    (33) patterns -> . patterns , patterns
+    (34) array_pattern -> . [ ]
+    (35) array_pattern -> . [ patterns ]
+    (36) array_pattern -> . [ SPREAD identifier , patterns ]
+    (37) array_pattern -> . [ patterns , SPREAD identifier , patterns ]
+    (38) array_pattern -> . [ patterns , SPREAD identifier ]
+    (39) list_pattern -> . { }
+    (40) list_pattern -> . { patterns }
+    (41) list_pattern -> . { patterns , SPREAD identifier }
+    (46) identifier -> . IDENTIFIER
+    [               shift and go to state 53
+    {               shift and go to state 54
+    IDENTIFIER      shift and go to state 17
+
+    cases                          shift and go to state 48
+    patterns                       shift and go to state 49
+    array_pattern                  shift and go to state 50
+    list_pattern                   shift and go to state 51
+    identifier                     shift and go to state 52
+
+state 42
+
+    (42) call -> callee ( arguments . )
+    (43) arguments -> arguments . , arguments
+    )               shift and go to state 55
+    ,               shift and go to state 56
+
+
+state 43
+
+    (44) arguments -> expr .
+    (13) binary_expr -> expr . INT_DIV expr
+    (14) binary_expr -> expr . / expr
+    (15) binary_expr -> expr . - expr
+    (16) binary_expr -> expr . + expr
+    (17) binary_expr -> expr . CONCAT expr
+    )               reduce using rule 44 (arguments -> expr .)
+    ,               reduce using rule 44 (arguments -> expr .)
+    INT_DIV         shift and go to state 23
+    /               shift and go to state 24
+    -               shift and go to state 25
+    +               shift and go to state 26
+    CONCAT          shift and go to state 27
+
+
+state 44
+
+    (24) _if -> IF expr DO . exprs ELSE exprs END
+    (2) exprs -> . expr
+    (3) exprs -> . exprs exprs
+    (4) expr -> . binary_expr
+    (5) expr -> . variable_declaration
+    (6) expr -> . case
+    (7) expr -> . call
+    (8) expr -> . _if
+    (9) expr -> . _def
+    (10) expr -> . literal
+    (11) expr -> . identifier
+    (12) expr -> . do
+    (13) binary_expr -> . expr INT_DIV expr
+    (14) binary_expr -> . expr / expr
+    (15) binary_expr -> . expr - expr
+    (16) binary_expr -> . expr + expr
+    (17) binary_expr -> . expr CONCAT expr
+    (47) variable_declaration -> . identifier = expr
+    (26) case -> . CASE expr OF cases END
+    (42) call -> . callee ( arguments )
+    (24) _if -> . IF expr DO exprs ELSE exprs END
+    (25) _if -> . IF expr do
+    (19) _def -> . DEF IDENTIFIER ( params ) do
+    (48) literal -> . NUMBER
+    (49) literal -> . STRING
+    (46) identifier -> . IDENTIFIER
+    (18) do -> . o_type DO exprs END
+    (45) callee -> . identifier
+    (20) o_type -> .
+    (21) o_type -> . % IDENTIFIER
+    CASE            shift and go to state 13
+    IF              shift and go to state 15
+    DEF             shift and go to state 16
+    NUMBER          shift and go to state 18
+    STRING          shift and go to state 19
+    IDENTIFIER      shift and go to state 17
+    DO              reduce using rule 20 (o_type -> .)
+    %               shift and go to state 21
+
+    expr                           shift and go to state 3
+    exprs                          shift and go to state 57
+    binary_expr                    shift and go to state 4
+    variable_declaration           shift and go to state 5
+    case                           shift and go to state 6
+    call                           shift and go to state 7
+    _if                            shift and go to state 8
+    _def                           shift and go to state 9
+    literal                        shift and go to state 10
+    identifier                     shift and go to state 11
+    do                             shift and go to state 12
+    callee                         shift and go to state 14
+    o_type                         shift and go to state 20
+
+state 45
+
+    (25) _if -> IF expr do .
+    INT_DIV         reduce using rule 25 (_if -> IF expr do .)
+    /               reduce using rule 25 (_if -> IF expr do .)
+    -               reduce using rule 25 (_if -> IF expr do .)
+    +               reduce using rule 25 (_if -> IF expr do .)
+    CONCAT          reduce using rule 25 (_if -> IF expr do .)
+    CASE            reduce using rule 25 (_if -> IF expr do .)
+    IF              reduce using rule 25 (_if -> IF expr do .)
+    DEF             reduce using rule 25 (_if -> IF expr do .)
+    NUMBER          reduce using rule 25 (_if -> IF expr do .)
+    STRING          reduce using rule 25 (_if -> IF expr do .)
+    IDENTIFIER      reduce using rule 25 (_if -> IF expr do .)
+    %               reduce using rule 25 (_if -> IF expr do .)
+    DO              reduce using rule 25 (_if -> IF expr do .)
+    $end            reduce using rule 25 (_if -> IF expr do .)
+    OF              reduce using rule 25 (_if -> IF expr do .)
+    END             reduce using rule 25 (_if -> IF expr do .)
+    ELSE            reduce using rule 25 (_if -> IF expr do .)
+    )               reduce using rule 25 (_if -> IF expr do .)
+    ,               reduce using rule 25 (_if -> IF expr do .)
+
+
+state 46
+
+    (19) _def -> DEF IDENTIFIER ( . params ) do
+    (22) params -> . o_type identifier
+    (23) params -> . params , params
+    (20) o_type -> .
+    (21) o_type -> . % IDENTIFIER
+    IDENTIFIER      reduce using rule 20 (o_type -> .)
+    %               shift and go to state 21
+
+    params                         shift and go to state 58
+    o_type                         shift and go to state 59
+
+state 47
+
+    (18) do -> o_type DO exprs . END
+    (3) exprs -> exprs . exprs
+    (2) exprs -> . expr
+    (3) exprs -> . exprs exprs
+    (4) expr -> . binary_expr
+    (5) expr -> . variable_declaration
+    (6) expr -> . case
+    (7) expr -> . call
+    (8) expr -> . _if
+    (9) expr -> . _def
+    (10) expr -> . literal
+    (11) expr -> . identifier
+    (12) expr -> . do
+    (13) binary_expr -> . expr INT_DIV expr
+    (14) binary_expr -> . expr / expr
+    (15) binary_expr -> . expr - expr
+    (16) binary_expr -> . expr + expr
+    (17) binary_expr -> . expr CONCAT expr
+    (47) variable_declaration -> . identifier = expr
+    (26) case -> . CASE expr OF cases END
+    (42) call -> . callee ( arguments )
+    (24) _if -> . IF expr DO exprs ELSE exprs END
+    (25) _if -> . IF expr do
+    (19) _def -> . DEF IDENTIFIER ( params ) do
+    (48) literal -> . NUMBER
+    (49) literal -> . STRING
+    (46) identifier -> . IDENTIFIER
+    (18) do -> . o_type DO exprs END
+    (45) callee -> . identifier
+    (20) o_type -> .
+    (21) o_type -> . % IDENTIFIER
+    END             shift and go to state 60
+    CASE            shift and go to state 13
+    IF              shift and go to state 15
+    DEF             shift and go to state 16
+    NUMBER          shift and go to state 18
+    STRING          shift and go to state 19
+    IDENTIFIER      shift and go to state 17
+    DO              reduce using rule 20 (o_type -> .)
+    %               shift and go to state 21
+
+    o_type                         shift and go to state 20
+    exprs                          shift and go to state 22
+    expr                           shift and go to state 3
+    binary_expr                    shift and go to state 4
+    variable_declaration           shift and go to state 5
+    case                           shift and go to state 6
+    call                           shift and go to state 7
+    _if                            shift and go to state 8
+    _def                           shift and go to state 9
+    literal                        shift and go to state 10
+    identifier                     shift and go to state 11
+    do                             shift and go to state 12
+    callee                         shift and go to state 14
+
+state 48
+
+    (26) case -> CASE expr OF cases . END
+    (28) cases -> cases . cases
+    (27) cases -> . patterns do
+    (28) cases -> . cases cases
+    (29) patterns -> . array_pattern
+    (30) patterns -> . list_pattern
+    (31) patterns -> . identifier ( patterns )
+    (32) patterns -> . identifier
+    (33) patterns -> . patterns , patterns
+    (34) array_pattern -> . [ ]
+    (35) array_pattern -> . [ patterns ]
+    (36) array_pattern -> . [ SPREAD identifier , patterns ]
+    (37) array_pattern -> . [ patterns , SPREAD identifier , patterns ]
+    (38) array_pattern -> . [ patterns , SPREAD identifier ]
+    (39) list_pattern -> . { }
+    (40) list_pattern -> . { patterns }
+    (41) list_pattern -> . { patterns , SPREAD identifier }
+    (46) identifier -> . IDENTIFIER
+    END             shift and go to state 62
+    [               shift and go to state 53
+    {               shift and go to state 54
+    IDENTIFIER      shift and go to state 17
+
+    cases                          shift and go to state 61
+    patterns                       shift and go to state 49
+    array_pattern                  shift and go to state 50
+    list_pattern                   shift and go to state 51
+    identifier                     shift and go to state 52
+
+state 49
+
+    (27) cases -> patterns . do
+    (33) patterns -> patterns . , patterns
+    (18) do -> . o_type DO exprs END
+    (20) o_type -> .
+    (21) o_type -> . % IDENTIFIER
+    ,               shift and go to state 64
+    DO              reduce using rule 20 (o_type -> .)
+    %               shift and go to state 21
+
+    do                             shift and go to state 63
+    o_type                         shift and go to state 20
+
+state 50
+
+    (29) patterns -> array_pattern .
+    ,               reduce using rule 29 (patterns -> array_pattern .)
+    %               reduce using rule 29 (patterns -> array_pattern .)
+    DO              reduce using rule 29 (patterns -> array_pattern .)
+    ]               reduce using rule 29 (patterns -> array_pattern .)
+    }               reduce using rule 29 (patterns -> array_pattern .)
+    )               reduce using rule 29 (patterns -> array_pattern .)
+
+
+state 51
+
+    (30) patterns -> list_pattern .
+    ,               reduce using rule 30 (patterns -> list_pattern .)
+    %               reduce using rule 30 (patterns -> list_pattern .)
+    DO              reduce using rule 30 (patterns -> list_pattern .)
+    ]               reduce using rule 30 (patterns -> list_pattern .)
+    }               reduce using rule 30 (patterns -> list_pattern .)
+    )               reduce using rule 30 (patterns -> list_pattern .)
+
+
+state 52
+
+    (31) patterns -> identifier . ( patterns )
+    (32) patterns -> identifier .
+    (               shift and go to state 65
+    ,               reduce using rule 32 (patterns -> identifier .)
+    %               reduce using rule 32 (patterns -> identifier .)
+    DO              reduce using rule 32 (patterns -> identifier .)
+    ]               reduce using rule 32 (patterns -> identifier .)
+    }               reduce using rule 32 (patterns -> identifier .)
+    )               reduce using rule 32 (patterns -> identifier .)
+
+
+state 53
+
+    (34) array_pattern -> [ . ]
+    (35) array_pattern -> [ . patterns ]
+    (36) array_pattern -> [ . SPREAD identifier , patterns ]
+    (37) array_pattern -> [ . patterns , SPREAD identifier , patterns ]
+    (38) array_pattern -> [ . patterns , SPREAD identifier ]
+    (29) patterns -> . array_pattern
+    (30) patterns -> . list_pattern
+    (31) patterns -> . identifier ( patterns )
+    (32) patterns -> . identifier
+    (33) patterns -> . patterns , patterns
+    (34) array_pattern -> . [ ]
+    (35) array_pattern -> . [ patterns ]
+    (36) array_pattern -> . [ SPREAD identifier , patterns ]
+    (37) array_pattern -> . [ patterns , SPREAD identifier , patterns ]
+    (38) array_pattern -> . [ patterns , SPREAD identifier ]
+    (39) list_pattern -> . { }
+    (40) list_pattern -> . { patterns }
+    (41) list_pattern -> . { patterns , SPREAD identifier }
+    (46) identifier -> . IDENTIFIER
+    ]               shift and go to state 66
+    SPREAD          shift and go to state 68
+    [               shift and go to state 53
+    {               shift and go to state 54
+    IDENTIFIER      shift and go to state 17
+
+    patterns                       shift and go to state 67
+    identifier                     shift and go to state 52
+    array_pattern                  shift and go to state 50
+    list_pattern                   shift and go to state 51
+
+state 54
+
+    (39) list_pattern -> { . }
+    (40) list_pattern -> { . patterns }
+    (41) list_pattern -> { . patterns , SPREAD identifier }
+    (29) patterns -> . array_pattern
+    (30) patterns -> . list_pattern
+    (31) patterns -> . identifier ( patterns )
+    (32) patterns -> . identifier
+    (33) patterns -> . patterns , patterns
+    (34) array_pattern -> . [ ]
+    (35) array_pattern -> . [ patterns ]
+    (36) array_pattern -> . [ SPREAD identifier , patterns ]
+    (37) array_pattern -> . [ patterns , SPREAD identifier , patterns ]
+    (38) array_pattern -> . [ patterns , SPREAD identifier ]
+    (39) list_pattern -> . { }
+    (40) list_pattern -> . { patterns }
+    (41) list_pattern -> . { patterns , SPREAD identifier }
+    (46) identifier -> . IDENTIFIER
+    }               shift and go to state 69
+    [               shift and go to state 53
+    {               shift and go to state 54
+    IDENTIFIER      shift and go to state 17
+
+    patterns                       shift and go to state 70
+    identifier                     shift and go to state 52
+    array_pattern                  shift and go to state 50
+    list_pattern                   shift and go to state 51
+
+state 55
+
+    (42) call -> callee ( arguments ) .
+    INT_DIV         reduce using rule 42 (call -> callee ( arguments ) .)
+    /               reduce using rule 42 (call -> callee ( arguments ) .)
+    -               reduce using rule 42 (call -> callee ( arguments ) .)
+    +               reduce using rule 42 (call -> callee ( arguments ) .)
+    CONCAT          reduce using rule 42 (call -> callee ( arguments ) .)
+    CASE            reduce using rule 42 (call -> callee ( arguments ) .)
+    IF              reduce using rule 42 (call -> callee ( arguments ) .)
+    DEF             reduce using rule 42 (call -> callee ( arguments ) .)
+    NUMBER          reduce using rule 42 (call -> callee ( arguments ) .)
+    STRING          reduce using rule 42 (call -> callee ( arguments ) .)
+    IDENTIFIER      reduce using rule 42 (call -> callee ( arguments ) .)
+    %               reduce using rule 42 (call -> callee ( arguments ) .)
+    DO              reduce using rule 42 (call -> callee ( arguments ) .)
+    $end            reduce using rule 42 (call -> callee ( arguments ) .)
+    OF              reduce using rule 42 (call -> callee ( arguments ) .)
+    END             reduce using rule 42 (call -> callee ( arguments ) .)
+    ELSE            reduce using rule 42 (call -> callee ( arguments ) .)
+    )               reduce using rule 42 (call -> callee ( arguments ) .)
+    ,               reduce using rule 42 (call -> callee ( arguments ) .)
+
+
+state 56
+
+    (43) arguments -> arguments , . arguments
+    (43) arguments -> . arguments , arguments
+    (44) arguments -> . expr
+    (4) expr -> . binary_expr
+    (5) expr -> . variable_declaration
+    (6) expr -> . case
+    (7) expr -> . call
+    (8) expr -> . _if
+    (9) expr -> . _def
+    (10) expr -> . literal
+    (11) expr -> . identifier
+    (12) expr -> . do
+    (13) binary_expr -> . expr INT_DIV expr
+    (14) binary_expr -> . expr / expr
+    (15) binary_expr -> . expr - expr
+    (16) binary_expr -> . expr + expr
+    (17) binary_expr -> . expr CONCAT expr
+    (47) variable_declaration -> . identifier = expr
+    (26) case -> . CASE expr OF cases END
+    (42) call -> . callee ( arguments )
+    (24) _if -> . IF expr DO exprs ELSE exprs END
+    (25) _if -> . IF expr do
+    (19) _def -> . DEF IDENTIFIER ( params ) do
+    (48) literal -> . NUMBER
+    (49) literal -> . STRING
+    (46) identifier -> . IDENTIFIER
+    (18) do -> . o_type DO exprs END
+    (45) callee -> . identifier
+    (20) o_type -> .
+    (21) o_type -> . % IDENTIFIER
+    CASE            shift and go to state 13
+    IF              shift and go to state 15
+    DEF             shift and go to state 16
+    NUMBER          shift and go to state 18
+    STRING          shift and go to state 19
+    IDENTIFIER      shift and go to state 17
+    DO              reduce using rule 20 (o_type -> .)
+    %               shift and go to state 21
+
+    arguments                      shift and go to state 71
+    expr                           shift and go to state 43
+    binary_expr                    shift and go to state 4
+    variable_declaration           shift and go to state 5
+    case                           shift and go to state 6
+    call                           shift and go to state 7
+    _if                            shift and go to state 8
+    _def                           shift and go to state 9
+    literal                        shift and go to state 10
+    identifier                     shift and go to state 11
+    do                             shift and go to state 12
+    callee                         shift and go to state 14
+    o_type                         shift and go to state 20
+
+state 57
+
+    (24) _if -> IF expr DO exprs . ELSE exprs END
+    (3) exprs -> exprs . exprs
+    (2) exprs -> . expr
+    (3) exprs -> . exprs exprs
+    (4) expr -> . binary_expr
+    (5) expr -> . variable_declaration
+    (6) expr -> . case
+    (7) expr -> . call
+    (8) expr -> . _if
+    (9) expr -> . _def
+    (10) expr -> . literal
+    (11) expr -> . identifier
+    (12) expr -> . do
+    (13) binary_expr -> . expr INT_DIV expr
+    (14) binary_expr -> . expr / expr
+    (15) binary_expr -> . expr - expr
+    (16) binary_expr -> . expr + expr
+    (17) binary_expr -> . expr CONCAT expr
+    (47) variable_declaration -> . identifier = expr
+    (26) case -> . CASE expr OF cases END
+    (42) call -> . callee ( arguments )
+    (24) _if -> . IF expr DO exprs ELSE exprs END
+    (25) _if -> . IF expr do
+    (19) _def -> . DEF IDENTIFIER ( params ) do
+    (48) literal -> . NUMBER
+    (49) literal -> . STRING
+    (46) identifier -> . IDENTIFIER
+    (18) do -> . o_type DO exprs END
+    (45) callee -> . identifier
+    (20) o_type -> .
+    (21) o_type -> . % IDENTIFIER
+    ELSE            shift and go to state 72
+    CASE            shift and go to state 13
+    IF              shift and go to state 15
+    DEF             shift and go to state 16
+    NUMBER          shift and go to state 18
+    STRING          shift and go to state 19
+    IDENTIFIER      shift and go to state 17
+    DO              reduce using rule 20 (o_type -> .)
+    %               shift and go to state 21
+
+    expr                           shift and go to state 3
+    exprs                          shift and go to state 22
+    binary_expr                    shift and go to state 4
+    variable_declaration           shift and go to state 5
+    case                           shift and go to state 6
+    call                           shift and go to state 7
+    _if                            shift and go to state 8
+    _def                           shift and go to state 9
+    literal                        shift and go to state 10
+    identifier                     shift and go to state 11
+    do                             shift and go to state 12
+    callee                         shift and go to state 14
+    o_type                         shift and go to state 20
+
+state 58
+
+    (19) _def -> DEF IDENTIFIER ( params . ) do
+    (23) params -> params . , params
+    )               shift and go to state 73
+    ,               shift and go to state 74
+
+
+state 59
+
+    (22) params -> o_type . identifier
+    (46) identifier -> . IDENTIFIER
+    IDENTIFIER      shift and go to state 17
+
+    identifier                     shift and go to state 75
+
+state 60
+
+    (18) do -> o_type DO exprs END .
+    INT_DIV         reduce using rule 18 (do -> o_type DO exprs END .)
+    /               reduce using rule 18 (do -> o_type DO exprs END .)
+    -               reduce using rule 18 (do -> o_type DO exprs END .)
+    +               reduce using rule 18 (do -> o_type DO exprs END .)
+    CONCAT          reduce using rule 18 (do -> o_type DO exprs END .)
+    CASE            reduce using rule 18 (do -> o_type DO exprs END .)
+    IF              reduce using rule 18 (do -> o_type DO exprs END .)
+    DEF             reduce using rule 18 (do -> o_type DO exprs END .)
+    NUMBER          reduce using rule 18 (do -> o_type DO exprs END .)
+    STRING          reduce using rule 18 (do -> o_type DO exprs END .)
+    IDENTIFIER      reduce using rule 18 (do -> o_type DO exprs END .)
+    %               reduce using rule 18 (do -> o_type DO exprs END .)
+    DO              reduce using rule 18 (do -> o_type DO exprs END .)
+    $end            reduce using rule 18 (do -> o_type DO exprs END .)
+    OF              reduce using rule 18 (do -> o_type DO exprs END .)
+    END             reduce using rule 18 (do -> o_type DO exprs END .)
+    ELSE            reduce using rule 18 (do -> o_type DO exprs END .)
+    )               reduce using rule 18 (do -> o_type DO exprs END .)
+    ,               reduce using rule 18 (do -> o_type DO exprs END .)
+    [               reduce using rule 18 (do -> o_type DO exprs END .)
+    {               reduce using rule 18 (do -> o_type DO exprs END .)
+
+
+state 61
+
+    (28) cases -> cases cases .
+    (28) cases -> cases . cases
+    (27) cases -> . patterns do
+    (28) cases -> . cases cases
+    (29) patterns -> . array_pattern
+    (30) patterns -> . list_pattern
+    (31) patterns -> . identifier ( patterns )
+    (32) patterns -> . identifier
+    (33) patterns -> . patterns , patterns
+    (34) array_pattern -> . [ ]
+    (35) array_pattern -> . [ patterns ]
+    (36) array_pattern -> . [ SPREAD identifier , patterns ]
+    (37) array_pattern -> . [ patterns , SPREAD identifier , patterns ]
+    (38) array_pattern -> . [ patterns , SPREAD identifier ]
+    (39) list_pattern -> . { }
+    (40) list_pattern -> . { patterns }
+    (41) list_pattern -> . { patterns , SPREAD identifier }
+    (46) identifier -> . IDENTIFIER
+  ! shift/reduce conflict for [ resolved as shift
+  ! shift/reduce conflict for { resolved as shift
+  ! shift/reduce conflict for IDENTIFIER resolved as shift
+    END             reduce using rule 28 (cases -> cases cases .)
+    [               shift and go to state 53
+    {               shift and go to state 54
+    IDENTIFIER      shift and go to state 17
+
+    cases                          shift and go to state 61
+    patterns                       shift and go to state 49
+    array_pattern                  shift and go to state 50
+    list_pattern                   shift and go to state 51
+    identifier                     shift and go to state 52
+
+state 62
+
+    (26) case -> CASE expr OF cases END .
+    INT_DIV         reduce using rule 26 (case -> CASE expr OF cases END .)
+    /               reduce using rule 26 (case -> CASE expr OF cases END .)
+    -               reduce using rule 26 (case -> CASE expr OF cases END .)
+    +               reduce using rule 26 (case -> CASE expr OF cases END .)
+    CONCAT          reduce using rule 26 (case -> CASE expr OF cases END .)
+    CASE            reduce using rule 26 (case -> CASE expr OF cases END .)
+    IF              reduce using rule 26 (case -> CASE expr OF cases END .)
+    DEF             reduce using rule 26 (case -> CASE expr OF cases END .)
+    NUMBER          reduce using rule 26 (case -> CASE expr OF cases END .)
+    STRING          reduce using rule 26 (case -> CASE expr OF cases END .)
+    IDENTIFIER      reduce using rule 26 (case -> CASE expr OF cases END .)
+    %               reduce using rule 26 (case -> CASE expr OF cases END .)
+    DO              reduce using rule 26 (case -> CASE expr OF cases END .)
+    $end            reduce using rule 26 (case -> CASE expr OF cases END .)
+    OF              reduce using rule 26 (case -> CASE expr OF cases END .)
+    END             reduce using rule 26 (case -> CASE expr OF cases END .)
+    ELSE            reduce using rule 26 (case -> CASE expr OF cases END .)
+    )               reduce using rule 26 (case -> CASE expr OF cases END .)
+    ,               reduce using rule 26 (case -> CASE expr OF cases END .)
+
+
+state 63
+
+    (27) cases -> patterns do .
+    END             reduce using rule 27 (cases -> patterns do .)
+    [               reduce using rule 27 (cases -> patterns do .)
+    {               reduce using rule 27 (cases -> patterns do .)
+    IDENTIFIER      reduce using rule 27 (cases -> patterns do .)
+
+
+state 64
+
+    (33) patterns -> patterns , . patterns
+    (29) patterns -> . array_pattern
+    (30) patterns -> . list_pattern
+    (31) patterns -> . identifier ( patterns )
+    (32) patterns -> . identifier
+    (33) patterns -> . patterns , patterns
+    (34) array_pattern -> . [ ]
+    (35) array_pattern -> . [ patterns ]
+    (36) array_pattern -> . [ SPREAD identifier , patterns ]
+    (37) array_pattern -> . [ patterns , SPREAD identifier , patterns ]
+    (38) array_pattern -> . [ patterns , SPREAD identifier ]
+    (39) list_pattern -> . { }
+    (40) list_pattern -> . { patterns }
+    (41) list_pattern -> . { patterns , SPREAD identifier }
+    (46) identifier -> . IDENTIFIER
+    [               shift and go to state 53
+    {               shift and go to state 54
+    IDENTIFIER      shift and go to state 17
+
+    patterns                       shift and go to state 76
+    array_pattern                  shift and go to state 50
+    list_pattern                   shift and go to state 51
+    identifier                     shift and go to state 52
+
+state 65
+
+    (31) patterns -> identifier ( . patterns )
+    (29) patterns -> . array_pattern
+    (30) patterns -> . list_pattern
+    (31) patterns -> . identifier ( patterns )
+    (32) patterns -> . identifier
+    (33) patterns -> . patterns , patterns
+    (34) array_pattern -> . [ ]
+    (35) array_pattern -> . [ patterns ]
+    (36) array_pattern -> . [ SPREAD identifier , patterns ]
+    (37) array_pattern -> . [ patterns , SPREAD identifier , patterns ]
+    (38) array_pattern -> . [ patterns , SPREAD identifier ]
+    (39) list_pattern -> . { }
+    (40) list_pattern -> . { patterns }
+    (41) list_pattern -> . { patterns , SPREAD identifier }
+    (46) identifier -> . IDENTIFIER
+    [               shift and go to state 53
+    {               shift and go to state 54
+    IDENTIFIER      shift and go to state 17
+
+    identifier                     shift and go to state 52
+    patterns                       shift and go to state 77
+    array_pattern                  shift and go to state 50
+    list_pattern                   shift and go to state 51
+
+state 66
+
+    (34) array_pattern -> [ ] .
+    ,               reduce using rule 34 (array_pattern -> [ ] .)
+    %               reduce using rule 34 (array_pattern -> [ ] .)
+    DO              reduce using rule 34 (array_pattern -> [ ] .)
+    ]               reduce using rule 34 (array_pattern -> [ ] .)
+    }               reduce using rule 34 (array_pattern -> [ ] .)
+    )               reduce using rule 34 (array_pattern -> [ ] .)
+
+
+state 67
+
+    (35) array_pattern -> [ patterns . ]
+    (37) array_pattern -> [ patterns . , SPREAD identifier , patterns ]
+    (38) array_pattern -> [ patterns . , SPREAD identifier ]
+    (33) patterns -> patterns . , patterns
+    ]               shift and go to state 78
+    ,               shift and go to state 79
+
+
+state 68
+
+    (36) array_pattern -> [ SPREAD . identifier , patterns ]
+    (46) identifier -> . IDENTIFIER
+    IDENTIFIER      shift and go to state 17
+
+    identifier                     shift and go to state 80
+
+state 69
+
+    (39) list_pattern -> { } .
+    ,               reduce using rule 39 (list_pattern -> { } .)
+    %               reduce using rule 39 (list_pattern -> { } .)
+    DO              reduce using rule 39 (list_pattern -> { } .)
+    ]               reduce using rule 39 (list_pattern -> { } .)
+    }               reduce using rule 39 (list_pattern -> { } .)
+    )               reduce using rule 39 (list_pattern -> { } .)
+
+
+state 70
+
+    (40) list_pattern -> { patterns . }
+    (41) list_pattern -> { patterns . , SPREAD identifier }
+    (33) patterns -> patterns . , patterns
+    }               shift and go to state 81
+    ,               shift and go to state 82
+
+
+state 71
+
+    (43) arguments -> arguments , arguments .
+    (43) arguments -> arguments . , arguments
+  ! shift/reduce conflict for , resolved as shift
+    )               reduce using rule 43 (arguments -> arguments , arguments .)
+    ,               shift and go to state 56
+
+
+state 72
+
+    (24) _if -> IF expr DO exprs ELSE . exprs END
+    (2) exprs -> . expr
+    (3) exprs -> . exprs exprs
+    (4) expr -> . binary_expr
+    (5) expr -> . variable_declaration
+    (6) expr -> . case
+    (7) expr -> . call
+    (8) expr -> . _if
+    (9) expr -> . _def
+    (10) expr -> . literal
+    (11) expr -> . identifier
+    (12) expr -> . do
+    (13) binary_expr -> . expr INT_DIV expr
+    (14) binary_expr -> . expr / expr
+    (15) binary_expr -> . expr - expr
+    (16) binary_expr -> . expr + expr
+    (17) binary_expr -> . expr CONCAT expr
+    (47) variable_declaration -> . identifier = expr
+    (26) case -> . CASE expr OF cases END
+    (42) call -> . callee ( arguments )
+    (24) _if -> . IF expr DO exprs ELSE exprs END
+    (25) _if -> . IF expr do
+    (19) _def -> . DEF IDENTIFIER ( params ) do
+    (48) literal -> . NUMBER
+    (49) literal -> . STRING
+    (46) identifier -> . IDENTIFIER
+    (18) do -> . o_type DO exprs END
+    (45) callee -> . identifier
+    (20) o_type -> .
+    (21) o_type -> . % IDENTIFIER
+    CASE            shift and go to state 13
+    IF              shift and go to state 15
+    DEF             shift and go to state 16
+    NUMBER          shift and go to state 18
+    STRING          shift and go to state 19
+    IDENTIFIER      shift and go to state 17
+    DO              reduce using rule 20 (o_type -> .)
+    %               shift and go to state 21
+
+    expr                           shift and go to state 3
+    exprs                          shift and go to state 83
+    binary_expr                    shift and go to state 4
+    variable_declaration           shift and go to state 5
+    case                           shift and go to state 6
+    call                           shift and go to state 7
+    _if                            shift and go to state 8
+    _def                           shift and go to state 9
+    literal                        shift and go to state 10
+    identifier                     shift and go to state 11
+    do                             shift and go to state 12
+    callee                         shift and go to state 14
+    o_type                         shift and go to state 20
+
+state 73
+
+    (19) _def -> DEF IDENTIFIER ( params ) . do
+    (18) do -> . o_type DO exprs END
+    (20) o_type -> .
+    (21) o_type -> . % IDENTIFIER
+    DO              reduce using rule 20 (o_type -> .)
+    %               shift and go to state 21
+
+    do                             shift and go to state 84
+    o_type                         shift and go to state 20
+
+state 74
+
+    (23) params -> params , . params
+    (22) params -> . o_type identifier
+    (23) params -> . params , params
+    (20) o_type -> .
+    (21) o_type -> . % IDENTIFIER
+    IDENTIFIER      reduce using rule 20 (o_type -> .)
+    %               shift and go to state 21
+
+    params                         shift and go to state 85
+    o_type                         shift and go to state 59
+
+state 75
+
+    (22) params -> o_type identifier .
+    )               reduce using rule 22 (params -> o_type identifier .)
+    ,               reduce using rule 22 (params -> o_type identifier .)
+
+
+state 76
+
+    (33) patterns -> patterns , patterns .
+    (33) patterns -> patterns . , patterns
+  ! shift/reduce conflict for , resolved as shift
+    %               reduce using rule 33 (patterns -> patterns , patterns .)
+    DO              reduce using rule 33 (patterns -> patterns , patterns .)
+    ]               reduce using rule 33 (patterns -> patterns , patterns .)
+    }               reduce using rule 33 (patterns -> patterns , patterns .)
+    )               reduce using rule 33 (patterns -> patterns , patterns .)
+    ,               shift and go to state 64
+
+
+state 77
+
+    (31) patterns -> identifier ( patterns . )
+    (33) patterns -> patterns . , patterns
+    )               shift and go to state 86
+    ,               shift and go to state 64
+
+
+state 78
+
+    (35) array_pattern -> [ patterns ] .
+    ,               reduce using rule 35 (array_pattern -> [ patterns ] .)
+    %               reduce using rule 35 (array_pattern -> [ patterns ] .)
+    DO              reduce using rule 35 (array_pattern -> [ patterns ] .)
+    ]               reduce using rule 35 (array_pattern -> [ patterns ] .)
+    }               reduce using rule 35 (array_pattern -> [ patterns ] .)
+    )               reduce using rule 35 (array_pattern -> [ patterns ] .)
+
+
+state 79
+
+    (37) array_pattern -> [ patterns , . SPREAD identifier , patterns ]
+    (38) array_pattern -> [ patterns , . SPREAD identifier ]
+    (33) patterns -> patterns , . patterns
+    (29) patterns -> . array_pattern
+    (30) patterns -> . list_pattern
+    (31) patterns -> . identifier ( patterns )
+    (32) patterns -> . identifier
+    (33) patterns -> . patterns , patterns
+    (34) array_pattern -> . [ ]
+    (35) array_pattern -> . [ patterns ]
+    (36) array_pattern -> . [ SPREAD identifier , patterns ]
+    (37) array_pattern -> . [ patterns , SPREAD identifier , patterns ]
+    (38) array_pattern -> . [ patterns , SPREAD identifier ]
+    (39) list_pattern -> . { }
+    (40) list_pattern -> . { patterns }
+    (41) list_pattern -> . { patterns , SPREAD identifier }
+    (46) identifier -> . IDENTIFIER
+    SPREAD          shift and go to state 87
+    [               shift and go to state 53
+    {               shift and go to state 54
+    IDENTIFIER      shift and go to state 17
+
+    patterns                       shift and go to state 76
+    identifier                     shift and go to state 52
+    array_pattern                  shift and go to state 50
+    list_pattern                   shift and go to state 51
+
+state 80
+
+    (36) array_pattern -> [ SPREAD identifier . , patterns ]
+    ,               shift and go to state 88
+
+
+state 81
+
+    (40) list_pattern -> { patterns } .
+    ,               reduce using rule 40 (list_pattern -> { patterns } .)
+    %               reduce using rule 40 (list_pattern -> { patterns } .)
+    DO              reduce using rule 40 (list_pattern -> { patterns } .)
+    ]               reduce using rule 40 (list_pattern -> { patterns } .)
+    }               reduce using rule 40 (list_pattern -> { patterns } .)
+    )               reduce using rule 40 (list_pattern -> { patterns } .)
+
+
+state 82
+
+    (41) list_pattern -> { patterns , . SPREAD identifier }
+    (33) patterns -> patterns , . patterns
+    (29) patterns -> . array_pattern
+    (30) patterns -> . list_pattern
+    (31) patterns -> . identifier ( patterns )
+    (32) patterns -> . identifier
+    (33) patterns -> . patterns , patterns
+    (34) array_pattern -> . [ ]
+    (35) array_pattern -> . [ patterns ]
+    (36) array_pattern -> . [ SPREAD identifier , patterns ]
+    (37) array_pattern -> . [ patterns , SPREAD identifier , patterns ]
+    (38) array_pattern -> . [ patterns , SPREAD identifier ]
+    (39) list_pattern -> . { }
+    (40) list_pattern -> . { patterns }
+    (41) list_pattern -> . { patterns , SPREAD identifier }
+    (46) identifier -> . IDENTIFIER
+    SPREAD          shift and go to state 89
+    [               shift and go to state 53
+    {               shift and go to state 54
+    IDENTIFIER      shift and go to state 17
+
+    patterns                       shift and go to state 76
+    identifier                     shift and go to state 52
+    array_pattern                  shift and go to state 50
+    list_pattern                   shift and go to state 51
+
+state 83
+
+    (24) _if -> IF expr DO exprs ELSE exprs . END
+    (3) exprs -> exprs . exprs
+    (2) exprs -> . expr
+    (3) exprs -> . exprs exprs
+    (4) expr -> . binary_expr
+    (5) expr -> . variable_declaration
+    (6) expr -> . case
+    (7) expr -> . call
+    (8) expr -> . _if
+    (9) expr -> . _def
+    (10) expr -> . literal
+    (11) expr -> . identifier
+    (12) expr -> . do
+    (13) binary_expr -> . expr INT_DIV expr
+    (14) binary_expr -> . expr / expr
+    (15) binary_expr -> . expr - expr
+    (16) binary_expr -> . expr + expr
+    (17) binary_expr -> . expr CONCAT expr
+    (47) variable_declaration -> . identifier = expr
+    (26) case -> . CASE expr OF cases END
+    (42) call -> . callee ( arguments )
+    (24) _if -> . IF expr DO exprs ELSE exprs END
+    (25) _if -> . IF expr do
+    (19) _def -> . DEF IDENTIFIER ( params ) do
+    (48) literal -> . NUMBER
+    (49) literal -> . STRING
+    (46) identifier -> . IDENTIFIER
+    (18) do -> . o_type DO exprs END
+    (45) callee -> . identifier
+    (20) o_type -> .
+    (21) o_type -> . % IDENTIFIER
+    END             shift and go to state 90
+    CASE            shift and go to state 13
+    IF              shift and go to state 15
+    DEF             shift and go to state 16
+    NUMBER          shift and go to state 18
+    STRING          shift and go to state 19
+    IDENTIFIER      shift and go to state 17
+    DO              reduce using rule 20 (o_type -> .)
+    %               shift and go to state 21
+
+    expr                           shift and go to state 3
+    exprs                          shift and go to state 22
+    binary_expr                    shift and go to state 4
+    variable_declaration           shift and go to state 5
+    case                           shift and go to state 6
+    call                           shift and go to state 7
+    _if                            shift and go to state 8
+    _def                           shift and go to state 9
+    literal                        shift and go to state 10
+    identifier                     shift and go to state 11
+    do                             shift and go to state 12
+    callee                         shift and go to state 14
+    o_type                         shift and go to state 20
+
+state 84
+
+    (19) _def -> DEF IDENTIFIER ( params ) do .
+    INT_DIV         reduce using rule 19 (_def -> DEF IDENTIFIER ( params ) do .)
+    /               reduce using rule 19 (_def -> DEF IDENTIFIER ( params ) do .)
+    -               reduce using rule 19 (_def -> DEF IDENTIFIER ( params ) do .)
+    +               reduce using rule 19 (_def -> DEF IDENTIFIER ( params ) do .)
+    CONCAT          reduce using rule 19 (_def -> DEF IDENTIFIER ( params ) do .)
+    CASE            reduce using rule 19 (_def -> DEF IDENTIFIER ( params ) do .)
+    IF              reduce using rule 19 (_def -> DEF IDENTIFIER ( params ) do .)
+    DEF             reduce using rule 19 (_def -> DEF IDENTIFIER ( params ) do .)
+    NUMBER          reduce using rule 19 (_def -> DEF IDENTIFIER ( params ) do .)
+    STRING          reduce using rule 19 (_def -> DEF IDENTIFIER ( params ) do .)
+    IDENTIFIER      reduce using rule 19 (_def -> DEF IDENTIFIER ( params ) do .)
+    %               reduce using rule 19 (_def -> DEF IDENTIFIER ( params ) do .)
+    DO              reduce using rule 19 (_def -> DEF IDENTIFIER ( params ) do .)
+    $end            reduce using rule 19 (_def -> DEF IDENTIFIER ( params ) do .)
+    OF              reduce using rule 19 (_def -> DEF IDENTIFIER ( params ) do .)
+    END             reduce using rule 19 (_def -> DEF IDENTIFIER ( params ) do .)
+    ELSE            reduce using rule 19 (_def -> DEF IDENTIFIER ( params ) do .)
+    )               reduce using rule 19 (_def -> DEF IDENTIFIER ( params ) do .)
+    ,               reduce using rule 19 (_def -> DEF IDENTIFIER ( params ) do .)
+
+
+state 85
+
+    (23) params -> params , params .
+    (23) params -> params . , params
+  ! shift/reduce conflict for , resolved as shift
+    )               reduce using rule 23 (params -> params , params .)
+    ,               shift and go to state 74
+
+
+state 86
+
+    (31) patterns -> identifier ( patterns ) .
+    ,               reduce using rule 31 (patterns -> identifier ( patterns ) .)
+    %               reduce using rule 31 (patterns -> identifier ( patterns ) .)
+    DO              reduce using rule 31 (patterns -> identifier ( patterns ) .)
+    ]               reduce using rule 31 (patterns -> identifier ( patterns ) .)
+    }               reduce using rule 31 (patterns -> identifier ( patterns ) .)
+    )               reduce using rule 31 (patterns -> identifier ( patterns ) .)
+
+
+state 87
+
+    (37) array_pattern -> [ patterns , SPREAD . identifier , patterns ]
+    (38) array_pattern -> [ patterns , SPREAD . identifier ]
+    (46) identifier -> . IDENTIFIER
+    IDENTIFIER      shift and go to state 17
+
+    identifier                     shift and go to state 91
+
+state 88
+
+    (36) array_pattern -> [ SPREAD identifier , . patterns ]
+    (29) patterns -> . array_pattern
+    (30) patterns -> . list_pattern
+    (31) patterns -> . identifier ( patterns )
+    (32) patterns -> . identifier
+    (33) patterns -> . patterns , patterns
+    (34) array_pattern -> . [ ]
+    (35) array_pattern -> . [ patterns ]
+    (36) array_pattern -> . [ SPREAD identifier , patterns ]
+    (37) array_pattern -> . [ patterns , SPREAD identifier , patterns ]
+    (38) array_pattern -> . [ patterns , SPREAD identifier ]
+    (39) list_pattern -> . { }
+    (40) list_pattern -> . { patterns }
+    (41) list_pattern -> . { patterns , SPREAD identifier }
+    (46) identifier -> . IDENTIFIER
+    [               shift and go to state 53
+    {               shift and go to state 54
+    IDENTIFIER      shift and go to state 17
+
+    identifier                     shift and go to state 52
+    patterns                       shift and go to state 92
+    array_pattern                  shift and go to state 50
+    list_pattern                   shift and go to state 51
+
+state 89
+
+    (41) list_pattern -> { patterns , SPREAD . identifier }
+    (46) identifier -> . IDENTIFIER
+    IDENTIFIER      shift and go to state 17
+
+    identifier                     shift and go to state 93
+
+state 90
+
+    (24) _if -> IF expr DO exprs ELSE exprs END .
+    INT_DIV         reduce using rule 24 (_if -> IF expr DO exprs ELSE exprs END .)
+    /               reduce using rule 24 (_if -> IF expr DO exprs ELSE exprs END .)
+    -               reduce using rule 24 (_if -> IF expr DO exprs ELSE exprs END .)
+    +               reduce using rule 24 (_if -> IF expr DO exprs ELSE exprs END .)
+    CONCAT          reduce using rule 24 (_if -> IF expr DO exprs ELSE exprs END .)
+    CASE            reduce using rule 24 (_if -> IF expr DO exprs ELSE exprs END .)
+    IF              reduce using rule 24 (_if -> IF expr DO exprs ELSE exprs END .)
+    DEF             reduce using rule 24 (_if -> IF expr DO exprs ELSE exprs END .)
+    NUMBER          reduce using rule 24 (_if -> IF expr DO exprs ELSE exprs END .)
+    STRING          reduce using rule 24 (_if -> IF expr DO exprs ELSE exprs END .)
+    IDENTIFIER      reduce using rule 24 (_if -> IF expr DO exprs ELSE exprs END .)
+    %               reduce using rule 24 (_if -> IF expr DO exprs ELSE exprs END .)
+    DO              reduce using rule 24 (_if -> IF expr DO exprs ELSE exprs END .)
+    $end            reduce using rule 24 (_if -> IF expr DO exprs ELSE exprs END .)
+    OF              reduce using rule 24 (_if -> IF expr DO exprs ELSE exprs END .)
+    END             reduce using rule 24 (_if -> IF expr DO exprs ELSE exprs END .)
+    ELSE            reduce using rule 24 (_if -> IF expr DO exprs ELSE exprs END .)
+    )               reduce using rule 24 (_if -> IF expr DO exprs ELSE exprs END .)
+    ,               reduce using rule 24 (_if -> IF expr DO exprs ELSE exprs END .)
+
+
+state 91
+
+    (37) array_pattern -> [ patterns , SPREAD identifier . , patterns ]
+    (38) array_pattern -> [ patterns , SPREAD identifier . ]
+    ,               shift and go to state 94
+    ]               shift and go to state 95
+
+
+state 92
+
+    (36) array_pattern -> [ SPREAD identifier , patterns . ]
+    (33) patterns -> patterns . , patterns
+    ]               shift and go to state 96
+    ,               shift and go to state 64
+
+
+state 93
+
+    (41) list_pattern -> { patterns , SPREAD identifier . }
+    }               shift and go to state 97
+
+
+state 94
+
+    (37) array_pattern -> [ patterns , SPREAD identifier , . patterns ]
+    (29) patterns -> . array_pattern
+    (30) patterns -> . list_pattern
+    (31) patterns -> . identifier ( patterns )
+    (32) patterns -> . identifier
+    (33) patterns -> . patterns , patterns
+    (34) array_pattern -> . [ ]
+    (35) array_pattern -> . [ patterns ]
+    (36) array_pattern -> . [ SPREAD identifier , patterns ]
+    (37) array_pattern -> . [ patterns , SPREAD identifier , patterns ]
+    (38) array_pattern -> . [ patterns , SPREAD identifier ]
+    (39) list_pattern -> . { }
+    (40) list_pattern -> . { patterns }
+    (41) list_pattern -> . { patterns , SPREAD identifier }
+    (46) identifier -> . IDENTIFIER
+    [               shift and go to state 53
+    {               shift and go to state 54
+    IDENTIFIER      shift and go to state 17
+
+    patterns                       shift and go to state 98
+    identifier                     shift and go to state 52
+    array_pattern                  shift and go to state 50
+    list_pattern                   shift and go to state 51
+
+state 95
+
+    (38) array_pattern -> [ patterns , SPREAD identifier ] .
+    ,               reduce using rule 38 (array_pattern -> [ patterns , SPREAD identifier ] .)
+    %               reduce using rule 38 (array_pattern -> [ patterns , SPREAD identifier ] .)
+    DO              reduce using rule 38 (array_pattern -> [ patterns , SPREAD identifier ] .)
+    ]               reduce using rule 38 (array_pattern -> [ patterns , SPREAD identifier ] .)
+    }               reduce using rule 38 (array_pattern -> [ patterns , SPREAD identifier ] .)
+    )               reduce using rule 38 (array_pattern -> [ patterns , SPREAD identifier ] .)
+
+
+state 96
+
+    (36) array_pattern -> [ SPREAD identifier , patterns ] .
+    ,               reduce using rule 36 (array_pattern -> [ SPREAD identifier , patterns ] .)
+    %               reduce using rule 36 (array_pattern -> [ SPREAD identifier , patterns ] .)
+    DO              reduce using rule 36 (array_pattern -> [ SPREAD identifier , patterns ] .)
+    ]               reduce using rule 36 (array_pattern -> [ SPREAD identifier , patterns ] .)
+    }               reduce using rule 36 (array_pattern -> [ SPREAD identifier , patterns ] .)
+    )               reduce using rule 36 (array_pattern -> [ SPREAD identifier , patterns ] .)
+
+
+state 97
+
+    (41) list_pattern -> { patterns , SPREAD identifier } .
+    ,               reduce using rule 41 (list_pattern -> { patterns , SPREAD identifier } .)
+    %               reduce using rule 41 (list_pattern -> { patterns , SPREAD identifier } .)
+    DO              reduce using rule 41 (list_pattern -> { patterns , SPREAD identifier } .)
+    ]               reduce using rule 41 (list_pattern -> { patterns , SPREAD identifier } .)
+    }               reduce using rule 41 (list_pattern -> { patterns , SPREAD identifier } .)
+    )               reduce using rule 41 (list_pattern -> { patterns , SPREAD identifier } .)
+
+
+state 98
+
+    (37) array_pattern -> [ patterns , SPREAD identifier , patterns . ]
+    (33) patterns -> patterns . , patterns
+    ]               shift and go to state 99
+    ,               shift and go to state 64
+
+
+state 99
+
+    (37) array_pattern -> [ patterns , SPREAD identifier , patterns ] .
+    ,               reduce using rule 37 (array_pattern -> [ patterns , SPREAD identifier , patterns ] .)
+    %               reduce using rule 37 (array_pattern -> [ patterns , SPREAD identifier , patterns ] .)
+    DO              reduce using rule 37 (array_pattern -> [ patterns , SPREAD identifier , patterns ] .)
+    ]               reduce using rule 37 (array_pattern -> [ patterns , SPREAD identifier , patterns ] .)
+    }               reduce using rule 37 (array_pattern -> [ patterns , SPREAD identifier , patterns ] .)
+    )               reduce using rule 37 (array_pattern -> [ patterns , SPREAD identifier , patterns ] .)
+
+
+Conflicts:
+
+shift/reduce conflict for CASE in state 22 resolved as shift
+shift/reduce conflict for IF in state 22 resolved as shift
+shift/reduce conflict for DEF in state 22 resolved as shift
+shift/reduce conflict for NUMBER in state 22 resolved as shift
+shift/reduce conflict for STRING in state 22 resolved as shift
+shift/reduce conflict for IDENTIFIER in state 22 resolved as shift
+shift/reduce conflict for % in state 22 resolved as shift
+shift/reduce conflict for DO in state 31 resolved as shift
+shift/reduce conflict for INT_DIV in state 35 resolved as shift
+shift/reduce conflict for / in state 35 resolved as shift
+shift/reduce conflict for - in state 35 resolved as shift
+shift/reduce conflict for + in state 35 resolved as shift
+shift/reduce conflict for CONCAT in state 35 resolved as shift
+shift/reduce conflict for INT_DIV in state 36 resolved as shift
+shift/reduce conflict for / in state 36 resolved as shift
+shift/reduce conflict for - in state 36 resolved as shift
+shift/reduce conflict for + in state 36 resolved as shift
+shift/reduce conflict for CONCAT in state 36 resolved as shift
+shift/reduce conflict for INT_DIV in state 37 resolved as shift
+shift/reduce conflict for / in state 37 resolved as shift
+shift/reduce conflict for - in state 37 resolved as shift
+shift/reduce conflict for + in state 37 resolved as shift
+shift/reduce conflict for CONCAT in state 37 resolved as shift
+shift/reduce conflict for INT_DIV in state 38 resolved as shift
+shift/reduce conflict for / in state 38 resolved as shift
+shift/reduce conflict for - in state 38 resolved as shift
+shift/reduce conflict for + in state 38 resolved as shift
+shift/reduce conflict for CONCAT in state 38 resolved as shift
+shift/reduce conflict for INT_DIV in state 39 resolved as shift
+shift/reduce conflict for / in state 39 resolved as shift
+shift/reduce conflict for - in state 39 resolved as shift
+shift/reduce conflict for + in state 39 resolved as shift
+shift/reduce conflict for CONCAT in state 39 resolved as shift
+shift/reduce conflict for INT_DIV in state 40 resolved as shift
+shift/reduce conflict for / in state 40 resolved as shift
+shift/reduce conflict for - in state 40 resolved as shift
+shift/reduce conflict for + in state 40 resolved as shift
+shift/reduce conflict for CONCAT in state 40 resolved as shift
+shift/reduce conflict for [ in state 61 resolved as shift
+shift/reduce conflict for { in state 61 resolved as shift
+shift/reduce conflict for IDENTIFIER in state 61 resolved as shift
+shift/reduce conflict for , in state 71 resolved as shift
+shift/reduce conflict for , in state 76 resolved as shift
+shift/reduce conflict for , in state 85 resolved as shift
+reduce/reduce conflict in state 22 resolved using rule exprs -> exprs exprs
+rejected rule (o_type -> <empty>) in state 22

@@ -1,0 +1,114 @@
+            
+# type
+enum Option<value> = None
+                   | Some(value)
+
+# struct
+struct User {
+  %string name
+  %string email
+  %number age
+}
+
+# array
+[:ok, err]
+# list
+{:ok, err}
+
+# variable
+x = 1
+
+
+# do
+x = 1
+y = do
+  z = x * 3
+  z / 2
+end
+
+z = %Option<%number> do None end
+
+# if else
+k = if z > 1 do
+    x * 2
+else
+    -1
+end
+
+
+# function declaration
+
+# lambda
+def zero() do
+  0
+end
+
+def get_email(%User user) %string do
+  user.email
+end   
+ 
+
+# case
+def length(list) do
+  case list of
+    { head, ...tail } do 1 + length(tail) end
+    {} do 0 end
+  end
+end
+
+def merge_sort(array) do
+  case array of
+    [] do [] end
+    [head] do [head] end
+    array do 
+      middle = length(array) // 2
+      left = slice(array, 0, middle)
+      left = merge_sort(left)
+      right = slice(array, middle)
+      right = merge_sort(right)
+      merge(left, right)
+    end
+  end
+end
+
+def merge(left, right) do
+  case left, right of
+    [], right do right end
+    left, [] do left end
+    [l_head, ...l_rest], [r_head, ...r_rest] do
+      if r_head < l_head do
+        [r_head, ...merge([l_head, ...l_rest], r_rest)]
+      else
+        [l_head, ...merge(l_rest, [r_head, ...r_rest])]
+      end
+    end
+end
+
+def findLast(array, predicate) do
+  case array of
+    [ ...rest, tail ] do
+      if predicate(tail) do
+        Some(tail)
+      else 
+        findLast(rest, predicate)
+      end
+    end
+    [] do None end
+  end
+end
+
+def flatMap(v, fn) do
+  case v of
+    None do
+      None
+    end
+    Some(value) do
+      fn(value)
+    end
+  end
+end
+    
+# function call
+map(Some(1), square)
+map(None, square)
+     
