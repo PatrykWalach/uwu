@@ -3,22 +3,44 @@ import dataclasses
 
 
 class UwuLexer(Lexer):
-    tokens = {NUMBER, STRING, IDENTIFIER, DEF, DO, END, IF, ELSE, CASE, OF, SPREAD,CONCAT
-,INT_DIV}
+    tokens = {
+        NUMBER,
+        STRING,
+        IDENTIFIER,
+        DEF,
+        DO,
+        END,
+        IF,
+        ELSE,
+        CASE,
+        OF,
+        SPREAD,
+        CONCAT,
+        ELIF,
+        COMMENT,
+        INT_DIV,
+        NEWLINE,
+    }
     literals = {"=", ".", "[", "]", ",", "{", "}", "(", ")", "%", "+", "-", ">", "<"}
     DEF = r"def"
     DO = r"do"
     END = r"end"
     IF = r"if"
     ELSE = r"else"
+    ELIF = r"elif"
     CASE = r"case"
     OF = r"of"
     SPREAD = r"\.{3}"
     STRING = r"'[^(\\')]*?'"
     NUMBER = r"\d+"
     IDENTIFIER = r"\w+"
-    CONCAT =r"\+{2}"
+    CONCAT = r"\+{2}"
     INT_DIV = r"/{2}"
+    COMMENT = r"#.*\n"
+
+    @_(r"\n+")
+    def NEWLINE(self, t):
+        self.lineno += len(t.value)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -30,12 +52,12 @@ class UwuParser(Parser):
     tokens = UwuLexer.tokens
     debugfile = "parser.out"
 
-    @_("exprs")
+    @_("expressions")
     def program(self, p):
         return
 
-    @_("exprs exprs", "expr")
-    def exprs(self, p):
+    @_("{ expr }")
+    def expressions(self, p):
         return
 
     @_(
@@ -45,9 +67,11 @@ class UwuParser(Parser):
         "_def",
         "_if",
         "call",
-        "case",
+        "case_of",
         "variable_declaration",
         "binary_expr",
+        "array",
+        "tuple",
     )
     def expr(self, p):
         return
@@ -58,11 +82,14 @@ class UwuParser(Parser):
         "expr '-' expr",
         "expr '/' expr",
         "expr INT_DIV expr",
+        "'(' binary_expr ')'",
     )
     def binary_expr(self, p):
         return
 
-    @_("o_type DO exprs END")
+    @_(
+        "[ type ] DO expressions END",
+    )
     def do(self, p):
         return
 
@@ -70,60 +97,60 @@ class UwuParser(Parser):
     def _def(self, p):
         return
 
-    @_("'%' IDENTIFIER", "")
-    def o_type(self, p):
+    @_("'%' IDENTIFIER [ '<' IDENTIFIER { ',' IDENTIFIER } '>' ]")
+    def type(self, p):
         return
 
-    @_("params ',' params", "o_type identifier")
+    @_("[ param ] { ',' param }")
     def params(self, p):
         return
 
-    @_("IF expr do", "IF expr DO exprs ELSE exprs END")
+    @_("[ type ] identifier")
+    def param(self, p):
+        return
+
+    @_("IF expr DO expressions { _elif } [ ELSE expressions ] END")
     def _if(self, p):
         return
 
-    @_("CASE expr OF cases END")
+    @_("ELIF expr DO expressions")
+    def _elif(self, p):
+        return
+
+    @_("CASE expr OF case { case } END")
+    def case_of(self, p):
+        return
+
+    @_("pattern { ',' pattern } do")
     def case(self, p):
         return
 
-    @_("cases cases", "patterns do")
-    def cases(self, p):
-        return
-
     @_(
-        "patterns ',' patterns",
-        "identifier",
-        "identifier '(' patterns ')'",
-        "list_pattern",
+        "identifier [ '(' pattern { ',' pattern } ')' ]",
+        "tuple_pattern",
         "array_pattern",
     )
-    def patterns(self, p):
+    def pattern(self, p):
         return
 
-    @_(
-        "'[' patterns ',' SPREAD identifier ']'",
-        "'[' patterns ',' SPREAD identifier ',' patterns ']'",
-        "'[' SPREAD identifier ',' patterns ']'",
-        "'[' patterns ']'",
-        "'[' ']'",
-    )
+    @_("'[' { pattern ',' } [ SPREAD identifier { ',' pattern } ] ']'")
     def array_pattern(self, p):
         return
 
-    @_(
-        "'{' patterns ',' SPREAD identifier '}'",
-        "'{' patterns '}'",
-        "'{' '}'",
-    )
-    def list_pattern(self, p):
+    @_("'{' { pattern ',' } [ SPREAD identifier { ',' pattern } ] '}'")
+    def tuple_pattern(self, p):
         return
 
-    @_("callee '(' arguments ')'")
+    @_("'[' [ expr ] { ',' expr } ']'")
+    def array(self, p):
+        return
+
+    @_("'{' [ expr ] { ',' expr } '}'")
+    def tuple(self, p):
+        return
+
+    @_("callee '(' [ expr ]  { ',' expr } ')'")
     def call(self, p):
-        return
-
-    @_("expr", "arguments ',' arguments")
-    def arguments(self, p):
         return
 
     @_("identifier")

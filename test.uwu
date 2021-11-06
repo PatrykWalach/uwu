@@ -10,13 +10,18 @@ struct User {
   %number age
 }
 
-# array
-[:ok, err]
-# list
-{:ok, err}
-
 # variable
 x = 1
+
+
+# array
+[ None, Some(12) ]
+
+
+# tuple
+{ None, Some(12) }
+y = { Some(32), Some(1), Some(3) }
+x = { Some(32), ...y }
 
 
 # do
@@ -26,7 +31,7 @@ y = do
   z / 2
 end
 
-z = %Option<%number> do None end
+z = %Option<number> do None end
 
 # if else
 k = if z > 1 do
@@ -49,10 +54,10 @@ end
  
 
 # case
-def length(list) do
-  case list of
-    { head, ...tail } do 1 + length(tail) end
-    {} do 0 end
+def length(array) do
+  case array of
+    [ head, ...tail ] do 1 + length(tail) end
+    [] do 0 end
   end
 end
 
@@ -72,10 +77,10 @@ def merge_sort(array) do
 end
 
 def merge(left, right) do
-  case left, right of
-    [], right do right end
-    left, [] do left end
-    [l_head, ...l_rest], [r_head, ...r_rest] do
+  case {left, right} of
+    {[], right} do right end
+    {left, []} do left end
+    {[l_head, ...l_rest], [r_head, ...r_rest]} do
       if r_head < l_head do
         [r_head, ...merge([l_head, ...l_rest], r_rest)]
       else
