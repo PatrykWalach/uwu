@@ -17,11 +17,27 @@ class UwuLexer(Lexer):
         SPREAD,
         CONCAT,
         ELIF,
-        COMMENT,
         INT_DIV,
-        NEWLINE,
+        ENUM,
+        STRUCT,TYPE_IDENTIFIER
     }
-    literals = {"=", ".", "[", "]", ",", "{", "}", "(", ")", "%", "+", "-", ">", "<"}
+    literals = {
+        "=",
+        ".",
+        "[",
+        "]",
+        ",",
+        "{",
+        "}",
+        "(",
+        ")",
+        ":",
+        "+",
+        "-",
+        ">",
+        "<",
+        "*","/"
+    }
     DEF = r"def"
     DO = r"do"
     END = r"end"
@@ -29,17 +45,22 @@ class UwuLexer(Lexer):
     ELSE = r"else"
     ELIF = r"elif"
     CASE = r"case"
+    ENUM = r"enum"
+    STRUCT = r"struct"
     OF = r"of"
     SPREAD = r"\.{3}"
     STRING = r"'[^(\\')]*?'"
     NUMBER = r"\d+"
-    IDENTIFIER = r"\w+"
+    IDENTIFIER = r"[a-z_]\w*"
+    TYPE_IDENTIFIER = r"[A-Z]\w*"
     CONCAT = r"\+{2}"
     INT_DIV = r"/{2}"
-    COMMENT = r"#.*\n"
+    ignore_comment = r"#.*\n"
+
+    ignore = ' \t'
 
     @_(r"\n+")
-    def NEWLINE(self, t):
+    def ignore_newline(self, t):
         self.lineno += len(t.value)
 
 
@@ -60,6 +81,13 @@ class UwuParser(Parser):
     def expressions(self, p):
         return
 
+    precedence = (
+        ("left", CONCAT),
+        ("left", "+", "-"),
+        ("left", "*", "/", INT_DIV),
+        ("right", "UMINUS"),
+    )
+
     @_(
         "do",
         "identifier",
@@ -72,6 +100,10 @@ class UwuParser(Parser):
         "binary_expr",
         "array",
         "tuple",
+        "'-' expr %prec UMINUS",
+        "'(' expr ')'",
+        "struct",
+        "enum",
     )
     def expr(self, p):
         return
@@ -81,31 +113,43 @@ class UwuParser(Parser):
         "expr '+' expr",
         "expr '-' expr",
         "expr '/' expr",
+        "expr '*' expr",
         "expr INT_DIV expr",
-        "'(' binary_expr ')'",
     )
     def binary_expr(self, p):
         return
 
     @_(
-        "[ type ] DO expressions END",
+        "DO [ type ] expressions END",
     )
     def do(self, p):
         return
 
-    @_("DEF IDENTIFIER '(' params ')' do")
+    @_("DEF identifier '(' [ param ] { ',' param } ')' [ type ] do")
     def _def(self, p):
         return
 
-    @_("'%' IDENTIFIER [ '<' IDENTIFIER { ',' IDENTIFIER } '>' ]")
+    @_("':' type_identifier [ '<' identifier { ',' identifier } '>' ]")
     def type(self, p):
         return
 
-    @_("[ param ] { ',' param }")
-    def params(self, p):
+    @_(
+        "STRUCT type_identifier [ '<' identifier { ',' identifier } '>' ] '{' { identifier type } '}'"
+    )
+    def struct(self, p):
         return
 
-    @_("[ type ] identifier")
+    @_(
+        "ENUM type_identifier [ '<' identifier { ',' identifier } '>' ] '{' { enum_key } '}'"
+    )
+    def enum(self, p):
+        return
+
+    @_("identifier [ '(' identifier { ',' identifier } ')' ]")
+    def enum_key(self, p):
+        return
+
+    @_("identifier [ type ]")
     def param(self, p):
         return
 
@@ -126,7 +170,7 @@ class UwuParser(Parser):
         return
 
     @_(
-        "identifier [ '(' pattern { ',' pattern } ')' ]",
+        "enum_pattern",
         "tuple_pattern",
         "array_pattern",
     )
@@ -137,6 +181,10 @@ class UwuParser(Parser):
     def array_pattern(self, p):
         return
 
+    @_("type_identifier [ '(' pattern { ',' pattern } ')' ]")
+    def enum_pattern(self, p):
+        return
+    
     @_("'{' { pattern ',' } [ SPREAD identifier { ',' pattern } ] '}'")
     def tuple_pattern(self, p):
         return
@@ -161,7 +209,11 @@ class UwuParser(Parser):
     def identifier(self, p):
         return
 
-    @_("identifier '=' expr")
+    @_("TYPE_IDENTIFIER")
+    def type_identifier(self, p):
+        return
+
+    @_("identifier [ type ] '=' expr")
     def variable_declaration(self, p):
         return
 
@@ -209,13 +261,7 @@ if __name__ == "__main__":
     lexer = UwuLexer()
     parser = UwuParser()
 
-    observer = Observer()
-    observer.schedule(Handler(), path=sys.argv[1], recursive=False)
-    observer.start()
+    with open("test.uwu", "r") as f:
+        data = f.read()
 
-    try:
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        observer.stop()
-    observer.join()
+    ast = parser.parse(lexer.tokenize(data))

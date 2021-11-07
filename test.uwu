@@ -1,17 +1,20 @@
             
 # type
-enum Option<value> = None
-                   | Some(value)
+enum Option<value> {
+  None
+  Some(value)
+}
 
 # struct
 struct User {
-  %string name
-  %string email
-  %number age
+  name: string
+  email: string
+  age: number
 }
 
 # variable
 x = 1
+x: Option<number> = None
 
 
 # array
@@ -31,7 +34,9 @@ y = do
   z / 2
 end
 
-z = %Option<number> do None end
+z = do: Option<number>
+ None
+end
 
 # if else
 k = if z > 1 do
@@ -42,13 +47,11 @@ end
 
 
 # function declaration
-
-# lambda
 def zero() do
   0
 end
 
-def get_email(%User user) %string do
+def get_email(user: User): string do
   user.email
 end   
  
