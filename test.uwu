@@ -24,7 +24,6 @@ x: Option<number> = None
 # tuple
 { None, Some(12) }
 y = { Some(32), Some(1), Some(3) }
-x = { Some(32), ...y }
 
 
 # do
@@ -119,4 +118,10 @@ end
 # function call
 map(Some(1), square)
 map(None, square)
-     
+
+# TODO
+# function type
+# tuple, array spread
+# y = { Some(32), Some(1), Some(3) }
+# x = { Some(32), ...y }
+# generic functions

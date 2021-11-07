@@ -19,7 +19,8 @@ class UwuLexer(Lexer):
         ELIF,
         INT_DIV,
         ENUM,
-        STRUCT,TYPE_IDENTIFIER
+        STRUCT,
+        TYPE_IDENTIFIER,
     }
     literals = {
         "=",
@@ -36,7 +37,8 @@ class UwuLexer(Lexer):
         "-",
         ">",
         "<",
-        "*","/"
+        "*",
+        "/",
     }
     DEF = r"def"
     DO = r"do"
@@ -57,7 +59,7 @@ class UwuLexer(Lexer):
     INT_DIV = r"/{2}"
     ignore_comment = r"#.*\n"
 
-    ignore = ' \t'
+    ignore = " \t"
 
     @_(r"\n+")
     def ignore_newline(self, t):
@@ -73,12 +75,12 @@ class UwuParser(Parser):
     tokens = UwuLexer.tokens
     debugfile = "parser.out"
 
-    @_("expressions")
+    @_("{ _program }")
     def program(self, p):
         return
 
-    @_("{ expr }")
-    def expressions(self, p):
+    @_("expr", "struct", "enum")
+    def _program(self, p):
         return
 
     precedence = (
@@ -102,8 +104,6 @@ class UwuParser(Parser):
         "tuple",
         "'-' expr %prec UMINUS",
         "'(' expr ')'",
-        "struct",
-        "enum",
     )
     def expr(self, p):
         return
@@ -120,7 +120,7 @@ class UwuParser(Parser):
         return
 
     @_(
-        "DO [ type ] expressions END",
+        "DO [ type ] { expr } END",
     )
     def do(self, p):
         return
@@ -153,11 +153,11 @@ class UwuParser(Parser):
     def param(self, p):
         return
 
-    @_("IF expr DO expressions { _elif } [ ELSE expressions ] END")
+    @_("IF expr DO { expr } { _elif } [ ELSE { expr } ] END")
     def _if(self, p):
         return
 
-    @_("ELIF expr DO expressions")
+    @_("ELIF expr DO { expr }")
     def _elif(self, p):
         return
 
@@ -184,7 +184,7 @@ class UwuParser(Parser):
     @_("type_identifier [ '(' pattern { ',' pattern } ')' ]")
     def enum_pattern(self, p):
         return
-    
+
     @_("'{' { pattern ',' } [ SPREAD identifier { ',' pattern } ] '}'")
     def tuple_pattern(self, p):
         return
