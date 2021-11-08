@@ -1,6 +1,30 @@
+from __future__ import annotations
+
 from sly import Parser, Lexer
+import functools
+import json
+import operator
+import random
+from functools import partial, reduce, wraps
+from itertools import product
+from typing import Any, Callable, Generic, TypeAlias, TypeVar, Union
+
 import dataclasses
 
+A = TypeVar('A')
+B = TypeVar('B')
+C = TypeVar('C')
+D = TypeVar('D')
+E = TypeVar('E')
+F = TypeVar('F')
+G = TypeVar('G')
+H = TypeVar('H')
+I = TypeVar('I')
+J = TypeVar('J')
+K = TypeVar('K')
+L = TypeVar('L')
+M = TypeVar('M')
+R = TypeVar('R')
 
 class UwuLexer(Lexer):
     tokens = {
@@ -20,7 +44,8 @@ class UwuLexer(Lexer):
         INT_DIV,
         ENUM,
         STRUCT,
-        TYPE_IDENTIFIER,
+        NEWLINE,
+        THEN,
     }
     literals = {
         "=",
@@ -39,6 +64,7 @@ class UwuLexer(Lexer):
         "<",
         "*",
         "/",
+        ".",
     }
     DEF = r"def"
     DO = r"do"
@@ -48,13 +74,13 @@ class UwuLexer(Lexer):
     ELIF = r"elif"
     CASE = r"case"
     ENUM = r"enum"
+    THEN = r"then"
     STRUCT = r"struct"
     OF = r"of"
     SPREAD = r"\.{3}"
     STRING = r"'[^(\\')]*?'"
     NUMBER = r"\d+"
-    IDENTIFIER = r"[a-z_]\w*"
-    TYPE_IDENTIFIER = r"[A-Z]\w*"
+    IDENTIFIER = r"\w+"
     CONCAT = r"\+{2}"
     INT_DIV = r"/{2}"
     ignore_comment = r"#.*\n"
@@ -62,26 +88,34 @@ class UwuLexer(Lexer):
     ignore = " \t"
 
     @_(r"\n+")
-    def ignore_newline(self, t):
+    def NEWLINE(self, t):
         self.lineno += len(t.value)
 
 
-@dataclasses.dataclass(frozen=True)
-class Do:
-    pass
+from typing import Callable, Protocol
 
 
 class UwuParser(Parser):
     tokens = UwuLexer.tokens
     debugfile = "parser.out"
 
-    @_("{ _program }")
+    @_("[ body ] { NEWLINE body }")
     def program(self, p):
-        return
+        match p.body0, p.body1:
+            case None,[]:
+                return Program([],None)
+            case body0, []:
+                return Program([body0],None)
+            case None,[*body]:
+                return Program(body,None)
+            case body0, [*body1]:
+                return Program([body0,*body1],None)
+            case _:
+                raise TypeError(f"{p.body0=} {p.body1=}")
 
     @_("expr", "struct", "enum")
-    def _program(self, p):
-        return
+    def body(self, p):
+        return p[0]
 
     precedence = (
         ("left", CONCAT),
@@ -102,11 +136,16 @@ class UwuParser(Parser):
         "binary_expr",
         "array",
         "tuple",
+    )
+    def expr(self, p):
+        return p[0]
+
+    @_(
         "'-' expr %prec UMINUS",
         "'(' expr ')'",
     )
     def expr(self, p):
-        return
+        return p[1]
 
     @_(
         "expr CONCAT expr",
@@ -120,28 +159,32 @@ class UwuParser(Parser):
         return
 
     @_(
-        "DO [ type ] { expr } END",
+        "DO [ type ] [ expr ] { NEWLINE expr } END",
     )
     def do(self, p):
-        return
+        match p.expr0, p.expr1:
+            case None,[*body]:
+                return Do(body,type=p.type)
+            case body0, [*body1]:
+                return Do([*body1, body0],type=p.type)
+            case _:
+                raise TypeError(f"{p.expr0=} {p.expr1=}")
 
     @_("DEF identifier '(' [ param ] { ',' param } ')' [ type ] do")
     def _def(self, p):
         return
 
-    @_("':' type_identifier [ '<' identifier { ',' identifier } '>' ]")
+    @_("':' identifier [ '<' identifier { ',' identifier } '>' ]")
     def type(self, p):
-        return
+        return Type(p.identifier0)
 
     @_(
-        "STRUCT type_identifier [ '<' identifier { ',' identifier } '>' ] '{' { identifier type } '}'"
+        "STRUCT identifier [ '<' identifier { ',' identifier } '>' ] '{' { identifier type } '}'"
     )
     def struct(self, p):
         return
 
-    @_(
-        "ENUM type_identifier [ '<' identifier { ',' identifier } '>' ] '{' { enum_key } '}'"
-    )
+    @_("ENUM identifier [ '<' identifier { ',' identifier } '>' ] '{' { enum_key } '}'")
     def enum(self, p):
         return
 
@@ -153,11 +196,15 @@ class UwuParser(Parser):
     def param(self, p):
         return
 
-    @_("IF expr DO { expr } { _elif } [ ELSE { expr } ] END")
+    @_("IF expr THEN [ type ] [ expr ] { NEWLINE expr } { _elif } [ _else ] END")
     def _if(self, p):
         return
 
-    @_("ELIF expr DO { expr }")
+    @_("ELSE [ expr ] { NEWLINE expr }")
+    def _else(self, p):
+        return
+
+    @_("ELIF expr THEN [ type ] [ expr ] { NEWLINE expr }")
     def _elif(self, p):
         return
 
@@ -181,7 +228,7 @@ class UwuParser(Parser):
     def array_pattern(self, p):
         return
 
-    @_("type_identifier [ '(' pattern { ',' pattern } ')' ]")
+    @_("identifier [ '(' pattern { ',' pattern } ')' ]")
     def enum_pattern(self, p):
         return
 
@@ -207,19 +254,19 @@ class UwuParser(Parser):
 
     @_("IDENTIFIER")
     def identifier(self, p):
-        return
-
-    @_("TYPE_IDENTIFIER")
-    def type_identifier(self, p):
-        return
+        return Identifier(p.IDENTIFIER)
 
     @_("identifier [ type ] '=' expr")
     def variable_declaration(self, p):
-        return
+        return VariableDeclaration(id=p.identifier,init=p.expr, type=p.type)
 
-    @_("STRING", "NUMBER")
+    @_("NUMBER")
     def literal(self, p):
-        return
+        return Literal(p.NUMBER, float(p.NUMBER),Type(Identifier('number')))
+
+    @_("STRING")
+    def literal(self, p):
+        return Literal(p.STRING,p.STRING,Type(Identifier('string')))
 
 
 import json
@@ -256,6 +303,104 @@ class Handler(FileSystemEventHandler):
 
 
 import json
+
+
+
+
+@dataclasses.dataclass(frozen=True)
+class VariableDeclaration(Generic[A,B]):
+    id: A
+    init:B 
+    type: Type|None
+    start:int|None=None
+    end: int|None=None
+
+@dataclasses.dataclass(frozen=True)
+class Do(Generic[C]):
+    body: list[C]
+    type: Type|None
+    start:int|None=None
+    end: int|None=None
+@dataclasses.dataclass(frozen=True)
+class Literal:
+    raw: str
+    value: float|str
+    type: Type
+    start:int|None=None
+    end: int|None=None
+
+@dataclasses.dataclass(frozen=True)
+class Program(Generic[D]):
+    body: list[D]
+    type: Type|None
+    start:int|None=None
+    end: int|None=None
+
+@dataclasses.dataclass(frozen=True)
+class Type(Generic[E]):
+    raw: E
+    @property
+    def type(self):
+        return self
+
+    start:int|None=None
+    end: int|None=None
+
+@dataclasses.dataclass(frozen=True)
+class Identifier:
+    name: str
+    start:int|None=None
+    end: int|None=None
+
+
+AstNode: TypeAlias = Program[R]| Do[R]|VariableDeclaration[R,R]|Type[R]
+AstTree: TypeAlias = AstNode['AstTree']
+
+
+scope = []
+
+
+def type_visitor(node:AstTree) -> Type:
+    print(f"{node=}")
+    match node:
+        case VariableDeclaration(id, init,None):
+            return type_visitor(init)
+        case VariableDeclaration(id, init,type) if type!=None:
+            if type_visitor(init) != type:
+                raise VisitorTypeException(f"{type_visitor(init)=} {type=} type mismatch")
+            return type
+        case Literal(type=type):
+            return type
+        case Program([],type) if type!=None:
+            return type
+        case Program(body,type):
+            body = [type_visitor(b) for b in body]
+            return body[-1]
+
+        case Do([],None):
+            raise VisitorTypeException(f"Type annotation missing for DO block line {node.start=} {node.end=}")
+        case Do([],type):
+            raise VisitorTypeException(f"Body missing for DO block line {node.start=} {node.end=}")
+        case Do(body,None):
+            scope.append({})
+            body = [type_visitor(b) for b in body]
+            scope.pop()
+            return body[-1]
+
+        case Do(body,type) if type!=None:
+            scope.append({})
+            body = [type_visitor(b) for b in body]
+
+            if body[-1] != type:
+                raise VisitorTypeException(f"Type missmatch for DO block {body[-1]=} {type=} line {node.start=} {node.end=}")
+            
+            scope.pop()
+            return type
+        case _:
+            raise TypeError(f"{node=}")
+
+class VisitorTypeException(Exception):
+    pass
 
 if __name__ == "__main__":
     lexer = UwuLexer()

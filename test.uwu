@@ -78,18 +78,18 @@ def merge_sort(array) do
   end
 end
 
-def merge(left, right) do
-  case {left, right} of
-    {[], right} do right end
-    {left, []} do left end
-    {[l_head, ...l_rest], [r_head, ...r_rest]} do
-      if r_head < l_head do
-        [r_head, ...merge([l_head, ...l_rest], r_rest)]
-      else
-        [l_head, ...merge(l_rest, [r_head, ...r_rest])]
-      end
-    end
-end
+# def merge(left, right) do
+#   case {left, right} of
+#     {[], right} do right end
+#     {left, []} do left end
+#     {[l_head, ...l_rest], [r_head, ...r_rest]} do
+#       if r_head < l_head do
+#         [r_head, ...merge([l_head, ...l_rest], r_rest)]
+#       else
+#         [l_head, ...merge(l_rest, [r_head, ...r_rest])]
+#       end
+#     end
+# end
 
 def findLast(array, predicate) do
   case array of
