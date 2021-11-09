@@ -13,7 +13,7 @@ Rule 9     body -> enum
 Rule 10    body -> struct
 Rule 11    body -> expr
 Rule 12    expr -> ( expr )
-Rule 13    expr -> - expr  [precedence=right, level=4]
+Rule 13    expr -> - expr  [precedence=right, level=5]
 Rule 14    expr -> tuple
 Rule 15    expr -> array
 Rule 16    expr -> binary_expr
@@ -206,7 +206,7 @@ Rule 202   _45_items -> _45_item
 Rule 203   _45_item -> , expr
 Rule 204   callee -> identifier
 Rule 205   identifier -> IDENTIFIER
-Rule 206   variable_declaration -> identifier _46_optional = expr
+Rule 206   variable_declaration -> identifier _46_optional = expr  [precedence=left, level=4]
 Rule 207   _46_optional -> type
 Rule 208   _46_optional -> <empty>
 Rule 209   literal -> STRING
@@ -2722,12 +2722,12 @@ state 91
     (28) binary_expr -> expr . - expr
     (29) binary_expr -> expr . + expr
     (30) binary_expr -> expr . CONCAT expr
-  ! shift/reduce conflict for INT_DIV resolved as shift
-  ! shift/reduce conflict for * resolved as shift
-  ! shift/reduce conflict for / resolved as shift
-  ! shift/reduce conflict for - resolved as shift
-  ! shift/reduce conflict for + resolved as shift
-  ! shift/reduce conflict for CONCAT resolved as shift
+    INT_DIV         reduce using rule 206 (variable_declaration -> identifier _46_optional = expr .)
+    *               reduce using rule 206 (variable_declaration -> identifier _46_optional = expr .)
+    /               reduce using rule 206 (variable_declaration -> identifier _46_optional = expr .)
+    -               reduce using rule 206 (variable_declaration -> identifier _46_optional = expr .)
+    +               reduce using rule 206 (variable_declaration -> identifier _46_optional = expr .)
+    CONCAT          reduce using rule 206 (variable_declaration -> identifier _46_optional = expr .)
     NEWLINE         reduce using rule 206 (variable_declaration -> identifier _46_optional = expr .)
     $end            reduce using rule 206 (variable_declaration -> identifier _46_optional = expr .)
     ,               reduce using rule 206 (variable_declaration -> identifier _46_optional = expr .)
@@ -2739,12 +2739,6 @@ state 91
     END             reduce using rule 206 (variable_declaration -> identifier _46_optional = expr .)
     ELIF            reduce using rule 206 (variable_declaration -> identifier _46_optional = expr .)
     ELSE            reduce using rule 206 (variable_declaration -> identifier _46_optional = expr .)
-    INT_DIV         shift and go to state 36
-    *               shift and go to state 37
-    /               shift and go to state 38
-    -               shift and go to state 39
-    +               shift and go to state 40
-    CONCAT          shift and go to state 41
 
 
 state 92
@@ -5333,13 +5327,3 @@ state 279
     -               shift and go to state 39
     +               shift and go to state 40
     CONCAT          shift and go to state 41
-
-
-Conflicts:
-
-shift/reduce conflict for INT_DIV in state 91 resolved as shift
-shift/reduce conflict for * in state 91 resolved as shift
-shift/reduce conflict for / in state 91 resolved as shift
-shift/reduce conflict for - in state 91 resolved as shift
-shift/reduce conflict for + in state 91 resolved as shift
-shift/reduce conflict for CONCAT in state 91 resolved as shift

@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+def _(fn: str, *args: str) -> Callable[[R], R]:
+    raise Exception
+
 from sly import Parser, Lexer
 import functools
 import json
@@ -7,24 +10,14 @@ import operator
 import random
 from functools import partial, reduce, wraps
 from itertools import product
-from typing import Any, Callable, Generic, TypeAlias, TypeVar, Union
-
+from typing import Any, Callable, Generic, TypeAlias, TypeVar, Union, overload
+import typed
+import terms
+from typed_terms import TypedDo,TypedIdentifier,TypedLiteral,TypedProgram,TypedVariableDeclaration
 import dataclasses
-
 A = TypeVar('A')
-B = TypeVar('B')
-C = TypeVar('C')
-D = TypeVar('D')
-E = TypeVar('E')
-F = TypeVar('F')
-G = TypeVar('G')
-H = TypeVar('H')
-I = TypeVar('I')
-J = TypeVar('J')
-K = TypeVar('K')
-L = TypeVar('L')
-M = TypeVar('M')
 R = TypeVar('R')
+
 
 class UwuLexer(Lexer):
     tokens = {
@@ -80,11 +73,11 @@ class UwuLexer(Lexer):
     SPREAD = r"\.{3}"
     STRING = r"'[^(\\')]*?'"
     NUMBER = r"\d+"
-    IDENTIFIER = r"\w+"
     CONCAT = r"\+{2}"
     INT_DIV = r"/{2}"
-    ignore_comment = r"#.*\n"
+    IDENTIFIER = r"\w+"
 
+    ignore_comment = r"\#.*"
     ignore = " \t"
 
     @_(r"\n+")
@@ -95,6 +88,11 @@ class UwuLexer(Lexer):
 from typing import Callable, Protocol
 
 
+def concat(v: A|None, l1:list[A])->list[A]:
+    l0 = [] if v == None else [v]
+    
+    return l0 + l1
+import terms
 class UwuParser(Parser):
     tokens = UwuLexer.tokens
     debugfile = "parser.out"
@@ -102,14 +100,8 @@ class UwuParser(Parser):
     @_("[ body ] { NEWLINE body }")
     def program(self, p):
         match p.body0, p.body1:
-            case None,[]:
-                return Program([],None)
-            case body0, []:
-                return Program([body0],None)
-            case None,[*body]:
-                return Program(body,None)
             case body0, [*body1]:
-                return Program([body0,*body1],None)
+                return terms.Program(concat(body0, body1))
             case _:
                 raise TypeError(f"{p.body0=} {p.body1=}")
 
@@ -121,6 +113,7 @@ class UwuParser(Parser):
         ("left", CONCAT),
         ("left", "+", "-"),
         ("left", "*", "/", INT_DIV),
+        ('left','='),
         ("right", "UMINUS"),
     )
 
@@ -156,17 +149,17 @@ class UwuParser(Parser):
         "expr INT_DIV expr",
     )
     def binary_expr(self, p):
-        return
+        return terms.BinaryExpr(p[1],p[0], p[2])
 
     @_(
         "DO [ type ] [ expr ] { NEWLINE expr } END",
     )
     def do(self, p):
-        match p.expr0, p.expr1:
-            case None,[*body]:
-                return Do(body,type=p.type)
-            case body0, [*body1]:
-                return Do([*body1, body0],type=p.type)
+        match p.type, p.expr0, p.expr1:
+            case None, body0, [*body1]:
+                return terms.Do(concat(body0, body1))
+            case type, body0, [*body1]:
+                return TypedDo(concat(body0, body1), type)
             case _:
                 raise TypeError(f"{p.expr0=} {p.expr1=}")
 
@@ -176,7 +169,11 @@ class UwuParser(Parser):
 
     @_("':' identifier [ '<' identifier { ',' identifier } '>' ]")
     def type(self, p):
-        return Type(p.identifier0)
+        if p.identifier0.name == 'string':
+            return typed.string()
+        if p.identifier0.name == 'number':
+            return typed.number()
+        return typed.GenericType(p.identifier0.name,[])
 
     @_(
         "STRUCT identifier [ '<' identifier { ',' identifier } '>' ] '{' { identifier type } '}'"
@@ -254,19 +251,21 @@ class UwuParser(Parser):
 
     @_("IDENTIFIER")
     def identifier(self, p):
-        return Identifier(p.IDENTIFIER)
+        return terms.Identifier(p.IDENTIFIER)
 
     @_("identifier [ type ] '=' expr")
     def variable_declaration(self, p):
-        return VariableDeclaration(id=p.identifier,init=p.expr, type=p.type)
+        if p.type ==None:
+            return terms.VariableDeclaration(id=p.identifier,init=p.expr)
+        return TypedVariableDeclaration(id=p.identifier,init=p.expr, type=p.type)
 
     @_("NUMBER")
     def literal(self, p):
-        return Literal(p.NUMBER, float(p.NUMBER),Type(Identifier('number')))
+        return terms.Literal(p.NUMBER, float(p.NUMBER))
 
     @_("STRING")
     def literal(self, p):
-        return Literal(p.STRING,p.STRING,Type(Identifier('string')))
+        return terms.Literal(p.STRING,p.STRING)
 
 
 import json
@@ -307,100 +306,11 @@ import json
 
 
 
-@dataclasses.dataclass(frozen=True)
-class VariableDeclaration(Generic[A,B]):
-    id: A
-    init:B 
-    type: Type|None
-    start:int|None=None
-    end: int|None=None
-
-@dataclasses.dataclass(frozen=True)
-class Do(Generic[C]):
-    body: list[C]
-    type: Type|None
-    start:int|None=None
-    end: int|None=None
-@dataclasses.dataclass(frozen=True)
-class Literal:
-    raw: str
-    value: float|str
-    type: Type
-    start:int|None=None
-    end: int|None=None
-
-@dataclasses.dataclass(frozen=True)
-class Program(Generic[D]):
-    body: list[D]
-    type: Type|None
-    start:int|None=None
-    end: int|None=None
-
-@dataclasses.dataclass(frozen=True)
-class Type(Generic[E]):
-    raw: E
-    @property
-    def type(self):
-        return self
-
-    start:int|None=None
-    end: int|None=None
-
-@dataclasses.dataclass(frozen=True)
-class Identifier:
-    name: str
-    start:int|None=None
-    end: int|None=None
-
-
-AstNode: TypeAlias = Program[R]| Do[R]|VariableDeclaration[R,R]|Type[R]
-AstTree: TypeAlias = AstNode['AstTree']
 
 
 scope = []
 
 
-def type_visitor(node:AstTree) -> Type:
-    print(f"{node=}")
-    match node:
-        case VariableDeclaration(id, init,None):
-            return type_visitor(init)
-        case VariableDeclaration(id, init,type) if type!=None:
-            if type_visitor(init) != type:
-                raise VisitorTypeException(f"{type_visitor(init)=} {type=} type mismatch")
-            return type
-        case Literal(type=type):
-            return type
-        case Program([],type) if type!=None:
-            return type
-        case Program(body,type):
-            body = [type_visitor(b) for b in body]
-            return body[-1]
-
-        case Do([],None):
-            raise VisitorTypeException(f"Type annotation missing for DO block line {node.start=} {node.end=}")
-        case Do([],type):
-            raise VisitorTypeException(f"Body missing for DO block line {node.start=} {node.end=}")
-        case Do(body,None):
-            scope.append({})
-            body = [type_visitor(b) for b in body]
-            scope.pop()
-            return body[-1]
-
-        case Do(body,type) if type!=None:
-            scope.append({})
-            body = [type_visitor(b) for b in body]
-
-            if body[-1] != type:
-                raise VisitorTypeException(f"Type missmatch for DO block {body[-1]=} {type=} line {node.start=} {node.end=}")
-            
-            scope.pop()
-            return type
-        case _:
-            raise TypeError(f"{node=}")
-
-class VisitorTypeException(Exception):
-    pass
 
 if __name__ == "__main__":
     lexer = UwuLexer()

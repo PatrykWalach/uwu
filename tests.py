@@ -1,16 +1,18 @@
+from typing import Generic
 import pytest
-from main import (
-    UwuParser,
-    UwuLexer,
-    Program,
-    Do,
-    VariableDeclaration,
-    Identifier,
-    Literal,
-    Type,
-    VisitorTypeException,
-    type_visitor,
+from main import UwuLexer, UwuParser
+
+from typed import Var, number, string
+from typed_terms import (
+    TypedProgram,
+    TypedDo,
+    TypedIdentifier,
+    TypedLiteral,
+    TypedVariableDeclaration,
 )
+from terms import BinaryExpr, Do, Identifier, Program, VariableDeclaration,Literal
+from Annotate import Annotate
+from constraint import collect
 
 
 @pytest.fixture
@@ -23,87 +25,100 @@ def lexer():
     return UwuLexer()
 
 
-def test_literal(parser, lexer):
-    program = parser.parse(
-        lexer.tokenize(
-            """
-            1
-            """
-        )
-    )
-    assert program == Program(
-        [Literal("1", 1, Type(Identifier("number")))],
-        None,
-    )
-    assert type_visitor(program) == Type(Identifier("number"))
+@pytest.mark.parametrize(
+    "program, ast, expected_type",
+    [
+        ("1", [Literal("1", 1)], number()),
+        (
+            "1+2*3",
+            [
+                BinaryExpr(
+                    "+",
+                    Literal("1", 1),
+                    BinaryExpr("*", Literal("2", 2), Literal("3", 3)),
+                )
+            ],
+            number()
+        ),
+        (
+            """do
+x = 1
+end""",
+            [
+                Do(
+                    [
+                        VariableDeclaration(
+                            Identifier("x"),
+                            Literal("1", 1),
+                        )
+                    ],
+                )
+            ],
+            number(),
+        ),
+    ],
+)
+def test_do(program, ast, expected_type, parser, lexer):
+    program = parser.parse(lexer.tokenize(program))
+    assert program == Program(ast)
+
+    typed_term = Annotate({})(program)
+    constraints = collect(typed_term)
+    subst = unify(constraints)
+
+    assert subst.apply_type(typed_term.type) == expected_type
 
 
-def test_do(parser, lexer):
-    program = parser.parse(
-        lexer.tokenize(
-            """
-do
-    x = 1
-end"""
-        )
-    )
-    assert program == Program(
-        [
-            Do(
-                [
-                    VariableDeclaration(
-                        Identifier("x"),
-                        Literal("1", 1, Type(Identifier("number"))),
-                        None,
-                    )
-                ],
-                None,
-            )
-        ],
-        None,
-    )
-    assert type_visitor(program) == Type(Identifier("number"))
+from Unifier import unify
 
 
-def test_variable_expection(parser, lexer):
-    program = parser.parse(lexer.tokenize("""x: string = 1"""))
-    assert program == Program(
-        [
-            VariableDeclaration(
-                Identifier("x"),
-                Literal("1", 1, Type(Identifier("number"))),
-                Type(Identifier("string")),
-            )
-        ],
-        None,
-    )
-    with pytest.raises(VisitorTypeException):
-        type_visitor(program)
-
-
-def test_do_expection(parser, lexer):
-    program = parser.parse(
-        lexer.tokenize(
-            """
-do: string
-    x = 1
-end"""
-        )
-    )
-    assert program == Program(
-        [
-            Do(
-                [
-                    VariableDeclaration(
-                        Identifier("x"),
-                        Literal("1", 1, Type(Identifier("number"))),
-                        None,
-                    )
-                ],
-                Type(Identifier("string")),
-            )
-        ],
-        None,
-    )
-    with pytest.raises(VisitorTypeException):
-        type_visitor(program)
+@pytest.mark.parametrize(
+    "program, ast",
+    [
+        (
+            """x: string = 134""",
+            [
+                TypedVariableDeclaration(
+                    Identifier("x"), Literal("134", 134), string()
+                )
+            ],
+        ),
+        (
+            """do: string
+            x = 1
+            end""",
+            [
+                TypedDo(
+                    [
+                        VariableDeclaration(
+                            Identifier("x"), Literal("1", 1)
+                        )
+                    ],
+                    string(),
+                )
+            ],
+        ),
+        # (
+        #     "do do x = 1 end\ny = x end",
+        #     [
+        #         Do(
+        #             [
+        #                 Do(
+        #                     [
+        #                         VariableDeclaration(
+        #                             Identifier("x"), TypedLiteral("1", 1, number())
+        #                         )
+        #                     ]
+        #                 ),
+        #                 VariableDeclaration(Identifier("y"), Identifier("x")),
+        #             ]
+        #         )
+        #     ],
+        # ),
+    ],
+)
+def test_do_expection(program, ast, parser, lexer):
+    program = parser.parse(lexer.tokenize(program))
+    assert program == Program(ast)
+    # with pytest.raises(VisitorTypeException):
+    #     type_visitor(program)
