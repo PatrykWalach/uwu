@@ -1,0 +1,10 @@
+{
+    "type": "Typed",
+    "ty": {
+        "type": 1
+    },
+    "node": {
+        "type": "Program",
+        "body": []
+    }
+}

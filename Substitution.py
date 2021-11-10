@@ -8,7 +8,7 @@ import functools
 
 
 class Substitution:
-    def __init__(self, solutions: dict[typed.Var, typed.Type]) -> None:
+    def __init__(self, solutions: dict[int, typed.Type]) -> None:
         self.solutions = solutions
 
     @staticmethod
@@ -16,7 +16,7 @@ class Substitution:
         return Substitution({})
     
     @staticmethod
-    def from_pair(tvar: typed.Var, ty:typed.Type) -> Substitution:
+    def from_pair(tvar: int, ty:typed.Type) -> Substitution:
         return Substitution({tvar: ty})
 
 
@@ -36,7 +36,7 @@ class Substitution:
 
     def compose(self,other:Substitution)->Substitution:
         substituted_this = map(other.apply_type,self.solutions.values())
-        substituted_this = zip(self.solutions.keys(),substituted_this,)
+        substituted_this = zip(self.solutions.keys(),substituted_this)
         substituted_this = dict(substituted_this)
         
         return Substitution(substituted_this | other.solutions)
@@ -50,8 +50,8 @@ def substitute(ty:typed.Type, tvar:typed. Var,replacement:typed.Type)->typed.Typ
             return ty
         case typed.GenericType(value,params):
             return typed.GenericType(
-                    substituteNext(value),
-                    [*map(substituteNext,params)]
+                    value,
+                   tuple(map(substituteNext,params))
                 )
         case typed.Var(tvar1) if (tvar == tvar1):
             return replacement
