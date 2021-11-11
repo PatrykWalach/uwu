@@ -19,7 +19,7 @@ from typing import Any, Callable, Generic, TypeAlias, TypeVar, Union, overload
 import typed
 import terms
 import dataclasses
-
+from Annotate import Annotate
 A = TypeVar("A")
 R = TypeVar("R")
 
@@ -109,7 +109,7 @@ class UwuParser(Parser):
 
     @_("[ stmt ] { NEWLINE stmt }")
     def program(self, p):
-        return terms.Program(concat(p.stmt0, p.stmt1))
+        return terms.EProgram(concat(p.stmt0, p.stmt1))
 
     @_("expr", "struct", "enum")
     def stmt(self, p):
@@ -155,28 +155,28 @@ class UwuParser(Parser):
         "expr INT_DIV expr",
     )
     def binary_expr(self, p):
-        return terms.BinaryExpr(p[1], p[0], p[2])
+        return terms.EBinaryExpr(p[1], p[0], p[2])
 
     @_(
         "DO [ ':' type ] [ expr ] { NEWLINE expr } END",
     )
     def do(self, p):
-        return terms.Do(concat(p.expr0, p.expr1), hint=p.type)
+        return terms.EDo(concat(p.expr0, p.expr1), hint=p.type)
 
     @_("DEF identifier '(' [ param ] { ',' param } ')' [ type ] do")
     def def_expr(self, p):
-        return terms.Def(
+        return terms.EDef(
             p.identifier, concat(p.param0, p.param1), body=p.do, hint=p.type
         )
 
     @_("identifier [ '<' type { ',' type } '>' ]")
     def type(self, p):
         if p.identifier.name == "string":
-            return typed.string()
+            return typed.TStr()
         if p.identifier.name == "number":
-            return typed.number()
+            return typed.TNum()
 
-        return typed.GenericType(p.identifier.name, tuple(concat(p.type0, p.type1)))
+        return typed.TGeneric(p.identifier.name, tuple(concat(p.type0, p.type1)))
 
     @_(
         "STRUCT identifier [ '<' identifier { ',' identifier } '>' ] '{' { identifier type } '}'"
@@ -194,7 +194,7 @@ class UwuParser(Parser):
 
     @_("identifier [ ':' type ]")
     def param(self, p):
-        return terms.Param(p.identifier, p.type)
+        return terms.EParam(p.identifier, p.type)
 
     @_("IF expr THEN [ ':' type ] [ expr ] { NEWLINE expr } { elif_expr } [ else_expr ] END")
     def if_expr(self, p):
@@ -210,11 +210,11 @@ class UwuParser(Parser):
 
     @_("CASE expr OF case { case } END")
     def case_of(self, p):
-        return terms.CaseOf(p.expr, concat(p.case0, p.case1))
+        return terms.ECaseOf(p.expr, concat(p.case0, p.case1))
 
     @_("pattern do")
     def case(self, p):
-        return terms.Case(p.pattern, p.do)
+        return terms.ECase(p.pattern, p.do)
 
     @_(
         
@@ -233,8 +233,8 @@ class UwuParser(Parser):
     def enum_pattern(self, p):
         print(f"{p[1]=}")
         if p[1] != None:
-            return terms.EnumPattern(p.identifier, [p[1][1]] + p[1][2])
-        return terms.EnumPattern(p.identifier, [])
+            return terms.EEnumPattern(p.identifier, [p[1][1]] + p[1][2])
+        return terms.EEnumPattern(p.identifier, [])
 
     # @_("'{' { pattern ',' } [ SPREAD identifier { ',' pattern } ] '}'")
     # def tuple_pattern(self, p):
@@ -250,7 +250,7 @@ class UwuParser(Parser):
 
     @_("callee '(' [ expr ]  { ',' expr } ')'")
     def call(self, p):
-        return terms.Call(p.callee, concat(p.expr0, p.expr1))
+        return terms.ECall(p.callee, concat(p.expr0, p.expr1))
 
     @_("identifier")
     def callee(self, p):
@@ -258,19 +258,19 @@ class UwuParser(Parser):
 
     @_("IDENTIFIER")
     def identifier(self, p):
-        return terms.Identifier(p.IDENTIFIER)
+        return terms.EIdentifier(p.IDENTIFIER)
 
     @_("identifier [ ':' type ] '=' expr")
     def variable_declaration(self, p):
-        return terms.VariableDeclaration(id=p.identifier, init=p.expr, hint=p.type)
+        return terms.EVariableDeclaration(id=p.identifier, init=p.expr, hint=p.type)
 
     @_("NUMBER")
     def literal(self, p):
-        return terms.Literal(p.NUMBER, float(p.NUMBER))
+        return terms.ELiteral(p.NUMBER, float(p.NUMBER))
 
     @_("STRING")
     def literal(self, p):
-        return terms.Literal(p.STRING, p.STRING)
+        return terms.ELiteral(p.STRING, p.STRING[1:-1])
 
 
 import json
@@ -311,6 +311,11 @@ import json
 
 scope = []
 
+def infer(program):
+    typed_term = Annotate({})(program)
+    constraints = collect(typed_term)
+    subst = unify(constraints)
+    return subst.apply_type(typed_term.ty)
 
 if __name__ == "__main__":
     lexer = UwuLexer()
@@ -321,21 +326,15 @@ if __name__ == "__main__":
 
     ast = parser.parse(
         lexer.tokenize(
-            "def x(k) do k() end\ndef n() do 12 end\ny:number=x(n)\nx"
+            "def id(a) do a(1,2) end"
         )
     )
 
     if ast != None:
 
-        from Annotate import Annotate
-
-        annotated = Annotate({})(ast)
         with open("ast.json", "w") as f:
-            json.dump(annotated, f, cls=AstEncoder, indent=4)
+            json.dump(infer(ast), f, cls=AstEncoder, indent=4)
+        
+        
 
 
-def infer(program):
-    typed_term = Annotate({})(program)
-    constraints = collect(typed_term)
-    subst = unify(constraints)
-    return subst.apply_type(typed_term.ty)

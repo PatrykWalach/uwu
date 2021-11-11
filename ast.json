@@ -1,10 +1,36 @@
 {
-    "type": "Typed",
-    "ty": {
-        "type": 1
-    },
-    "node": {
-        "type": "Program",
-        "body": []
-    }
+    "type": "TGeneric",
+    "id": "Def",
+    "params": [
+        {
+            "type": "TGeneric",
+            "id": "Params",
+            "params": [
+                {
+                    "type": "TGeneric",
+                    "id": "Def",
+                    "params": [
+                        {
+                            "type": "TGeneric",
+                            "id": "Params",
+                            "params": [
+                                {
+                                    "type": "TNum"
+                                },
+                                {
+                                    "type": "TNum"
+                                }
+                            ]
+                        },
+                        {
+                            "type": 5
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": 5
+        }
+    ]
 }

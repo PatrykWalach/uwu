@@ -3,21 +3,24 @@ import dataclasses
 from typing import TypeAlias
 
 @dataclasses.dataclass(frozen=True)
-class number:
+class TNum:
     pass
 
 @dataclasses.dataclass(frozen=True)
-class string:
+class TStr:
     pass
 
 @dataclasses.dataclass(frozen=True)
-class GenericType:
+class TGeneric:
     id: str
     params: tuple[Type,...]
 
+def TDef(params: tuple[Type,...], ret: Type) -> Type:
+    return TGeneric('Def', (TGeneric('Params', params),ret))
+
 @dataclasses.dataclass(frozen=True)
-class Var:
+class TVar:
     type: int
 
-Type:TypeAlias = number|string|Var |GenericType
+Type:TypeAlias = TNum|TStr|TVar |TGeneric
 

@@ -1,11 +1,15 @@
+import json
+import Annotate
+from Unifier import unify
 from typing import Generic
 import pytest
-from main import UwuLexer, UwuParser, infer
+from algorithm_w import Scheme, type_infer
+from main import AstEncoder, UwuLexer, UwuParser, infer
 
 import typed
 
 from terms import *
-from Annotate import Annotate
+
 from constraint import collect
 
 
@@ -20,77 +24,57 @@ def lexer():
 
 
 @pytest.mark.parametrize(
-    "program, ast, expected_type",
+    "program, ast",
     [
-        ("1", [Literal("1", 1)], typed.number()),
+        ("1", [ELiteral("1", 1)]),
+        ("'abc'", [ELiteral("'abc'", "abc")]),
         (
             "1+2*3",
             [
-                BinaryExpr(
+                EBinaryExpr(
                     "+",
-                    Literal("1", 1),
-                    BinaryExpr("*", Literal("2", 2), Literal("3", 3)),
+                    ELiteral("1", 1),
+                    EBinaryExpr("*", ELiteral("2", 2), ELiteral("3", 3)),
                 )
             ],
-            typed.number(),
+    
         ),
         (
             "x=(2+3)*4",
             [
-                VariableDeclaration(
-                    Identifier("x"),
-                    BinaryExpr(
+                EVariableDeclaration(
+                    EIdentifier("x"),
+                    EBinaryExpr(
                         "*",
-                        BinaryExpr("+", Literal("2", 2), Literal("3", 3)),
-                        Literal("4", 4),
+                        EBinaryExpr("+", ELiteral("2", 2), ELiteral("3", 3)),
+                        ELiteral("4", 4),
                     ),
                 )
             ],
-            typed.number(),
+ 
         ),
         # ("enum Option<value>{None\nSome(value)}\nx:Option<number>=None"),
         (
             "def x(k) do k() end\ndef n() do 12 end\ny:number=x(n)\nx",
             [
-                Def(
-                    Identifier("x"),
-                    [Param(Identifier("k"))],
-                    Do([Call(Identifier("k"), [])]),
+                EDef(
+                    EIdentifier("x"),
+                    [EParam(EIdentifier("k"))],
+                    EDo([ECall(EIdentifier("k"), [])]),
                 ),
-                Def(
-                    Identifier("n"),
+                EDef(
+                    EIdentifier("n"),
                     [],
-                    Do([Literal("12", 12)]),
+                    EDo([ELiteral("12", 12)]),
                 ),
-                VariableDeclaration(
-                    Identifier("y"),
-                    Call(Identifier("x"), [Identifier("n")]),
-                    hint=typed.number(),
+                EVariableDeclaration(
+                    EIdentifier("y"),
+                    ECall(EIdentifier("x"), [EIdentifier("n")]),
+                    hint=typed.TNum(),
                 ),
-                Identifier("x"),
-            ],
-            typed.GenericType(
-                "Def",
-                (
-                    typed.GenericType(
-                        "Params",
-                        (
-                            typed.GenericType(
-                                "Def",
-                                (
-                                    typed.GenericType("Params", tuple()),
-                                    typed.Var(0),
-                                ),
-                            ),
-                        ),
-                    ),
-                    typed.Var(0),
-                ),
-            ),
+                EIdentifier("x"),
+            ]
         ),
-        # f: Def<Var(0), Def<Def<Var(0), Var(1)>, Var(1)>>
-        #
-        # x = f(12, n -> n + 1)
         # (
         #     "def flatMap(v, fn) do case v of None do None end Some(value) do fn(value) end end end",
         #     [
@@ -115,65 +99,60 @@ def lexer():
         #             ),
         #         )
         #     ],
-        #     typed.GenericType(
-        #         "Def",
-        #         (
-        #             typed.GenericType(
-        #                 "Params",
-        #                 (
-        #                     typed.GenericType("Option", (typed.Var(0),)),
-        #                     typed.GenericType(
-        #                         "Def",
-        #                         (
-        #                             typed.GenericType("Params", (typed.Var(0),)),
-        #                             typed.GenericType("Option", (typed.Var(1),)),
-        #                         ),
-        #                     ),
-        #                 ),
-        #             ),
-        #             typed.GenericType("Option", (typed.Var(1),)),
-        #         ),
-        #     ),
-        # ),
         (
             "x=y=2+3",
             [
-                VariableDeclaration(
-                    Identifier("x"),
-                    VariableDeclaration(
-                        Identifier("y"),
-                        BinaryExpr("+", Literal("2", 2), Literal("3", 3)),
+                EVariableDeclaration(
+                    EIdentifier("x"),
+                    EVariableDeclaration(
+                        EIdentifier("y"),
+                        EBinaryExpr("+", ELiteral("2", 2), ELiteral("3", 3)),
                     ),
                 )
             ],
-            typed.number(),
+          
         ),
         (
             "do x = 1 end",
             [
-                Do(
+                EDo(
                     [
-                        VariableDeclaration(
-                            Identifier("x"),
-                            Literal("1", 1),
+                        EVariableDeclaration(
+                            EIdentifier("x"),
+                            ELiteral("1", 1),
                         )
                     ],
                 )
             ],
-            typed.number(),
+         
         ),
+        ("id('abc')", [
+            ECall(EIdentifier("id"), [ELiteral("'abc'", "abc")])
+        ], ),
+        ("id(1)", [
+            ECall(EIdentifier("id"), [ELiteral("1", 1)])
+        ], ),
+        ("id('12')\nid(1)", [ECall(EIdentifier("id"), [ELiteral("'12'", "12")]),
+                             ECall(EIdentifier("id"), [ELiteral("1", 1)])
+                             ], ),
+        ("id(1+2)", [
+            ECall(EIdentifier("id"), [
+                EBinaryExpr("+", ELiteral("1", 1), ELiteral("2", 2))
+            ])
+        ], ),
         (
             "def add(a, b) do a + b end",
             [
-                Def(
-                    identifier=Identifier(name="add"),
-                    params=[Param(Identifier("a")), Param(Identifier("b"))],
-                    body=Do(
+                EDef(
+                    identifier=EIdentifier(name="add"),
+                    params=[EParam(EIdentifier("a")),
+                            EParam(EIdentifier("b"))],
+                    body=EDo(
                         body=[
-                            BinaryExpr(
+                            EBinaryExpr(
                                 op="+",
-                                left=Identifier(name="a"),
-                                right=Identifier(name="b"),
+                                left=EIdentifier(name="a"),
+                                right=EIdentifier(name="b"),
                             )
                         ],
                         hint=None,
@@ -181,28 +160,74 @@ def lexer():
                     hint=None,
                 ),
             ],
-            typed.GenericType(  # Def<Params<number, number>, number>
+        ),
+    ],
+)
+def test_parser(program, ast, parser, lexer):
+    program = parser.parse(lexer.tokenize(program))
+    assert program == EProgram(ast)
+
+
+@pytest.mark.parametrize(
+    "program, expected_type",
+    [
+        ("1", typed.TNum()),
+        (
+            "1+2*3",
+            typed.TNum(),
+        ),
+        (
+            "x=(2+3)*4",
+            typed.TNum(),
+        ),
+        # ("enum Option<value>{None\nSome(value)}\nx:Option<number>=None"),
+        (
+            "def id2(a) do a end\nid2('12')",
+            typed.TStr()
+        ),
+        (
+            "def fun() do fun() + 1 end\nfun()",
+            typed.TNum()
+        ),
+        (
+            "def id2(a) do a end\nid2(1)\nid2('12')",
+            typed.TStr()
+        ),
+        (
+            "def id2(a) do a end\nid2('12')\nid2(1)",
+            typed.TNum()
+        ),
+        #     "def flatMap(v, fn) do case v of None do None end Some(value) do fn(value) end end end",
+        (
+            "x=y=2+3",
+            typed.TNum(),
+        ),
+        (
+            "do x = 1 end",
+            typed.TNum(),
+        ),
+        ("id('12')", typed.TStr()),
+        ("id(1)",  typed.TNum()),
+        ("id('12')\nid(1)",  typed.TNum()),
+        ("id(1+2)",  typed.TNum()),
+        (
+            "def add(a, b) do a + b end",
+            typed.TGeneric(  # Def<Params<number, number>, number>
                 "Def",
                 (
-                    typed.GenericType("Params", (typed.number(), typed.number())),
-                    typed.number(),
+                    typed.TGeneric("Params", (typed.TNum(), typed.TNum())),
+                    typed.TNum(),
                 ),
             ),
         ),
     ],
 )
-def test_do(program, ast, expected_type, parser, lexer):
+def test_infer(program, expected_type, parser, lexer):
     program = parser.parse(lexer.tokenize(program))
-    assert program == Program(ast)
 
-
-
-    assert infer(program) == expected_type
-
-
-
-
-from Unifier import unify
+    assert type_infer({
+        'id': Scheme([-1], typed.TGeneric('Def', (typed.TGeneric('Params', (typed.TVar(-1),)), typed.TVar(-1)))),
+    }, program) == expected_type
 
 
 @pytest.mark.parametrize(
@@ -210,14 +235,15 @@ from Unifier import unify
     [
         (
             """x: string = 134""",
-            [VariableDeclaration(Identifier("x"), Literal("134", 134), typed.string())],
+            [EVariableDeclaration(EIdentifier(
+                "x"), ELiteral("134", 134), typed.TStr())],
         ),
         (
             "do: string x = 1 end",
             [
-                Do(
-                    [VariableDeclaration(Identifier("x"), Literal("1", 1))],
-                    typed.string(),
+                EDo(
+                    [EVariableDeclaration(EIdentifier("x"), ELiteral("1", 1))],
+                    typed.TStr(),
                 )
             ],
         ),
@@ -242,6 +268,6 @@ from Unifier import unify
 )
 def test_do_expection(program, ast, parser, lexer):
     program = parser.parse(lexer.tokenize(program))
-    assert program == Program(ast)
+    assert program == EProgram(ast)
     # with pytest.raises(VisitorTypeException):
     #     type_visitor(program)

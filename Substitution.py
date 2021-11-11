@@ -42,20 +42,20 @@ class Substitution:
         return Substitution(substituted_this | other.solutions)
 
 
-def substitute(ty:typed.Type, tvar:typed. Var,replacement:typed.Type)->typed.Type:
+def substitute(ty:typed.Type, tvar:int,replacement:typed.Type)->typed.Type:
     substituteNext =functools.partial(substitute,tvar=tvar,replacement=replacement)
 
     match ty:
-        case typed.number()|typed.string():
+        case typed.TNum()|typed.TStr():
             return ty
-        case typed.GenericType(value,params):
-            return typed.GenericType(
+        case typed.TGeneric(value,params):
+            return typed.TGeneric(
                     value,
                    tuple(map(substituteNext,params))
                 )
-        case typed.Var(tvar1) if (tvar == tvar1):
+        case typed.TVar(tvar1) if (tvar == tvar1):
             return replacement
-        case typed.Var(tvar1):
+        case typed.TVar(tvar1):
                 return ty
         case _:
             raise TypeError(f"Cannot substitute {tvar} with {replacement} in {ty}")

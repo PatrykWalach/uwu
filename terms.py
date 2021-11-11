@@ -24,43 +24,43 @@ T = typing.TypeVar("T")
 
 
 @dataclasses.dataclass(frozen=True)
-class VariableDeclaration(typing.Generic[C, D]):
+class EVariableDeclaration(typing.Generic[C, D]):
     id: C
     init: D
     hint: typed.Type | None = None
 
 
 @dataclasses.dataclass(frozen=True)
-class Do(typing.Generic[A]):
+class EDo(typing.Generic[A]):
     body: list[A]
     hint: typed.Type | None = None
 
 
 @dataclasses.dataclass(frozen=True)
-class Program(typing.Generic[B]):
+class EProgram(typing.Generic[B]):
     body: list[B]
 
 
 @dataclasses.dataclass(frozen=True)
-class BinaryExpr(typing.Generic[E, F]):
+class EBinaryExpr(typing.Generic[E, F]):
     op: typing.Literal["++", "+", "-", "/", "*", "//"]
     left: E
     right: F
 
 
 @dataclasses.dataclass(frozen=True)
-class Identifier:
+class EIdentifier:
     name: str
 
 
 @dataclasses.dataclass(frozen=True)
-class Literal:
+class ELiteral:
     raw: str
     value: float | str
 
 
 @dataclasses.dataclass(frozen=True)
-class Def(typing.Generic[G, H, I]):
+class EDef(typing.Generic[G, H, I]):
     identifier: G
     params: list[H]
     body: I
@@ -68,46 +68,46 @@ class Def(typing.Generic[G, H, I]):
 
 
 @dataclasses.dataclass(frozen=True)
-class Param(typing.Generic[J]):
+class EParam(typing.Generic[J]):
     identifier: J
     hint: typing.Type | None = None
 
 
 @dataclasses.dataclass(frozen=True)
-class CaseOf(typing.Generic[K, L]):
+class ECaseOf(typing.Generic[K, L]):
     of: K
     cases: list[L]
 
 
 @dataclasses.dataclass(frozen=True)
-class Case(typing.Generic[M, N]):
+class ECase(typing.Generic[M, N]):
     pattern: M
     body: N
 
 
 @dataclasses.dataclass(frozen=True)
-class EnumPattern(typing.Generic[O, P]):
+class EEnumPattern(typing.Generic[O, P]):
     id: O
     patterns: P
 
 
 @dataclasses.dataclass(frozen=True)
-class Call(typing.Generic[R, S]):
+class ECall(typing.Generic[R, S]):
     callee: R
     arguments: list[S]
 
 
 AstNode: typing.TypeAlias = (
-    Program[R]
-    | Do[R]
-    | VariableDeclaration[R, R]
-    | Identifier
-    | BinaryExpr[R, R]
-    | Literal
-    | Def[R, R, R]
-    | Param[R]
-    | CaseOf[R, R]
-    | Case[R, R]
-    | Call[R, R]
+    EProgram[R]
+    | EDo[R]
+    | EVariableDeclaration[R, R]
+    | EIdentifier
+    | EBinaryExpr[R, R]
+    | ELiteral
+    | EDef[R, R, R]
+    | EParam[R]
+    | ECaseOf[R, R]
+    | ECase[R, R]
+    | ECall[R, R]
 )
 AstTree: typing.TypeAlias = AstNode["AstTree"]
