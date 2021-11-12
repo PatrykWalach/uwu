@@ -1,16 +1,15 @@
 import json
-import Annotate
-from Unifier import unify
+
 from typing import Generic
 import pytest
 from algorithm_w import Scheme, type_infer
-from main import AstEncoder, UwuLexer, UwuParser, infer
+from main import AstEncoder, UwuLexer, UwuParser
 
 import typed
 
 from terms import *
 
-from constraint import collect
+
 
 
 @pytest.fixture

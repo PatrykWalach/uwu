@@ -1,7 +1,5 @@
 from __future__ import annotations
-from Unifier import unify
 
-from constraint import collect
 
 
 def _(fn: str, *args: str) -> Callable[[R], R]:
@@ -19,7 +17,6 @@ from typing import Any, Callable, Generic, TypeAlias, TypeVar, Union, overload
 import typed
 import terms
 import dataclasses
-from Annotate import Annotate
 A = TypeVar("A")
 R = TypeVar("R")
 
@@ -309,13 +306,9 @@ class Handler(FileSystemEventHandler):
 import json
 
 
-scope = []
 
-def infer(program):
-    typed_term = Annotate({})(program)
-    constraints = collect(typed_term)
-    subst = unify(constraints)
-    return subst.apply_type(typed_term.ty)
+
+
 
 if __name__ == "__main__":
     lexer = UwuLexer()

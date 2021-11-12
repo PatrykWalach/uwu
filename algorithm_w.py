@@ -2,7 +2,6 @@ from __future__ import annotations
 import itertools
 import dataclasses
 import functools
-import Annotate
 import typing
 import terms
 import typed
