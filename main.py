@@ -1,22 +1,27 @@
 from __future__ import annotations
-
+from watchdog.events import FileSystemEventHandler
+from watchdog.observers import Observer
+import time
+import sys
+from typing import Callable, Protocol
+import dataclasses
+from algorithm_j import Context, Scheme, fresh_ty_var, type_infer
+import terms
+import typed
+from typing import Any, Callable, Generic, TypeAlias, TypeVar, Union, overload
+from itertools import product
+from functools import partial, reduce, wraps
+import random
+import operator
+import json
+import functools
+from sly import Parser, Lexer
 
 
 def _(fn: str, *args: str) -> Callable[[R], R]:
     raise Exception
 
 
-from sly import Parser, Lexer
-import functools
-import json
-import operator
-import random
-from functools import partial, reduce, wraps
-from itertools import product
-from typing import Any, Callable, Generic, TypeAlias, TypeVar, Union, overload
-import typed
-import terms
-import dataclasses
 A = TypeVar("A")
 R = TypeVar("R")
 
@@ -41,6 +46,7 @@ class UwuLexer(Lexer):
         STRUCT,
         NEWLINE,
         THEN,
+        # NOT_LESS,  NOT_MORE
     }
     literals = {
         "=",
@@ -61,23 +67,25 @@ class UwuLexer(Lexer):
         "/",
         "."
     }
-    DEF = r"def"
-    DO = r"do"
-    END = r"end"
-    IF = r"if"
-    ELSE = r"else"
-    ELIF = r"elif"
-    CASE = r"case"
-    ENUM = r"enum"
-    THEN = r"then"
-    STRUCT = r"struct"
-    OF = r"of"
     SPREAD = r"\.{3}"
     STRING = r"'[^(\\')]*?'"
     NUMBER = r"\d+"
     CONCAT = r"\+{2}"
+    # NOT_LESS = r">="
+    # NOT_MORE = r"<="
     INT_DIV = r"/{2}"
     IDENTIFIER = r"\w+"
+    IDENTIFIER["def"] = DEF
+    IDENTIFIER["do"] = DO
+    IDENTIFIER["end"] = END
+    IDENTIFIER["if"] = IF
+    IDENTIFIER["else"] = ELSE
+    IDENTIFIER["elif"] = ELIF
+    IDENTIFIER["case"] = CASE
+    IDENTIFIER["enum"] = ENUM
+    IDENTIFIER["then"] = THEN
+    IDENTIFIER["struct"] = STRUCT
+    IDENTIFIER["of"] = OF
 
     ignore_comment = r"\#.*"
     ignore = " \t"
@@ -88,16 +96,10 @@ class UwuLexer(Lexer):
         return t
 
 
-from typing import Callable, Protocol
-
-
 def concat(v: A | None, l1: list[A]) -> list[A]:
     l0 = [] if v == None else [v]
 
     return l0 + l1
-
-
-import terms
 
 
 class UwuParser(Parser):
@@ -117,18 +119,21 @@ class UwuParser(Parser):
         ("left", CONCAT),
         ("left", "+", "-"),
         ("left", "*", "/", INT_DIV),
+        ("left", "<", ">"
+         # , NOT_LESS, NOT_MORE
+         ),
         ("right", "UMINUS"),
     )
 
     @_(
         "do",
-        "identifier",
         "literal",
         "def_expr",
         "if_expr",
         "call",
         "case_of",
         "variable_declaration",
+        "identifier",
         "binary_expr",
         "array",
         "tuple",
@@ -149,6 +154,10 @@ class UwuParser(Parser):
         "expr '-' expr",
         "expr '/' expr",
         "expr '*' expr",
+        "expr '<' expr",
+        "expr '>' expr",
+        # "expr NOT_LESS expr",
+        # "expr NOT_MORE expr",
         "expr INT_DIV expr",
     )
     def binary_expr(self, p):
@@ -160,7 +169,13 @@ class UwuParser(Parser):
     def do(self, p):
         return terms.EDo(concat(p.expr0, p.expr1), hint=p.type)
 
-    @_("DEF identifier '(' [ param ] { ',' param } ')' [ type ] do")
+    @_(
+        "[ expr ] { NEWLINE expr }",
+    )
+    def block_statement(self, p):
+        return terms.EBlockStatement(concat(p.expr0, p.expr1))
+
+    @_("DEF identifier '(' [ param ] { ',' param } ')' [ ':' type ] do")
     def def_expr(self, p):
         return terms.EDef(
             p.identifier, concat(p.param0, p.param1), body=p.do, hint=p.type
@@ -173,37 +188,43 @@ class UwuParser(Parser):
         if p.identifier.name == "number":
             return typed.TNum()
 
-        return typed.TGeneric(p.identifier.name, tuple(concat(p.type0, p.type1)))
+        return typed.TGeneric(p.identifier.name, concat(p[1][1], p[1][2]))
 
     @_(
-        "STRUCT identifier [ '<' identifier { ',' identifier } '>' ] '{' { identifier type } '}'"
+        "STRUCT identifier [ '<' identifier { ',' identifier } '>' ] '{' { identifier ':' type } '}'"
     )
     def struct(self, p):
-        return NotImplemented
+        raise NotImplemented
 
     @_("ENUM identifier [ '<' identifier { ',' identifier } '>' ] '{' { enum_key } '}'")
     def enum(self, p):
-        return NotImplemented
+        raise NotImplemented
 
     @_("identifier [ '(' identifier { ',' identifier } ')' ]")
     def enum_key(self, p):
-        return NotImplemented
+        raise NotImplemented
 
     @_("identifier [ ':' type ]")
     def param(self, p):
         return terms.EParam(p.identifier, p.type)
 
-    @_("IF expr THEN [ ':' type ] [ expr ] { NEWLINE expr } { elif_expr } [ else_expr ] END")
+    @_("IF expr THEN [ ':' type ] block_statement [ or_else ] END")
     def if_expr(self, p):
-        return NotImplemented
+        return terms.EIf(p.expr,
+                         then=p.block_statement,
+                         or_else=p.or_else,
+                         hint=p.type)
 
-    @_("ELSE [ expr ] { NEWLINE expr }")
-    def else_expr(self, p):
-        return NotImplemented
+    @_("ELSE block_statement")
+    def or_else(self, p):
+        return p.block_statement
 
-    @_("ELIF expr THEN [ ':' type ] [ expr ] { NEWLINE expr }")
-    def elif_expr(self, p):
-        return NotImplemented
+    @_("ELIF expr THEN block_statement [ or_else ]")
+    def or_else(self, p):
+        return terms.EIf(p.expr,
+                         then=p.block_statement,
+                         or_else=p.or_else,
+                         hint=p.type)
 
     @_("CASE expr OF case { case } END")
     def case_of(self, p):
@@ -214,7 +235,7 @@ class UwuParser(Parser):
         return terms.ECase(p.pattern, p.do)
 
     @_(
-        
+
         "enum_pattern",
         # "tuple_pattern",
         # "array_pattern",
@@ -235,15 +256,15 @@ class UwuParser(Parser):
 
     # @_("'{' { pattern ',' } [ SPREAD identifier { ',' pattern } ] '}'")
     # def tuple_pattern(self, p):
-    #     return NotImplemented
+    #     raise NotImplemented
 
     @_("'[' [ expr ] { ',' expr } ']'")
     def array(self, p):
-        return NotImplemented
+        raise NotImplemented
 
     @_("'{' [ expr ] { ',' expr } '}'")
     def tuple(self, p):
-        return NotImplemented
+        raise NotImplemented
 
     @_("callee '(' [ expr ]  { ',' expr } ')'")
     def call(self, p):
@@ -270,10 +291,6 @@ class UwuParser(Parser):
         return terms.ELiteral(p.STRING, p.STRING[1:-1])
 
 
-import json
-import dataclasses
-
-
 class AstEncoder(json.JSONEncoder):
     def default(self, obj):
         if dataclasses.is_dataclass(obj):
@@ -281,12 +298,6 @@ class AstEncoder(json.JSONEncoder):
                 field: getattr(obj, field) for field in obj.__dataclass_fields__
             }
         return json.JSONEncoder.default(self, obj)
-
-
-import sys
-import time
-from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler
 
 
 class Handler(FileSystemEventHandler):
@@ -303,11 +314,13 @@ class Handler(FileSystemEventHandler):
             json.dump(ast, f, cls=AstEncoder, indent=4)
 
 
-import json
+ty_some = typed.TVar(-2)
+ty_id = typed.TVar(-1)
 
-
-
-
+DEFAULT_CTX: Context = {
+    'None': Scheme([], typed.TGeneric('Option', [fresh_ty_var()])), 'Some': Scheme([ty_some.type],  typed.TDef([ty_some], typed.TGeneric('Option', [ty_some]))),
+    'id': Scheme([ty_id.type], typed.TDef([ty_id], ty_id)),
+}
 
 
 if __name__ == "__main__":
@@ -326,8 +339,5 @@ if __name__ == "__main__":
     if ast != None:
 
         with open("ast.json", "w") as f:
-            json.dump(infer(ast), f, cls=AstEncoder, indent=4)
-        
-        
-
-
+            json.dump(type_infer(DEFAULT_CTX, ast),
+                      f, cls=AstEncoder, indent=4)

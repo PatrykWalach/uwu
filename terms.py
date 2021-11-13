@@ -21,6 +21,11 @@ P = typing.TypeVar("P")
 R = typing.TypeVar("R")
 S = typing.TypeVar("S")
 T = typing.TypeVar("T")
+U = typing.TypeVar("U")
+W = typing.TypeVar("W")
+X = typing.TypeVar("X")
+Y = typing.TypeVar("Y")
+Z = typing.TypeVar("Z")
 
 
 @dataclasses.dataclass(frozen=True)
@@ -97,6 +102,19 @@ class ECall(typing.Generic[R, S]):
     arguments: list[S]
 
 
+@dataclasses.dataclass(frozen=True)
+class EIf(typing.Generic[T, U, W]):
+    test: T
+    then: U
+    or_else: W|None
+    hint: typing.Type | None = None
+
+
+@dataclasses.dataclass(frozen=True)
+class EBlockStatement(typing.Generic[X]):
+    body: list[X]
+
+
 AstNode: typing.TypeAlias = (
     EProgram[R]
     | EDo[R]
@@ -109,5 +127,7 @@ AstNode: typing.TypeAlias = (
     | ECaseOf[R, R]
     | ECase[R, R]
     | ECall[R, R]
+    | EIf[R, R, R]
+    | EBlockStatement[R]
 )
 AstTree: typing.TypeAlias = AstNode["AstTree"]

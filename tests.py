@@ -1,15 +1,14 @@
+from sly import lex
 import json
 
 from typing import Generic
 import pytest
-from algorithm_w import Scheme, type_infer
-from main import AstEncoder, UwuLexer, UwuParser
+from algorithm_j import Scheme, UnifyException, type_infer
+from main import DEFAULT_CTX, AstEncoder, UwuLexer, UwuParser
 
 import typed
 
 from terms import *
-
-
 
 
 @pytest.fixture
@@ -20,6 +19,35 @@ def parser():
 @pytest.fixture
 def lexer():
     return UwuLexer()
+
+
+def token(type, value, lineno, index):
+    t = lex.Token()
+    t.type = type
+    t.value = value
+    t.lineno = lineno
+    t.index = index
+
+    return t
+
+
+# @pytest.mark.parametrize(
+#     'program, expected_tokens', [
+#         ("x:Option<number>=None", [
+#          token('IDENTIFIER', value='x', lineno=1, index=0),
+#          token(type=':', value=':', lineno=1, index=1),
+#          token(type='IDENTIFIER', value='Option', lineno=1, index=2),
+#             token(type='<', value='<', lineno=1, index=8),
+#             token(type='IDENTIFIER', value='number', lineno=1, index=9),
+#             token(type='>', value='>', lineno=1, index=15),
+#             token(type='=', value='=', lineno=1, index=16),
+#             token(type='IDENTIFIER', value='None', lineno=1, index=17),
+
+#          ])
+#     ])
+# def test_tokenizer(program, expected_tokens, lexer):
+#     tokens = [*lexer.tokenize(program)]
+#     assert tokens == expected_tokens
 
 
 @pytest.mark.parametrize(
@@ -36,7 +64,7 @@ def lexer():
                     EBinaryExpr("*", ELiteral("2", 2), ELiteral("3", 3)),
                 )
             ],
-    
+
         ),
         (
             "x=(2+3)*4",
@@ -50,7 +78,7 @@ def lexer():
                     ),
                 )
             ],
- 
+
         ),
         # ("enum Option<value>{None\nSome(value)}\nx:Option<number>=None"),
         (
@@ -109,7 +137,7 @@ def lexer():
                     ),
                 )
             ],
-          
+
         ),
         (
             "do x = 1 end",
@@ -123,7 +151,7 @@ def lexer():
                     ],
                 )
             ],
-         
+
         ),
         ("id('abc')", [
             ECall(EIdentifier("id"), [ELiteral("'abc'", "abc")])
@@ -139,6 +167,10 @@ def lexer():
                 EBinaryExpr("+", ELiteral("1", 1), ELiteral("2", 2))
             ])
         ], ),
+        ("x:Option<number>=None", [
+            EVariableDeclaration(EIdentifier(
+                'x'), EIdentifier('None'), hint=typed.TGeneric('Option', [typed.TNum()]))
+        ]),
         (
             "def add(a, b) do a + b end",
             [
@@ -188,6 +220,7 @@ def test_parser(program, ast, parser, lexer):
             "def fun() do fun() + 1 end\nfun()",
             typed.TNum()
         ),
+        ('def fun() do: number 1 end\n fun()', typed.TNum()),
         (
             "def id2(a) do a end\nid2(1)\nid2('12')",
             typed.TStr()
@@ -208,65 +241,53 @@ def test_parser(program, ast, parser, lexer):
         ("id('12')", typed.TStr()),
         ("id(1)",  typed.TNum()),
         ("id('12')\nid(1)",  typed.TNum()),
+        ("x:Option<number>=None", typed.TGeneric('Option', [typed.TNum()])),
         ("id(1+2)",  typed.TNum()),
         (
             "def add(a, b) do a + b end",
             typed.TGeneric(  # Def<Params<number, number>, number>
                 "Def",
-                (
-                    typed.TGeneric("Params", (typed.TNum(), typed.TNum())),
+                [
+                    typed.TGeneric("Params", [typed.TNum(), typed.TNum()]),
                     typed.TNum(),
-                ),
+                ],
             ),
         ),
+        ("if 2 > 0 then: Option<number> None else None end",
+         typed.TGeneric('Option', [typed.TNum()])),
+        ("if 2 > 0 then 1 else 2 end", typed.TNum()),
+        ("if 2 > 0 then 1 end", typed.TGeneric('Option', [typed.TNum()])),
+        ("if 2 > 0 then Some(1) end", typed.TGeneric(
+            'Option', [typed.TGeneric('Option', [typed.TNum()])])),
     ],
 )
 def test_infer(program, expected_type, parser, lexer):
     program = parser.parse(lexer.tokenize(program))
 
-    assert type_infer({
-        'id': Scheme([-1], typed.TGeneric('Def', (typed.TGeneric('Params', (typed.TVar(-1),)), typed.TVar(-1)))),
-    }, program) == expected_type
+    assert type_infer(DEFAULT_CTX, program) == expected_type
 
 
 @pytest.mark.parametrize(
-    "program, ast",
+    "program",
     [
         (
-            """x: string = 134""",
-            [EVariableDeclaration(EIdentifier(
-                "x"), ELiteral("134", 134), typed.TStr())],
+            """x: string = 134"""
         ),
         (
-            "do: string x = 1 end",
-            [
-                EDo(
-                    [EVariableDeclaration(EIdentifier("x"), ELiteral("1", 1))],
-                    typed.TStr(),
-                )
-            ],
+            "do: string 1 end"
         ),
-        # (
-        #     "do do x = 1 end\ny = x end",
-        #     [
-        #         Do(
-        #             [
-        #                 Do(
-        #                     [
-        #                         VariableDeclaration(
-        #                             Identifier("x"), TypedLiteral("1", 1, typed.number())
-        #                         )
-        #                     ]
-        #                 ),
-        #                 VariableDeclaration(Identifier("y"), Identifier("x")),
-        #             ]
-        #         )
-        #     ],
-        # ),
+        (
+            "def fun(): string do 1 end"
+        ),
+        (
+            "if 2 > 0 then: number 1 else '12' end"
+        ),
+        (
+            "if 2 > 0 then: string 1 else 2 end"
+        ),
     ],
 )
-def test_do_expection(program, ast, parser, lexer):
+def test_do_expection(program, parser, lexer):
     program = parser.parse(lexer.tokenize(program))
-    assert program == EProgram(ast)
-    # with pytest.raises(VisitorTypeException):
-    #     type_visitor(program)
+    with pytest.raises(UnifyException):
+        type_infer(DEFAULT_CTX, program)
