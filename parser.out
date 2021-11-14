@@ -13,7 +13,7 @@ Rule 9     stmt -> enum
 Rule 10    stmt -> struct
 Rule 11    stmt -> expr
 Rule 12    expr -> ( expr )
-Rule 13    expr -> - expr  [precedence=right, level=6]
+Rule 13    expr -> - expr  [precedence=right, level=5]
 Rule 14    expr -> tuple
 Rule 15    expr -> array
 Rule 16    expr -> binary_expr
@@ -26,8 +26,8 @@ Rule 22    expr -> def_expr
 Rule 23    expr -> literal
 Rule 24    expr -> do
 Rule 25    binary_expr -> expr INT_DIV expr  [precedence=left, level=4]
-Rule 26    binary_expr -> expr > expr  [precedence=left, level=5]
-Rule 27    binary_expr -> expr < expr  [precedence=left, level=5]
+Rule 26    binary_expr -> expr > expr
+Rule 27    binary_expr -> expr < expr
 Rule 28    binary_expr -> expr * expr  [precedence=left, level=4]
 Rule 29    binary_expr -> expr / expr  [precedence=left, level=4]
 Rule 30    binary_expr -> expr - expr  [precedence=left, level=3]
@@ -62,7 +62,7 @@ Rule 58    _9_item -> , param
 Rule 59    _10_optional -> : type
 Rule 60    _10_optional -> <empty>
 Rule 61    type -> identifier _11_optional
-Rule 62    _11_optional -> < type _12_repeat >  [precedence=left, level=5]
+Rule 62    _11_optional -> < type _12_repeat >
 Rule 63    _12_repeat -> _12_items
 Rule 64    _12_repeat -> <empty>
 Rule 65    _12_items -> _12_items _12_item
@@ -70,7 +70,7 @@ Rule 66    _12_items -> _12_item
 Rule 67    _12_item -> , type
 Rule 68    _11_optional -> <empty>
 Rule 69    struct -> STRUCT identifier _13_optional { _15_repeat }
-Rule 70    _13_optional -> < identifier _14_repeat >  [precedence=left, level=5]
+Rule 70    _13_optional -> < identifier _14_repeat >
 Rule 71    _14_repeat -> _14_items
 Rule 72    _14_repeat -> <empty>
 Rule 73    _14_items -> _14_items _14_item
@@ -83,7 +83,7 @@ Rule 79    _15_items -> _15_items _15_item
 Rule 80    _15_items -> _15_item
 Rule 81    _15_item -> identifier : type
 Rule 82    enum -> ENUM identifier _16_optional { _18_repeat }
-Rule 83    _16_optional -> < identifier _17_repeat >  [precedence=left, level=5]
+Rule 83    _16_optional -> < identifier _17_repeat >
 Rule 84    _17_repeat -> _17_items
 Rule 85    _17_repeat -> <empty>
 Rule 86    _17_items -> _17_items _17_item
@@ -2207,6 +2207,8 @@ state 62
     (31) binary_expr -> expr . + expr
     (32) binary_expr -> expr . CONCAT expr
     INT_DIV         reduce using rule 25 (binary_expr -> expr INT_DIV expr .)
+    >               reduce using rule 25 (binary_expr -> expr INT_DIV expr .)
+    <               reduce using rule 25 (binary_expr -> expr INT_DIV expr .)
     *               reduce using rule 25 (binary_expr -> expr INT_DIV expr .)
     /               reduce using rule 25 (binary_expr -> expr INT_DIV expr .)
     -               reduce using rule 25 (binary_expr -> expr INT_DIV expr .)
@@ -2223,8 +2225,6 @@ state 62
     END             reduce using rule 25 (binary_expr -> expr INT_DIV expr .)
     ELIF            reduce using rule 25 (binary_expr -> expr INT_DIV expr .)
     ELSE            reduce using rule 25 (binary_expr -> expr INT_DIV expr .)
-    >               shift and go to state 37
-    <               shift and go to state 38
 
 
 state 63
@@ -2238,14 +2238,14 @@ state 63
     (30) binary_expr -> expr . - expr
     (31) binary_expr -> expr . + expr
     (32) binary_expr -> expr . CONCAT expr
-    INT_DIV         reduce using rule 26 (binary_expr -> expr > expr .)
-    >               reduce using rule 26 (binary_expr -> expr > expr .)
-    <               reduce using rule 26 (binary_expr -> expr > expr .)
-    *               reduce using rule 26 (binary_expr -> expr > expr .)
-    /               reduce using rule 26 (binary_expr -> expr > expr .)
-    -               reduce using rule 26 (binary_expr -> expr > expr .)
-    +               reduce using rule 26 (binary_expr -> expr > expr .)
-    CONCAT          reduce using rule 26 (binary_expr -> expr > expr .)
+  ! shift/reduce conflict for INT_DIV resolved as shift
+  ! shift/reduce conflict for > resolved as shift
+  ! shift/reduce conflict for < resolved as shift
+  ! shift/reduce conflict for * resolved as shift
+  ! shift/reduce conflict for / resolved as shift
+  ! shift/reduce conflict for - resolved as shift
+  ! shift/reduce conflict for + resolved as shift
+  ! shift/reduce conflict for CONCAT resolved as shift
     NEWLINE         reduce using rule 26 (binary_expr -> expr > expr .)
     $end            reduce using rule 26 (binary_expr -> expr > expr .)
     ,               reduce using rule 26 (binary_expr -> expr > expr .)
@@ -2257,6 +2257,14 @@ state 63
     END             reduce using rule 26 (binary_expr -> expr > expr .)
     ELIF            reduce using rule 26 (binary_expr -> expr > expr .)
     ELSE            reduce using rule 26 (binary_expr -> expr > expr .)
+    INT_DIV         shift and go to state 36
+    >               shift and go to state 37
+    <               shift and go to state 38
+    *               shift and go to state 39
+    /               shift and go to state 40
+    -               shift and go to state 41
+    +               shift and go to state 42
+    CONCAT          shift and go to state 43
 
 
 state 64
@@ -2270,14 +2278,14 @@ state 64
     (30) binary_expr -> expr . - expr
     (31) binary_expr -> expr . + expr
     (32) binary_expr -> expr . CONCAT expr
-    INT_DIV         reduce using rule 27 (binary_expr -> expr < expr .)
-    >               reduce using rule 27 (binary_expr -> expr < expr .)
-    <               reduce using rule 27 (binary_expr -> expr < expr .)
-    *               reduce using rule 27 (binary_expr -> expr < expr .)
-    /               reduce using rule 27 (binary_expr -> expr < expr .)
-    -               reduce using rule 27 (binary_expr -> expr < expr .)
-    +               reduce using rule 27 (binary_expr -> expr < expr .)
-    CONCAT          reduce using rule 27 (binary_expr -> expr < expr .)
+  ! shift/reduce conflict for INT_DIV resolved as shift
+  ! shift/reduce conflict for > resolved as shift
+  ! shift/reduce conflict for < resolved as shift
+  ! shift/reduce conflict for * resolved as shift
+  ! shift/reduce conflict for / resolved as shift
+  ! shift/reduce conflict for - resolved as shift
+  ! shift/reduce conflict for + resolved as shift
+  ! shift/reduce conflict for CONCAT resolved as shift
     NEWLINE         reduce using rule 27 (binary_expr -> expr < expr .)
     $end            reduce using rule 27 (binary_expr -> expr < expr .)
     ,               reduce using rule 27 (binary_expr -> expr < expr .)
@@ -2289,6 +2297,14 @@ state 64
     END             reduce using rule 27 (binary_expr -> expr < expr .)
     ELIF            reduce using rule 27 (binary_expr -> expr < expr .)
     ELSE            reduce using rule 27 (binary_expr -> expr < expr .)
+    INT_DIV         shift and go to state 36
+    >               shift and go to state 37
+    <               shift and go to state 38
+    *               shift and go to state 39
+    /               shift and go to state 40
+    -               shift and go to state 41
+    +               shift and go to state 42
+    CONCAT          shift and go to state 43
 
 
 state 65
@@ -2303,6 +2319,8 @@ state 65
     (31) binary_expr -> expr . + expr
     (32) binary_expr -> expr . CONCAT expr
     INT_DIV         reduce using rule 28 (binary_expr -> expr * expr .)
+    >               reduce using rule 28 (binary_expr -> expr * expr .)
+    <               reduce using rule 28 (binary_expr -> expr * expr .)
     *               reduce using rule 28 (binary_expr -> expr * expr .)
     /               reduce using rule 28 (binary_expr -> expr * expr .)
     -               reduce using rule 28 (binary_expr -> expr * expr .)
@@ -2319,8 +2337,6 @@ state 65
     END             reduce using rule 28 (binary_expr -> expr * expr .)
     ELIF            reduce using rule 28 (binary_expr -> expr * expr .)
     ELSE            reduce using rule 28 (binary_expr -> expr * expr .)
-    >               shift and go to state 37
-    <               shift and go to state 38
 
 
 state 66
@@ -2335,6 +2351,8 @@ state 66
     (31) binary_expr -> expr . + expr
     (32) binary_expr -> expr . CONCAT expr
     INT_DIV         reduce using rule 29 (binary_expr -> expr / expr .)
+    >               reduce using rule 29 (binary_expr -> expr / expr .)
+    <               reduce using rule 29 (binary_expr -> expr / expr .)
     *               reduce using rule 29 (binary_expr -> expr / expr .)
     /               reduce using rule 29 (binary_expr -> expr / expr .)
     -               reduce using rule 29 (binary_expr -> expr / expr .)
@@ -2351,8 +2369,6 @@ state 66
     END             reduce using rule 29 (binary_expr -> expr / expr .)
     ELIF            reduce using rule 29 (binary_expr -> expr / expr .)
     ELSE            reduce using rule 29 (binary_expr -> expr / expr .)
-    >               shift and go to state 37
-    <               shift and go to state 38
 
 
 state 67
@@ -2366,6 +2382,8 @@ state 67
     (30) binary_expr -> expr . - expr
     (31) binary_expr -> expr . + expr
     (32) binary_expr -> expr . CONCAT expr
+    >               reduce using rule 30 (binary_expr -> expr - expr .)
+    <               reduce using rule 30 (binary_expr -> expr - expr .)
     -               reduce using rule 30 (binary_expr -> expr - expr .)
     +               reduce using rule 30 (binary_expr -> expr - expr .)
     CONCAT          reduce using rule 30 (binary_expr -> expr - expr .)
@@ -2381,8 +2399,6 @@ state 67
     ELIF            reduce using rule 30 (binary_expr -> expr - expr .)
     ELSE            reduce using rule 30 (binary_expr -> expr - expr .)
     INT_DIV         shift and go to state 36
-    >               shift and go to state 37
-    <               shift and go to state 38
     *               shift and go to state 39
     /               shift and go to state 40
 
@@ -2398,6 +2414,8 @@ state 68
     (30) binary_expr -> expr . - expr
     (31) binary_expr -> expr . + expr
     (32) binary_expr -> expr . CONCAT expr
+    >               reduce using rule 31 (binary_expr -> expr + expr .)
+    <               reduce using rule 31 (binary_expr -> expr + expr .)
     -               reduce using rule 31 (binary_expr -> expr + expr .)
     +               reduce using rule 31 (binary_expr -> expr + expr .)
     CONCAT          reduce using rule 31 (binary_expr -> expr + expr .)
@@ -2413,8 +2431,6 @@ state 68
     ELIF            reduce using rule 31 (binary_expr -> expr + expr .)
     ELSE            reduce using rule 31 (binary_expr -> expr + expr .)
     INT_DIV         shift and go to state 36
-    >               shift and go to state 37
-    <               shift and go to state 38
     *               shift and go to state 39
     /               shift and go to state 40
 
@@ -2430,6 +2446,8 @@ state 69
     (30) binary_expr -> expr . - expr
     (31) binary_expr -> expr . + expr
     (32) binary_expr -> expr . CONCAT expr
+    >               reduce using rule 32 (binary_expr -> expr CONCAT expr .)
+    <               reduce using rule 32 (binary_expr -> expr CONCAT expr .)
     CONCAT          reduce using rule 32 (binary_expr -> expr CONCAT expr .)
     NEWLINE         reduce using rule 32 (binary_expr -> expr CONCAT expr .)
     $end            reduce using rule 32 (binary_expr -> expr CONCAT expr .)
@@ -2443,8 +2461,6 @@ state 69
     ELIF            reduce using rule 32 (binary_expr -> expr CONCAT expr .)
     ELSE            reduce using rule 32 (binary_expr -> expr CONCAT expr .)
     INT_DIV         shift and go to state 36
-    >               shift and go to state 37
-    <               shift and go to state 38
     *               shift and go to state 39
     /               shift and go to state 40
     -               shift and go to state 41
@@ -2962,6 +2978,8 @@ state 96
     (30) binary_expr -> expr . - expr
     (31) binary_expr -> expr . + expr
     (32) binary_expr -> expr . CONCAT expr
+    >               reduce using rule 157 (variable_declaration -> identifier _34_optional = expr .)
+    <               reduce using rule 157 (variable_declaration -> identifier _34_optional = expr .)
     NEWLINE         reduce using rule 157 (variable_declaration -> identifier _34_optional = expr .)
     $end            reduce using rule 157 (variable_declaration -> identifier _34_optional = expr .)
     ,               reduce using rule 157 (variable_declaration -> identifier _34_optional = expr .)
@@ -2974,8 +2992,6 @@ state 96
     ELIF            reduce using rule 157 (variable_declaration -> identifier _34_optional = expr .)
     ELSE            reduce using rule 157 (variable_declaration -> identifier _34_optional = expr .)
     INT_DIV         shift and go to state 36
-    >               shift and go to state 37
-    <               shift and go to state 38
     *               shift and go to state 39
     /               shift and go to state 40
     -               shift and go to state 41
@@ -4782,3 +4798,23 @@ state 228
 
     (112) _24_optional -> or_else .
     END             reduce using rule 112 (_24_optional -> or_else .)
+
+
+Conflicts:
+
+shift/reduce conflict for INT_DIV in state 63 resolved as shift
+shift/reduce conflict for > in state 63 resolved as shift
+shift/reduce conflict for < in state 63 resolved as shift
+shift/reduce conflict for * in state 63 resolved as shift
+shift/reduce conflict for / in state 63 resolved as shift
+shift/reduce conflict for - in state 63 resolved as shift
+shift/reduce conflict for + in state 63 resolved as shift
+shift/reduce conflict for CONCAT in state 63 resolved as shift
+shift/reduce conflict for INT_DIV in state 64 resolved as shift
+shift/reduce conflict for > in state 64 resolved as shift
+shift/reduce conflict for < in state 64 resolved as shift
+shift/reduce conflict for * in state 64 resolved as shift
+shift/reduce conflict for / in state 64 resolved as shift
+shift/reduce conflict for - in state 64 resolved as shift
+shift/reduce conflict for + in state 64 resolved as shift
+shift/reduce conflict for CONCAT in state 64 resolved as shift

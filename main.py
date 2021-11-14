@@ -46,7 +46,8 @@ class UwuLexer(Lexer):
         STRUCT,
         NEWLINE,
         THEN,
-        # NOT_LESS,  NOT_MORE
+        # NOT_LESS,
+        # NOT_MORE
     }
     literals = {
         "=",
@@ -116,12 +117,12 @@ class UwuParser(Parser):
 
     precedence = (
         ("left", "="),
+        ("left", "<", ">",
+        #  NOT_LESS, NOT_MORE
+         ),
         ("left", CONCAT),
         ("left", "+", "-"),
         ("left", "*", "/", INT_DIV),
-        ("left", "<", ">"
-         # , NOT_LESS, NOT_MORE
-         ),
         ("right", "UMINUS"),
     )
 
@@ -341,3 +342,4 @@ if __name__ == "__main__":
         with open("ast.json", "w") as f:
             json.dump(type_infer(DEFAULT_CTX, ast),
                       f, cls=AstEncoder, indent=4)
+
