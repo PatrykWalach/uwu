@@ -1,3 +1,4 @@
+from __future__ import annotations
 import dataclasses
 import typing
 import typed
@@ -29,28 +30,28 @@ Z = typing.TypeVar("Z")
 
 
 @dataclasses.dataclass(frozen=True)
-class EVariableDeclaration(typing.Generic[C, D]):
-    id: C
-    init: D
-    hint: typed.Type | None = None
+class EVariableDeclaration:
+    id: EIdentifier
+    init: Expr
+    hint: EHint | None = None
 
 
 @dataclasses.dataclass(frozen=True)
-class EDo(typing.Generic[A]):
-    body: list[A]
-    hint: typed.Type | None = None
+class EDo:
+    body: list[Expr]
+    hint: EHint | None = None
 
 
 @dataclasses.dataclass(frozen=True)
-class EProgram(typing.Generic[B]):
-    body: list[B]
+class EProgram:
+    body: list[Expr | EEnumDeclaration]
 
 
 @dataclasses.dataclass(frozen=True)
-class EBinaryExpr(typing.Generic[E, F]):
+class EBinaryExpr:
     op: typing.Literal["++", "+", "-", "/", "*", "//"]
-    left: E
-    right: F
+    left: Expr
+    right: Expr
 
 
 @dataclasses.dataclass(frozen=True)
@@ -65,69 +66,103 @@ class ELiteral:
 
 
 @dataclasses.dataclass(frozen=True)
-class EDef(typing.Generic[G, H, I]):
-    identifier: G
-    params: list[H]
-    body: I
-    hint: typing.Type | None = None
+class EDef:
+    identifier: EIdentifier
+    params: list[EParam]
+    body: EDo
+    hint: EHint | None = None
 
 
 @dataclasses.dataclass(frozen=True)
-class EParam(typing.Generic[J]):
-    identifier: J
-    hint: typing.Type | None = None
+class EParam:
+    identifier: EIdentifier
+    hint: EHint | None = None
 
 
 @dataclasses.dataclass(frozen=True)
-class ECaseOf(typing.Generic[K, L]):
-    of: K
-    cases: list[L]
+class ECaseOf:
+    of: Expr
+    cases: list[ECase]
 
 
 @dataclasses.dataclass(frozen=True)
-class ECase(typing.Generic[M, N]):
-    pattern: M
-    body: N
+class ECase:
+    pattern: EEnumPattern | EIdentifier
+    body: EDo
 
 
 @dataclasses.dataclass(frozen=True)
-class EEnumPattern(typing.Generic[O, P]):
-    id: O
-    patterns: P
+class EEnumPattern:
+    id: EIdentifier
+    patterns: list[EEnumPattern | EIdentifier]
 
 
 @dataclasses.dataclass(frozen=True)
-class ECall(typing.Generic[R, S]):
-    callee: R
-    arguments: list[S]
+class ECall:
+    callee: EIdentifier
+    arguments: list[Expr]
 
 
 @dataclasses.dataclass(frozen=True)
-class EIf(typing.Generic[T, U, W]):
-    test: T
-    then: U
-    or_else: W|None
-    hint: typing.Type | None = None
+class EIf:
+    test: Expr
+    then: EBlockStmt
+    or_else: EBlockStmt | EIf | None
+    hint: EHint | None = None
 
 
 @dataclasses.dataclass(frozen=True)
-class EBlockStatement(typing.Generic[X]):
-    body: list[X]
+class EBlockStmt:
+    body: list[Expr]
+
+
+@dataclasses.dataclass(frozen=True)
+class EHint:
+    id: EIdentifier
+    arguments: list[EHint]
+
+
+@dataclasses.dataclass(frozen=True)
+class EEnumDeclaration:
+    id: EIdentifier
+    generics: list[EIdentifier]
+    variants: list[EVariant]
+
+
+@dataclasses.dataclass(frozen=True)
+class EVariant:
+    id: EIdentifier
+    fields: EFieldsUnnamed
+
+
+@dataclasses.dataclass(frozen=True)
+class EFieldsUnnamed:
+    unnamed: list[EIdentifier]
 
 
 AstNode: typing.TypeAlias = (
-    EProgram[R]
-    | EDo[R]
-    | EVariableDeclaration[R, R]
+    EProgram
+    | EDo
+    | EVariableDeclaration
     | EIdentifier
-    | EBinaryExpr[R, R]
+    | EBinaryExpr
     | ELiteral
-    | EDef[R, R, R]
-    | EParam[R]
-    | ECaseOf[R, R]
-    | ECase[R, R]
-    | ECall[R, R]
-    | EIf[R, R, R]
-    | EBlockStatement[R]
+    | EDef
+    | EParam
+    | ECaseOf
+    | ECase
+    | ECall
+    | EIf
+    | EBlockStmt
+    | EEnumDeclaration
+    | EEnumPattern
+    | EFieldsUnnamed
+    | EHint
+    | EVariant
+
 )
-AstTree: typing.TypeAlias = AstNode["AstTree"]
+AstTree: typing.TypeAlias = AstNode
+
+Expr: typing.TypeAlias = EDo | ELiteral | EDef | EIf | ECall | ECaseOf | EVariableDeclaration | EIdentifier | EBinaryExpr
+
+# 'type_identifier',  "array", "tuple",

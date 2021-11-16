@@ -4,20 +4,6 @@ from typing import TypeAlias
 
 
 @dataclasses.dataclass(frozen=True)
-class TNum:
-
-    def __str__(self) -> str:
-        return type(self).__name__
-
-
-@dataclasses.dataclass(frozen=True)
-class TStr:
-
-    def __str__(self) -> str:
-        return type(self).__name__
-
-
-@dataclasses.dataclass(frozen=True)
 class TGeneric:
     id: str
     params: list[Type]
@@ -32,9 +18,21 @@ def TDef(params: list[Type], ret: Type) -> Type:
     return TGeneric('Def', [TGeneric('Params', params), ret])
 
 
+def TNum() -> Type:
+    return TGeneric('Num', [])
+
+
+def TStr() -> Type:
+    return TGeneric('Str', [])
+
+
+def TBool() -> Type:
+    return TGeneric('Bool', [])
+
+
 @dataclasses.dataclass(frozen=True)
 class TVar:
     type: int
 
 
-Type: TypeAlias = TNum | TStr | TVar | TGeneric
+Type: TypeAlias = TVar | TGeneric

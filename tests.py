@@ -33,12 +33,12 @@ def token(type, value, lineno, index):
 
 # @pytest.mark.parametrize(
 #     'program, expected_tokens', [
-#         ("x:Option<number>=None", [
+#         ("x:Option<Num>=None", [
 #          token('IDENTIFIER', value='x', lineno=1, index=0),
 #          token(type=':', value=':', lineno=1, index=1),
 #          token(type='IDENTIFIER', value='Option', lineno=1, index=2),
 #             token(type='<', value='<', lineno=1, index=8),
-#             token(type='IDENTIFIER', value='number', lineno=1, index=9),
+#             token(type='IDENTIFIER', value='Num', lineno=1, index=9),
 #             token(type='>', value='>', lineno=1, index=15),
 #             token(type='=', value='=', lineno=1, index=16),
 #             token(type='IDENTIFIER', value='None', lineno=1, index=17),
@@ -80,9 +80,9 @@ def token(type, value, lineno, index):
             ],
 
         ),
-        # ("enum Option<value>{None\nSome(value)}\nx:Option<number>=None"),
+        # ("enum Option<value>{None\nSome(value)}\nx:Option<Num>=None"),
         (
-            "def x(k) do k() end\ndef n() do 12 end\ny:number=x(n)\nx",
+            "def x(k) do k() end\ndef n() do 12 end\ny:Num=x(n)\nx",
             [
                 EDef(
                     EIdentifier("x"),
@@ -97,7 +97,7 @@ def token(type, value, lineno, index):
                 EVariableDeclaration(
                     EIdentifier("y"),
                     ECall(EIdentifier("x"), [EIdentifier("n")]),
-                    hint=typed.TNum(),
+                    hint=EHint(EIdentifier('Num'), []),
                 ),
                 EIdentifier("x"),
             ]
@@ -167,10 +167,12 @@ def token(type, value, lineno, index):
                 EBinaryExpr("+", ELiteral("1", 1), ELiteral("2", 2))
             ])
         ], ),
-        ("x:Option<number>=None", [
+        ("x:Option<Num>=None", [
             EVariableDeclaration(EIdentifier(
-                'x'), EIdentifier('None'), hint=typed.TGeneric('Option', [typed.TNum()]))
-        ]),
+                'x'), EIdentifier('None'),
+                hint=EHint(EIdentifier('Option'), [
+                           EHint(EIdentifier('Num'), [])])
+            )]),
         (
             "def add(a, b) do a + b end",
             [
@@ -199,7 +201,7 @@ def test_parser(program, ast, parser, lexer):
     assert program == EProgram(ast)
 
 
-@pytest.mark.parametrize(
+@ pytest.mark.parametrize(
     "program, expected_type",
     [
         ("1", typed.TNum()),
@@ -211,7 +213,7 @@ def test_parser(program, ast, parser, lexer):
             "x=(2+3)*4",
             typed.TNum(),
         ),
-        # ("enum Option<value>{None\nSome(value)}\nx:Option<number>=None"),
+        # ("enum Option<value>{None\nSome(value)}\nx:Option<Num>=None"),
         (
             "def id2(a) do a end\nid2('12')",
             typed.TStr()
@@ -220,7 +222,7 @@ def test_parser(program, ast, parser, lexer):
             "def fun() do fun() + 1 end\nfun()",
             typed.TNum()
         ),
-        ('def fun() do: number 1 end\n fun()', typed.TNum()),
+        ('def fun() do: Num 1 end\n fun()', typed.TNum()),
         (
             "def id2(a) do a end\nid2(1)\nid2('12')",
             typed.TStr()
@@ -241,19 +243,13 @@ def test_parser(program, ast, parser, lexer):
         ("id('12')", typed.TStr()),
         ("id(1)",  typed.TNum()),
         ("id('12')\nid(1)",  typed.TNum()),
-        ("x:Option<number>=None", typed.TGeneric('Option', [typed.TNum()])),
+        ("x:Option<Num>=None", typed.TGeneric('Option', [typed.TNum()])),
         ("id(1+2)",  typed.TNum()),
         (
             "def add(a, b) do a + b end",
-            typed.TGeneric(  # Def<Params<number, number>, number>
-                "Def",
-                [
-                    typed.TGeneric("Params", [typed.TNum(), typed.TNum()]),
-                    typed.TNum(),
-                ],
-            ),
+            typed.TDef([typed.TNum(), typed.TNum()],    typed.TNum(),),
         ),
-        ("if 2 > 0 then: Option<number> None else None end",
+        ("if 2 > 0 then: Option<Num> None else None end",
          typed.TGeneric('Option', [typed.TNum()])),
         ("if 2 > 0 then 1 else 2 end", typed.TNum()),
         ("if 2 > 0 then 1 end", typed.TGeneric('Option', [typed.TNum()])),
@@ -267,23 +263,23 @@ def test_infer(program, expected_type, parser, lexer):
     assert type_infer(DEFAULT_CTX, program) == expected_type
 
 
-@pytest.mark.parametrize(
+@ pytest.mark.parametrize(
     "program",
     [
         (
-            """x: string = 134"""
+            """x: Str = 134"""
         ),
         (
-            "do: string 1 end"
+            "do: Str 1 end"
         ),
         (
-            "def fun(): string do 1 end"
+            "def fun(): Str do 1 end"
         ),
         (
-            "if 2 > 0 then: number 1 else '12' end"
+            "if 2 > 0 then: Num 1 else '12' end"
         ),
         (
-            "if 2 > 0 then: string 1 else 2 end"
+            "if 2 > 0 then: Str 1 else 2 end"
         ),
     ],
 )

@@ -7,14 +7,14 @@ enum Option<value> {
 
 # struct
 struct User {
-  name: string
-  email: string
-  age: number
+  name: Str
+  email: Str
+  age: Num
 }
 
 # variable
 x = 1
-x: Option<number> = None
+x: Option<Num> = None
 
 
 # array
@@ -33,7 +33,7 @@ y = do
   z / 2
 end
 
-z = do: Option<number>
+z = do: Option<Num>
  None
 end
 
@@ -50,7 +50,7 @@ def zero() do
   0
 end
 
-def get_email(user: User): string do
+def get_email(user: User): Str do
   user.email
 end   
  
