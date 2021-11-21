@@ -328,7 +328,8 @@ ty_id = typed.TVar(-1)
 DEFAULT_CTX: Context = {
     'Str': Scheme([], typed.TStr()),
     'Num': Scheme([], typed.TNum()),
-    'None': Scheme([], typed.TGeneric('Option', [fresh_ty_var()])), 'Some': Scheme([ty_some.type],  typed.TDef([ty_some], typed.TGeneric('Option', [ty_some]))),
+    'None': Scheme([], typed.TGeneric('Option', [fresh_ty_var()])),
+    'Some': Scheme([ty_some.type],  typed.TDef([ty_some], typed.TGeneric('Option', [ty_some]))),
     'id': Scheme([ty_id.type], typed.TDef([ty_id], ty_id)),
     'Option': Scheme([], typed.TGeneric('Option', [fresh_ty_var()])),
 }

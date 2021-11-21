@@ -205,6 +205,10 @@ def test_parser(program, ast, parser, lexer):
     "program, expected_type",
     [
         ("1", typed.TNum()),
+        ("Some(1)", typed.TGeneric('Option', [typed.TNum()])),
+        ('id(id(1))', typed.TNum()),
+        ("Some(Some(1))", typed.TGeneric('Option', [
+         typed.TGeneric('Option', [typed.TNum()])])),
         (
             "1+2*3",
             typed.TNum(),
@@ -252,9 +256,14 @@ def test_parser(program, ast, parser, lexer):
         ("if 2 > 0 then: Option<Num> None else None end",
          typed.TGeneric('Option', [typed.TNum()])),
         ("if 2 > 0 then 1 else 2 end", typed.TNum()),
-        ("if 2 > 0 then 1 end", typed.TGeneric('Option', [typed.TNum()])),
-        ("if 2 > 0 then Some(1) end", typed.TGeneric(
-            'Option', [typed.TGeneric('Option', [typed.TNum()])])),
+        ("if 2 > 0 then Some(Some(1)) end",
+         typed.TGeneric('Option', [typed.TGeneric('Option', [typed.TNum()])])),
+        ("if 2 > 0 then Some(1) elif 2 > 0 then Some(1) end",
+         typed.TGeneric('Option', [typed.TNum()])),
+        ("if 2 > 0 then Some(1) end",
+         typed.TGeneric('Option',  [typed.TNum()])),
+        ("if 2 > 0 then Some(1) elif 2 > 0 then None end", typed.TGeneric(
+            'Option', [typed.TNum()])),
     ],
 )
 def test_infer(program, expected_type, parser, lexer):
@@ -277,6 +286,15 @@ def test_infer(program, expected_type, parser, lexer):
         ),
         (
             "if 2 > 0 then: Num 1 else '12' end"
+        ),
+        (
+            "if 2 > 0 then: Num '12' else 1 end"
+        ),
+        (
+            "if 2 > 0 then: Num 1 elif 2 > 0 then '12' else 1 end"
+        ),
+        (
+            "if 1+1 then 1 else 1 end"
         ),
         (
             "if 2 > 0 then: Str 1 else 2 end"
