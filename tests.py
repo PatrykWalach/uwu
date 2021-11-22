@@ -194,6 +194,8 @@ def token(type, value, lineno, index):
                 ),
             ],
         ),
+        ('enum AOrB {A B}', [EEnumDeclaration(id=EIdentifier(name='AOrB'), generics=[], variants=[EVariant(id=EIdentifier(
+            name='A'), fields=EFieldsUnnamed(unnamed=[])), EVariant(id=EIdentifier(name='B'), fields=EFieldsUnnamed(unnamed=[]))])])
     ],
 )
 def test_parser(program, ast, parser, lexer):
@@ -205,10 +207,13 @@ def test_parser(program, ast, parser, lexer):
     "program, expected_type",
     [
         ("1", typed.TNum()),
-        ("Some(1)", typed.TGeneric('Option', [typed.TNum()])),
+        ("x = 1\nx", typed.TNum()),
+        ("x = 1\na = x\na", typed.TNum()),
+        ("x = 1\na = x", typed.TNum()),
+        ("Some(1)", typed.TOption(typed.TNum())),
         ('id(id(1))', typed.TNum()),
-        ("Some(Some(1))", typed.TGeneric('Option', [
-         typed.TGeneric('Option', [typed.TNum()])])),
+        ("Some(Some(1))", typed.TOption(
+         typed.TOption(typed.TNum()))),
         (
             "1+2*3",
             typed.TNum(),
@@ -247,23 +252,23 @@ def test_parser(program, ast, parser, lexer):
         ("id('12')", typed.TStr()),
         ("id(1)",  typed.TNum()),
         ("id('12')\nid(1)",  typed.TNum()),
-        ("x:Option<Num>=None", typed.TGeneric('Option', [typed.TNum()])),
+        ("x:Option<Num>=None", typed.TOption(typed.TNum())),
         ("id(1+2)",  typed.TNum()),
         (
             "def add(a, b) do a + b end",
             typed.TDef([typed.TNum(), typed.TNum()],    typed.TNum(),),
         ),
         ("if 2 > 0 then: Option<Num> None else None end",
-         typed.TGeneric('Option', [typed.TNum()])),
+         typed.TOption(typed.TNum())),
         ("if 2 > 0 then 1 else 2 end", typed.TNum()),
         ("if 2 > 0 then Some(Some(1)) end",
-         typed.TGeneric('Option', [typed.TGeneric('Option', [typed.TNum()])])),
+         typed.TOption(typed.TOption(typed.TNum()))),
         ("if 2 > 0 then Some(1) elif 2 > 0 then Some(1) end",
-         typed.TGeneric('Option', [typed.TNum()])),
+         typed.TOption(typed.TNum())),
         ("if 2 > 0 then Some(1) end",
-         typed.TGeneric('Option',  [typed.TNum()])),
-        ("if 2 > 0 then Some(1) elif 2 > 0 then None end", typed.TGeneric(
-            'Option', [typed.TNum()])),
+         typed.TOption(typed.TNum())),
+        ("if 2 > 0 then Some(1) elif 2 > 0 then None end", typed.TOption(typed.TNum())),
+        ('enum AOrB {A B}\nx:AOrB=A', typed.TGeneric(typed.TMeta(), []))
     ],
 )
 def test_infer(program, expected_type, parser, lexer):

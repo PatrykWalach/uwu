@@ -5,7 +5,7 @@ from typing import TypeAlias
 
 @dataclasses.dataclass(frozen=True)
 class TGeneric:
-    id: str
+    id: Type
     params: list[Type]
 
     def __str__(self) -> str:
@@ -14,25 +14,50 @@ class TGeneric:
         return f"{type(self).__name__}{params}"
 
 
-def TDef(params: list[Type], ret: Type) -> Type:
-    return TGeneric('Def', [TGeneric('Params', params), ret])
-
-
-def TNum() -> Type:
-    return TGeneric('Num', [])
-
-
-def TStr() -> Type:
-    return TGeneric('Str', [])
-
-
-def TBool() -> Type:
-    return TGeneric('Bool', [])
-
-
 @dataclasses.dataclass(frozen=True)
 class TVar:
     type: int
 
 
-Type: TypeAlias = TVar | TGeneric
+@dataclasses.dataclass(frozen=True)
+class TMeta:
+    pass
+
+
+TDefMeta = TMeta()
+TParamsMeta = TMeta()
+
+
+def TDef(params: list[Type], ret: Type) -> Type:
+    return TGeneric(TDefMeta, [TGeneric(TParamsMeta, params), ret])
+
+
+TNumMeta = TMeta()
+
+
+def TNum() -> Type:
+    return TGeneric(TNumMeta, [])
+
+
+TStrMeta = TMeta()
+
+
+def TStr() -> Type:
+    return TGeneric(TStrMeta, [])
+
+
+TBoolMeta = TMeta()
+
+
+def TBool() -> Type:
+    return TGeneric(TBoolMeta, [])
+
+
+TOptionMeta = TMeta()
+
+
+def TOption(param: Type) -> Type:
+    return TGeneric(TOptionMeta, [param])
+
+
+Type: TypeAlias = TVar | TGeneric | TMeta

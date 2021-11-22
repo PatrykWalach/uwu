@@ -185,7 +185,6 @@ class UwuParser(Parser):
 
     @_("type_identifier [ '<' type { ',' type } '>' ]")
     def type(self, p):
-        print(f"{p[1]=}")
         return terms.EHint(p.type_identifier, concat(p[1][1], p[1][2]))
 
     @_(
@@ -196,11 +195,24 @@ class UwuParser(Parser):
 
     @_("ENUM type_identifier [ '<' fields_unnamed '>' ] '{' { variant } '}'")
     def enum(self, p):
-        return terms.EEnumDeclaration(p.type_identifier, p.fields_unnamed, p.variant)
+
+        match p.fields_unnamed:
+            case None:
+                return terms.EEnumDeclaration(p.type_identifier, [], p.variant)
+            case [*fields_unnamed]:
+                return terms.EEnumDeclaration(p.type_identifier, fields_unnamed, p.variant)
+            case _:
+                raise TypeError(f"{p.fields_unnamed=}")
 
     @_("type_identifier [ '(' fields_unnamed ')' ]")
     def variant(self, p):
-        return terms.EVariant(p.identifier, terms.EFieldsUnnamed(p.fields_unnamed))
+        match p.fields_unnamed:
+            case None:
+                return terms.EVariant(p.type_identifier, terms.EFieldsUnnamed([]))
+            case [*fields_unnamed]:
+                return terms.EVariant(p.type_identifier, terms.EFieldsUnnamed(fields_unnamed))
+            case _:
+                raise TypeError(f"{p.fields_unnamed=}")
 
     @_("identifier { ',' identifier }")
     def fields_unnamed(self, p):
@@ -322,16 +334,23 @@ class Handler(FileSystemEventHandler):
             json.dump(ast, f, cls=AstEncoder, indent=4)
 
 
-ty_some = typed.TVar(-2)
-ty_id = typed.TVar(-1)
+ty_some =  fresh_ty_var()
+ty_id =  fresh_ty_var()
+ty_none = fresh_ty_var()
 
 DEFAULT_CTX: Context = {
-    'Str': Scheme([], typed.TStr()),
-    'Num': Scheme([], typed.TNum()),
-    'None': Scheme([], typed.TGeneric('Option', [fresh_ty_var()])),
-    'Some': Scheme([ty_some.type],  typed.TDef([ty_some], typed.TGeneric('Option', [ty_some]))),
+    'Str': Scheme([], typed.TStrMeta),
+    'Num': Scheme([], typed.TNumMeta),
+
+    'Bool': Scheme([], typed.TBoolMeta),
+    'True': Scheme([], typed.TBool()),
+    'False': Scheme([], typed.TBool()),
+
+    'Option': Scheme([], typed.TOptionMeta),
+    'None': Scheme([ty_none.type], typed.TOption(ty_none)),
+    'Some': Scheme([ty_some.type],  typed.TDef([ty_some], typed.TOption(ty_some))),
+
     'id': Scheme([ty_id.type], typed.TDef([ty_id], ty_id)),
-    'Option': Scheme([], typed.TGeneric('Option', [fresh_ty_var()])),
 }
 
 

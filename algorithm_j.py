@@ -28,7 +28,7 @@ Context: typing.TypeAlias = dict[str, Scheme]  # dict[str, Scheme]
 counter = 0
 
 
-def fresh_ty_var() -> typed.Type:
+def fresh_ty_var() -> typed.TVar:
     global counter
     counter += 1
     return typed.TVar(counter)
@@ -38,6 +38,8 @@ def apply_subst(subst: Substitution, ty: typed.Type) -> typed.Type:
     match ty:
         # case typed.TNum() | typed.TStr():
         #     return ty
+        case typed.TMeta():
+            return ty
         case typed.TVar(var):
             return subst.get(var, typed.TVar(var))
         case typed.TGeneric(id, params):
@@ -61,6 +63,8 @@ def free_type_vars(type: typed.Type) -> set[int]:
             return {var}
         # case typed.TNum() | typed.TStr():
         #     return set()
+        case typed.TMeta():
+            return set()
         case typed.TGeneric(_, params):
             return functools.reduce(
                 lambda acc, ty: acc | free_type_vars(ty),
@@ -92,9 +96,12 @@ def unify(a: typed.Type, b: typed.Type) -> Substitution:
     match (a, b):
         # case (typed.TNum(), typed.TNum()) | (typed.TStr(), typed.TStr()):
         #     return {}
-        case (typed.TGeneric(val0, params0), typed.TGeneric(val1, params1)) if val0 == val1 and len(params0) == len(params1):
+        case typed.TMeta() as a, typed.TMeta() as b if a is b:
+            return {}
+        case (typed.TGeneric(val0, params0), typed.TGeneric(val1, params1)) if len(params0) == len(params1):
 
-            s1 = {}
+            s1 = unify(val0, val1)
+
             for param0, param1 in zip(params0, params1):
                 s2 = unify(apply_subst(s1, param0),
                            apply_subst(s1, param1))
@@ -143,7 +150,7 @@ def apply_subst_ctx(subst: Substitution, ctx: Context) -> Context:
 
 
 def instantiate(scheme: Scheme) -> typed.Type:
-    newVars = [fresh_ty_var() for _ in scheme.vars]
+    newVars: list[typed.Type] = [fresh_ty_var() for _ in scheme.vars]
     subst = dict(zip(scheme.vars, newVars))
     return apply_subst(subst, scheme.t)
 
@@ -193,6 +200,10 @@ def infer(subst: Substitution, ctx: Context, exp: terms.AstTree) -> tuple[Substi
 
             ctx[id] = Scheme.from_subst(subst, ctx, t1)
             return subst, t1
+        case terms.EEnumDeclaration(terms.EIdentifier(id)):
+            ty =  typed.TMeta()
+            ctx[id] = Scheme([], ty)
+            return subst, ty
         case terms.EBinaryExpr('+' | '*' | '/' | '//' | '-', left, right):
             subst, ty_left = infer(subst, ctx, left)
             subst = unify_subst(ty_left, typed.TNum(), subst)
@@ -220,8 +231,8 @@ def infer(subst: Substitution, ctx: Context, exp: terms.AstTree) -> tuple[Substi
 
             params = list[typed.Type]()
             for arg in args:
-                subst, t = infer(subst, ctx, arg)
-                params.append(t)
+                subst, ty = infer(subst, ctx, arg)
+                params.append(ty)
 
             subst = unify_subst(ty1, typed.TDef(
                 params,
@@ -269,8 +280,8 @@ def infer(subst: Substitution, ctx: Context, exp: terms.AstTree) -> tuple[Substi
                 ty_condition, typed.TBool(), subst)
 
             subst, ty_then = infer(subst, ctx, then)
-            unify_subst(ty_then, typed.TGeneric(
-                'Option', [fresh_ty_var()]), subst)
+            unify_subst(ty_then, typed.TOption(
+                fresh_ty_var()), subst)
 
             return subst, ty_then
 
@@ -287,8 +298,8 @@ def infer(subst: Substitution, ctx: Context, exp: terms.AstTree) -> tuple[Substi
             return subst, ty_then
         case terms.EIf(test, then, or_else=None, hint=hint) if hint != None:
             subst, hint = infer(subst, ctx, hint)
-            subst = unify_subst(hint, typed.TGeneric(
-                'Option', [fresh_ty_var()]), subst)
+            subst = unify_subst(hint, typed.TOption(
+                fresh_ty_var()), subst)
 
             subst, ty_condition = infer(subst, ctx, test)
             subst = unify_subst(
@@ -312,16 +323,15 @@ def infer(subst: Substitution, ctx: Context, exp: terms.AstTree) -> tuple[Substi
 
             return subst, hint
         case terms.EHint(terms.EIdentifier(id), arguments):
-
             types = list[typed.Type]()
             for arg in arguments:
-                subst, t = infer(subst, ctx, arg)
-                types.append(t)
+                subst, ty = infer(subst, ctx, arg)
+                types.append(ty)
 
             subst, ty1 = infer(subst, ctx, terms.EIdentifier(id))
-            subst = unify_subst(ty1, typed.TGeneric(id, types), subst)
+            # subst = unify_subst(ty1, typed.TMeta(), subst)
 
-            return subst, typed.TGeneric(id, types)
+            return subst, typed.TGeneric(ty1, types)
         case _:
             raise TypeError(f"Cannot infer type of {exp=}")
 
