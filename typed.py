@@ -5,7 +5,7 @@ from typing import TypeAlias
 
 @dataclasses.dataclass(frozen=True)
 class TGeneric:
-    id: Type
+    id: str
     params: list[Type]
 
     def __str__(self) -> str:
@@ -19,45 +19,36 @@ class TVar:
     type: int
 
 
-@dataclasses.dataclass(frozen=True)
-class TMeta:
-    pass
-
-
-TDefMeta = TMeta()
-TParamsMeta = TMeta()
-
-
 def TDef(params: list[Type], ret: Type) -> Type:
-    return TGeneric(TDefMeta, [TGeneric(TParamsMeta, params), ret])
+    return TGeneric('Def', [TGeneric('Params', params), ret])
 
 
-TNumMeta = TMeta()
+ 
 
 
 def TNum() -> Type:
-    return TGeneric(TNumMeta, [])
+    return TGeneric('Num', [])
 
 
-TStrMeta = TMeta()
+ 
 
 
 def TStr() -> Type:
-    return TGeneric(TStrMeta, [])
+    return TGeneric('Str', [])
 
 
-TBoolMeta = TMeta()
+ 
 
 
 def TBool() -> Type:
-    return TGeneric(TBoolMeta, [])
+    return TGeneric('Bool', [])
 
 
-TOptionMeta = TMeta()
+ 
 
 
 def TOption(param: Type) -> Type:
-    return TGeneric(TOptionMeta, [param])
+    return TGeneric('Option', [param])
 
 
-Type: TypeAlias = TVar | TGeneric | TMeta
+Type: TypeAlias = TVar | TGeneric

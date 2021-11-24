@@ -268,7 +268,9 @@ def test_parser(program, ast, parser, lexer):
         ("if 2 > 0 then Some(1) end",
          typed.TOption(typed.TNum())),
         ("if 2 > 0 then Some(1) elif 2 > 0 then None end", typed.TOption(typed.TNum())),
-        ('enum AOrB {A B}\nx:AOrB=A', typed.TGeneric(typed.TMeta(), []))
+        ('enum AB {A B}\nx:AB=A', typed.TGeneric('AB', [])),
+        ('enum ABC<x,y,z> {A(x)B(y)C(z)}\nx:ABC<Num,Num,Num>=A(1)',
+         typed.TGeneric('ABC', [typed.TNum(), typed.TNum(), typed.TNum()])),
     ],
 )
 def test_infer(program, expected_type, parser, lexer):

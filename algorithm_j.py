@@ -38,8 +38,6 @@ def apply_subst(subst: Substitution, ty: typed.Type) -> typed.Type:
     match ty:
         # case typed.TNum() | typed.TStr():
         #     return ty
-        case typed.TMeta():
-            return ty
         case typed.TVar(var):
             return subst.get(var, typed.TVar(var))
         case typed.TGeneric(id, params):
@@ -63,8 +61,6 @@ def free_type_vars(type: typed.Type) -> set[int]:
             return {var}
         # case typed.TNum() | typed.TStr():
         #     return set()
-        case typed.TMeta():
-            return set()
         case typed.TGeneric(_, params):
             return functools.reduce(
                 lambda acc, ty: acc | free_type_vars(ty),
@@ -96,11 +92,9 @@ def unify(a: typed.Type, b: typed.Type) -> Substitution:
     match (a, b):
         # case (typed.TNum(), typed.TNum()) | (typed.TStr(), typed.TStr()):
         #     return {}
-        case typed.TMeta() as a, typed.TMeta() as b if a is b:
-            return {}
-        case (typed.TGeneric(val0, params0), typed.TGeneric(val1, params1)) if len(params0) == len(params1):
+        case (typed.TGeneric(val0, params0), typed.TGeneric(val1, params1)) if val0 == val1 and len(params0) == len(params1):
 
-            s1 = unify(val0, val1)
+            s1 = {}
 
             for param0, param1 in zip(params0, params1):
                 s2 = unify(apply_subst(s1, param0),
@@ -108,10 +102,7 @@ def unify(a: typed.Type, b: typed.Type) -> Substitution:
                 s1 = compose_subst(s2, s1)
 
             return s1
-
-        case (typed.TVar(u), t):
-            return var_bind(u, t)
-        case (t, typed.TVar(u)):
+        case (typed.TVar(u), t) | (t, typed.TVar(u)):
             return var_bind(u, t)
         case _:
             raise UnifyException(f"Cannot unify {a=} and {b=}")
@@ -200,9 +191,44 @@ def infer(subst: Substitution, ctx: Context, exp: terms.AstTree) -> tuple[Substi
 
             ctx[id] = Scheme.from_subst(subst, ctx, t1)
             return subst, t1
-        case terms.EEnumDeclaration(terms.EIdentifier(id)):
-            ty =  typed.TMeta()
+        # case terms.EFieldsUnnamed(unnamed):
+        #     types = list[typed.Type]()
+        #     for field in unnamed:
+        #         subst, ty = infer(subst, ctx, field)
+        #         types.append(ty)
+
+        #     return subst, typed.TGeneric(TFieldsMeta, types)
+        # case terms.EVariant(terms.EIdentifier(id), fields):
+        #     subst, ty = infer(subst, ctx, fields)
+        #     ctx[id] = Scheme.from_subst(subst, ctx, ty)
+        #     return subst, ty
+        case terms.EEnumDeclaration(terms.EIdentifier(id), generics, variants=variants):
+
+            for generic in generics:
+                ctx[generic.name] = Scheme([], fresh_ty_var())
+
+            for variant in variants:
+
+                types = list[typed.Type]()
+
+                for field in variant.fields.unnamed:
+                    subst, ty = infer(subst, ctx, field)
+                    types.append(ty)
+
+                ty = typed.TGeneric(
+                    id, [ctx[generic.name].t for generic in generics])
+
+                if types:
+                    ty = typed.TDef(types, ty)
+
+                ctx[variant.id.name] = Scheme.from_subst(subst, ctx, ty)
+
+            ty = typed.TGeneric(id, [fresh_ty_var() for _ in generics])
             ctx[id] = Scheme([], ty)
+
+            for generic in generics:
+                del ctx[generic.name]
+
             return subst, ty
         case terms.EBinaryExpr('+' | '*' | '/' | '//' | '-', left, right):
             subst, ty_left = infer(subst, ctx, left)
@@ -329,9 +355,9 @@ def infer(subst: Substitution, ctx: Context, exp: terms.AstTree) -> tuple[Substi
                 types.append(ty)
 
             subst, ty1 = infer(subst, ctx, terms.EIdentifier(id))
-            # subst = unify_subst(ty1, typed.TMeta(), subst)
+            subst = unify_subst(ty1, typed.TGeneric(id, types), subst)
 
-            return subst, typed.TGeneric(ty1, types)
+            return subst, typed.TGeneric(id, types)
         case _:
             raise TypeError(f"Cannot infer type of {exp=}")
 

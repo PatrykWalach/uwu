@@ -339,14 +339,14 @@ ty_id =  fresh_ty_var()
 ty_none = fresh_ty_var()
 
 DEFAULT_CTX: Context = {
-    'Str': Scheme([], typed.TStrMeta),
-    'Num': Scheme([], typed.TNumMeta),
+    'Str': Scheme([], typed.TStr()),
+    'Num': Scheme([], typed.TNum()),
 
-    'Bool': Scheme([], typed.TBoolMeta),
+    'Bool': Scheme([], typed.TBool()),
     'True': Scheme([], typed.TBool()),
     'False': Scheme([], typed.TBool()),
 
-    'Option': Scheme([], typed.TOptionMeta),
+    'Option': Scheme([], typed.TOption(fresh_ty_var())),
     'None': Scheme([ty_none.type], typed.TOption(ty_none)),
     'Some': Scheme([ty_some.type],  typed.TDef([ty_some], typed.TOption(ty_some))),
 
