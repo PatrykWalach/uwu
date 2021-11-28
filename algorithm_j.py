@@ -12,7 +12,7 @@ from util import ap
 @dataclasses.dataclass
 class Scheme:
     vars: list[int]
-    t: typed.Type
+    ty: typed.Type
 
     @staticmethod
     def from_subst(subst: Substitution, ctx: Context, ty1: typed.Type):
@@ -71,7 +71,7 @@ def free_type_vars(type: typed.Type) -> set[int]:
 
 
 def free_type_vars_scheme(scheme: Scheme):
-    return free_type_vars(scheme.t).difference(scheme.vars)
+    return free_type_vars(scheme.ty).difference(scheme.vars)
 
 
 def free_type_vars_ctx(ctx: Context) -> set[int]:
@@ -127,7 +127,7 @@ def apply_subst_scheme(subst: Substitution, scheme: Scheme) -> Scheme:
         subst.pop(var, None)
 
     return Scheme(scheme.vars, apply_subst(
-        subst, scheme.t))
+        subst, scheme.ty))
 
 
 def apply_subst_ctx(subst: Substitution, ctx: Context) -> Context:
@@ -143,7 +143,7 @@ def apply_subst_ctx(subst: Substitution, ctx: Context) -> Context:
 def instantiate(scheme: Scheme) -> typed.Type:
     newVars: list[typed.Type] = [fresh_ty_var() for _ in scheme.vars]
     subst = dict(zip(scheme.vars, newVars))
-    return apply_subst(subst, scheme.t)
+    return apply_subst(subst, scheme.ty)
 
 
 def unify_subst(a: typed.Type, b: typed.Type, subst: Substitution) -> Substitution:
@@ -216,7 +216,7 @@ def infer(subst: Substitution, ctx: Context, exp: terms.AstTree) -> tuple[Substi
                     types.append(ty)
 
                 ty = typed.TGeneric(
-                    id, [ctx[generic.name].t for generic in generics])
+                    id, [ctx[generic.name].ty for generic in generics])
 
                 if types:
                     ty = typed.TDef(types, ty)
