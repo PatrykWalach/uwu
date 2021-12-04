@@ -49,7 +49,7 @@ class EProgram:
 
 @dataclasses.dataclass(frozen=True)
 class EBinaryExpr:
-    op: typing.Literal["++", "+", "-", "/", "*", "//"]
+    op: typing.Literal["++", "+", "-", "/", "*", "//", '>', '<', '<=', '>=']
     left: Expr
     right: Expr
 
