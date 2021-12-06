@@ -334,9 +334,28 @@ class Handler(FileSystemEventHandler):
             json.dump(ast, f, cls=AstEncoder, indent=4)
 
 
-ty_some =  fresh_ty_var()
-ty_id =  fresh_ty_var()
+ty_some = fresh_ty_var()
+ty_id = fresh_ty_var()
 ty_none = fresh_ty_var()
+ty_print = fresh_ty_var()
+
+
+BUILTINS = [terms.EEnumDeclaration(terms.EIdentifier('Some'), [
+                                   terms.EIdentifier('value')], [
+                                       terms.EVariant(terms.EIdentifier('Some'), terms.EFieldsUnnamed(
+                                           [terms.EIdentifier('value')])),
+    terms.EVariant(terms.EIdentifier('None'), terms.EFieldsUnnamed([]))
+]),
+    terms.EEnumDeclaration(terms.EIdentifier('Bool'), [
+    ], [
+        terms.EVariant(terms.EIdentifier('True'), terms.EFieldsUnnamed([]
+                                                                       )),
+        terms.EVariant(terms.EIdentifier('False'), terms.EFieldsUnnamed([]))
+    ]),
+    terms.EDef(terms.EIdentifier('id'), [terms.EParam(terms.EIdentifier('value'))], terms.EDo([
+        terms.EIdentifier('value')
+    ]))
+]
 
 DEFAULT_CTX: Context = {
     'Str': Scheme([], typed.TStr()),
@@ -351,6 +370,7 @@ DEFAULT_CTX: Context = {
     'Some': Scheme([ty_some.type],  typed.TDef([ty_some], typed.TOption(ty_some))),
 
     'id': Scheme([ty_id.type], typed.TDef([ty_id], ty_id)),
+    'print': Scheme([ty_print.type], typed.TDef([ty_print], ty_print)),
 }
 
 

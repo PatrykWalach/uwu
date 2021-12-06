@@ -1,0 +1,1 @@
+(()=>{Some=(value)=>{return {_:'Some',value}};None=()=>{return {_:'None',}};True=()=>{return {_:'True',}};False=()=>{return {_:'False',}};id=(value)=>{return (()=>{return value})()};(__arg=(1.0+(2.0*3.0)),console.log(__arg),__arg)})()

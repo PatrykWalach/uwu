@@ -1,10 +1,13 @@
+from pathlib import WindowsPath
+from subprocess import check_output
+from compile import compile
 from sly import lex
 import json
 
 from typing import Generic
 import pytest
 from algorithm_j import Scheme, UnifyException, type_infer
-from main import DEFAULT_CTX, AstEncoder, UwuLexer, UwuParser
+from main import BUILTINS, DEFAULT_CTX, AstEncoder, UwuLexer, UwuParser
 
 import typed
 
@@ -280,10 +283,30 @@ def test_infer(program, expected_type, parser, lexer):
 
 
 @ pytest.mark.parametrize(
+    "program, expected_output",
+    [
+        ("print(1)", "1"),
+        ("x = 1\nprint(x)", "1"),
+        ("x = 1\na = x\nprint(a)", "1"),
+        ("x = 1\nprint(a = x)", "1"),
+        ("print(1+2*3)", "7"),
+        ("print(x=(2+3)*4)", "20"),
+        ("print(if 2 > 0 then 1 else 2 end)", "1"),
+        ("print(if 2 < 0 then 1 else 2 end)", "2"),
+    ],
+)
+def test_compile_with_snapshot(program, expected_output, snapshot, parser, lexer):
+    program = parser.parse(lexer.tokenize(program))
+    snapshot.assert_match(compile(EProgram(BUILTINS+program.body)), 'index.js')
+    path: WindowsPath = snapshot.snapshot_dir
+    assert check_output(['node', path / 'index.js']) == f"{expected_output}\n".encode('UTF-8')
+
+
+@ pytest.mark.parametrize(
     "program",
     [
         (
-            """x: Str = 134"""
+            "x: Str = 134"
         ),
         (
             "do: Str 1 end"
