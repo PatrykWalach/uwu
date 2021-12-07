@@ -170,9 +170,9 @@ def token(type, value, lineno, index):
                 EBinaryExpr("+", ELiteral("1", 1), ELiteral("2", 2))
             ])
         ], ),
-        ("x:Option<Num>=None", [
+        ("x:Option<Num>=None()", [
             EVariableDeclaration(EIdentifier(
-                'x'), EIdentifier('None'),
+                'x'), ECall(EIdentifier('None'), []),
                 hint=EHint(EIdentifier('Option'), [
                            EHint(EIdentifier('Num'), [])])
             )]),
@@ -198,7 +198,9 @@ def token(type, value, lineno, index):
             ],
         ),
         ('enum AOrB {A B}', [EEnumDeclaration(id=EIdentifier(name='AOrB'), generics=[], variants=[EVariant(id=EIdentifier(
-            name='A'), fields=EFieldsUnnamed(unnamed=[])), EVariant(id=EIdentifier(name='B'), fields=EFieldsUnnamed(unnamed=[]))])])
+            name='A'), fields=EFieldsUnnamed(unnamed=[])), EVariant(id=EIdentifier(name='B'), fields=EFieldsUnnamed(unnamed=[]))])]),
+        ('case x of Some(value) do 2 end None() do 3 end end', [ECaseOf(EIdentifier(name='x'), [ECase(EEnumPattern(EIdentifier(name='Some'), [
+            EParam(EIdentifier(name='value'))]), EDo([ELiteral(raw='2', value=2.0)])), ECase(EEnumPattern(EIdentifier(name='None'), []), EDo([ELiteral(raw='3', value=3.0)]))])]),
     ],
 )
 def test_parser(program, ast, parser, lexer):
@@ -255,13 +257,13 @@ def test_parser(program, ast, parser, lexer):
         ("id('12')", typed.TStr()),
         ("id(1)",  typed.TNum()),
         ("id('12')\nid(1)",  typed.TNum()),
-        ("x:Option<Num>=None", typed.TOption(typed.TNum())),
+        ("x:Option<Num>=None()", typed.TOption(typed.TNum())),
         ("id(1+2)",  typed.TNum()),
         (
             "def add(a, b) do a + b end",
             typed.TDef([typed.TNum(), typed.TNum()],    typed.TNum(),),
         ),
-        ("if 2 > 0 then: Option<Num> None else None end",
+        ("if 2 > 0 then: Option<Num> None() else None() end",
          typed.TOption(typed.TNum())),
         ("if 2 > 0 then 1 else 2 end", typed.TNum()),
         ("if 2 > 0 then Some(Some(1)) end",
@@ -270,10 +272,14 @@ def test_parser(program, ast, parser, lexer):
          typed.TOption(typed.TNum())),
         ("if 2 > 0 then Some(1) end",
          typed.TOption(typed.TNum())),
-        ("if 2 > 0 then Some(1) elif 2 > 0 then None end", typed.TOption(typed.TNum())),
-        ('enum AB {A B}\nx:AB=A', typed.TGeneric('AB', [])),
+        ("if 2 > 0 then Some(1) elif 2 > 0 then None() end",
+         typed.TOption(typed.TNum())),
+        ('enum AB {A B}\nx:AB=A()', typed.TGeneric('AB', [])),
         ('enum ABC<x,y,z> {A(x)B(y)C(z)}\nx:ABC<Num,Num,Num>=A(1)',
          typed.TGeneric('ABC', [typed.TNum(), typed.TNum(), typed.TNum()])),
+        ('x=Some(1)\ncase x of Some(value) do 2 end None() do 3 end end', typed.TNum()),
+        ('def flatMap(v, fn) do case v of None() do None() end Some(value) do fn(value) end end end\nflatMap(Some(1),Some)',
+         typed.TOption(typed.TNum())),
     ],
 )
 def test_infer(program, expected_type, parser, lexer):
@@ -299,36 +305,21 @@ def test_compile_with_snapshot(program, expected_output, snapshot, parser, lexer
     program = parser.parse(lexer.tokenize(program))
     snapshot.assert_match(compile(EProgram(BUILTINS+program.body)), 'index.js')
     path: WindowsPath = snapshot.snapshot_dir
-    assert check_output(['node', path / 'index.js']) == f"{expected_output}\n".encode('UTF-8')
+    assert check_output(['node', path / 'index.js']
+                        ) == f"{expected_output}\n".encode('UTF-8')
 
 
 @ pytest.mark.parametrize(
     "program",
     [
-        (
-            "x: Str = 134"
-        ),
-        (
-            "do: Str 1 end"
-        ),
-        (
-            "def fun(): Str do 1 end"
-        ),
-        (
-            "if 2 > 0 then: Num 1 else '12' end"
-        ),
-        (
-            "if 2 > 0 then: Num '12' else 1 end"
-        ),
-        (
-            "if 2 > 0 then: Num 1 elif 2 > 0 then '12' else 1 end"
-        ),
-        (
-            "if 1+1 then 1 else 1 end"
-        ),
-        (
-            "if 2 > 0 then: Str 1 else 2 end"
-        ),
+        "x: Str = 134",
+        "do: Str 1 end",
+        "def fun(): Str do 1 end",
+        "if 2 > 0 then: Num 1 else '12' end",
+        "if 2 > 0 then: Num '12' else 1 end",
+        "if 2 > 0 then: Num 1 elif 2 > 0 then '12' else 1 end",
+        "if 1+1 then 1 else 1 end",
+        "if 2 > 0 then: Str 1 else 2 end",
     ],
 )
 def test_do_expection(program, parser, lexer):

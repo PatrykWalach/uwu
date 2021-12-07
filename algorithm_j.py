@@ -215,11 +215,8 @@ def infer(subst: Substitution, ctx: Context, exp: terms.AstTree) -> tuple[Substi
                     subst, ty = infer(subst, ctx, field)
                     types.append(ty)
 
-                ty = typed.TGeneric(
-                    id, [ctx[generic.name].ty for generic in generics])
-
-                if types:
-                    ty = typed.TDef(types, ty)
+                ty = typed.TDef(types, typed.TGeneric(
+                    id, [ctx[generic.name].ty for generic in generics]))
 
                 ctx[variant.id.name] = Scheme.from_subst(subst, ctx, ty)
 
@@ -358,6 +355,32 @@ def infer(subst: Substitution, ctx: Context, exp: terms.AstTree) -> tuple[Substi
             subst = unify_subst(ty1, typed.TGeneric(id, types), subst)
 
             return subst, typed.TGeneric(id, types)
+        case terms.ECaseOf(of, cases):
+            ty1 = fresh_ty_var()
+
+            subst, ty_of = infer(subst, ctx, of)
+
+            for case in cases:
+                ctx = ctx.copy()
+                subst, ty2 = infer(subst, ctx, case)
+                subst = unify_subst(ty2, typed.TDef([ty_of], ty1), subst)
+
+            return subst, ty1
+        case terms.ECase(pattern, body):
+            subst, ty_pattern = infer(subst, ctx, pattern)
+            subst, ty_body = infer(subst, ctx, body)
+            return subst, typed.TDef([ty_pattern], ty_body)
+        case terms.EEnumPattern(id, patterns):
+            ty = fresh_ty_var()
+            subst, ty_id = infer(subst, ctx, id)
+
+            ty_patterns = list[typed.Type]()
+            for pattern in patterns:
+                subst, ty_pattern = infer(subst, ctx, pattern)
+                ty_patterns.append(ty_pattern)
+
+            subst = unify_subst(ty_id, typed.TDef(ty_patterns, ty), subst)
+            return subst, ty
         case _:
             raise TypeError(f"Cannot infer type of {exp=}")
 

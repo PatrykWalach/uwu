@@ -135,7 +135,8 @@ class UwuParser(Parser):
         "call",
         "case_of",
         "variable_declaration",
-        "identifier", 'type_identifier',
+        "identifier",
+        'type_identifier',
         "binary_expr",
         "array",
         "tuple",
@@ -248,7 +249,7 @@ class UwuParser(Parser):
         return terms.ECase(p.pattern, p.do)
 
     @_(
-        "identifier",
+        "param_pattern",
         "enum_pattern",
         # "tuple_pattern",
         # "array_pattern",
@@ -256,15 +257,25 @@ class UwuParser(Parser):
     def pattern(self, p):
         return p[0]
 
+    @_("identifier")
+    def param_pattern(self, p):
+        return terms.EParam(p.identifier)
+
     # @_("'[' { pattern ',' } [ SPREAD identifier { ',' pattern } ] ']'")
     # def array_pattern(self, p):
     #     return terms.ArrayPattern(concat(p.pattern0, p.pattern1))
 
-    @_("type_identifier [ '(' pattern { ',' pattern } ')' ]")
-    def enum_pattern(self, p):
+    @_("pattern { ',' pattern }")
+    def patterns(self, p):
+        return concat(p.pattern0, p.pattern1)
 
-        return terms.EEnumPattern(p.type_identifier, concat(p.pattern0, concat(p.pattern1, [])  # p[1][1], concat(p[1][2], [])
-                                                            ))
+    @_("type_identifier '(' [ patterns ] ')'")
+    def enum_pattern(self, p):
+        patterns = p.patterns
+        if patterns == None:
+            patterns = []
+
+        return terms.EEnumPattern(p.type_identifier, patterns)
 
     @_("TYPE_IDENTIFIER")
     def type_identifier(self, p):
@@ -362,11 +373,11 @@ DEFAULT_CTX: Context = {
     'Num': Scheme([], typed.TNum()),
 
     'Bool': Scheme([], typed.TBool()),
-    'True': Scheme([], typed.TBool()),
-    'False': Scheme([], typed.TBool()),
+    'True': Scheme([], typed.TDef([], typed.TBool())),
+    'False': Scheme([], typed.TDef([], typed.TBool())),
 
     'Option': Scheme([], typed.TOption(fresh_ty_var())),
-    'None': Scheme([ty_none.type], typed.TOption(ty_none)),
+    'None': Scheme([ty_none.type], typed.TDef([], typed.TOption(ty_none))),
     'Some': Scheme([ty_some.type],  typed.TDef([ty_some], typed.TOption(ty_some))),
 
     'id': Scheme([ty_id.type], typed.TDef([ty_id], ty_id)),

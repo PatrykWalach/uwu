@@ -94,7 +94,7 @@ class ECase:
 @dataclasses.dataclass(frozen=True)
 class EEnumPattern:
     id: EIdentifier
-    patterns: list[EEnumPattern | EIdentifier]
+    patterns: list[EEnumPattern | EParam]
 
 
 @dataclasses.dataclass(frozen=True)
