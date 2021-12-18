@@ -77,6 +77,9 @@ class EDef:
 class EParam:
     identifier: EIdentifier
     hint: EHint | None = None
+@dataclasses.dataclass(frozen=True)
+class EParamPattern:
+    identifier: EIdentifier
 
 
 @dataclasses.dataclass(frozen=True)
@@ -87,14 +90,14 @@ class ECaseOf:
 
 @dataclasses.dataclass(frozen=True)
 class ECase:
-    pattern: EEnumPattern | EIdentifier
+    pattern: EEnumPattern | EParamPattern
     body: EDo
 
 
 @dataclasses.dataclass(frozen=True)
 class EEnumPattern:
     id: EIdentifier
-    patterns: list[EEnumPattern | EParam]
+    patterns: list[EEnumPattern | EParamPattern]
 
 
 @dataclasses.dataclass(frozen=True)
@@ -158,7 +161,7 @@ AstNode: typing.TypeAlias = (
     | EEnumPattern
     | EFieldsUnnamed
     | EHint
-    | EVariant
+    | EVariant |EParamPattern
 
 )
 AstTree: typing.TypeAlias = AstNode

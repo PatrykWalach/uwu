@@ -259,7 +259,7 @@ class UwuParser(Parser):
 
     @_("identifier")
     def param_pattern(self, p):
-        return terms.EParam(p.identifier)
+        return terms.EParamPattern(p.identifier)
 
     # @_("'[' { pattern ',' } [ SPREAD identifier { ',' pattern } ] ']'")
     # def array_pattern(self, p):

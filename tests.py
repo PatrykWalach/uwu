@@ -200,7 +200,7 @@ def token(type, value, lineno, index):
         ('enum AOrB {A B}', [EEnumDeclaration(id=EIdentifier(name='AOrB'), generics=[], variants=[EVariant(id=EIdentifier(
             name='A'), fields=EFieldsUnnamed(unnamed=[])), EVariant(id=EIdentifier(name='B'), fields=EFieldsUnnamed(unnamed=[]))])]),
         ('case x of Some(value) do 2 end None() do 3 end end', [ECaseOf(EIdentifier(name='x'), [ECase(EEnumPattern(EIdentifier(name='Some'), [
-            EParam(EIdentifier(name='value'))]), EDo([ELiteral(raw='2', value=2.0)])), ECase(EEnumPattern(EIdentifier(name='None'), []), EDo([ELiteral(raw='3', value=3.0)]))])]),
+            EParamPattern(EIdentifier(name='value'))]), EDo([ELiteral(raw='2', value=2.0)])), ECase(EEnumPattern(EIdentifier(name='None'), []), EDo([ELiteral(raw='3', value=3.0)]))])]),
     ],
 )
 def test_parser(program, ast, parser, lexer):
@@ -299,6 +299,16 @@ def test_infer(program, expected_type, parser, lexer):
         ("print(x=(2+3)*4)", "20"),
         ("print(if 2 > 0 then 1 else 2 end)", "1"),
         ("print(if 2 < 0 then 1 else 2 end)", "2"),
+        ("print(case Some(1) of Some() do 2 end None() do 3 end end)", '2'),
+        ("print(case Some(1) of Some(value) do 1 end None() do 3 end end)", '1'),
+        ("enum ABC<a,b,c> {A(a) B(b) C(c)}\nprint(case A(1) of A(a) do a end B(b) do b end C(c) do c end end)", "1"),
+        ("print(case Some(Some(1)) of Some(Some(value)) do value end None() do 2 end Some() do 3 end end)", "1"),
+        ("print(case None() of Some(Some(value)) do value end None() do 2 end Some() do 3 end end)", "2"),
+        ("print(case Some(None()) of Some(Some(value)) do value end None() do 2 end Some() do 3 end end)", "3"),
+        ("enum Pair<a,b> {Pair(a,b)}\nprint(case Pair(1,2) of Pair(x, y) do x end end)", "1"),
+        ("enum Pair<a,b> {Pair(a,b)}\nprint(case Pair(1,2) of Pair(x, y) do y end end)", "2"),
+        ("enum Pair<a,b> {Pair(a,b)}\nprint(case Pair(1,2) of Pair(a) do a end end)", "1"),
+        ("enum Pair<a,b> {Pair(a,b)}\nprint(case Pair(1,Pair(2,3)) of Pair(x, Pair(y, z)) do z end Pair(c, v) do c end end)", "3"),
     ],
 )
 def test_compile_with_snapshot(program, expected_output, snapshot, parser, lexer):
@@ -320,6 +330,7 @@ def test_compile_with_snapshot(program, expected_output, snapshot, parser, lexer
         "if 2 > 0 then: Num 1 elif 2 > 0 then '12' else 1 end",
         "if 1+1 then 1 else 1 end",
         "if 2 > 0 then: Str 1 else 2 end",
+
     ],
 )
 def test_do_expection(program, parser, lexer):

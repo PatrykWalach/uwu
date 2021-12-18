@@ -1,0 +1,1 @@
+(()=>{Some=(value)=>{return {_:'Some',_0: value}};None=()=>{return {_:'None',}};True=()=>{return {_:'True',}};False=()=>{return {_:'False',}};id=(value)=>{return (()=>{return value})()};Pair=(a,b)=>{return {_:'Pair',_0: a,_1: b}};console.log(((__)=>{if(((__)=>{return __._ === "Pair"&&((__)=>{a=__; return true})(__._0)})(__)){return (()=>{return a})()}})(Pair(1.0,2.0)))})()

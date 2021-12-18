@@ -243,7 +243,7 @@ def infer(subst: Substitution, ctx: Context, exp: terms.AstTree) -> tuple[Substi
             subst, hint = infer(subst, ctx, hint)
             ctx[id] = Scheme.from_subst(subst, ctx, hint)
             return subst, hint
-        case terms.EParam(terms.EIdentifier(id), hint=None):
+        case terms.EParam(terms.EIdentifier(id), hint=None) | terms.EParamPattern(terms.EIdentifier(id)):
             ty = fresh_ty_var()
             # ctx[id] = Scheme.from_subst(subst, ctx, ty)
             ctx[id] = Scheme([], ty)

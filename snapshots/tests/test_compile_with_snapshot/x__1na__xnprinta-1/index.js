@@ -1,1 +1,1 @@
-(()=>{Some=(value)=>{return {_:'Some',value}};None=()=>{return {_:'None',}};True=()=>{return {_:'True',}};False=()=>{return {_:'False',}};id=(value)=>{return (()=>{return value})()};x=1.0;a=x;(__arg=a,console.log(__arg),__arg)})()
+(()=>{Some=(value)=>{return {_:'Some',_0: value}};None=()=>{return {_:'None',}};True=()=>{return {_:'True',}};False=()=>{return {_:'False',}};id=(value)=>{return (()=>{return value})()};x=1.0;a=x;console.log(a)})()
