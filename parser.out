@@ -121,74 +121,82 @@ Rule 117   _24_items -> _24_items _24_item
 Rule 118   _24_items -> _24_item
 Rule 119   _24_item -> case
 Rule 120   case -> pattern do
-Rule 121   pattern -> enum_pattern
-Rule 122   pattern -> param_pattern
-Rule 123   param_pattern -> identifier
-Rule 124   patterns -> pattern _25_repeat
-Rule 125   _25_repeat -> _25_items
-Rule 126   _25_repeat -> <empty>
-Rule 127   _25_items -> _25_items _25_item
-Rule 128   _25_items -> _25_item
-Rule 129   _25_item -> , pattern
-Rule 130   enum_pattern -> type_identifier ( _26_optional )
-Rule 131   _26_optional -> patterns
-Rule 132   _26_optional -> <empty>
-Rule 133   type_identifier -> TYPE_IDENTIFIER
-Rule 134   array -> [ _27_optional _28_repeat ]
-Rule 135   _27_optional -> expr
-Rule 136   _27_optional -> <empty>
+Rule 121   pattern -> array_pattern
+Rule 122   pattern -> enum_pattern
+Rule 123   pattern -> param_pattern
+Rule 124   param_pattern -> identifier
+Rule 125   array_pattern -> [ _25_optional _26_optional ]
+Rule 126   _25_optional -> patterns
+Rule 127   _25_optional -> <empty>
+Rule 128   _26_optional -> spread
+Rule 129   _26_optional -> <empty>
+Rule 130   spread -> SPREAD identifier _27_repeat
+Rule 131   _27_repeat -> _27_items
+Rule 132   _27_repeat -> <empty>
+Rule 133   _27_items -> _27_items _27_item
+Rule 134   _27_items -> _27_item
+Rule 135   _27_item -> , pattern
+Rule 136   patterns -> pattern _28_repeat
 Rule 137   _28_repeat -> _28_items
 Rule 138   _28_repeat -> <empty>
 Rule 139   _28_items -> _28_items _28_item
 Rule 140   _28_items -> _28_item
-Rule 141   _28_item -> , expr
-Rule 142   tuple -> { _29_optional _30_repeat }
-Rule 143   _29_optional -> expr
+Rule 141   _28_item -> , pattern
+Rule 142   enum_pattern -> type_identifier ( _29_optional )
+Rule 143   _29_optional -> patterns
 Rule 144   _29_optional -> <empty>
-Rule 145   _30_repeat -> _30_items
-Rule 146   _30_repeat -> <empty>
-Rule 147   _30_items -> _30_items _30_item
-Rule 148   _30_items -> _30_item
-Rule 149   _30_item -> , expr
-Rule 150   call -> callee ( _31_optional _32_repeat )
-Rule 151   _31_optional -> expr
-Rule 152   _31_optional -> <empty>
-Rule 153   _32_repeat -> _32_items
-Rule 154   _32_repeat -> <empty>
-Rule 155   _32_items -> _32_items _32_item
-Rule 156   _32_items -> _32_item
-Rule 157   _32_item -> , expr
-Rule 158   callee -> type_identifier
-Rule 159   callee -> identifier
-Rule 160   identifier -> IDENTIFIER
-Rule 161   variable_declaration -> identifier : type_identifier < type _33_repeat NOT_LESS expr  [precedence=left, level=2]
-Rule 162   _33_repeat -> _33_items
-Rule 163   _33_repeat -> <empty>
-Rule 164   _33_items -> _33_items _33_item
-Rule 165   _33_items -> _33_item
-Rule 166   _33_item -> , type
-Rule 167   variable_declaration -> identifier _34_optional = expr  [precedence=left, level=1]
-Rule 168   _34_optional -> : type
-Rule 169   _34_optional -> <empty>
-Rule 170   literal -> STRING
-Rule 171   literal -> NUMBER
-
-Unused terminals:
-
-    SPREAD
+Rule 145   type_identifier -> TYPE_IDENTIFIER
+Rule 146   array -> [ _30_optional _31_repeat ]
+Rule 147   _30_optional -> expr
+Rule 148   _30_optional -> <empty>
+Rule 149   _31_repeat -> _31_items
+Rule 150   _31_repeat -> <empty>
+Rule 151   _31_items -> _31_items _31_item
+Rule 152   _31_items -> _31_item
+Rule 153   _31_item -> , expr
+Rule 154   tuple -> { _32_optional _33_repeat }
+Rule 155   _32_optional -> expr
+Rule 156   _32_optional -> <empty>
+Rule 157   _33_repeat -> _33_items
+Rule 158   _33_repeat -> <empty>
+Rule 159   _33_items -> _33_items _33_item
+Rule 160   _33_items -> _33_item
+Rule 161   _33_item -> , expr
+Rule 162   call -> callee ( _34_optional _35_repeat )
+Rule 163   _34_optional -> expr
+Rule 164   _34_optional -> <empty>
+Rule 165   _35_repeat -> _35_items
+Rule 166   _35_repeat -> <empty>
+Rule 167   _35_items -> _35_items _35_item
+Rule 168   _35_items -> _35_item
+Rule 169   _35_item -> , expr
+Rule 170   callee -> type_identifier
+Rule 171   callee -> identifier
+Rule 172   identifier -> IDENTIFIER
+Rule 173   variable_declaration -> identifier : type_identifier < type _36_repeat NOT_LESS expr  [precedence=left, level=2]
+Rule 174   _36_repeat -> _36_items
+Rule 175   _36_repeat -> <empty>
+Rule 176   _36_items -> _36_items _36_item
+Rule 177   _36_items -> _36_item
+Rule 178   _36_item -> , type
+Rule 179   variable_declaration -> identifier _37_optional = expr  [precedence=left, level=1]
+Rule 180   _37_optional -> : type
+Rule 181   _37_optional -> <empty>
+Rule 182   literal -> STRING
+Rule 183   literal -> NUMBER
 
 Terminals, with rules where they appear:
 
-(                    : 12 54 94 130 150
-)                    : 12 54 94 130 150
+(                    : 12 54 94 142 162
+)                    : 12 54 94 142 162
 *                    : 31
 +                    : 34
-,                    : 61 70 78 101 129 141 149 157 166
+,                    : 61 70 78 101 135 141 153 161 169 178
 -                    : 13 33
 /                    : 32
-:                    : 37 62 84 103 106 161 168
-<                    : 30 65 73 86 161
-=                    : 167
+:                    : 37 62 84 103 106 173 180
+<                    : 30 65 73 86 173
+=                    : 179
 >                    : 29 65 73 86
 CASE                 : 114
 CONCAT               : 35
@@ -198,24 +206,24 @@ ELIF                 : 110
 ELSE                 : 113
 END                  : 36 105 114
 ENUM                 : 85
-IDENTIFIER           : 160
+IDENTIFIER           : 172
 IF                   : 105
 INT_DIV              : 26
 NEWLINE              : 8 45 53
-NOT_LESS             : 28 161
+NOT_LESS             : 28 173
 NOT_MORE             : 27
-NUMBER               : 171
+NUMBER               : 183
 OF                   : 114
-SPREAD               : 
-STRING               : 170
+SPREAD               : 130
+STRING               : 182
 STRUCT               : 72
 THEN                 : 105 110
-TYPE_IDENTIFIER      : 133
-[                    : 134
-]                    : 134
+TYPE_IDENTIFIER      : 145
+[                    : 125 146
+]                    : 125 146
 error                : 
-{                    : 72 85 142
-}                    : 72 85 142
+{                    : 72 85 154
+}                    : 72 85 154
 
 Nonterminals, with rules where they appear:
 
@@ -247,29 +255,34 @@ _23_optional         : 110
 _24_item             : 117 118
 _24_items            : 115 117
 _24_repeat           : 114
-_25_item             : 127 128
-_25_items            : 125 127
-_25_repeat           : 124
-_26_optional         : 130
-_27_optional         : 134
+_25_optional         : 125
+_26_optional         : 125
+_27_item             : 133 134
+_27_items            : 131 133
+_27_repeat           : 130
 _28_item             : 139 140
 _28_items            : 137 139
-_28_repeat           : 134
+_28_repeat           : 136
 _29_optional         : 142
 _2_item              : 6 7
 _2_items             : 4 6
 _2_repeat            : 1
-_30_item             : 147 148
-_30_items            : 145 147
-_30_repeat           : 142
-_31_optional         : 150
-_32_item             : 155 156
-_32_items            : 153 155
-_32_repeat           : 150
-_33_item             : 164 165
-_33_items            : 162 164
-_33_repeat           : 161
-_34_optional         : 167
+_30_optional         : 146
+_31_item             : 151 152
+_31_items            : 149 151
+_31_repeat           : 146
+_32_optional         : 154
+_33_item             : 159 160
+_33_items            : 157 159
+_33_repeat           : 154
+_34_optional         : 162
+_35_item             : 167 168
+_35_items            : 165 167
+_35_repeat           : 162
+_36_item             : 176 177
+_36_items            : 174 176
+_36_repeat           : 173
+_37_optional         : 179
 _3_optional          : 36
 _4_optional          : 36
 _5_item              : 43 44
@@ -284,32 +297,34 @@ _9_item              : 59 60
 _9_items             : 57 59
 _9_repeat            : 54
 array                : 15
+array_pattern        : 121
 binary_expr          : 16
 block_statement      : 105 110 113
 call                 : 21
-callee               : 150
+callee               : 162
 case                 : 114 119
 case_of              : 20
 def_expr             : 23
 do                   : 25 54 120
 enum                 : 9
-enum_pattern         : 121
-expr                 : 11 12 13 26 26 27 27 28 28 29 29 30 30 31 31 32 32 33 33 34 34 35 35 39 45 47 53 105 110 114 135 141 143 149 151 157 161 167
+enum_pattern         : 122
+expr                 : 11 12 13 26 26 27 27 28 28 29 29 30 30 31 31 32 32 33 33 34 34 35 35 39 45 47 53 105 110 114 147 153 155 161 163 169 173 179
 fields_unnamed       : 86 94
-identifier           : 18 54 73 78 84 96 101 102 123 159 161 167
+identifier           : 18 54 73 78 84 96 101 102 124 130 171 173 179
 if_expr              : 22
 literal              : 24
 or_else              : 108 111
 param                : 55 61
-param_pattern        : 122
-pattern              : 120 124 129
-patterns             : 131
+param_pattern        : 123
+pattern              : 120 135 136 141
+patterns             : 126 143
 program              : 0
+spread               : 128
 stmt                 : 2 8
 struct               : 10
 tuple                : 14
-type                 : 37 62 65 70 84 103 106 161 166 168
-type_identifier      : 17 64 72 85 93 130 158 161
+type                 : 37 62 65 70 84 103 106 173 178 180
+type_identifier      : 17 64 72 85 93 142 170 173
 variable_declaration : 19
 variant              : 92
 
@@ -339,8 +354,8 @@ state 0
     (23) expr -> . def_expr
     (24) expr -> . literal
     (25) expr -> . do
-    (142) tuple -> . { _29_optional _30_repeat }
-    (134) array -> . [ _27_optional _28_repeat ]
+    (154) tuple -> . { _32_optional _33_repeat }
+    (146) array -> . [ _30_optional _31_repeat ]
     (26) binary_expr -> . expr INT_DIV expr
     (27) binary_expr -> . expr NOT_MORE expr
     (28) binary_expr -> . expr NOT_LESS expr
@@ -351,19 +366,19 @@ state 0
     (33) binary_expr -> . expr - expr
     (34) binary_expr -> . expr + expr
     (35) binary_expr -> . expr CONCAT expr
-    (133) type_identifier -> . TYPE_IDENTIFIER
-    (160) identifier -> . IDENTIFIER
-    (161) variable_declaration -> . identifier : type_identifier < type _33_repeat NOT_LESS expr
-    (167) variable_declaration -> . identifier _34_optional = expr
+    (145) type_identifier -> . TYPE_IDENTIFIER
+    (172) identifier -> . IDENTIFIER
+    (173) variable_declaration -> . identifier : type_identifier < type _36_repeat NOT_LESS expr
+    (179) variable_declaration -> . identifier _37_optional = expr
     (114) case_of -> . CASE expr OF case _24_repeat END
-    (150) call -> . callee ( _31_optional _32_repeat )
+    (162) call -> . callee ( _34_optional _35_repeat )
     (105) if_expr -> . IF expr THEN _21_optional block_statement _22_optional END
     (54) def_expr -> . DEF identifier ( _8_optional _9_repeat ) _10_optional do
-    (170) literal -> . STRING
-    (171) literal -> . NUMBER
+    (182) literal -> . STRING
+    (183) literal -> . NUMBER
     (36) do -> . DO _3_optional _4_optional _5_repeat END
-    (158) callee -> . type_identifier
-    (159) callee -> . identifier
+    (170) callee -> . type_identifier
+    (171) callee -> . identifier
     NEWLINE         reduce using rule 3 (_1_optional -> .)
     $end            reduce using rule 3 (_1_optional -> .)
     ENUM            shift and go to state 7
@@ -472,7 +487,7 @@ state 6
 state 7
 
     (85) enum -> ENUM . type_identifier _16_optional { _17_repeat }
-    (133) type_identifier -> . TYPE_IDENTIFIER
+    (145) type_identifier -> . TYPE_IDENTIFIER
     TYPE_IDENTIFIER shift and go to state 25
 
     type_identifier                shift and go to state 48
@@ -480,7 +495,7 @@ state 7
 state 8
 
     (17) expr -> type_identifier .
-    (158) callee -> type_identifier .
+    (170) callee -> type_identifier .
     INT_DIV         reduce using rule 17 (expr -> type_identifier .)
     NOT_MORE        reduce using rule 17 (expr -> type_identifier .)
     NOT_LESS        reduce using rule 17 (expr -> type_identifier .)
@@ -502,14 +517,14 @@ state 8
     END             reduce using rule 17 (expr -> type_identifier .)
     ELIF            reduce using rule 17 (expr -> type_identifier .)
     ELSE            reduce using rule 17 (expr -> type_identifier .)
-    (               reduce using rule 158 (callee -> type_identifier .)
+    (               reduce using rule 170 (callee -> type_identifier .)
 
 
 state 9
 
-    (142) tuple -> { . _29_optional _30_repeat }
-    (143) _29_optional -> . expr
-    (144) _29_optional -> .
+    (154) tuple -> { . _32_optional _33_repeat }
+    (155) _32_optional -> . expr
+    (156) _32_optional -> .
     (12) expr -> . ( expr )
     (13) expr -> . - expr
     (14) expr -> . tuple
@@ -524,8 +539,8 @@ state 9
     (23) expr -> . def_expr
     (24) expr -> . literal
     (25) expr -> . do
-    (142) tuple -> . { _29_optional _30_repeat }
-    (134) array -> . [ _27_optional _28_repeat ]
+    (154) tuple -> . { _32_optional _33_repeat }
+    (146) array -> . [ _30_optional _31_repeat ]
     (26) binary_expr -> . expr INT_DIV expr
     (27) binary_expr -> . expr NOT_MORE expr
     (28) binary_expr -> . expr NOT_LESS expr
@@ -536,21 +551,21 @@ state 9
     (33) binary_expr -> . expr - expr
     (34) binary_expr -> . expr + expr
     (35) binary_expr -> . expr CONCAT expr
-    (133) type_identifier -> . TYPE_IDENTIFIER
-    (160) identifier -> . IDENTIFIER
-    (161) variable_declaration -> . identifier : type_identifier < type _33_repeat NOT_LESS expr
-    (167) variable_declaration -> . identifier _34_optional = expr
+    (145) type_identifier -> . TYPE_IDENTIFIER
+    (172) identifier -> . IDENTIFIER
+    (173) variable_declaration -> . identifier : type_identifier < type _36_repeat NOT_LESS expr
+    (179) variable_declaration -> . identifier _37_optional = expr
     (114) case_of -> . CASE expr OF case _24_repeat END
-    (150) call -> . callee ( _31_optional _32_repeat )
+    (162) call -> . callee ( _34_optional _35_repeat )
     (105) if_expr -> . IF expr THEN _21_optional block_statement _22_optional END
     (54) def_expr -> . DEF identifier ( _8_optional _9_repeat ) _10_optional do
-    (170) literal -> . STRING
-    (171) literal -> . NUMBER
+    (182) literal -> . STRING
+    (183) literal -> . NUMBER
     (36) do -> . DO _3_optional _4_optional _5_repeat END
-    (158) callee -> . type_identifier
-    (159) callee -> . identifier
-    ,               reduce using rule 144 (_29_optional -> .)
-    }               reduce using rule 144 (_29_optional -> .)
+    (170) callee -> . type_identifier
+    (171) callee -> . identifier
+    ,               reduce using rule 156 (_32_optional -> .)
+    }               reduce using rule 156 (_32_optional -> .)
     (               shift and go to state 11
     -               shift and go to state 12
     {               shift and go to state 9
@@ -564,7 +579,7 @@ state 9
     NUMBER          shift and go to state 32
     DO              shift and go to state 33
 
-    _29_optional                   shift and go to state 49
+    _32_optional                   shift and go to state 49
     expr                           shift and go to state 50
     tuple                          shift and go to state 13
     array                          shift and go to state 14
@@ -583,7 +598,7 @@ state 9
 state 10
 
     (72) struct -> STRUCT . type_identifier _13_optional { _15_repeat }
-    (133) type_identifier -> . TYPE_IDENTIFIER
+    (145) type_identifier -> . TYPE_IDENTIFIER
     TYPE_IDENTIFIER shift and go to state 25
 
     type_identifier                shift and go to state 51
@@ -605,8 +620,8 @@ state 11
     (23) expr -> . def_expr
     (24) expr -> . literal
     (25) expr -> . do
-    (142) tuple -> . { _29_optional _30_repeat }
-    (134) array -> . [ _27_optional _28_repeat ]
+    (154) tuple -> . { _32_optional _33_repeat }
+    (146) array -> . [ _30_optional _31_repeat ]
     (26) binary_expr -> . expr INT_DIV expr
     (27) binary_expr -> . expr NOT_MORE expr
     (28) binary_expr -> . expr NOT_LESS expr
@@ -617,19 +632,19 @@ state 11
     (33) binary_expr -> . expr - expr
     (34) binary_expr -> . expr + expr
     (35) binary_expr -> . expr CONCAT expr
-    (133) type_identifier -> . TYPE_IDENTIFIER
-    (160) identifier -> . IDENTIFIER
-    (161) variable_declaration -> . identifier : type_identifier < type _33_repeat NOT_LESS expr
-    (167) variable_declaration -> . identifier _34_optional = expr
+    (145) type_identifier -> . TYPE_IDENTIFIER
+    (172) identifier -> . IDENTIFIER
+    (173) variable_declaration -> . identifier : type_identifier < type _36_repeat NOT_LESS expr
+    (179) variable_declaration -> . identifier _37_optional = expr
     (114) case_of -> . CASE expr OF case _24_repeat END
-    (150) call -> . callee ( _31_optional _32_repeat )
+    (162) call -> . callee ( _34_optional _35_repeat )
     (105) if_expr -> . IF expr THEN _21_optional block_statement _22_optional END
     (54) def_expr -> . DEF identifier ( _8_optional _9_repeat ) _10_optional do
-    (170) literal -> . STRING
-    (171) literal -> . NUMBER
+    (182) literal -> . STRING
+    (183) literal -> . NUMBER
     (36) do -> . DO _3_optional _4_optional _5_repeat END
-    (158) callee -> . type_identifier
-    (159) callee -> . identifier
+    (170) callee -> . type_identifier
+    (171) callee -> . identifier
     (               shift and go to state 11
     -               shift and go to state 12
     {               shift and go to state 9
@@ -675,8 +690,8 @@ state 12
     (23) expr -> . def_expr
     (24) expr -> . literal
     (25) expr -> . do
-    (142) tuple -> . { _29_optional _30_repeat }
-    (134) array -> . [ _27_optional _28_repeat ]
+    (154) tuple -> . { _32_optional _33_repeat }
+    (146) array -> . [ _30_optional _31_repeat ]
     (26) binary_expr -> . expr INT_DIV expr
     (27) binary_expr -> . expr NOT_MORE expr
     (28) binary_expr -> . expr NOT_LESS expr
@@ -687,19 +702,19 @@ state 12
     (33) binary_expr -> . expr - expr
     (34) binary_expr -> . expr + expr
     (35) binary_expr -> . expr CONCAT expr
-    (133) type_identifier -> . TYPE_IDENTIFIER
-    (160) identifier -> . IDENTIFIER
-    (161) variable_declaration -> . identifier : type_identifier < type _33_repeat NOT_LESS expr
-    (167) variable_declaration -> . identifier _34_optional = expr
+    (145) type_identifier -> . TYPE_IDENTIFIER
+    (172) identifier -> . IDENTIFIER
+    (173) variable_declaration -> . identifier : type_identifier < type _36_repeat NOT_LESS expr
+    (179) variable_declaration -> . identifier _37_optional = expr
     (114) case_of -> . CASE expr OF case _24_repeat END
-    (150) call -> . callee ( _31_optional _32_repeat )
+    (162) call -> . callee ( _34_optional _35_repeat )
     (105) if_expr -> . IF expr THEN _21_optional block_statement _22_optional END
     (54) def_expr -> . DEF identifier ( _8_optional _9_repeat ) _10_optional do
-    (170) literal -> . STRING
-    (171) literal -> . NUMBER
+    (182) literal -> . STRING
+    (183) literal -> . NUMBER
     (36) do -> . DO _3_optional _4_optional _5_repeat END
-    (158) callee -> . type_identifier
-    (159) callee -> . identifier
+    (170) callee -> . type_identifier
+    (171) callee -> . identifier
     (               shift and go to state 11
     -               shift and go to state 12
     {               shift and go to state 9
@@ -809,11 +824,11 @@ state 15
 state 16
 
     (18) expr -> identifier .
-    (161) variable_declaration -> identifier . : type_identifier < type _33_repeat NOT_LESS expr
-    (167) variable_declaration -> identifier . _34_optional = expr
-    (159) callee -> identifier .
-    (168) _34_optional -> . : type
-    (169) _34_optional -> .
+    (173) variable_declaration -> identifier . : type_identifier < type _36_repeat NOT_LESS expr
+    (179) variable_declaration -> identifier . _37_optional = expr
+    (171) callee -> identifier .
+    (180) _37_optional -> . : type
+    (181) _37_optional -> .
     INT_DIV         reduce using rule 18 (expr -> identifier .)
     NOT_MORE        reduce using rule 18 (expr -> identifier .)
     NOT_LESS        reduce using rule 18 (expr -> identifier .)
@@ -836,10 +851,10 @@ state 16
     ELIF            reduce using rule 18 (expr -> identifier .)
     ELSE            reduce using rule 18 (expr -> identifier .)
     :               shift and go to state 54
-    (               reduce using rule 159 (callee -> identifier .)
-    =               reduce using rule 169 (_34_optional -> .)
+    (               reduce using rule 171 (callee -> identifier .)
+    =               reduce using rule 181 (_37_optional -> .)
 
-    _34_optional                   shift and go to state 55
+    _37_optional                   shift and go to state 55
 
 state 17
 
@@ -1025,9 +1040,9 @@ state 23
 
 state 24
 
-    (134) array -> [ . _27_optional _28_repeat ]
-    (135) _27_optional -> . expr
-    (136) _27_optional -> .
+    (146) array -> [ . _30_optional _31_repeat ]
+    (147) _30_optional -> . expr
+    (148) _30_optional -> .
     (12) expr -> . ( expr )
     (13) expr -> . - expr
     (14) expr -> . tuple
@@ -1042,8 +1057,8 @@ state 24
     (23) expr -> . def_expr
     (24) expr -> . literal
     (25) expr -> . do
-    (142) tuple -> . { _29_optional _30_repeat }
-    (134) array -> . [ _27_optional _28_repeat ]
+    (154) tuple -> . { _32_optional _33_repeat }
+    (146) array -> . [ _30_optional _31_repeat ]
     (26) binary_expr -> . expr INT_DIV expr
     (27) binary_expr -> . expr NOT_MORE expr
     (28) binary_expr -> . expr NOT_LESS expr
@@ -1054,21 +1069,21 @@ state 24
     (33) binary_expr -> . expr - expr
     (34) binary_expr -> . expr + expr
     (35) binary_expr -> . expr CONCAT expr
-    (133) type_identifier -> . TYPE_IDENTIFIER
-    (160) identifier -> . IDENTIFIER
-    (161) variable_declaration -> . identifier : type_identifier < type _33_repeat NOT_LESS expr
-    (167) variable_declaration -> . identifier _34_optional = expr
+    (145) type_identifier -> . TYPE_IDENTIFIER
+    (172) identifier -> . IDENTIFIER
+    (173) variable_declaration -> . identifier : type_identifier < type _36_repeat NOT_LESS expr
+    (179) variable_declaration -> . identifier _37_optional = expr
     (114) case_of -> . CASE expr OF case _24_repeat END
-    (150) call -> . callee ( _31_optional _32_repeat )
+    (162) call -> . callee ( _34_optional _35_repeat )
     (105) if_expr -> . IF expr THEN _21_optional block_statement _22_optional END
     (54) def_expr -> . DEF identifier ( _8_optional _9_repeat ) _10_optional do
-    (170) literal -> . STRING
-    (171) literal -> . NUMBER
+    (182) literal -> . STRING
+    (183) literal -> . NUMBER
     (36) do -> . DO _3_optional _4_optional _5_repeat END
-    (158) callee -> . type_identifier
-    (159) callee -> . identifier
-    ,               reduce using rule 136 (_27_optional -> .)
-    ]               reduce using rule 136 (_27_optional -> .)
+    (170) callee -> . type_identifier
+    (171) callee -> . identifier
+    ,               reduce using rule 148 (_30_optional -> .)
+    ]               reduce using rule 148 (_30_optional -> .)
     (               shift and go to state 11
     -               shift and go to state 12
     {               shift and go to state 9
@@ -1082,7 +1097,7 @@ state 24
     NUMBER          shift and go to state 32
     DO              shift and go to state 33
 
-    _27_optional                   shift and go to state 56
+    _30_optional                   shift and go to state 56
     expr                           shift and go to state 57
     tuple                          shift and go to state 13
     array                          shift and go to state 14
@@ -1100,70 +1115,71 @@ state 24
 
 state 25
 
-    (133) type_identifier -> TYPE_IDENTIFIER .
-    INT_DIV         reduce using rule 133 (type_identifier -> TYPE_IDENTIFIER .)
-    NOT_MORE        reduce using rule 133 (type_identifier -> TYPE_IDENTIFIER .)
-    NOT_LESS        reduce using rule 133 (type_identifier -> TYPE_IDENTIFIER .)
-    >               reduce using rule 133 (type_identifier -> TYPE_IDENTIFIER .)
-    <               reduce using rule 133 (type_identifier -> TYPE_IDENTIFIER .)
-    *               reduce using rule 133 (type_identifier -> TYPE_IDENTIFIER .)
-    /               reduce using rule 133 (type_identifier -> TYPE_IDENTIFIER .)
-    -               reduce using rule 133 (type_identifier -> TYPE_IDENTIFIER .)
-    +               reduce using rule 133 (type_identifier -> TYPE_IDENTIFIER .)
-    CONCAT          reduce using rule 133 (type_identifier -> TYPE_IDENTIFIER .)
-    NEWLINE         reduce using rule 133 (type_identifier -> TYPE_IDENTIFIER .)
-    $end            reduce using rule 133 (type_identifier -> TYPE_IDENTIFIER .)
-    (               reduce using rule 133 (type_identifier -> TYPE_IDENTIFIER .)
-    {               reduce using rule 133 (type_identifier -> TYPE_IDENTIFIER .)
-    ,               reduce using rule 133 (type_identifier -> TYPE_IDENTIFIER .)
-    }               reduce using rule 133 (type_identifier -> TYPE_IDENTIFIER .)
-    )               reduce using rule 133 (type_identifier -> TYPE_IDENTIFIER .)
-    ]               reduce using rule 133 (type_identifier -> TYPE_IDENTIFIER .)
-    OF              reduce using rule 133 (type_identifier -> TYPE_IDENTIFIER .)
-    THEN            reduce using rule 133 (type_identifier -> TYPE_IDENTIFIER .)
-    END             reduce using rule 133 (type_identifier -> TYPE_IDENTIFIER .)
-    ELIF            reduce using rule 133 (type_identifier -> TYPE_IDENTIFIER .)
-    ELSE            reduce using rule 133 (type_identifier -> TYPE_IDENTIFIER .)
-    =               reduce using rule 133 (type_identifier -> TYPE_IDENTIFIER .)
-    [               reduce using rule 133 (type_identifier -> TYPE_IDENTIFIER .)
-    TYPE_IDENTIFIER reduce using rule 133 (type_identifier -> TYPE_IDENTIFIER .)
-    IDENTIFIER      reduce using rule 133 (type_identifier -> TYPE_IDENTIFIER .)
-    CASE            reduce using rule 133 (type_identifier -> TYPE_IDENTIFIER .)
-    IF              reduce using rule 133 (type_identifier -> TYPE_IDENTIFIER .)
-    DEF             reduce using rule 133 (type_identifier -> TYPE_IDENTIFIER .)
-    STRING          reduce using rule 133 (type_identifier -> TYPE_IDENTIFIER .)
-    NUMBER          reduce using rule 133 (type_identifier -> TYPE_IDENTIFIER .)
-    DO              reduce using rule 133 (type_identifier -> TYPE_IDENTIFIER .)
+    (145) type_identifier -> TYPE_IDENTIFIER .
+    INT_DIV         reduce using rule 145 (type_identifier -> TYPE_IDENTIFIER .)
+    NOT_MORE        reduce using rule 145 (type_identifier -> TYPE_IDENTIFIER .)
+    NOT_LESS        reduce using rule 145 (type_identifier -> TYPE_IDENTIFIER .)
+    >               reduce using rule 145 (type_identifier -> TYPE_IDENTIFIER .)
+    <               reduce using rule 145 (type_identifier -> TYPE_IDENTIFIER .)
+    *               reduce using rule 145 (type_identifier -> TYPE_IDENTIFIER .)
+    /               reduce using rule 145 (type_identifier -> TYPE_IDENTIFIER .)
+    -               reduce using rule 145 (type_identifier -> TYPE_IDENTIFIER .)
+    +               reduce using rule 145 (type_identifier -> TYPE_IDENTIFIER .)
+    CONCAT          reduce using rule 145 (type_identifier -> TYPE_IDENTIFIER .)
+    NEWLINE         reduce using rule 145 (type_identifier -> TYPE_IDENTIFIER .)
+    $end            reduce using rule 145 (type_identifier -> TYPE_IDENTIFIER .)
+    (               reduce using rule 145 (type_identifier -> TYPE_IDENTIFIER .)
+    {               reduce using rule 145 (type_identifier -> TYPE_IDENTIFIER .)
+    ,               reduce using rule 145 (type_identifier -> TYPE_IDENTIFIER .)
+    }               reduce using rule 145 (type_identifier -> TYPE_IDENTIFIER .)
+    )               reduce using rule 145 (type_identifier -> TYPE_IDENTIFIER .)
+    ]               reduce using rule 145 (type_identifier -> TYPE_IDENTIFIER .)
+    OF              reduce using rule 145 (type_identifier -> TYPE_IDENTIFIER .)
+    THEN            reduce using rule 145 (type_identifier -> TYPE_IDENTIFIER .)
+    END             reduce using rule 145 (type_identifier -> TYPE_IDENTIFIER .)
+    ELIF            reduce using rule 145 (type_identifier -> TYPE_IDENTIFIER .)
+    ELSE            reduce using rule 145 (type_identifier -> TYPE_IDENTIFIER .)
+    =               reduce using rule 145 (type_identifier -> TYPE_IDENTIFIER .)
+    [               reduce using rule 145 (type_identifier -> TYPE_IDENTIFIER .)
+    TYPE_IDENTIFIER reduce using rule 145 (type_identifier -> TYPE_IDENTIFIER .)
+    IDENTIFIER      reduce using rule 145 (type_identifier -> TYPE_IDENTIFIER .)
+    CASE            reduce using rule 145 (type_identifier -> TYPE_IDENTIFIER .)
+    IF              reduce using rule 145 (type_identifier -> TYPE_IDENTIFIER .)
+    DEF             reduce using rule 145 (type_identifier -> TYPE_IDENTIFIER .)
+    STRING          reduce using rule 145 (type_identifier -> TYPE_IDENTIFIER .)
+    NUMBER          reduce using rule 145 (type_identifier -> TYPE_IDENTIFIER .)
+    DO              reduce using rule 145 (type_identifier -> TYPE_IDENTIFIER .)
 
 
 state 26
 
-    (160) identifier -> IDENTIFIER .
-    :               reduce using rule 160 (identifier -> IDENTIFIER .)
-    =               reduce using rule 160 (identifier -> IDENTIFIER .)
-    INT_DIV         reduce using rule 160 (identifier -> IDENTIFIER .)
-    NOT_MORE        reduce using rule 160 (identifier -> IDENTIFIER .)
-    NOT_LESS        reduce using rule 160 (identifier -> IDENTIFIER .)
-    >               reduce using rule 160 (identifier -> IDENTIFIER .)
-    <               reduce using rule 160 (identifier -> IDENTIFIER .)
-    *               reduce using rule 160 (identifier -> IDENTIFIER .)
-    /               reduce using rule 160 (identifier -> IDENTIFIER .)
-    -               reduce using rule 160 (identifier -> IDENTIFIER .)
-    +               reduce using rule 160 (identifier -> IDENTIFIER .)
-    CONCAT          reduce using rule 160 (identifier -> IDENTIFIER .)
-    NEWLINE         reduce using rule 160 (identifier -> IDENTIFIER .)
-    $end            reduce using rule 160 (identifier -> IDENTIFIER .)
-    (               reduce using rule 160 (identifier -> IDENTIFIER .)
-    ,               reduce using rule 160 (identifier -> IDENTIFIER .)
-    }               reduce using rule 160 (identifier -> IDENTIFIER .)
-    )               reduce using rule 160 (identifier -> IDENTIFIER .)
-    ]               reduce using rule 160 (identifier -> IDENTIFIER .)
-    OF              reduce using rule 160 (identifier -> IDENTIFIER .)
-    THEN            reduce using rule 160 (identifier -> IDENTIFIER .)
-    END             reduce using rule 160 (identifier -> IDENTIFIER .)
-    ELIF            reduce using rule 160 (identifier -> IDENTIFIER .)
-    ELSE            reduce using rule 160 (identifier -> IDENTIFIER .)
-    DO              reduce using rule 160 (identifier -> IDENTIFIER .)
+    (172) identifier -> IDENTIFIER .
+    :               reduce using rule 172 (identifier -> IDENTIFIER .)
+    =               reduce using rule 172 (identifier -> IDENTIFIER .)
+    INT_DIV         reduce using rule 172 (identifier -> IDENTIFIER .)
+    NOT_MORE        reduce using rule 172 (identifier -> IDENTIFIER .)
+    NOT_LESS        reduce using rule 172 (identifier -> IDENTIFIER .)
+    >               reduce using rule 172 (identifier -> IDENTIFIER .)
+    <               reduce using rule 172 (identifier -> IDENTIFIER .)
+    *               reduce using rule 172 (identifier -> IDENTIFIER .)
+    /               reduce using rule 172 (identifier -> IDENTIFIER .)
+    -               reduce using rule 172 (identifier -> IDENTIFIER .)
+    +               reduce using rule 172 (identifier -> IDENTIFIER .)
+    CONCAT          reduce using rule 172 (identifier -> IDENTIFIER .)
+    NEWLINE         reduce using rule 172 (identifier -> IDENTIFIER .)
+    $end            reduce using rule 172 (identifier -> IDENTIFIER .)
+    (               reduce using rule 172 (identifier -> IDENTIFIER .)
+    ,               reduce using rule 172 (identifier -> IDENTIFIER .)
+    }               reduce using rule 172 (identifier -> IDENTIFIER .)
+    )               reduce using rule 172 (identifier -> IDENTIFIER .)
+    ]               reduce using rule 172 (identifier -> IDENTIFIER .)
+    OF              reduce using rule 172 (identifier -> IDENTIFIER .)
+    THEN            reduce using rule 172 (identifier -> IDENTIFIER .)
+    END             reduce using rule 172 (identifier -> IDENTIFIER .)
+    ELIF            reduce using rule 172 (identifier -> IDENTIFIER .)
+    ELSE            reduce using rule 172 (identifier -> IDENTIFIER .)
+    DO              reduce using rule 172 (identifier -> IDENTIFIER .)
+    SPREAD          reduce using rule 172 (identifier -> IDENTIFIER .)
 
 
 state 27
@@ -1183,8 +1199,8 @@ state 27
     (23) expr -> . def_expr
     (24) expr -> . literal
     (25) expr -> . do
-    (142) tuple -> . { _29_optional _30_repeat }
-    (134) array -> . [ _27_optional _28_repeat ]
+    (154) tuple -> . { _32_optional _33_repeat }
+    (146) array -> . [ _30_optional _31_repeat ]
     (26) binary_expr -> . expr INT_DIV expr
     (27) binary_expr -> . expr NOT_MORE expr
     (28) binary_expr -> . expr NOT_LESS expr
@@ -1195,19 +1211,19 @@ state 27
     (33) binary_expr -> . expr - expr
     (34) binary_expr -> . expr + expr
     (35) binary_expr -> . expr CONCAT expr
-    (133) type_identifier -> . TYPE_IDENTIFIER
-    (160) identifier -> . IDENTIFIER
-    (161) variable_declaration -> . identifier : type_identifier < type _33_repeat NOT_LESS expr
-    (167) variable_declaration -> . identifier _34_optional = expr
+    (145) type_identifier -> . TYPE_IDENTIFIER
+    (172) identifier -> . IDENTIFIER
+    (173) variable_declaration -> . identifier : type_identifier < type _36_repeat NOT_LESS expr
+    (179) variable_declaration -> . identifier _37_optional = expr
     (114) case_of -> . CASE expr OF case _24_repeat END
-    (150) call -> . callee ( _31_optional _32_repeat )
+    (162) call -> . callee ( _34_optional _35_repeat )
     (105) if_expr -> . IF expr THEN _21_optional block_statement _22_optional END
     (54) def_expr -> . DEF identifier ( _8_optional _9_repeat ) _10_optional do
-    (170) literal -> . STRING
-    (171) literal -> . NUMBER
+    (182) literal -> . STRING
+    (183) literal -> . NUMBER
     (36) do -> . DO _3_optional _4_optional _5_repeat END
-    (158) callee -> . type_identifier
-    (159) callee -> . identifier
+    (170) callee -> . type_identifier
+    (171) callee -> . identifier
     (               shift and go to state 11
     -               shift and go to state 12
     {               shift and go to state 9
@@ -1238,7 +1254,7 @@ state 27
 
 state 28
 
-    (150) call -> callee . ( _31_optional _32_repeat )
+    (162) call -> callee . ( _34_optional _35_repeat )
     (               shift and go to state 59
 
 
@@ -1259,8 +1275,8 @@ state 29
     (23) expr -> . def_expr
     (24) expr -> . literal
     (25) expr -> . do
-    (142) tuple -> . { _29_optional _30_repeat }
-    (134) array -> . [ _27_optional _28_repeat ]
+    (154) tuple -> . { _32_optional _33_repeat }
+    (146) array -> . [ _30_optional _31_repeat ]
     (26) binary_expr -> . expr INT_DIV expr
     (27) binary_expr -> . expr NOT_MORE expr
     (28) binary_expr -> . expr NOT_LESS expr
@@ -1271,19 +1287,19 @@ state 29
     (33) binary_expr -> . expr - expr
     (34) binary_expr -> . expr + expr
     (35) binary_expr -> . expr CONCAT expr
-    (133) type_identifier -> . TYPE_IDENTIFIER
-    (160) identifier -> . IDENTIFIER
-    (161) variable_declaration -> . identifier : type_identifier < type _33_repeat NOT_LESS expr
-    (167) variable_declaration -> . identifier _34_optional = expr
+    (145) type_identifier -> . TYPE_IDENTIFIER
+    (172) identifier -> . IDENTIFIER
+    (173) variable_declaration -> . identifier : type_identifier < type _36_repeat NOT_LESS expr
+    (179) variable_declaration -> . identifier _37_optional = expr
     (114) case_of -> . CASE expr OF case _24_repeat END
-    (150) call -> . callee ( _31_optional _32_repeat )
+    (162) call -> . callee ( _34_optional _35_repeat )
     (105) if_expr -> . IF expr THEN _21_optional block_statement _22_optional END
     (54) def_expr -> . DEF identifier ( _8_optional _9_repeat ) _10_optional do
-    (170) literal -> . STRING
-    (171) literal -> . NUMBER
+    (182) literal -> . STRING
+    (183) literal -> . NUMBER
     (36) do -> . DO _3_optional _4_optional _5_repeat END
-    (158) callee -> . type_identifier
-    (159) callee -> . identifier
+    (170) callee -> . type_identifier
+    (171) callee -> . identifier
     (               shift and go to state 11
     -               shift and go to state 12
     {               shift and go to state 9
@@ -1315,61 +1331,61 @@ state 29
 state 30
 
     (54) def_expr -> DEF . identifier ( _8_optional _9_repeat ) _10_optional do
-    (160) identifier -> . IDENTIFIER
+    (172) identifier -> . IDENTIFIER
     IDENTIFIER      shift and go to state 26
 
     identifier                     shift and go to state 61
 
 state 31
 
-    (170) literal -> STRING .
-    INT_DIV         reduce using rule 170 (literal -> STRING .)
-    NOT_MORE        reduce using rule 170 (literal -> STRING .)
-    NOT_LESS        reduce using rule 170 (literal -> STRING .)
-    >               reduce using rule 170 (literal -> STRING .)
-    <               reduce using rule 170 (literal -> STRING .)
-    *               reduce using rule 170 (literal -> STRING .)
-    /               reduce using rule 170 (literal -> STRING .)
-    -               reduce using rule 170 (literal -> STRING .)
-    +               reduce using rule 170 (literal -> STRING .)
-    CONCAT          reduce using rule 170 (literal -> STRING .)
-    NEWLINE         reduce using rule 170 (literal -> STRING .)
-    $end            reduce using rule 170 (literal -> STRING .)
-    ,               reduce using rule 170 (literal -> STRING .)
-    }               reduce using rule 170 (literal -> STRING .)
-    )               reduce using rule 170 (literal -> STRING .)
-    ]               reduce using rule 170 (literal -> STRING .)
-    OF              reduce using rule 170 (literal -> STRING .)
-    THEN            reduce using rule 170 (literal -> STRING .)
-    END             reduce using rule 170 (literal -> STRING .)
-    ELIF            reduce using rule 170 (literal -> STRING .)
-    ELSE            reduce using rule 170 (literal -> STRING .)
+    (182) literal -> STRING .
+    INT_DIV         reduce using rule 182 (literal -> STRING .)
+    NOT_MORE        reduce using rule 182 (literal -> STRING .)
+    NOT_LESS        reduce using rule 182 (literal -> STRING .)
+    >               reduce using rule 182 (literal -> STRING .)
+    <               reduce using rule 182 (literal -> STRING .)
+    *               reduce using rule 182 (literal -> STRING .)
+    /               reduce using rule 182 (literal -> STRING .)
+    -               reduce using rule 182 (literal -> STRING .)
+    +               reduce using rule 182 (literal -> STRING .)
+    CONCAT          reduce using rule 182 (literal -> STRING .)
+    NEWLINE         reduce using rule 182 (literal -> STRING .)
+    $end            reduce using rule 182 (literal -> STRING .)
+    ,               reduce using rule 182 (literal -> STRING .)
+    }               reduce using rule 182 (literal -> STRING .)
+    )               reduce using rule 182 (literal -> STRING .)
+    ]               reduce using rule 182 (literal -> STRING .)
+    OF              reduce using rule 182 (literal -> STRING .)
+    THEN            reduce using rule 182 (literal -> STRING .)
+    END             reduce using rule 182 (literal -> STRING .)
+    ELIF            reduce using rule 182 (literal -> STRING .)
+    ELSE            reduce using rule 182 (literal -> STRING .)
 
 
 state 32
 
-    (171) literal -> NUMBER .
-    INT_DIV         reduce using rule 171 (literal -> NUMBER .)
-    NOT_MORE        reduce using rule 171 (literal -> NUMBER .)
-    NOT_LESS        reduce using rule 171 (literal -> NUMBER .)
-    >               reduce using rule 171 (literal -> NUMBER .)
-    <               reduce using rule 171 (literal -> NUMBER .)
-    *               reduce using rule 171 (literal -> NUMBER .)
-    /               reduce using rule 171 (literal -> NUMBER .)
-    -               reduce using rule 171 (literal -> NUMBER .)
-    +               reduce using rule 171 (literal -> NUMBER .)
-    CONCAT          reduce using rule 171 (literal -> NUMBER .)
-    NEWLINE         reduce using rule 171 (literal -> NUMBER .)
-    $end            reduce using rule 171 (literal -> NUMBER .)
-    ,               reduce using rule 171 (literal -> NUMBER .)
-    }               reduce using rule 171 (literal -> NUMBER .)
-    )               reduce using rule 171 (literal -> NUMBER .)
-    ]               reduce using rule 171 (literal -> NUMBER .)
-    OF              reduce using rule 171 (literal -> NUMBER .)
-    THEN            reduce using rule 171 (literal -> NUMBER .)
-    END             reduce using rule 171 (literal -> NUMBER .)
-    ELIF            reduce using rule 171 (literal -> NUMBER .)
-    ELSE            reduce using rule 171 (literal -> NUMBER .)
+    (183) literal -> NUMBER .
+    INT_DIV         reduce using rule 183 (literal -> NUMBER .)
+    NOT_MORE        reduce using rule 183 (literal -> NUMBER .)
+    NOT_LESS        reduce using rule 183 (literal -> NUMBER .)
+    >               reduce using rule 183 (literal -> NUMBER .)
+    <               reduce using rule 183 (literal -> NUMBER .)
+    *               reduce using rule 183 (literal -> NUMBER .)
+    /               reduce using rule 183 (literal -> NUMBER .)
+    -               reduce using rule 183 (literal -> NUMBER .)
+    +               reduce using rule 183 (literal -> NUMBER .)
+    CONCAT          reduce using rule 183 (literal -> NUMBER .)
+    NEWLINE         reduce using rule 183 (literal -> NUMBER .)
+    $end            reduce using rule 183 (literal -> NUMBER .)
+    ,               reduce using rule 183 (literal -> NUMBER .)
+    }               reduce using rule 183 (literal -> NUMBER .)
+    )               reduce using rule 183 (literal -> NUMBER .)
+    ]               reduce using rule 183 (literal -> NUMBER .)
+    OF              reduce using rule 183 (literal -> NUMBER .)
+    THEN            reduce using rule 183 (literal -> NUMBER .)
+    END             reduce using rule 183 (literal -> NUMBER .)
+    ELIF            reduce using rule 183 (literal -> NUMBER .)
+    ELSE            reduce using rule 183 (literal -> NUMBER .)
 
 
 state 33
@@ -1440,8 +1456,8 @@ state 37
     (23) expr -> . def_expr
     (24) expr -> . literal
     (25) expr -> . do
-    (142) tuple -> . { _29_optional _30_repeat }
-    (134) array -> . [ _27_optional _28_repeat ]
+    (154) tuple -> . { _32_optional _33_repeat }
+    (146) array -> . [ _30_optional _31_repeat ]
     (26) binary_expr -> . expr INT_DIV expr
     (27) binary_expr -> . expr NOT_MORE expr
     (28) binary_expr -> . expr NOT_LESS expr
@@ -1452,19 +1468,19 @@ state 37
     (33) binary_expr -> . expr - expr
     (34) binary_expr -> . expr + expr
     (35) binary_expr -> . expr CONCAT expr
-    (133) type_identifier -> . TYPE_IDENTIFIER
-    (160) identifier -> . IDENTIFIER
-    (161) variable_declaration -> . identifier : type_identifier < type _33_repeat NOT_LESS expr
-    (167) variable_declaration -> . identifier _34_optional = expr
+    (145) type_identifier -> . TYPE_IDENTIFIER
+    (172) identifier -> . IDENTIFIER
+    (173) variable_declaration -> . identifier : type_identifier < type _36_repeat NOT_LESS expr
+    (179) variable_declaration -> . identifier _37_optional = expr
     (114) case_of -> . CASE expr OF case _24_repeat END
-    (150) call -> . callee ( _31_optional _32_repeat )
+    (162) call -> . callee ( _34_optional _35_repeat )
     (105) if_expr -> . IF expr THEN _21_optional block_statement _22_optional END
     (54) def_expr -> . DEF identifier ( _8_optional _9_repeat ) _10_optional do
-    (170) literal -> . STRING
-    (171) literal -> . NUMBER
+    (182) literal -> . STRING
+    (183) literal -> . NUMBER
     (36) do -> . DO _3_optional _4_optional _5_repeat END
-    (158) callee -> . type_identifier
-    (159) callee -> . identifier
+    (170) callee -> . type_identifier
+    (171) callee -> . identifier
     ENUM            shift and go to state 7
     STRUCT          shift and go to state 10
     (               shift and go to state 11
@@ -1515,8 +1531,8 @@ state 38
     (23) expr -> . def_expr
     (24) expr -> . literal
     (25) expr -> . do
-    (142) tuple -> . { _29_optional _30_repeat }
-    (134) array -> . [ _27_optional _28_repeat ]
+    (154) tuple -> . { _32_optional _33_repeat }
+    (146) array -> . [ _30_optional _31_repeat ]
     (26) binary_expr -> . expr INT_DIV expr
     (27) binary_expr -> . expr NOT_MORE expr
     (28) binary_expr -> . expr NOT_LESS expr
@@ -1527,19 +1543,19 @@ state 38
     (33) binary_expr -> . expr - expr
     (34) binary_expr -> . expr + expr
     (35) binary_expr -> . expr CONCAT expr
-    (133) type_identifier -> . TYPE_IDENTIFIER
-    (160) identifier -> . IDENTIFIER
-    (161) variable_declaration -> . identifier : type_identifier < type _33_repeat NOT_LESS expr
-    (167) variable_declaration -> . identifier _34_optional = expr
+    (145) type_identifier -> . TYPE_IDENTIFIER
+    (172) identifier -> . IDENTIFIER
+    (173) variable_declaration -> . identifier : type_identifier < type _36_repeat NOT_LESS expr
+    (179) variable_declaration -> . identifier _37_optional = expr
     (114) case_of -> . CASE expr OF case _24_repeat END
-    (150) call -> . callee ( _31_optional _32_repeat )
+    (162) call -> . callee ( _34_optional _35_repeat )
     (105) if_expr -> . IF expr THEN _21_optional block_statement _22_optional END
     (54) def_expr -> . DEF identifier ( _8_optional _9_repeat ) _10_optional do
-    (170) literal -> . STRING
-    (171) literal -> . NUMBER
+    (182) literal -> . STRING
+    (183) literal -> . NUMBER
     (36) do -> . DO _3_optional _4_optional _5_repeat END
-    (158) callee -> . type_identifier
-    (159) callee -> . identifier
+    (170) callee -> . type_identifier
+    (171) callee -> . identifier
     (               shift and go to state 11
     -               shift and go to state 12
     {               shift and go to state 9
@@ -1585,8 +1601,8 @@ state 39
     (23) expr -> . def_expr
     (24) expr -> . literal
     (25) expr -> . do
-    (142) tuple -> . { _29_optional _30_repeat }
-    (134) array -> . [ _27_optional _28_repeat ]
+    (154) tuple -> . { _32_optional _33_repeat }
+    (146) array -> . [ _30_optional _31_repeat ]
     (26) binary_expr -> . expr INT_DIV expr
     (27) binary_expr -> . expr NOT_MORE expr
     (28) binary_expr -> . expr NOT_LESS expr
@@ -1597,19 +1613,19 @@ state 39
     (33) binary_expr -> . expr - expr
     (34) binary_expr -> . expr + expr
     (35) binary_expr -> . expr CONCAT expr
-    (133) type_identifier -> . TYPE_IDENTIFIER
-    (160) identifier -> . IDENTIFIER
-    (161) variable_declaration -> . identifier : type_identifier < type _33_repeat NOT_LESS expr
-    (167) variable_declaration -> . identifier _34_optional = expr
+    (145) type_identifier -> . TYPE_IDENTIFIER
+    (172) identifier -> . IDENTIFIER
+    (173) variable_declaration -> . identifier : type_identifier < type _36_repeat NOT_LESS expr
+    (179) variable_declaration -> . identifier _37_optional = expr
     (114) case_of -> . CASE expr OF case _24_repeat END
-    (150) call -> . callee ( _31_optional _32_repeat )
+    (162) call -> . callee ( _34_optional _35_repeat )
     (105) if_expr -> . IF expr THEN _21_optional block_statement _22_optional END
     (54) def_expr -> . DEF identifier ( _8_optional _9_repeat ) _10_optional do
-    (170) literal -> . STRING
-    (171) literal -> . NUMBER
+    (182) literal -> . STRING
+    (183) literal -> . NUMBER
     (36) do -> . DO _3_optional _4_optional _5_repeat END
-    (158) callee -> . type_identifier
-    (159) callee -> . identifier
+    (170) callee -> . type_identifier
+    (171) callee -> . identifier
     (               shift and go to state 11
     -               shift and go to state 12
     {               shift and go to state 9
@@ -1655,8 +1671,8 @@ state 40
     (23) expr -> . def_expr
     (24) expr -> . literal
     (25) expr -> . do
-    (142) tuple -> . { _29_optional _30_repeat }
-    (134) array -> . [ _27_optional _28_repeat ]
+    (154) tuple -> . { _32_optional _33_repeat }
+    (146) array -> . [ _30_optional _31_repeat ]
     (26) binary_expr -> . expr INT_DIV expr
     (27) binary_expr -> . expr NOT_MORE expr
     (28) binary_expr -> . expr NOT_LESS expr
@@ -1667,19 +1683,19 @@ state 40
     (33) binary_expr -> . expr - expr
     (34) binary_expr -> . expr + expr
     (35) binary_expr -> . expr CONCAT expr
-    (133) type_identifier -> . TYPE_IDENTIFIER
-    (160) identifier -> . IDENTIFIER
-    (161) variable_declaration -> . identifier : type_identifier < type _33_repeat NOT_LESS expr
-    (167) variable_declaration -> . identifier _34_optional = expr
+    (145) type_identifier -> . TYPE_IDENTIFIER
+    (172) identifier -> . IDENTIFIER
+    (173) variable_declaration -> . identifier : type_identifier < type _36_repeat NOT_LESS expr
+    (179) variable_declaration -> . identifier _37_optional = expr
     (114) case_of -> . CASE expr OF case _24_repeat END
-    (150) call -> . callee ( _31_optional _32_repeat )
+    (162) call -> . callee ( _34_optional _35_repeat )
     (105) if_expr -> . IF expr THEN _21_optional block_statement _22_optional END
     (54) def_expr -> . DEF identifier ( _8_optional _9_repeat ) _10_optional do
-    (170) literal -> . STRING
-    (171) literal -> . NUMBER
+    (182) literal -> . STRING
+    (183) literal -> . NUMBER
     (36) do -> . DO _3_optional _4_optional _5_repeat END
-    (158) callee -> . type_identifier
-    (159) callee -> . identifier
+    (170) callee -> . type_identifier
+    (171) callee -> . identifier
     (               shift and go to state 11
     -               shift and go to state 12
     {               shift and go to state 9
@@ -1725,8 +1741,8 @@ state 41
     (23) expr -> . def_expr
     (24) expr -> . literal
     (25) expr -> . do
-    (142) tuple -> . { _29_optional _30_repeat }
-    (134) array -> . [ _27_optional _28_repeat ]
+    (154) tuple -> . { _32_optional _33_repeat }
+    (146) array -> . [ _30_optional _31_repeat ]
     (26) binary_expr -> . expr INT_DIV expr
     (27) binary_expr -> . expr NOT_MORE expr
     (28) binary_expr -> . expr NOT_LESS expr
@@ -1737,19 +1753,19 @@ state 41
     (33) binary_expr -> . expr - expr
     (34) binary_expr -> . expr + expr
     (35) binary_expr -> . expr CONCAT expr
-    (133) type_identifier -> . TYPE_IDENTIFIER
-    (160) identifier -> . IDENTIFIER
-    (161) variable_declaration -> . identifier : type_identifier < type _33_repeat NOT_LESS expr
-    (167) variable_declaration -> . identifier _34_optional = expr
+    (145) type_identifier -> . TYPE_IDENTIFIER
+    (172) identifier -> . IDENTIFIER
+    (173) variable_declaration -> . identifier : type_identifier < type _36_repeat NOT_LESS expr
+    (179) variable_declaration -> . identifier _37_optional = expr
     (114) case_of -> . CASE expr OF case _24_repeat END
-    (150) call -> . callee ( _31_optional _32_repeat )
+    (162) call -> . callee ( _34_optional _35_repeat )
     (105) if_expr -> . IF expr THEN _21_optional block_statement _22_optional END
     (54) def_expr -> . DEF identifier ( _8_optional _9_repeat ) _10_optional do
-    (170) literal -> . STRING
-    (171) literal -> . NUMBER
+    (182) literal -> . STRING
+    (183) literal -> . NUMBER
     (36) do -> . DO _3_optional _4_optional _5_repeat END
-    (158) callee -> . type_identifier
-    (159) callee -> . identifier
+    (170) callee -> . type_identifier
+    (171) callee -> . identifier
     (               shift and go to state 11
     -               shift and go to state 12
     {               shift and go to state 9
@@ -1795,8 +1811,8 @@ state 42
     (23) expr -> . def_expr
     (24) expr -> . literal
     (25) expr -> . do
-    (142) tuple -> . { _29_optional _30_repeat }
-    (134) array -> . [ _27_optional _28_repeat ]
+    (154) tuple -> . { _32_optional _33_repeat }
+    (146) array -> . [ _30_optional _31_repeat ]
     (26) binary_expr -> . expr INT_DIV expr
     (27) binary_expr -> . expr NOT_MORE expr
     (28) binary_expr -> . expr NOT_LESS expr
@@ -1807,19 +1823,19 @@ state 42
     (33) binary_expr -> . expr - expr
     (34) binary_expr -> . expr + expr
     (35) binary_expr -> . expr CONCAT expr
-    (133) type_identifier -> . TYPE_IDENTIFIER
-    (160) identifier -> . IDENTIFIER
-    (161) variable_declaration -> . identifier : type_identifier < type _33_repeat NOT_LESS expr
-    (167) variable_declaration -> . identifier _34_optional = expr
+    (145) type_identifier -> . TYPE_IDENTIFIER
+    (172) identifier -> . IDENTIFIER
+    (173) variable_declaration -> . identifier : type_identifier < type _36_repeat NOT_LESS expr
+    (179) variable_declaration -> . identifier _37_optional = expr
     (114) case_of -> . CASE expr OF case _24_repeat END
-    (150) call -> . callee ( _31_optional _32_repeat )
+    (162) call -> . callee ( _34_optional _35_repeat )
     (105) if_expr -> . IF expr THEN _21_optional block_statement _22_optional END
     (54) def_expr -> . DEF identifier ( _8_optional _9_repeat ) _10_optional do
-    (170) literal -> . STRING
-    (171) literal -> . NUMBER
+    (182) literal -> . STRING
+    (183) literal -> . NUMBER
     (36) do -> . DO _3_optional _4_optional _5_repeat END
-    (158) callee -> . type_identifier
-    (159) callee -> . identifier
+    (170) callee -> . type_identifier
+    (171) callee -> . identifier
     (               shift and go to state 11
     -               shift and go to state 12
     {               shift and go to state 9
@@ -1865,8 +1881,8 @@ state 43
     (23) expr -> . def_expr
     (24) expr -> . literal
     (25) expr -> . do
-    (142) tuple -> . { _29_optional _30_repeat }
-    (134) array -> . [ _27_optional _28_repeat ]
+    (154) tuple -> . { _32_optional _33_repeat }
+    (146) array -> . [ _30_optional _31_repeat ]
     (26) binary_expr -> . expr INT_DIV expr
     (27) binary_expr -> . expr NOT_MORE expr
     (28) binary_expr -> . expr NOT_LESS expr
@@ -1877,19 +1893,19 @@ state 43
     (33) binary_expr -> . expr - expr
     (34) binary_expr -> . expr + expr
     (35) binary_expr -> . expr CONCAT expr
-    (133) type_identifier -> . TYPE_IDENTIFIER
-    (160) identifier -> . IDENTIFIER
-    (161) variable_declaration -> . identifier : type_identifier < type _33_repeat NOT_LESS expr
-    (167) variable_declaration -> . identifier _34_optional = expr
+    (145) type_identifier -> . TYPE_IDENTIFIER
+    (172) identifier -> . IDENTIFIER
+    (173) variable_declaration -> . identifier : type_identifier < type _36_repeat NOT_LESS expr
+    (179) variable_declaration -> . identifier _37_optional = expr
     (114) case_of -> . CASE expr OF case _24_repeat END
-    (150) call -> . callee ( _31_optional _32_repeat )
+    (162) call -> . callee ( _34_optional _35_repeat )
     (105) if_expr -> . IF expr THEN _21_optional block_statement _22_optional END
     (54) def_expr -> . DEF identifier ( _8_optional _9_repeat ) _10_optional do
-    (170) literal -> . STRING
-    (171) literal -> . NUMBER
+    (182) literal -> . STRING
+    (183) literal -> . NUMBER
     (36) do -> . DO _3_optional _4_optional _5_repeat END
-    (158) callee -> . type_identifier
-    (159) callee -> . identifier
+    (170) callee -> . type_identifier
+    (171) callee -> . identifier
     (               shift and go to state 11
     -               shift and go to state 12
     {               shift and go to state 9
@@ -1935,8 +1951,8 @@ state 44
     (23) expr -> . def_expr
     (24) expr -> . literal
     (25) expr -> . do
-    (142) tuple -> . { _29_optional _30_repeat }
-    (134) array -> . [ _27_optional _28_repeat ]
+    (154) tuple -> . { _32_optional _33_repeat }
+    (146) array -> . [ _30_optional _31_repeat ]
     (26) binary_expr -> . expr INT_DIV expr
     (27) binary_expr -> . expr NOT_MORE expr
     (28) binary_expr -> . expr NOT_LESS expr
@@ -1947,19 +1963,19 @@ state 44
     (33) binary_expr -> . expr - expr
     (34) binary_expr -> . expr + expr
     (35) binary_expr -> . expr CONCAT expr
-    (133) type_identifier -> . TYPE_IDENTIFIER
-    (160) identifier -> . IDENTIFIER
-    (161) variable_declaration -> . identifier : type_identifier < type _33_repeat NOT_LESS expr
-    (167) variable_declaration -> . identifier _34_optional = expr
+    (145) type_identifier -> . TYPE_IDENTIFIER
+    (172) identifier -> . IDENTIFIER
+    (173) variable_declaration -> . identifier : type_identifier < type _36_repeat NOT_LESS expr
+    (179) variable_declaration -> . identifier _37_optional = expr
     (114) case_of -> . CASE expr OF case _24_repeat END
-    (150) call -> . callee ( _31_optional _32_repeat )
+    (162) call -> . callee ( _34_optional _35_repeat )
     (105) if_expr -> . IF expr THEN _21_optional block_statement _22_optional END
     (54) def_expr -> . DEF identifier ( _8_optional _9_repeat ) _10_optional do
-    (170) literal -> . STRING
-    (171) literal -> . NUMBER
+    (182) literal -> . STRING
+    (183) literal -> . NUMBER
     (36) do -> . DO _3_optional _4_optional _5_repeat END
-    (158) callee -> . type_identifier
-    (159) callee -> . identifier
+    (170) callee -> . type_identifier
+    (171) callee -> . identifier
     (               shift and go to state 11
     -               shift and go to state 12
     {               shift and go to state 9
@@ -2005,8 +2021,8 @@ state 45
     (23) expr -> . def_expr
     (24) expr -> . literal
     (25) expr -> . do
-    (142) tuple -> . { _29_optional _30_repeat }
-    (134) array -> . [ _27_optional _28_repeat ]
+    (154) tuple -> . { _32_optional _33_repeat }
+    (146) array -> . [ _30_optional _31_repeat ]
     (26) binary_expr -> . expr INT_DIV expr
     (27) binary_expr -> . expr NOT_MORE expr
     (28) binary_expr -> . expr NOT_LESS expr
@@ -2017,19 +2033,19 @@ state 45
     (33) binary_expr -> . expr - expr
     (34) binary_expr -> . expr + expr
     (35) binary_expr -> . expr CONCAT expr
-    (133) type_identifier -> . TYPE_IDENTIFIER
-    (160) identifier -> . IDENTIFIER
-    (161) variable_declaration -> . identifier : type_identifier < type _33_repeat NOT_LESS expr
-    (167) variable_declaration -> . identifier _34_optional = expr
+    (145) type_identifier -> . TYPE_IDENTIFIER
+    (172) identifier -> . IDENTIFIER
+    (173) variable_declaration -> . identifier : type_identifier < type _36_repeat NOT_LESS expr
+    (179) variable_declaration -> . identifier _37_optional = expr
     (114) case_of -> . CASE expr OF case _24_repeat END
-    (150) call -> . callee ( _31_optional _32_repeat )
+    (162) call -> . callee ( _34_optional _35_repeat )
     (105) if_expr -> . IF expr THEN _21_optional block_statement _22_optional END
     (54) def_expr -> . DEF identifier ( _8_optional _9_repeat ) _10_optional do
-    (170) literal -> . STRING
-    (171) literal -> . NUMBER
+    (182) literal -> . STRING
+    (183) literal -> . NUMBER
     (36) do -> . DO _3_optional _4_optional _5_repeat END
-    (158) callee -> . type_identifier
-    (159) callee -> . identifier
+    (170) callee -> . type_identifier
+    (171) callee -> . identifier
     (               shift and go to state 11
     -               shift and go to state 12
     {               shift and go to state 9
@@ -2075,8 +2091,8 @@ state 46
     (23) expr -> . def_expr
     (24) expr -> . literal
     (25) expr -> . do
-    (142) tuple -> . { _29_optional _30_repeat }
-    (134) array -> . [ _27_optional _28_repeat ]
+    (154) tuple -> . { _32_optional _33_repeat }
+    (146) array -> . [ _30_optional _31_repeat ]
     (26) binary_expr -> . expr INT_DIV expr
     (27) binary_expr -> . expr NOT_MORE expr
     (28) binary_expr -> . expr NOT_LESS expr
@@ -2087,19 +2103,19 @@ state 46
     (33) binary_expr -> . expr - expr
     (34) binary_expr -> . expr + expr
     (35) binary_expr -> . expr CONCAT expr
-    (133) type_identifier -> . TYPE_IDENTIFIER
-    (160) identifier -> . IDENTIFIER
-    (161) variable_declaration -> . identifier : type_identifier < type _33_repeat NOT_LESS expr
-    (167) variable_declaration -> . identifier _34_optional = expr
+    (145) type_identifier -> . TYPE_IDENTIFIER
+    (172) identifier -> . IDENTIFIER
+    (173) variable_declaration -> . identifier : type_identifier < type _36_repeat NOT_LESS expr
+    (179) variable_declaration -> . identifier _37_optional = expr
     (114) case_of -> . CASE expr OF case _24_repeat END
-    (150) call -> . callee ( _31_optional _32_repeat )
+    (162) call -> . callee ( _34_optional _35_repeat )
     (105) if_expr -> . IF expr THEN _21_optional block_statement _22_optional END
     (54) def_expr -> . DEF identifier ( _8_optional _9_repeat ) _10_optional do
-    (170) literal -> . STRING
-    (171) literal -> . NUMBER
+    (182) literal -> . STRING
+    (183) literal -> . NUMBER
     (36) do -> . DO _3_optional _4_optional _5_repeat END
-    (158) callee -> . type_identifier
-    (159) callee -> . identifier
+    (170) callee -> . type_identifier
+    (171) callee -> . identifier
     (               shift and go to state 11
     -               shift and go to state 12
     {               shift and go to state 9
@@ -2145,8 +2161,8 @@ state 47
     (23) expr -> . def_expr
     (24) expr -> . literal
     (25) expr -> . do
-    (142) tuple -> . { _29_optional _30_repeat }
-    (134) array -> . [ _27_optional _28_repeat ]
+    (154) tuple -> . { _32_optional _33_repeat }
+    (146) array -> . [ _30_optional _31_repeat ]
     (26) binary_expr -> . expr INT_DIV expr
     (27) binary_expr -> . expr NOT_MORE expr
     (28) binary_expr -> . expr NOT_LESS expr
@@ -2157,19 +2173,19 @@ state 47
     (33) binary_expr -> . expr - expr
     (34) binary_expr -> . expr + expr
     (35) binary_expr -> . expr CONCAT expr
-    (133) type_identifier -> . TYPE_IDENTIFIER
-    (160) identifier -> . IDENTIFIER
-    (161) variable_declaration -> . identifier : type_identifier < type _33_repeat NOT_LESS expr
-    (167) variable_declaration -> . identifier _34_optional = expr
+    (145) type_identifier -> . TYPE_IDENTIFIER
+    (172) identifier -> . IDENTIFIER
+    (173) variable_declaration -> . identifier : type_identifier < type _36_repeat NOT_LESS expr
+    (179) variable_declaration -> . identifier _37_optional = expr
     (114) case_of -> . CASE expr OF case _24_repeat END
-    (150) call -> . callee ( _31_optional _32_repeat )
+    (162) call -> . callee ( _34_optional _35_repeat )
     (105) if_expr -> . IF expr THEN _21_optional block_statement _22_optional END
     (54) def_expr -> . DEF identifier ( _8_optional _9_repeat ) _10_optional do
-    (170) literal -> . STRING
-    (171) literal -> . NUMBER
+    (182) literal -> . STRING
+    (183) literal -> . NUMBER
     (36) do -> . DO _3_optional _4_optional _5_repeat END
-    (158) callee -> . type_identifier
-    (159) callee -> . identifier
+    (170) callee -> . type_identifier
+    (171) callee -> . identifier
     (               shift and go to state 11
     -               shift and go to state 12
     {               shift and go to state 9
@@ -2210,22 +2226,22 @@ state 48
 
 state 49
 
-    (142) tuple -> { _29_optional . _30_repeat }
-    (145) _30_repeat -> . _30_items
-    (146) _30_repeat -> .
-    (147) _30_items -> . _30_items _30_item
-    (148) _30_items -> . _30_item
-    (149) _30_item -> . , expr
-    }               reduce using rule 146 (_30_repeat -> .)
+    (154) tuple -> { _32_optional . _33_repeat }
+    (157) _33_repeat -> . _33_items
+    (158) _33_repeat -> .
+    (159) _33_items -> . _33_items _33_item
+    (160) _33_items -> . _33_item
+    (161) _33_item -> . , expr
+    }               reduce using rule 158 (_33_repeat -> .)
     ,               shift and go to state 81
 
-    _30_repeat                     shift and go to state 78
-    _30_items                      shift and go to state 79
-    _30_item                       shift and go to state 80
+    _33_repeat                     shift and go to state 78
+    _33_items                      shift and go to state 79
+    _33_item                       shift and go to state 80
 
 state 50
 
-    (143) _29_optional -> expr .
+    (155) _32_optional -> expr .
     (26) binary_expr -> expr . INT_DIV expr
     (27) binary_expr -> expr . NOT_MORE expr
     (28) binary_expr -> expr . NOT_LESS expr
@@ -2236,8 +2252,8 @@ state 50
     (33) binary_expr -> expr . - expr
     (34) binary_expr -> expr . + expr
     (35) binary_expr -> expr . CONCAT expr
-    ,               reduce using rule 143 (_29_optional -> expr .)
-    }               reduce using rule 143 (_29_optional -> expr .)
+    ,               reduce using rule 155 (_32_optional -> expr .)
+    }               reduce using rule 155 (_32_optional -> expr .)
     INT_DIV         shift and go to state 38
     NOT_MORE        shift and go to state 39
     NOT_LESS        shift and go to state 40
@@ -2324,9 +2340,9 @@ state 53
 
 state 54
 
-    (161) variable_declaration -> identifier : . type_identifier < type _33_repeat NOT_LESS expr
-    (168) _34_optional -> : . type
-    (133) type_identifier -> . TYPE_IDENTIFIER
+    (173) variable_declaration -> identifier : . type_identifier < type _36_repeat NOT_LESS expr
+    (180) _37_optional -> : . type
+    (145) type_identifier -> . TYPE_IDENTIFIER
     (64) type -> . type_identifier _11_optional
     TYPE_IDENTIFIER shift and go to state 25
 
@@ -2335,28 +2351,28 @@ state 54
 
 state 55
 
-    (167) variable_declaration -> identifier _34_optional . = expr
+    (179) variable_declaration -> identifier _37_optional . = expr
     =               shift and go to state 87
 
 
 state 56
 
-    (134) array -> [ _27_optional . _28_repeat ]
-    (137) _28_repeat -> . _28_items
-    (138) _28_repeat -> .
-    (139) _28_items -> . _28_items _28_item
-    (140) _28_items -> . _28_item
-    (141) _28_item -> . , expr
-    ]               reduce using rule 138 (_28_repeat -> .)
+    (146) array -> [ _30_optional . _31_repeat ]
+    (149) _31_repeat -> . _31_items
+    (150) _31_repeat -> .
+    (151) _31_items -> . _31_items _31_item
+    (152) _31_items -> . _31_item
+    (153) _31_item -> . , expr
+    ]               reduce using rule 150 (_31_repeat -> .)
     ,               shift and go to state 91
 
-    _28_repeat                     shift and go to state 88
-    _28_items                      shift and go to state 89
-    _28_item                       shift and go to state 90
+    _31_repeat                     shift and go to state 88
+    _31_items                      shift and go to state 89
+    _31_item                       shift and go to state 90
 
 state 57
 
-    (135) _27_optional -> expr .
+    (147) _30_optional -> expr .
     (26) binary_expr -> expr . INT_DIV expr
     (27) binary_expr -> expr . NOT_MORE expr
     (28) binary_expr -> expr . NOT_LESS expr
@@ -2367,8 +2383,8 @@ state 57
     (33) binary_expr -> expr . - expr
     (34) binary_expr -> expr . + expr
     (35) binary_expr -> expr . CONCAT expr
-    ,               reduce using rule 135 (_27_optional -> expr .)
-    ]               reduce using rule 135 (_27_optional -> expr .)
+    ,               reduce using rule 147 (_30_optional -> expr .)
+    ]               reduce using rule 147 (_30_optional -> expr .)
     INT_DIV         shift and go to state 38
     NOT_MORE        shift and go to state 39
     NOT_LESS        shift and go to state 40
@@ -2409,9 +2425,9 @@ state 58
 
 state 59
 
-    (150) call -> callee ( . _31_optional _32_repeat )
-    (151) _31_optional -> . expr
-    (152) _31_optional -> .
+    (162) call -> callee ( . _34_optional _35_repeat )
+    (163) _34_optional -> . expr
+    (164) _34_optional -> .
     (12) expr -> . ( expr )
     (13) expr -> . - expr
     (14) expr -> . tuple
@@ -2426,8 +2442,8 @@ state 59
     (23) expr -> . def_expr
     (24) expr -> . literal
     (25) expr -> . do
-    (142) tuple -> . { _29_optional _30_repeat }
-    (134) array -> . [ _27_optional _28_repeat ]
+    (154) tuple -> . { _32_optional _33_repeat }
+    (146) array -> . [ _30_optional _31_repeat ]
     (26) binary_expr -> . expr INT_DIV expr
     (27) binary_expr -> . expr NOT_MORE expr
     (28) binary_expr -> . expr NOT_LESS expr
@@ -2438,21 +2454,21 @@ state 59
     (33) binary_expr -> . expr - expr
     (34) binary_expr -> . expr + expr
     (35) binary_expr -> . expr CONCAT expr
-    (133) type_identifier -> . TYPE_IDENTIFIER
-    (160) identifier -> . IDENTIFIER
-    (161) variable_declaration -> . identifier : type_identifier < type _33_repeat NOT_LESS expr
-    (167) variable_declaration -> . identifier _34_optional = expr
+    (145) type_identifier -> . TYPE_IDENTIFIER
+    (172) identifier -> . IDENTIFIER
+    (173) variable_declaration -> . identifier : type_identifier < type _36_repeat NOT_LESS expr
+    (179) variable_declaration -> . identifier _37_optional = expr
     (114) case_of -> . CASE expr OF case _24_repeat END
-    (150) call -> . callee ( _31_optional _32_repeat )
+    (162) call -> . callee ( _34_optional _35_repeat )
     (105) if_expr -> . IF expr THEN _21_optional block_statement _22_optional END
     (54) def_expr -> . DEF identifier ( _8_optional _9_repeat ) _10_optional do
-    (170) literal -> . STRING
-    (171) literal -> . NUMBER
+    (182) literal -> . STRING
+    (183) literal -> . NUMBER
     (36) do -> . DO _3_optional _4_optional _5_repeat END
-    (158) callee -> . type_identifier
-    (159) callee -> . identifier
-    ,               reduce using rule 152 (_31_optional -> .)
-    )               reduce using rule 152 (_31_optional -> .)
+    (170) callee -> . type_identifier
+    (171) callee -> . identifier
+    ,               reduce using rule 164 (_34_optional -> .)
+    )               reduce using rule 164 (_34_optional -> .)
     (               shift and go to state 11
     -               shift and go to state 12
     {               shift and go to state 9
@@ -2467,7 +2483,7 @@ state 59
     DO              shift and go to state 33
 
     callee                         shift and go to state 28
-    _31_optional                   shift and go to state 93
+    _34_optional                   shift and go to state 93
     expr                           shift and go to state 94
     tuple                          shift and go to state 13
     array                          shift and go to state 14
@@ -2533,8 +2549,8 @@ state 62
     (23) expr -> . def_expr
     (24) expr -> . literal
     (25) expr -> . do
-    (142) tuple -> . { _29_optional _30_repeat }
-    (134) array -> . [ _27_optional _28_repeat ]
+    (154) tuple -> . { _32_optional _33_repeat }
+    (146) array -> . [ _30_optional _31_repeat ]
     (26) binary_expr -> . expr INT_DIV expr
     (27) binary_expr -> . expr NOT_MORE expr
     (28) binary_expr -> . expr NOT_LESS expr
@@ -2545,19 +2561,19 @@ state 62
     (33) binary_expr -> . expr - expr
     (34) binary_expr -> . expr + expr
     (35) binary_expr -> . expr CONCAT expr
-    (133) type_identifier -> . TYPE_IDENTIFIER
-    (160) identifier -> . IDENTIFIER
-    (161) variable_declaration -> . identifier : type_identifier < type _33_repeat NOT_LESS expr
-    (167) variable_declaration -> . identifier _34_optional = expr
+    (145) type_identifier -> . TYPE_IDENTIFIER
+    (172) identifier -> . IDENTIFIER
+    (173) variable_declaration -> . identifier : type_identifier < type _36_repeat NOT_LESS expr
+    (179) variable_declaration -> . identifier _37_optional = expr
     (114) case_of -> . CASE expr OF case _24_repeat END
-    (150) call -> . callee ( _31_optional _32_repeat )
+    (162) call -> . callee ( _34_optional _35_repeat )
     (105) if_expr -> . IF expr THEN _21_optional block_statement _22_optional END
     (54) def_expr -> . DEF identifier ( _8_optional _9_repeat ) _10_optional do
-    (170) literal -> . STRING
-    (171) literal -> . NUMBER
+    (182) literal -> . STRING
+    (183) literal -> . NUMBER
     (36) do -> . DO _3_optional _4_optional _5_repeat END
-    (158) callee -> . type_identifier
-    (159) callee -> . identifier
+    (170) callee -> . type_identifier
+    (171) callee -> . identifier
     NEWLINE         reduce using rule 40 (_4_optional -> .)
     END             reduce using rule 40 (_4_optional -> .)
     (               shift and go to state 11
@@ -2593,7 +2609,7 @@ state 63
 
     (37) _3_optional -> : . type
     (64) type -> . type_identifier _11_optional
-    (133) type_identifier -> . TYPE_IDENTIFIER
+    (145) type_identifier -> . TYPE_IDENTIFIER
     TYPE_IDENTIFIER shift and go to state 25
 
     type                           shift and go to state 99
@@ -2983,7 +2999,7 @@ state 77
 
     (86) _16_optional -> < . fields_unnamed >
     (96) fields_unnamed -> . identifier _19_repeat
-    (160) identifier -> . IDENTIFIER
+    (172) identifier -> . IDENTIFIER
     IDENTIFIER      shift and go to state 26
 
     fields_unnamed                 shift and go to state 102
@@ -2991,30 +3007,30 @@ state 77
 
 state 78
 
-    (142) tuple -> { _29_optional _30_repeat . }
+    (154) tuple -> { _32_optional _33_repeat . }
     }               shift and go to state 104
 
 
 state 79
 
-    (145) _30_repeat -> _30_items .
-    (147) _30_items -> _30_items . _30_item
-    (149) _30_item -> . , expr
-    }               reduce using rule 145 (_30_repeat -> _30_items .)
+    (157) _33_repeat -> _33_items .
+    (159) _33_items -> _33_items . _33_item
+    (161) _33_item -> . , expr
+    }               reduce using rule 157 (_33_repeat -> _33_items .)
     ,               shift and go to state 81
 
-    _30_item                       shift and go to state 105
+    _33_item                       shift and go to state 105
 
 state 80
 
-    (148) _30_items -> _30_item .
-    ,               reduce using rule 148 (_30_items -> _30_item .)
-    }               reduce using rule 148 (_30_items -> _30_item .)
+    (160) _33_items -> _33_item .
+    ,               reduce using rule 160 (_33_items -> _33_item .)
+    }               reduce using rule 160 (_33_items -> _33_item .)
 
 
 state 81
 
-    (149) _30_item -> , . expr
+    (161) _33_item -> , . expr
     (12) expr -> . ( expr )
     (13) expr -> . - expr
     (14) expr -> . tuple
@@ -3029,8 +3045,8 @@ state 81
     (23) expr -> . def_expr
     (24) expr -> . literal
     (25) expr -> . do
-    (142) tuple -> . { _29_optional _30_repeat }
-    (134) array -> . [ _27_optional _28_repeat ]
+    (154) tuple -> . { _32_optional _33_repeat }
+    (146) array -> . [ _30_optional _31_repeat ]
     (26) binary_expr -> . expr INT_DIV expr
     (27) binary_expr -> . expr NOT_MORE expr
     (28) binary_expr -> . expr NOT_LESS expr
@@ -3041,19 +3057,19 @@ state 81
     (33) binary_expr -> . expr - expr
     (34) binary_expr -> . expr + expr
     (35) binary_expr -> . expr CONCAT expr
-    (133) type_identifier -> . TYPE_IDENTIFIER
-    (160) identifier -> . IDENTIFIER
-    (161) variable_declaration -> . identifier : type_identifier < type _33_repeat NOT_LESS expr
-    (167) variable_declaration -> . identifier _34_optional = expr
+    (145) type_identifier -> . TYPE_IDENTIFIER
+    (172) identifier -> . IDENTIFIER
+    (173) variable_declaration -> . identifier : type_identifier < type _36_repeat NOT_LESS expr
+    (179) variable_declaration -> . identifier _37_optional = expr
     (114) case_of -> . CASE expr OF case _24_repeat END
-    (150) call -> . callee ( _31_optional _32_repeat )
+    (162) call -> . callee ( _34_optional _35_repeat )
     (105) if_expr -> . IF expr THEN _21_optional block_statement _22_optional END
     (54) def_expr -> . DEF identifier ( _8_optional _9_repeat ) _10_optional do
-    (170) literal -> . STRING
-    (171) literal -> . NUMBER
+    (182) literal -> . STRING
+    (183) literal -> . NUMBER
     (36) do -> . DO _3_optional _4_optional _5_repeat END
-    (158) callee -> . type_identifier
-    (159) callee -> . identifier
+    (170) callee -> . type_identifier
+    (171) callee -> . identifier
     (               shift and go to state 11
     -               shift and go to state 12
     {               shift and go to state 9
@@ -3091,7 +3107,7 @@ state 82
 state 83
 
     (73) _13_optional -> < . identifier _14_repeat >
-    (160) identifier -> . IDENTIFIER
+    (172) identifier -> . IDENTIFIER
     IDENTIFIER      shift and go to state 26
 
     identifier                     shift and go to state 108
@@ -3124,7 +3140,7 @@ state 84
 
 state 85
 
-    (161) variable_declaration -> identifier : type_identifier . < type _33_repeat NOT_LESS expr
+    (173) variable_declaration -> identifier : type_identifier . < type _36_repeat NOT_LESS expr
     (64) type -> type_identifier . _11_optional
     (65) _11_optional -> . < type _12_repeat >
     (71) _11_optional -> .
@@ -3135,13 +3151,13 @@ state 85
 
 state 86
 
-    (168) _34_optional -> : type .
-    =               reduce using rule 168 (_34_optional -> : type .)
+    (180) _37_optional -> : type .
+    =               reduce using rule 180 (_37_optional -> : type .)
 
 
 state 87
 
-    (167) variable_declaration -> identifier _34_optional = . expr
+    (179) variable_declaration -> identifier _37_optional = . expr
     (12) expr -> . ( expr )
     (13) expr -> . - expr
     (14) expr -> . tuple
@@ -3156,8 +3172,8 @@ state 87
     (23) expr -> . def_expr
     (24) expr -> . literal
     (25) expr -> . do
-    (142) tuple -> . { _29_optional _30_repeat }
-    (134) array -> . [ _27_optional _28_repeat ]
+    (154) tuple -> . { _32_optional _33_repeat }
+    (146) array -> . [ _30_optional _31_repeat ]
     (26) binary_expr -> . expr INT_DIV expr
     (27) binary_expr -> . expr NOT_MORE expr
     (28) binary_expr -> . expr NOT_LESS expr
@@ -3168,19 +3184,19 @@ state 87
     (33) binary_expr -> . expr - expr
     (34) binary_expr -> . expr + expr
     (35) binary_expr -> . expr CONCAT expr
-    (133) type_identifier -> . TYPE_IDENTIFIER
-    (160) identifier -> . IDENTIFIER
-    (161) variable_declaration -> . identifier : type_identifier < type _33_repeat NOT_LESS expr
-    (167) variable_declaration -> . identifier _34_optional = expr
+    (145) type_identifier -> . TYPE_IDENTIFIER
+    (172) identifier -> . IDENTIFIER
+    (173) variable_declaration -> . identifier : type_identifier < type _36_repeat NOT_LESS expr
+    (179) variable_declaration -> . identifier _37_optional = expr
     (114) case_of -> . CASE expr OF case _24_repeat END
-    (150) call -> . callee ( _31_optional _32_repeat )
+    (162) call -> . callee ( _34_optional _35_repeat )
     (105) if_expr -> . IF expr THEN _21_optional block_statement _22_optional END
     (54) def_expr -> . DEF identifier ( _8_optional _9_repeat ) _10_optional do
-    (170) literal -> . STRING
-    (171) literal -> . NUMBER
+    (182) literal -> . STRING
+    (183) literal -> . NUMBER
     (36) do -> . DO _3_optional _4_optional _5_repeat END
-    (158) callee -> . type_identifier
-    (159) callee -> . identifier
+    (170) callee -> . type_identifier
+    (171) callee -> . identifier
     (               shift and go to state 11
     -               shift and go to state 12
     {               shift and go to state 9
@@ -3211,30 +3227,30 @@ state 87
 
 state 88
 
-    (134) array -> [ _27_optional _28_repeat . ]
+    (146) array -> [ _30_optional _31_repeat . ]
     ]               shift and go to state 112
 
 
 state 89
 
-    (137) _28_repeat -> _28_items .
-    (139) _28_items -> _28_items . _28_item
-    (141) _28_item -> . , expr
-    ]               reduce using rule 137 (_28_repeat -> _28_items .)
+    (149) _31_repeat -> _31_items .
+    (151) _31_items -> _31_items . _31_item
+    (153) _31_item -> . , expr
+    ]               reduce using rule 149 (_31_repeat -> _31_items .)
     ,               shift and go to state 91
 
-    _28_item                       shift and go to state 113
+    _31_item                       shift and go to state 113
 
 state 90
 
-    (140) _28_items -> _28_item .
-    ,               reduce using rule 140 (_28_items -> _28_item .)
-    ]               reduce using rule 140 (_28_items -> _28_item .)
+    (152) _31_items -> _31_item .
+    ,               reduce using rule 152 (_31_items -> _31_item .)
+    ]               reduce using rule 152 (_31_items -> _31_item .)
 
 
 state 91
 
-    (141) _28_item -> , . expr
+    (153) _31_item -> , . expr
     (12) expr -> . ( expr )
     (13) expr -> . - expr
     (14) expr -> . tuple
@@ -3249,8 +3265,8 @@ state 91
     (23) expr -> . def_expr
     (24) expr -> . literal
     (25) expr -> . do
-    (142) tuple -> . { _29_optional _30_repeat }
-    (134) array -> . [ _27_optional _28_repeat ]
+    (154) tuple -> . { _32_optional _33_repeat }
+    (146) array -> . [ _30_optional _31_repeat ]
     (26) binary_expr -> . expr INT_DIV expr
     (27) binary_expr -> . expr NOT_MORE expr
     (28) binary_expr -> . expr NOT_LESS expr
@@ -3261,19 +3277,19 @@ state 91
     (33) binary_expr -> . expr - expr
     (34) binary_expr -> . expr + expr
     (35) binary_expr -> . expr CONCAT expr
-    (133) type_identifier -> . TYPE_IDENTIFIER
-    (160) identifier -> . IDENTIFIER
-    (161) variable_declaration -> . identifier : type_identifier < type _33_repeat NOT_LESS expr
-    (167) variable_declaration -> . identifier _34_optional = expr
+    (145) type_identifier -> . TYPE_IDENTIFIER
+    (172) identifier -> . IDENTIFIER
+    (173) variable_declaration -> . identifier : type_identifier < type _36_repeat NOT_LESS expr
+    (179) variable_declaration -> . identifier _37_optional = expr
     (114) case_of -> . CASE expr OF case _24_repeat END
-    (150) call -> . callee ( _31_optional _32_repeat )
+    (162) call -> . callee ( _34_optional _35_repeat )
     (105) if_expr -> . IF expr THEN _21_optional block_statement _22_optional END
     (54) def_expr -> . DEF identifier ( _8_optional _9_repeat ) _10_optional do
-    (170) literal -> . STRING
-    (171) literal -> . NUMBER
+    (182) literal -> . STRING
+    (183) literal -> . NUMBER
     (36) do -> . DO _3_optional _4_optional _5_repeat END
-    (158) callee -> . type_identifier
-    (159) callee -> . identifier
+    (170) callee -> . type_identifier
+    (171) callee -> . identifier
     (               shift and go to state 11
     -               shift and go to state 12
     {               shift and go to state 9
@@ -3306,40 +3322,44 @@ state 92
 
     (114) case_of -> CASE expr OF . case _24_repeat END
     (120) case -> . pattern do
-    (121) pattern -> . enum_pattern
-    (122) pattern -> . param_pattern
-    (130) enum_pattern -> . type_identifier ( _26_optional )
-    (123) param_pattern -> . identifier
-    (133) type_identifier -> . TYPE_IDENTIFIER
-    (160) identifier -> . IDENTIFIER
+    (121) pattern -> . array_pattern
+    (122) pattern -> . enum_pattern
+    (123) pattern -> . param_pattern
+    (125) array_pattern -> . [ _25_optional _26_optional ]
+    (142) enum_pattern -> . type_identifier ( _29_optional )
+    (124) param_pattern -> . identifier
+    (145) type_identifier -> . TYPE_IDENTIFIER
+    (172) identifier -> . IDENTIFIER
+    [               shift and go to state 120
     TYPE_IDENTIFIER shift and go to state 25
     IDENTIFIER      shift and go to state 26
 
     case                           shift and go to state 115
     pattern                        shift and go to state 116
-    enum_pattern                   shift and go to state 117
-    param_pattern                  shift and go to state 118
-    type_identifier                shift and go to state 119
-    identifier                     shift and go to state 120
+    array_pattern                  shift and go to state 117
+    enum_pattern                   shift and go to state 118
+    param_pattern                  shift and go to state 119
+    type_identifier                shift and go to state 121
+    identifier                     shift and go to state 122
 
 state 93
 
-    (150) call -> callee ( _31_optional . _32_repeat )
-    (153) _32_repeat -> . _32_items
-    (154) _32_repeat -> .
-    (155) _32_items -> . _32_items _32_item
-    (156) _32_items -> . _32_item
-    (157) _32_item -> . , expr
-    )               reduce using rule 154 (_32_repeat -> .)
-    ,               shift and go to state 124
+    (162) call -> callee ( _34_optional . _35_repeat )
+    (165) _35_repeat -> . _35_items
+    (166) _35_repeat -> .
+    (167) _35_items -> . _35_items _35_item
+    (168) _35_items -> . _35_item
+    (169) _35_item -> . , expr
+    )               reduce using rule 166 (_35_repeat -> .)
+    ,               shift and go to state 126
 
-    _32_repeat                     shift and go to state 121
-    _32_items                      shift and go to state 122
-    _32_item                       shift and go to state 123
+    _35_repeat                     shift and go to state 123
+    _35_items                      shift and go to state 124
+    _35_item                       shift and go to state 125
 
 state 94
 
-    (151) _31_optional -> expr .
+    (163) _34_optional -> expr .
     (26) binary_expr -> expr . INT_DIV expr
     (27) binary_expr -> expr . NOT_MORE expr
     (28) binary_expr -> expr . NOT_LESS expr
@@ -3350,8 +3370,8 @@ state 94
     (33) binary_expr -> expr . - expr
     (34) binary_expr -> expr . + expr
     (35) binary_expr -> expr . CONCAT expr
-    ,               reduce using rule 151 (_31_optional -> expr .)
-    )               reduce using rule 151 (_31_optional -> expr .)
+    ,               reduce using rule 163 (_34_optional -> expr .)
+    )               reduce using rule 163 (_34_optional -> expr .)
     INT_DIV         shift and go to state 38
     NOT_MORE        shift and go to state 39
     NOT_LESS        shift and go to state 40
@@ -3369,7 +3389,7 @@ state 95
     (105) if_expr -> IF expr THEN . _21_optional block_statement _22_optional END
     (106) _21_optional -> . : type
     (107) _21_optional -> .
-    :               shift and go to state 126
+    :               shift and go to state 128
     (               reduce using rule 107 (_21_optional -> .)
     -               reduce using rule 107 (_21_optional -> .)
     {               reduce using rule 107 (_21_optional -> .)
@@ -3387,7 +3407,7 @@ state 95
     END             reduce using rule 107 (_21_optional -> .)
     NEWLINE         reduce using rule 107 (_21_optional -> .)
 
-    _21_optional                   shift and go to state 125
+    _21_optional                   shift and go to state 127
 
 state 96
 
@@ -3395,14 +3415,14 @@ state 96
     (55) _8_optional -> . param
     (56) _8_optional -> .
     (102) param -> . identifier _20_optional
-    (160) identifier -> . IDENTIFIER
+    (172) identifier -> . IDENTIFIER
     ,               reduce using rule 56 (_8_optional -> .)
     )               reduce using rule 56 (_8_optional -> .)
     IDENTIFIER      shift and go to state 26
 
-    identifier                     shift and go to state 127
-    _8_optional                    shift and go to state 128
-    param                          shift and go to state 129
+    identifier                     shift and go to state 129
+    _8_optional                    shift and go to state 130
+    param                          shift and go to state 131
 
 state 97
 
@@ -3413,11 +3433,11 @@ state 97
     (44) _5_items -> . _5_item
     (45) _5_item -> . NEWLINE expr
     END             reduce using rule 42 (_5_repeat -> .)
-    NEWLINE         shift and go to state 133
+    NEWLINE         shift and go to state 135
 
-    _5_repeat                      shift and go to state 130
-    _5_items                       shift and go to state 131
-    _5_item                        shift and go to state 132
+    _5_repeat                      shift and go to state 132
+    _5_items                       shift and go to state 133
+    _5_item                        shift and go to state 134
 
 state 98
 
@@ -3470,7 +3490,7 @@ state 100
     (64) type -> type_identifier . _11_optional
     (65) _11_optional -> . < type _12_repeat >
     (71) _11_optional -> .
-    <               shift and go to state 134
+    <               shift and go to state 136
     (               reduce using rule 71 (_11_optional -> .)
     -               reduce using rule 71 (_11_optional -> .)
     {               reduce using rule 71 (_11_optional -> .)
@@ -3504,20 +3524,20 @@ state 101
     (91) _17_items -> . _17_item
     (92) _17_item -> . variant
     (93) variant -> . type_identifier _18_optional
-    (133) type_identifier -> . TYPE_IDENTIFIER
+    (145) type_identifier -> . TYPE_IDENTIFIER
     }               reduce using rule 89 (_17_repeat -> .)
     TYPE_IDENTIFIER shift and go to state 25
 
-    type_identifier                shift and go to state 135
-    _17_repeat                     shift and go to state 136
-    _17_items                      shift and go to state 137
-    _17_item                       shift and go to state 138
-    variant                        shift and go to state 139
+    type_identifier                shift and go to state 137
+    _17_repeat                     shift and go to state 138
+    _17_items                      shift and go to state 139
+    _17_item                       shift and go to state 140
+    variant                        shift and go to state 141
 
 state 102
 
     (86) _16_optional -> < fields_unnamed . >
-    >               shift and go to state 140
+    >               shift and go to state 142
 
 
 state 103
@@ -3530,48 +3550,48 @@ state 103
     (101) _19_item -> . , identifier
     >               reduce using rule 98 (_19_repeat -> .)
     )               reduce using rule 98 (_19_repeat -> .)
-    ,               shift and go to state 144
+    ,               shift and go to state 146
 
-    _19_repeat                     shift and go to state 141
-    _19_items                      shift and go to state 142
-    _19_item                       shift and go to state 143
+    _19_repeat                     shift and go to state 143
+    _19_items                      shift and go to state 144
+    _19_item                       shift and go to state 145
 
 state 104
 
-    (142) tuple -> { _29_optional _30_repeat } .
-    INT_DIV         reduce using rule 142 (tuple -> { _29_optional _30_repeat } .)
-    NOT_MORE        reduce using rule 142 (tuple -> { _29_optional _30_repeat } .)
-    NOT_LESS        reduce using rule 142 (tuple -> { _29_optional _30_repeat } .)
-    >               reduce using rule 142 (tuple -> { _29_optional _30_repeat } .)
-    <               reduce using rule 142 (tuple -> { _29_optional _30_repeat } .)
-    *               reduce using rule 142 (tuple -> { _29_optional _30_repeat } .)
-    /               reduce using rule 142 (tuple -> { _29_optional _30_repeat } .)
-    -               reduce using rule 142 (tuple -> { _29_optional _30_repeat } .)
-    +               reduce using rule 142 (tuple -> { _29_optional _30_repeat } .)
-    CONCAT          reduce using rule 142 (tuple -> { _29_optional _30_repeat } .)
-    NEWLINE         reduce using rule 142 (tuple -> { _29_optional _30_repeat } .)
-    $end            reduce using rule 142 (tuple -> { _29_optional _30_repeat } .)
-    ,               reduce using rule 142 (tuple -> { _29_optional _30_repeat } .)
-    }               reduce using rule 142 (tuple -> { _29_optional _30_repeat } .)
-    )               reduce using rule 142 (tuple -> { _29_optional _30_repeat } .)
-    ]               reduce using rule 142 (tuple -> { _29_optional _30_repeat } .)
-    OF              reduce using rule 142 (tuple -> { _29_optional _30_repeat } .)
-    THEN            reduce using rule 142 (tuple -> { _29_optional _30_repeat } .)
-    END             reduce using rule 142 (tuple -> { _29_optional _30_repeat } .)
-    ELIF            reduce using rule 142 (tuple -> { _29_optional _30_repeat } .)
-    ELSE            reduce using rule 142 (tuple -> { _29_optional _30_repeat } .)
+    (154) tuple -> { _32_optional _33_repeat } .
+    INT_DIV         reduce using rule 154 (tuple -> { _32_optional _33_repeat } .)
+    NOT_MORE        reduce using rule 154 (tuple -> { _32_optional _33_repeat } .)
+    NOT_LESS        reduce using rule 154 (tuple -> { _32_optional _33_repeat } .)
+    >               reduce using rule 154 (tuple -> { _32_optional _33_repeat } .)
+    <               reduce using rule 154 (tuple -> { _32_optional _33_repeat } .)
+    *               reduce using rule 154 (tuple -> { _32_optional _33_repeat } .)
+    /               reduce using rule 154 (tuple -> { _32_optional _33_repeat } .)
+    -               reduce using rule 154 (tuple -> { _32_optional _33_repeat } .)
+    +               reduce using rule 154 (tuple -> { _32_optional _33_repeat } .)
+    CONCAT          reduce using rule 154 (tuple -> { _32_optional _33_repeat } .)
+    NEWLINE         reduce using rule 154 (tuple -> { _32_optional _33_repeat } .)
+    $end            reduce using rule 154 (tuple -> { _32_optional _33_repeat } .)
+    ,               reduce using rule 154 (tuple -> { _32_optional _33_repeat } .)
+    }               reduce using rule 154 (tuple -> { _32_optional _33_repeat } .)
+    )               reduce using rule 154 (tuple -> { _32_optional _33_repeat } .)
+    ]               reduce using rule 154 (tuple -> { _32_optional _33_repeat } .)
+    OF              reduce using rule 154 (tuple -> { _32_optional _33_repeat } .)
+    THEN            reduce using rule 154 (tuple -> { _32_optional _33_repeat } .)
+    END             reduce using rule 154 (tuple -> { _32_optional _33_repeat } .)
+    ELIF            reduce using rule 154 (tuple -> { _32_optional _33_repeat } .)
+    ELSE            reduce using rule 154 (tuple -> { _32_optional _33_repeat } .)
 
 
 state 105
 
-    (147) _30_items -> _30_items _30_item .
-    ,               reduce using rule 147 (_30_items -> _30_items _30_item .)
-    }               reduce using rule 147 (_30_items -> _30_items _30_item .)
+    (159) _33_items -> _33_items _33_item .
+    ,               reduce using rule 159 (_33_items -> _33_items _33_item .)
+    }               reduce using rule 159 (_33_items -> _33_items _33_item .)
 
 
 state 106
 
-    (149) _30_item -> , expr .
+    (161) _33_item -> , expr .
     (26) binary_expr -> expr . INT_DIV expr
     (27) binary_expr -> expr . NOT_MORE expr
     (28) binary_expr -> expr . NOT_LESS expr
@@ -3582,8 +3602,8 @@ state 106
     (33) binary_expr -> expr . - expr
     (34) binary_expr -> expr . + expr
     (35) binary_expr -> expr . CONCAT expr
-    ,               reduce using rule 149 (_30_item -> , expr .)
-    }               reduce using rule 149 (_30_item -> , expr .)
+    ,               reduce using rule 161 (_33_item -> , expr .)
+    }               reduce using rule 161 (_33_item -> , expr .)
     INT_DIV         shift and go to state 38
     NOT_MORE        shift and go to state 39
     NOT_LESS        shift and go to state 40
@@ -3604,14 +3624,14 @@ state 107
     (82) _15_items -> . _15_items _15_item
     (83) _15_items -> . _15_item
     (84) _15_item -> . identifier : type
-    (160) identifier -> . IDENTIFIER
+    (172) identifier -> . IDENTIFIER
     }               reduce using rule 81 (_15_repeat -> .)
     IDENTIFIER      shift and go to state 26
 
-    _15_repeat                     shift and go to state 145
-    _15_items                      shift and go to state 146
-    _15_item                       shift and go to state 147
-    identifier                     shift and go to state 148
+    _15_repeat                     shift and go to state 147
+    _15_items                      shift and go to state 148
+    _15_item                       shift and go to state 149
+    identifier                     shift and go to state 150
 
 state 108
 
@@ -3622,22 +3642,22 @@ state 108
     (77) _14_items -> . _14_item
     (78) _14_item -> . , identifier
     >               reduce using rule 75 (_14_repeat -> .)
-    ,               shift and go to state 152
+    ,               shift and go to state 154
 
-    _14_repeat                     shift and go to state 149
-    _14_items                      shift and go to state 150
-    _14_item                       shift and go to state 151
+    _14_repeat                     shift and go to state 151
+    _14_items                      shift and go to state 152
+    _14_item                       shift and go to state 153
 
 state 109
 
-    (161) variable_declaration -> identifier : type_identifier < . type _33_repeat NOT_LESS expr
+    (173) variable_declaration -> identifier : type_identifier < . type _36_repeat NOT_LESS expr
     (65) _11_optional -> < . type _12_repeat >
     (64) type -> . type_identifier _11_optional
-    (133) type_identifier -> . TYPE_IDENTIFIER
+    (145) type_identifier -> . TYPE_IDENTIFIER
     TYPE_IDENTIFIER shift and go to state 25
 
     type_identifier                shift and go to state 100
-    type                           shift and go to state 153
+    type                           shift and go to state 155
 
 state 110
 
@@ -3668,7 +3688,7 @@ state 110
 
 state 111
 
-    (167) variable_declaration -> identifier _34_optional = expr .
+    (179) variable_declaration -> identifier _37_optional = expr .
     (26) binary_expr -> expr . INT_DIV expr
     (27) binary_expr -> expr . NOT_MORE expr
     (28) binary_expr -> expr . NOT_LESS expr
@@ -3679,17 +3699,17 @@ state 111
     (33) binary_expr -> expr . - expr
     (34) binary_expr -> expr . + expr
     (35) binary_expr -> expr . CONCAT expr
-    NEWLINE         reduce using rule 167 (variable_declaration -> identifier _34_optional = expr .)
-    $end            reduce using rule 167 (variable_declaration -> identifier _34_optional = expr .)
-    ,               reduce using rule 167 (variable_declaration -> identifier _34_optional = expr .)
-    }               reduce using rule 167 (variable_declaration -> identifier _34_optional = expr .)
-    )               reduce using rule 167 (variable_declaration -> identifier _34_optional = expr .)
-    ]               reduce using rule 167 (variable_declaration -> identifier _34_optional = expr .)
-    OF              reduce using rule 167 (variable_declaration -> identifier _34_optional = expr .)
-    THEN            reduce using rule 167 (variable_declaration -> identifier _34_optional = expr .)
-    END             reduce using rule 167 (variable_declaration -> identifier _34_optional = expr .)
-    ELIF            reduce using rule 167 (variable_declaration -> identifier _34_optional = expr .)
-    ELSE            reduce using rule 167 (variable_declaration -> identifier _34_optional = expr .)
+    NEWLINE         reduce using rule 179 (variable_declaration -> identifier _37_optional = expr .)
+    $end            reduce using rule 179 (variable_declaration -> identifier _37_optional = expr .)
+    ,               reduce using rule 179 (variable_declaration -> identifier _37_optional = expr .)
+    }               reduce using rule 179 (variable_declaration -> identifier _37_optional = expr .)
+    )               reduce using rule 179 (variable_declaration -> identifier _37_optional = expr .)
+    ]               reduce using rule 179 (variable_declaration -> identifier _37_optional = expr .)
+    OF              reduce using rule 179 (variable_declaration -> identifier _37_optional = expr .)
+    THEN            reduce using rule 179 (variable_declaration -> identifier _37_optional = expr .)
+    END             reduce using rule 179 (variable_declaration -> identifier _37_optional = expr .)
+    ELIF            reduce using rule 179 (variable_declaration -> identifier _37_optional = expr .)
+    ELSE            reduce using rule 179 (variable_declaration -> identifier _37_optional = expr .)
     INT_DIV         shift and go to state 38
     NOT_MORE        shift and go to state 39
     NOT_LESS        shift and go to state 40
@@ -3704,40 +3724,40 @@ state 111
 
 state 112
 
-    (134) array -> [ _27_optional _28_repeat ] .
-    INT_DIV         reduce using rule 134 (array -> [ _27_optional _28_repeat ] .)
-    NOT_MORE        reduce using rule 134 (array -> [ _27_optional _28_repeat ] .)
-    NOT_LESS        reduce using rule 134 (array -> [ _27_optional _28_repeat ] .)
-    >               reduce using rule 134 (array -> [ _27_optional _28_repeat ] .)
-    <               reduce using rule 134 (array -> [ _27_optional _28_repeat ] .)
-    *               reduce using rule 134 (array -> [ _27_optional _28_repeat ] .)
-    /               reduce using rule 134 (array -> [ _27_optional _28_repeat ] .)
-    -               reduce using rule 134 (array -> [ _27_optional _28_repeat ] .)
-    +               reduce using rule 134 (array -> [ _27_optional _28_repeat ] .)
-    CONCAT          reduce using rule 134 (array -> [ _27_optional _28_repeat ] .)
-    NEWLINE         reduce using rule 134 (array -> [ _27_optional _28_repeat ] .)
-    $end            reduce using rule 134 (array -> [ _27_optional _28_repeat ] .)
-    ,               reduce using rule 134 (array -> [ _27_optional _28_repeat ] .)
-    }               reduce using rule 134 (array -> [ _27_optional _28_repeat ] .)
-    )               reduce using rule 134 (array -> [ _27_optional _28_repeat ] .)
-    ]               reduce using rule 134 (array -> [ _27_optional _28_repeat ] .)
-    OF              reduce using rule 134 (array -> [ _27_optional _28_repeat ] .)
-    THEN            reduce using rule 134 (array -> [ _27_optional _28_repeat ] .)
-    END             reduce using rule 134 (array -> [ _27_optional _28_repeat ] .)
-    ELIF            reduce using rule 134 (array -> [ _27_optional _28_repeat ] .)
-    ELSE            reduce using rule 134 (array -> [ _27_optional _28_repeat ] .)
+    (146) array -> [ _30_optional _31_repeat ] .
+    INT_DIV         reduce using rule 146 (array -> [ _30_optional _31_repeat ] .)
+    NOT_MORE        reduce using rule 146 (array -> [ _30_optional _31_repeat ] .)
+    NOT_LESS        reduce using rule 146 (array -> [ _30_optional _31_repeat ] .)
+    >               reduce using rule 146 (array -> [ _30_optional _31_repeat ] .)
+    <               reduce using rule 146 (array -> [ _30_optional _31_repeat ] .)
+    *               reduce using rule 146 (array -> [ _30_optional _31_repeat ] .)
+    /               reduce using rule 146 (array -> [ _30_optional _31_repeat ] .)
+    -               reduce using rule 146 (array -> [ _30_optional _31_repeat ] .)
+    +               reduce using rule 146 (array -> [ _30_optional _31_repeat ] .)
+    CONCAT          reduce using rule 146 (array -> [ _30_optional _31_repeat ] .)
+    NEWLINE         reduce using rule 146 (array -> [ _30_optional _31_repeat ] .)
+    $end            reduce using rule 146 (array -> [ _30_optional _31_repeat ] .)
+    ,               reduce using rule 146 (array -> [ _30_optional _31_repeat ] .)
+    }               reduce using rule 146 (array -> [ _30_optional _31_repeat ] .)
+    )               reduce using rule 146 (array -> [ _30_optional _31_repeat ] .)
+    ]               reduce using rule 146 (array -> [ _30_optional _31_repeat ] .)
+    OF              reduce using rule 146 (array -> [ _30_optional _31_repeat ] .)
+    THEN            reduce using rule 146 (array -> [ _30_optional _31_repeat ] .)
+    END             reduce using rule 146 (array -> [ _30_optional _31_repeat ] .)
+    ELIF            reduce using rule 146 (array -> [ _30_optional _31_repeat ] .)
+    ELSE            reduce using rule 146 (array -> [ _30_optional _31_repeat ] .)
 
 
 state 113
 
-    (139) _28_items -> _28_items _28_item .
-    ,               reduce using rule 139 (_28_items -> _28_items _28_item .)
-    ]               reduce using rule 139 (_28_items -> _28_items _28_item .)
+    (151) _31_items -> _31_items _31_item .
+    ,               reduce using rule 151 (_31_items -> _31_items _31_item .)
+    ]               reduce using rule 151 (_31_items -> _31_items _31_item .)
 
 
 state 114
 
-    (141) _28_item -> , expr .
+    (153) _31_item -> , expr .
     (26) binary_expr -> expr . INT_DIV expr
     (27) binary_expr -> expr . NOT_MORE expr
     (28) binary_expr -> expr . NOT_LESS expr
@@ -3748,8 +3768,8 @@ state 114
     (33) binary_expr -> expr . - expr
     (34) binary_expr -> expr . + expr
     (35) binary_expr -> expr . CONCAT expr
-    ,               reduce using rule 141 (_28_item -> , expr .)
-    ]               reduce using rule 141 (_28_item -> , expr .)
+    ,               reduce using rule 153 (_31_item -> , expr .)
+    ]               reduce using rule 153 (_31_item -> , expr .)
     INT_DIV         shift and go to state 38
     NOT_MORE        shift and go to state 39
     NOT_LESS        shift and go to state 40
@@ -3771,25 +3791,29 @@ state 115
     (118) _24_items -> . _24_item
     (119) _24_item -> . case
     (120) case -> . pattern do
-    (121) pattern -> . enum_pattern
-    (122) pattern -> . param_pattern
-    (130) enum_pattern -> . type_identifier ( _26_optional )
-    (123) param_pattern -> . identifier
-    (133) type_identifier -> . TYPE_IDENTIFIER
-    (160) identifier -> . IDENTIFIER
+    (121) pattern -> . array_pattern
+    (122) pattern -> . enum_pattern
+    (123) pattern -> . param_pattern
+    (125) array_pattern -> . [ _25_optional _26_optional ]
+    (142) enum_pattern -> . type_identifier ( _29_optional )
+    (124) param_pattern -> . identifier
+    (145) type_identifier -> . TYPE_IDENTIFIER
+    (172) identifier -> . IDENTIFIER
     END             reduce using rule 116 (_24_repeat -> .)
+    [               shift and go to state 120
     TYPE_IDENTIFIER shift and go to state 25
     IDENTIFIER      shift and go to state 26
 
-    case                           shift and go to state 154
-    _24_repeat                     shift and go to state 155
-    _24_items                      shift and go to state 156
-    _24_item                       shift and go to state 157
+    case                           shift and go to state 156
+    _24_repeat                     shift and go to state 157
+    _24_items                      shift and go to state 158
+    _24_item                       shift and go to state 159
     pattern                        shift and go to state 116
-    enum_pattern                   shift and go to state 117
-    param_pattern                  shift and go to state 118
-    type_identifier                shift and go to state 119
-    identifier                     shift and go to state 120
+    array_pattern                  shift and go to state 117
+    enum_pattern                   shift and go to state 118
+    param_pattern                  shift and go to state 119
+    type_identifier                shift and go to state 121
+    identifier                     shift and go to state 122
 
 state 116
 
@@ -3797,64 +3821,109 @@ state 116
     (36) do -> . DO _3_optional _4_optional _5_repeat END
     DO              shift and go to state 33
 
-    do                             shift and go to state 158
+    do                             shift and go to state 160
 
 state 117
 
-    (121) pattern -> enum_pattern .
-    DO              reduce using rule 121 (pattern -> enum_pattern .)
-    ,               reduce using rule 121 (pattern -> enum_pattern .)
-    )               reduce using rule 121 (pattern -> enum_pattern .)
+    (121) pattern -> array_pattern .
+    DO              reduce using rule 121 (pattern -> array_pattern .)
+    ,               reduce using rule 121 (pattern -> array_pattern .)
+    SPREAD          reduce using rule 121 (pattern -> array_pattern .)
+    ]               reduce using rule 121 (pattern -> array_pattern .)
+    )               reduce using rule 121 (pattern -> array_pattern .)
 
 
 state 118
 
-    (122) pattern -> param_pattern .
-    DO              reduce using rule 122 (pattern -> param_pattern .)
-    ,               reduce using rule 122 (pattern -> param_pattern .)
-    )               reduce using rule 122 (pattern -> param_pattern .)
+    (122) pattern -> enum_pattern .
+    DO              reduce using rule 122 (pattern -> enum_pattern .)
+    ,               reduce using rule 122 (pattern -> enum_pattern .)
+    SPREAD          reduce using rule 122 (pattern -> enum_pattern .)
+    ]               reduce using rule 122 (pattern -> enum_pattern .)
+    )               reduce using rule 122 (pattern -> enum_pattern .)
 
 
 state 119
 
-    (130) enum_pattern -> type_identifier . ( _26_optional )
-    (               shift and go to state 159
+    (123) pattern -> param_pattern .
+    DO              reduce using rule 123 (pattern -> param_pattern .)
+    ,               reduce using rule 123 (pattern -> param_pattern .)
+    SPREAD          reduce using rule 123 (pattern -> param_pattern .)
+    ]               reduce using rule 123 (pattern -> param_pattern .)
+    )               reduce using rule 123 (pattern -> param_pattern .)
 
 
 state 120
 
-    (123) param_pattern -> identifier .
-    DO              reduce using rule 123 (param_pattern -> identifier .)
-    ,               reduce using rule 123 (param_pattern -> identifier .)
-    )               reduce using rule 123 (param_pattern -> identifier .)
+    (125) array_pattern -> [ . _25_optional _26_optional ]
+    (126) _25_optional -> . patterns
+    (127) _25_optional -> .
+    (136) patterns -> . pattern _28_repeat
+    (121) pattern -> . array_pattern
+    (122) pattern -> . enum_pattern
+    (123) pattern -> . param_pattern
+    (125) array_pattern -> . [ _25_optional _26_optional ]
+    (142) enum_pattern -> . type_identifier ( _29_optional )
+    (124) param_pattern -> . identifier
+    (145) type_identifier -> . TYPE_IDENTIFIER
+    (172) identifier -> . IDENTIFIER
+    SPREAD          reduce using rule 127 (_25_optional -> .)
+    ]               reduce using rule 127 (_25_optional -> .)
+    [               shift and go to state 120
+    TYPE_IDENTIFIER shift and go to state 25
+    IDENTIFIER      shift and go to state 26
 
+    _25_optional                   shift and go to state 161
+    patterns                       shift and go to state 162
+    pattern                        shift and go to state 163
+    array_pattern                  shift and go to state 117
+    enum_pattern                   shift and go to state 118
+    param_pattern                  shift and go to state 119
+    type_identifier                shift and go to state 121
+    identifier                     shift and go to state 122
 
 state 121
 
-    (150) call -> callee ( _31_optional _32_repeat . )
-    )               shift and go to state 160
+    (142) enum_pattern -> type_identifier . ( _29_optional )
+    (               shift and go to state 164
 
 
 state 122
 
-    (153) _32_repeat -> _32_items .
-    (155) _32_items -> _32_items . _32_item
-    (157) _32_item -> . , expr
-    )               reduce using rule 153 (_32_repeat -> _32_items .)
-    ,               shift and go to state 124
+    (124) param_pattern -> identifier .
+    DO              reduce using rule 124 (param_pattern -> identifier .)
+    ,               reduce using rule 124 (param_pattern -> identifier .)
+    SPREAD          reduce using rule 124 (param_pattern -> identifier .)
+    ]               reduce using rule 124 (param_pattern -> identifier .)
+    )               reduce using rule 124 (param_pattern -> identifier .)
 
-    _32_item                       shift and go to state 161
 
 state 123
 
-    (156) _32_items -> _32_item .
-    ,               reduce using rule 156 (_32_items -> _32_item .)
-    )               reduce using rule 156 (_32_items -> _32_item .)
+    (162) call -> callee ( _34_optional _35_repeat . )
+    )               shift and go to state 165
 
 
 state 124
 
-    (157) _32_item -> , . expr
+    (165) _35_repeat -> _35_items .
+    (167) _35_items -> _35_items . _35_item
+    (169) _35_item -> . , expr
+    )               reduce using rule 165 (_35_repeat -> _35_items .)
+    ,               shift and go to state 126
+
+    _35_item                       shift and go to state 166
+
+state 125
+
+    (168) _35_items -> _35_item .
+    ,               reduce using rule 168 (_35_items -> _35_item .)
+    )               reduce using rule 168 (_35_items -> _35_item .)
+
+
+state 126
+
+    (169) _35_item -> , . expr
     (12) expr -> . ( expr )
     (13) expr -> . - expr
     (14) expr -> . tuple
@@ -3869,8 +3938,8 @@ state 124
     (23) expr -> . def_expr
     (24) expr -> . literal
     (25) expr -> . do
-    (142) tuple -> . { _29_optional _30_repeat }
-    (134) array -> . [ _27_optional _28_repeat ]
+    (154) tuple -> . { _32_optional _33_repeat }
+    (146) array -> . [ _30_optional _31_repeat ]
     (26) binary_expr -> . expr INT_DIV expr
     (27) binary_expr -> . expr NOT_MORE expr
     (28) binary_expr -> . expr NOT_LESS expr
@@ -3881,19 +3950,19 @@ state 124
     (33) binary_expr -> . expr - expr
     (34) binary_expr -> . expr + expr
     (35) binary_expr -> . expr CONCAT expr
-    (133) type_identifier -> . TYPE_IDENTIFIER
-    (160) identifier -> . IDENTIFIER
-    (161) variable_declaration -> . identifier : type_identifier < type _33_repeat NOT_LESS expr
-    (167) variable_declaration -> . identifier _34_optional = expr
+    (145) type_identifier -> . TYPE_IDENTIFIER
+    (172) identifier -> . IDENTIFIER
+    (173) variable_declaration -> . identifier : type_identifier < type _36_repeat NOT_LESS expr
+    (179) variable_declaration -> . identifier _37_optional = expr
     (114) case_of -> . CASE expr OF case _24_repeat END
-    (150) call -> . callee ( _31_optional _32_repeat )
+    (162) call -> . callee ( _34_optional _35_repeat )
     (105) if_expr -> . IF expr THEN _21_optional block_statement _22_optional END
     (54) def_expr -> . DEF identifier ( _8_optional _9_repeat ) _10_optional do
-    (170) literal -> . STRING
-    (171) literal -> . NUMBER
+    (182) literal -> . STRING
+    (183) literal -> . NUMBER
     (36) do -> . DO _3_optional _4_optional _5_repeat END
-    (158) callee -> . type_identifier
-    (159) callee -> . identifier
+    (170) callee -> . type_identifier
+    (171) callee -> . identifier
     (               shift and go to state 11
     -               shift and go to state 12
     {               shift and go to state 9
@@ -3907,7 +3976,7 @@ state 124
     NUMBER          shift and go to state 32
     DO              shift and go to state 33
 
-    expr                           shift and go to state 162
+    expr                           shift and go to state 167
     tuple                          shift and go to state 13
     array                          shift and go to state 14
     binary_expr                    shift and go to state 15
@@ -3922,7 +3991,7 @@ state 124
     do                             shift and go to state 23
     callee                         shift and go to state 28
 
-state 125
+state 127
 
     (105) if_expr -> IF expr THEN _21_optional . block_statement _22_optional END
     (46) block_statement -> . _6_optional _7_repeat
@@ -3942,8 +4011,8 @@ state 125
     (23) expr -> . def_expr
     (24) expr -> . literal
     (25) expr -> . do
-    (142) tuple -> . { _29_optional _30_repeat }
-    (134) array -> . [ _27_optional _28_repeat ]
+    (154) tuple -> . { _32_optional _33_repeat }
+    (146) array -> . [ _30_optional _31_repeat ]
     (26) binary_expr -> . expr INT_DIV expr
     (27) binary_expr -> . expr NOT_MORE expr
     (28) binary_expr -> . expr NOT_LESS expr
@@ -3954,19 +4023,19 @@ state 125
     (33) binary_expr -> . expr - expr
     (34) binary_expr -> . expr + expr
     (35) binary_expr -> . expr CONCAT expr
-    (133) type_identifier -> . TYPE_IDENTIFIER
-    (160) identifier -> . IDENTIFIER
-    (161) variable_declaration -> . identifier : type_identifier < type _33_repeat NOT_LESS expr
-    (167) variable_declaration -> . identifier _34_optional = expr
+    (145) type_identifier -> . TYPE_IDENTIFIER
+    (172) identifier -> . IDENTIFIER
+    (173) variable_declaration -> . identifier : type_identifier < type _36_repeat NOT_LESS expr
+    (179) variable_declaration -> . identifier _37_optional = expr
     (114) case_of -> . CASE expr OF case _24_repeat END
-    (150) call -> . callee ( _31_optional _32_repeat )
+    (162) call -> . callee ( _34_optional _35_repeat )
     (105) if_expr -> . IF expr THEN _21_optional block_statement _22_optional END
     (54) def_expr -> . DEF identifier ( _8_optional _9_repeat ) _10_optional do
-    (170) literal -> . STRING
-    (171) literal -> . NUMBER
+    (182) literal -> . STRING
+    (183) literal -> . NUMBER
     (36) do -> . DO _3_optional _4_optional _5_repeat END
-    (158) callee -> . type_identifier
-    (159) callee -> . identifier
+    (170) callee -> . type_identifier
+    (171) callee -> . identifier
     NEWLINE         reduce using rule 48 (_6_optional -> .)
     ELIF            reduce using rule 48 (_6_optional -> .)
     ELSE            reduce using rule 48 (_6_optional -> .)
@@ -3984,9 +4053,9 @@ state 125
     NUMBER          shift and go to state 32
     DO              shift and go to state 33
 
-    expr                           shift and go to state 163
-    block_statement                shift and go to state 164
-    _6_optional                    shift and go to state 165
+    expr                           shift and go to state 168
+    block_statement                shift and go to state 169
+    _6_optional                    shift and go to state 170
     tuple                          shift and go to state 13
     array                          shift and go to state 14
     binary_expr                    shift and go to state 15
@@ -4001,28 +4070,28 @@ state 125
     do                             shift and go to state 23
     callee                         shift and go to state 28
 
-state 126
+state 128
 
     (106) _21_optional -> : . type
     (64) type -> . type_identifier _11_optional
-    (133) type_identifier -> . TYPE_IDENTIFIER
+    (145) type_identifier -> . TYPE_IDENTIFIER
     TYPE_IDENTIFIER shift and go to state 25
 
-    type                           shift and go to state 166
+    type                           shift and go to state 171
     type_identifier                shift and go to state 100
 
-state 127
+state 129
 
     (102) param -> identifier . _20_optional
     (103) _20_optional -> . : type
     (104) _20_optional -> .
-    :               shift and go to state 168
+    :               shift and go to state 173
     ,               reduce using rule 104 (_20_optional -> .)
     )               reduce using rule 104 (_20_optional -> .)
 
-    _20_optional                   shift and go to state 167
+    _20_optional                   shift and go to state 172
 
-state 128
+state 130
 
     (54) def_expr -> DEF identifier ( _8_optional . _9_repeat ) _10_optional do
     (57) _9_repeat -> . _9_items
@@ -4031,43 +4100,43 @@ state 128
     (60) _9_items -> . _9_item
     (61) _9_item -> . , param
     )               reduce using rule 58 (_9_repeat -> .)
-    ,               shift and go to state 172
+    ,               shift and go to state 177
 
-    _9_repeat                      shift and go to state 169
-    _9_items                       shift and go to state 170
-    _9_item                        shift and go to state 171
+    _9_repeat                      shift and go to state 174
+    _9_items                       shift and go to state 175
+    _9_item                        shift and go to state 176
 
-state 129
+state 131
 
     (55) _8_optional -> param .
     ,               reduce using rule 55 (_8_optional -> param .)
     )               reduce using rule 55 (_8_optional -> param .)
 
 
-state 130
+state 132
 
     (36) do -> DO _3_optional _4_optional _5_repeat . END
-    END             shift and go to state 173
+    END             shift and go to state 178
 
 
-state 131
+state 133
 
     (41) _5_repeat -> _5_items .
     (43) _5_items -> _5_items . _5_item
     (45) _5_item -> . NEWLINE expr
     END             reduce using rule 41 (_5_repeat -> _5_items .)
-    NEWLINE         shift and go to state 133
+    NEWLINE         shift and go to state 135
 
-    _5_item                        shift and go to state 174
+    _5_item                        shift and go to state 179
 
-state 132
+state 134
 
     (44) _5_items -> _5_item .
     NEWLINE         reduce using rule 44 (_5_items -> _5_item .)
     END             reduce using rule 44 (_5_items -> _5_item .)
 
 
-state 133
+state 135
 
     (45) _5_item -> NEWLINE . expr
     (12) expr -> . ( expr )
@@ -4084,8 +4153,8 @@ state 133
     (23) expr -> . def_expr
     (24) expr -> . literal
     (25) expr -> . do
-    (142) tuple -> . { _29_optional _30_repeat }
-    (134) array -> . [ _27_optional _28_repeat ]
+    (154) tuple -> . { _32_optional _33_repeat }
+    (146) array -> . [ _30_optional _31_repeat ]
     (26) binary_expr -> . expr INT_DIV expr
     (27) binary_expr -> . expr NOT_MORE expr
     (28) binary_expr -> . expr NOT_LESS expr
@@ -4096,19 +4165,19 @@ state 133
     (33) binary_expr -> . expr - expr
     (34) binary_expr -> . expr + expr
     (35) binary_expr -> . expr CONCAT expr
-    (133) type_identifier -> . TYPE_IDENTIFIER
-    (160) identifier -> . IDENTIFIER
-    (161) variable_declaration -> . identifier : type_identifier < type _33_repeat NOT_LESS expr
-    (167) variable_declaration -> . identifier _34_optional = expr
+    (145) type_identifier -> . TYPE_IDENTIFIER
+    (172) identifier -> . IDENTIFIER
+    (173) variable_declaration -> . identifier : type_identifier < type _36_repeat NOT_LESS expr
+    (179) variable_declaration -> . identifier _37_optional = expr
     (114) case_of -> . CASE expr OF case _24_repeat END
-    (150) call -> . callee ( _31_optional _32_repeat )
+    (162) call -> . callee ( _34_optional _35_repeat )
     (105) if_expr -> . IF expr THEN _21_optional block_statement _22_optional END
     (54) def_expr -> . DEF identifier ( _8_optional _9_repeat ) _10_optional do
-    (170) literal -> . STRING
-    (171) literal -> . NUMBER
+    (182) literal -> . STRING
+    (183) literal -> . NUMBER
     (36) do -> . DO _3_optional _4_optional _5_repeat END
-    (158) callee -> . type_identifier
-    (159) callee -> . identifier
+    (170) callee -> . type_identifier
+    (171) callee -> . identifier
     (               shift and go to state 11
     -               shift and go to state 12
     {               shift and go to state 9
@@ -4122,7 +4191,7 @@ state 133
     NUMBER          shift and go to state 32
     DO              shift and go to state 33
 
-    expr                           shift and go to state 175
+    expr                           shift and go to state 180
     tuple                          shift and go to state 13
     array                          shift and go to state 14
     binary_expr                    shift and go to state 15
@@ -4137,86 +4206,86 @@ state 133
     do                             shift and go to state 23
     callee                         shift and go to state 28
 
-state 134
+state 136
 
     (65) _11_optional -> < . type _12_repeat >
     (64) type -> . type_identifier _11_optional
-    (133) type_identifier -> . TYPE_IDENTIFIER
+    (145) type_identifier -> . TYPE_IDENTIFIER
     TYPE_IDENTIFIER shift and go to state 25
 
-    type                           shift and go to state 176
+    type                           shift and go to state 181
     type_identifier                shift and go to state 100
 
-state 135
+state 137
 
     (93) variant -> type_identifier . _18_optional
     (94) _18_optional -> . ( fields_unnamed )
     (95) _18_optional -> .
-    (               shift and go to state 178
+    (               shift and go to state 183
     TYPE_IDENTIFIER reduce using rule 95 (_18_optional -> .)
     }               reduce using rule 95 (_18_optional -> .)
 
-    _18_optional                   shift and go to state 177
+    _18_optional                   shift and go to state 182
 
-state 136
+state 138
 
     (85) enum -> ENUM type_identifier _16_optional { _17_repeat . }
-    }               shift and go to state 179
+    }               shift and go to state 184
 
 
-state 137
+state 139
 
     (88) _17_repeat -> _17_items .
     (90) _17_items -> _17_items . _17_item
     (92) _17_item -> . variant
     (93) variant -> . type_identifier _18_optional
-    (133) type_identifier -> . TYPE_IDENTIFIER
+    (145) type_identifier -> . TYPE_IDENTIFIER
     }               reduce using rule 88 (_17_repeat -> _17_items .)
     TYPE_IDENTIFIER shift and go to state 25
 
-    _17_item                       shift and go to state 180
-    variant                        shift and go to state 139
-    type_identifier                shift and go to state 135
+    _17_item                       shift and go to state 185
+    variant                        shift and go to state 141
+    type_identifier                shift and go to state 137
 
-state 138
+state 140
 
     (91) _17_items -> _17_item .
     TYPE_IDENTIFIER reduce using rule 91 (_17_items -> _17_item .)
     }               reduce using rule 91 (_17_items -> _17_item .)
 
 
-state 139
+state 141
 
     (92) _17_item -> variant .
     TYPE_IDENTIFIER reduce using rule 92 (_17_item -> variant .)
     }               reduce using rule 92 (_17_item -> variant .)
 
 
-state 140
+state 142
 
     (86) _16_optional -> < fields_unnamed > .
     {               reduce using rule 86 (_16_optional -> < fields_unnamed > .)
 
 
-state 141
+state 143
 
     (96) fields_unnamed -> identifier _19_repeat .
     >               reduce using rule 96 (fields_unnamed -> identifier _19_repeat .)
     )               reduce using rule 96 (fields_unnamed -> identifier _19_repeat .)
 
 
-state 142
+state 144
 
     (97) _19_repeat -> _19_items .
     (99) _19_items -> _19_items . _19_item
     (101) _19_item -> . , identifier
     >               reduce using rule 97 (_19_repeat -> _19_items .)
     )               reduce using rule 97 (_19_repeat -> _19_items .)
-    ,               shift and go to state 144
+    ,               shift and go to state 146
 
-    _19_item                       shift and go to state 181
+    _19_item                       shift and go to state 186
 
-state 143
+state 145
 
     (100) _19_items -> _19_item .
     ,               reduce using rule 100 (_19_items -> _19_item .)
@@ -4224,215 +4293,262 @@ state 143
     )               reduce using rule 100 (_19_items -> _19_item .)
 
 
-state 144
+state 146
 
     (101) _19_item -> , . identifier
-    (160) identifier -> . IDENTIFIER
+    (172) identifier -> . IDENTIFIER
     IDENTIFIER      shift and go to state 26
 
-    identifier                     shift and go to state 182
+    identifier                     shift and go to state 187
 
-state 145
+state 147
 
     (72) struct -> STRUCT type_identifier _13_optional { _15_repeat . }
-    }               shift and go to state 183
+    }               shift and go to state 188
 
 
-state 146
+state 148
 
     (80) _15_repeat -> _15_items .
     (82) _15_items -> _15_items . _15_item
     (84) _15_item -> . identifier : type
-    (160) identifier -> . IDENTIFIER
+    (172) identifier -> . IDENTIFIER
     }               reduce using rule 80 (_15_repeat -> _15_items .)
     IDENTIFIER      shift and go to state 26
 
-    _15_item                       shift and go to state 184
-    identifier                     shift and go to state 148
+    _15_item                       shift and go to state 189
+    identifier                     shift and go to state 150
 
-state 147
+state 149
 
     (83) _15_items -> _15_item .
     IDENTIFIER      reduce using rule 83 (_15_items -> _15_item .)
     }               reduce using rule 83 (_15_items -> _15_item .)
 
 
-state 148
+state 150
 
     (84) _15_item -> identifier . : type
-    :               shift and go to state 185
+    :               shift and go to state 190
 
 
-state 149
+state 151
 
     (73) _13_optional -> < identifier _14_repeat . >
-    >               shift and go to state 186
+    >               shift and go to state 191
 
 
-state 150
+state 152
 
     (74) _14_repeat -> _14_items .
     (76) _14_items -> _14_items . _14_item
     (78) _14_item -> . , identifier
     >               reduce using rule 74 (_14_repeat -> _14_items .)
-    ,               shift and go to state 152
+    ,               shift and go to state 154
 
-    _14_item                       shift and go to state 187
+    _14_item                       shift and go to state 192
 
-state 151
+state 153
 
     (77) _14_items -> _14_item .
     ,               reduce using rule 77 (_14_items -> _14_item .)
     >               reduce using rule 77 (_14_items -> _14_item .)
 
 
-state 152
-
-    (78) _14_item -> , . identifier
-    (160) identifier -> . IDENTIFIER
-    IDENTIFIER      shift and go to state 26
-
-    identifier                     shift and go to state 188
-
-state 153
-
-    (161) variable_declaration -> identifier : type_identifier < type . _33_repeat NOT_LESS expr
-    (65) _11_optional -> < type . _12_repeat >
-    (162) _33_repeat -> . _33_items
-    (163) _33_repeat -> .
-    (66) _12_repeat -> . _12_items
-    (67) _12_repeat -> .
-    (164) _33_items -> . _33_items _33_item
-    (165) _33_items -> . _33_item
-    (68) _12_items -> . _12_items _12_item
-    (69) _12_items -> . _12_item
-    (166) _33_item -> . , type
-    (70) _12_item -> . , type
-    NOT_LESS        reduce using rule 163 (_33_repeat -> .)
-    >               reduce using rule 67 (_12_repeat -> .)
-    ,               shift and go to state 195
-
-    _33_repeat                     shift and go to state 189
-    _12_repeat                     shift and go to state 190
-    _33_items                      shift and go to state 191
-    _12_items                      shift and go to state 192
-    _33_item                       shift and go to state 193
-    _12_item                       shift and go to state 194
-
 state 154
 
+    (78) _14_item -> , . identifier
+    (172) identifier -> . IDENTIFIER
+    IDENTIFIER      shift and go to state 26
+
+    identifier                     shift and go to state 193
+
+state 155
+
+    (173) variable_declaration -> identifier : type_identifier < type . _36_repeat NOT_LESS expr
+    (65) _11_optional -> < type . _12_repeat >
+    (174) _36_repeat -> . _36_items
+    (175) _36_repeat -> .
+    (66) _12_repeat -> . _12_items
+    (67) _12_repeat -> .
+    (176) _36_items -> . _36_items _36_item
+    (177) _36_items -> . _36_item
+    (68) _12_items -> . _12_items _12_item
+    (69) _12_items -> . _12_item
+    (178) _36_item -> . , type
+    (70) _12_item -> . , type
+    NOT_LESS        reduce using rule 175 (_36_repeat -> .)
+    >               reduce using rule 67 (_12_repeat -> .)
+    ,               shift and go to state 200
+
+    _36_repeat                     shift and go to state 194
+    _12_repeat                     shift and go to state 195
+    _36_items                      shift and go to state 196
+    _12_items                      shift and go to state 197
+    _36_item                       shift and go to state 198
+    _12_item                       shift and go to state 199
+
+state 156
+
     (119) _24_item -> case .
+    [               reduce using rule 119 (_24_item -> case .)
     TYPE_IDENTIFIER reduce using rule 119 (_24_item -> case .)
     IDENTIFIER      reduce using rule 119 (_24_item -> case .)
     END             reduce using rule 119 (_24_item -> case .)
 
 
-state 155
+state 157
 
     (114) case_of -> CASE expr OF case _24_repeat . END
-    END             shift and go to state 196
+    END             shift and go to state 201
 
 
-state 156
+state 158
 
     (115) _24_repeat -> _24_items .
     (117) _24_items -> _24_items . _24_item
     (119) _24_item -> . case
     (120) case -> . pattern do
-    (121) pattern -> . enum_pattern
-    (122) pattern -> . param_pattern
-    (130) enum_pattern -> . type_identifier ( _26_optional )
-    (123) param_pattern -> . identifier
-    (133) type_identifier -> . TYPE_IDENTIFIER
-    (160) identifier -> . IDENTIFIER
+    (121) pattern -> . array_pattern
+    (122) pattern -> . enum_pattern
+    (123) pattern -> . param_pattern
+    (125) array_pattern -> . [ _25_optional _26_optional ]
+    (142) enum_pattern -> . type_identifier ( _29_optional )
+    (124) param_pattern -> . identifier
+    (145) type_identifier -> . TYPE_IDENTIFIER
+    (172) identifier -> . IDENTIFIER
     END             reduce using rule 115 (_24_repeat -> _24_items .)
+    [               shift and go to state 120
     TYPE_IDENTIFIER shift and go to state 25
     IDENTIFIER      shift and go to state 26
 
-    _24_item                       shift and go to state 197
-    case                           shift and go to state 154
+    _24_item                       shift and go to state 202
+    case                           shift and go to state 156
     pattern                        shift and go to state 116
-    enum_pattern                   shift and go to state 117
-    param_pattern                  shift and go to state 118
-    type_identifier                shift and go to state 119
-    identifier                     shift and go to state 120
+    array_pattern                  shift and go to state 117
+    enum_pattern                   shift and go to state 118
+    param_pattern                  shift and go to state 119
+    type_identifier                shift and go to state 121
+    identifier                     shift and go to state 122
 
-state 157
+state 159
 
     (118) _24_items -> _24_item .
+    [               reduce using rule 118 (_24_items -> _24_item .)
     TYPE_IDENTIFIER reduce using rule 118 (_24_items -> _24_item .)
     IDENTIFIER      reduce using rule 118 (_24_items -> _24_item .)
     END             reduce using rule 118 (_24_items -> _24_item .)
 
 
-state 158
+state 160
 
     (120) case -> pattern do .
+    [               reduce using rule 120 (case -> pattern do .)
     TYPE_IDENTIFIER reduce using rule 120 (case -> pattern do .)
     IDENTIFIER      reduce using rule 120 (case -> pattern do .)
     END             reduce using rule 120 (case -> pattern do .)
 
 
-state 159
-
-    (130) enum_pattern -> type_identifier ( . _26_optional )
-    (131) _26_optional -> . patterns
-    (132) _26_optional -> .
-    (124) patterns -> . pattern _25_repeat
-    (121) pattern -> . enum_pattern
-    (122) pattern -> . param_pattern
-    (130) enum_pattern -> . type_identifier ( _26_optional )
-    (123) param_pattern -> . identifier
-    (133) type_identifier -> . TYPE_IDENTIFIER
-    (160) identifier -> . IDENTIFIER
-    )               reduce using rule 132 (_26_optional -> .)
-    TYPE_IDENTIFIER shift and go to state 25
-    IDENTIFIER      shift and go to state 26
-
-    type_identifier                shift and go to state 119
-    _26_optional                   shift and go to state 198
-    patterns                       shift and go to state 199
-    pattern                        shift and go to state 200
-    enum_pattern                   shift and go to state 117
-    param_pattern                  shift and go to state 118
-    identifier                     shift and go to state 120
-
-state 160
-
-    (150) call -> callee ( _31_optional _32_repeat ) .
-    INT_DIV         reduce using rule 150 (call -> callee ( _31_optional _32_repeat ) .)
-    NOT_MORE        reduce using rule 150 (call -> callee ( _31_optional _32_repeat ) .)
-    NOT_LESS        reduce using rule 150 (call -> callee ( _31_optional _32_repeat ) .)
-    >               reduce using rule 150 (call -> callee ( _31_optional _32_repeat ) .)
-    <               reduce using rule 150 (call -> callee ( _31_optional _32_repeat ) .)
-    *               reduce using rule 150 (call -> callee ( _31_optional _32_repeat ) .)
-    /               reduce using rule 150 (call -> callee ( _31_optional _32_repeat ) .)
-    -               reduce using rule 150 (call -> callee ( _31_optional _32_repeat ) .)
-    +               reduce using rule 150 (call -> callee ( _31_optional _32_repeat ) .)
-    CONCAT          reduce using rule 150 (call -> callee ( _31_optional _32_repeat ) .)
-    NEWLINE         reduce using rule 150 (call -> callee ( _31_optional _32_repeat ) .)
-    $end            reduce using rule 150 (call -> callee ( _31_optional _32_repeat ) .)
-    ,               reduce using rule 150 (call -> callee ( _31_optional _32_repeat ) .)
-    }               reduce using rule 150 (call -> callee ( _31_optional _32_repeat ) .)
-    )               reduce using rule 150 (call -> callee ( _31_optional _32_repeat ) .)
-    ]               reduce using rule 150 (call -> callee ( _31_optional _32_repeat ) .)
-    OF              reduce using rule 150 (call -> callee ( _31_optional _32_repeat ) .)
-    THEN            reduce using rule 150 (call -> callee ( _31_optional _32_repeat ) .)
-    END             reduce using rule 150 (call -> callee ( _31_optional _32_repeat ) .)
-    ELIF            reduce using rule 150 (call -> callee ( _31_optional _32_repeat ) .)
-    ELSE            reduce using rule 150 (call -> callee ( _31_optional _32_repeat ) .)
-
-
 state 161
 
-    (155) _32_items -> _32_items _32_item .
-    ,               reduce using rule 155 (_32_items -> _32_items _32_item .)
-    )               reduce using rule 155 (_32_items -> _32_items _32_item .)
+    (125) array_pattern -> [ _25_optional . _26_optional ]
+    (128) _26_optional -> . spread
+    (129) _26_optional -> .
+    (130) spread -> . SPREAD identifier _27_repeat
+    ]               reduce using rule 129 (_26_optional -> .)
+    SPREAD          shift and go to state 205
 
+    _26_optional                   shift and go to state 203
+    spread                         shift and go to state 204
 
 state 162
 
-    (157) _32_item -> , expr .
+    (126) _25_optional -> patterns .
+    SPREAD          reduce using rule 126 (_25_optional -> patterns .)
+    ]               reduce using rule 126 (_25_optional -> patterns .)
+
+
+state 163
+
+    (136) patterns -> pattern . _28_repeat
+    (137) _28_repeat -> . _28_items
+    (138) _28_repeat -> .
+    (139) _28_items -> . _28_items _28_item
+    (140) _28_items -> . _28_item
+    (141) _28_item -> . , pattern
+    SPREAD          reduce using rule 138 (_28_repeat -> .)
+    ]               reduce using rule 138 (_28_repeat -> .)
+    )               reduce using rule 138 (_28_repeat -> .)
+    ,               shift and go to state 209
+
+    _28_repeat                     shift and go to state 206
+    _28_items                      shift and go to state 207
+    _28_item                       shift and go to state 208
+
+state 164
+
+    (142) enum_pattern -> type_identifier ( . _29_optional )
+    (143) _29_optional -> . patterns
+    (144) _29_optional -> .
+    (136) patterns -> . pattern _28_repeat
+    (121) pattern -> . array_pattern
+    (122) pattern -> . enum_pattern
+    (123) pattern -> . param_pattern
+    (125) array_pattern -> . [ _25_optional _26_optional ]
+    (142) enum_pattern -> . type_identifier ( _29_optional )
+    (124) param_pattern -> . identifier
+    (145) type_identifier -> . TYPE_IDENTIFIER
+    (172) identifier -> . IDENTIFIER
+    )               reduce using rule 144 (_29_optional -> .)
+    [               shift and go to state 120
+    TYPE_IDENTIFIER shift and go to state 25
+    IDENTIFIER      shift and go to state 26
+
+    type_identifier                shift and go to state 121
+    _29_optional                   shift and go to state 210
+    patterns                       shift and go to state 211
+    pattern                        shift and go to state 163
+    array_pattern                  shift and go to state 117
+    enum_pattern                   shift and go to state 118
+    param_pattern                  shift and go to state 119
+    identifier                     shift and go to state 122
+
+state 165
+
+    (162) call -> callee ( _34_optional _35_repeat ) .
+    INT_DIV         reduce using rule 162 (call -> callee ( _34_optional _35_repeat ) .)
+    NOT_MORE        reduce using rule 162 (call -> callee ( _34_optional _35_repeat ) .)
+    NOT_LESS        reduce using rule 162 (call -> callee ( _34_optional _35_repeat ) .)
+    >               reduce using rule 162 (call -> callee ( _34_optional _35_repeat ) .)
+    <               reduce using rule 162 (call -> callee ( _34_optional _35_repeat ) .)
+    *               reduce using rule 162 (call -> callee ( _34_optional _35_repeat ) .)
+    /               reduce using rule 162 (call -> callee ( _34_optional _35_repeat ) .)
+    -               reduce using rule 162 (call -> callee ( _34_optional _35_repeat ) .)
+    +               reduce using rule 162 (call -> callee ( _34_optional _35_repeat ) .)
+    CONCAT          reduce using rule 162 (call -> callee ( _34_optional _35_repeat ) .)
+    NEWLINE         reduce using rule 162 (call -> callee ( _34_optional _35_repeat ) .)
+    $end            reduce using rule 162 (call -> callee ( _34_optional _35_repeat ) .)
+    ,               reduce using rule 162 (call -> callee ( _34_optional _35_repeat ) .)
+    }               reduce using rule 162 (call -> callee ( _34_optional _35_repeat ) .)
+    )               reduce using rule 162 (call -> callee ( _34_optional _35_repeat ) .)
+    ]               reduce using rule 162 (call -> callee ( _34_optional _35_repeat ) .)
+    OF              reduce using rule 162 (call -> callee ( _34_optional _35_repeat ) .)
+    THEN            reduce using rule 162 (call -> callee ( _34_optional _35_repeat ) .)
+    END             reduce using rule 162 (call -> callee ( _34_optional _35_repeat ) .)
+    ELIF            reduce using rule 162 (call -> callee ( _34_optional _35_repeat ) .)
+    ELSE            reduce using rule 162 (call -> callee ( _34_optional _35_repeat ) .)
+
+
+state 166
+
+    (167) _35_items -> _35_items _35_item .
+    ,               reduce using rule 167 (_35_items -> _35_items _35_item .)
+    )               reduce using rule 167 (_35_items -> _35_items _35_item .)
+
+
+state 167
+
+    (169) _35_item -> , expr .
     (26) binary_expr -> expr . INT_DIV expr
     (27) binary_expr -> expr . NOT_MORE expr
     (28) binary_expr -> expr . NOT_LESS expr
@@ -4443,8 +4559,8 @@ state 162
     (33) binary_expr -> expr . - expr
     (34) binary_expr -> expr . + expr
     (35) binary_expr -> expr . CONCAT expr
-    ,               reduce using rule 157 (_32_item -> , expr .)
-    )               reduce using rule 157 (_32_item -> , expr .)
+    ,               reduce using rule 169 (_35_item -> , expr .)
+    )               reduce using rule 169 (_35_item -> , expr .)
     INT_DIV         shift and go to state 38
     NOT_MORE        shift and go to state 39
     NOT_LESS        shift and go to state 40
@@ -4457,7 +4573,7 @@ state 162
     CONCAT          shift and go to state 47
 
 
-state 163
+state 168
 
     (47) _6_optional -> expr .
     (26) binary_expr -> expr . INT_DIV expr
@@ -4486,7 +4602,7 @@ state 163
     CONCAT          shift and go to state 47
 
 
-state 164
+state 169
 
     (105) if_expr -> IF expr THEN _21_optional block_statement . _22_optional END
     (108) _22_optional -> . or_else
@@ -4494,13 +4610,13 @@ state 164
     (110) or_else -> . ELIF expr THEN block_statement _23_optional
     (113) or_else -> . ELSE block_statement
     END             reduce using rule 109 (_22_optional -> .)
-    ELIF            shift and go to state 203
-    ELSE            shift and go to state 204
+    ELIF            shift and go to state 214
+    ELSE            shift and go to state 215
 
-    _22_optional                   shift and go to state 201
-    or_else                        shift and go to state 202
+    _22_optional                   shift and go to state 212
+    or_else                        shift and go to state 213
 
-state 165
+state 170
 
     (46) block_statement -> _6_optional . _7_repeat
     (49) _7_repeat -> . _7_items
@@ -4511,13 +4627,13 @@ state 165
     ELIF            reduce using rule 50 (_7_repeat -> .)
     ELSE            reduce using rule 50 (_7_repeat -> .)
     END             reduce using rule 50 (_7_repeat -> .)
-    NEWLINE         shift and go to state 208
+    NEWLINE         shift and go to state 219
 
-    _7_repeat                      shift and go to state 205
-    _7_items                       shift and go to state 206
-    _7_item                        shift and go to state 207
+    _7_repeat                      shift and go to state 216
+    _7_items                       shift and go to state 217
+    _7_item                        shift and go to state 218
 
-state 166
+state 171
 
     (106) _21_optional -> : type .
     (               reduce using rule 106 (_21_optional -> : type .)
@@ -4538,57 +4654,57 @@ state 166
     NEWLINE         reduce using rule 106 (_21_optional -> : type .)
 
 
-state 167
+state 172
 
     (102) param -> identifier _20_optional .
     ,               reduce using rule 102 (param -> identifier _20_optional .)
     )               reduce using rule 102 (param -> identifier _20_optional .)
 
 
-state 168
+state 173
 
     (103) _20_optional -> : . type
     (64) type -> . type_identifier _11_optional
-    (133) type_identifier -> . TYPE_IDENTIFIER
+    (145) type_identifier -> . TYPE_IDENTIFIER
     TYPE_IDENTIFIER shift and go to state 25
 
-    type                           shift and go to state 209
+    type                           shift and go to state 220
     type_identifier                shift and go to state 100
 
-state 169
+state 174
 
     (54) def_expr -> DEF identifier ( _8_optional _9_repeat . ) _10_optional do
-    )               shift and go to state 210
+    )               shift and go to state 221
 
 
-state 170
+state 175
 
     (57) _9_repeat -> _9_items .
     (59) _9_items -> _9_items . _9_item
     (61) _9_item -> . , param
     )               reduce using rule 57 (_9_repeat -> _9_items .)
-    ,               shift and go to state 172
+    ,               shift and go to state 177
 
-    _9_item                        shift and go to state 211
+    _9_item                        shift and go to state 222
 
-state 171
+state 176
 
     (60) _9_items -> _9_item .
     ,               reduce using rule 60 (_9_items -> _9_item .)
     )               reduce using rule 60 (_9_items -> _9_item .)
 
 
-state 172
+state 177
 
     (61) _9_item -> , . param
     (102) param -> . identifier _20_optional
-    (160) identifier -> . IDENTIFIER
+    (172) identifier -> . IDENTIFIER
     IDENTIFIER      shift and go to state 26
 
-    param                          shift and go to state 212
-    identifier                     shift and go to state 127
+    param                          shift and go to state 223
+    identifier                     shift and go to state 129
 
-state 173
+state 178
 
     (36) do -> DO _3_optional _4_optional _5_repeat END .
     INT_DIV         reduce using rule 36 (do -> DO _3_optional _4_optional _5_repeat END .)
@@ -4612,18 +4728,19 @@ state 173
     END             reduce using rule 36 (do -> DO _3_optional _4_optional _5_repeat END .)
     ELIF            reduce using rule 36 (do -> DO _3_optional _4_optional _5_repeat END .)
     ELSE            reduce using rule 36 (do -> DO _3_optional _4_optional _5_repeat END .)
+    [               reduce using rule 36 (do -> DO _3_optional _4_optional _5_repeat END .)
     TYPE_IDENTIFIER reduce using rule 36 (do -> DO _3_optional _4_optional _5_repeat END .)
     IDENTIFIER      reduce using rule 36 (do -> DO _3_optional _4_optional _5_repeat END .)
 
 
-state 174
+state 179
 
     (43) _5_items -> _5_items _5_item .
     NEWLINE         reduce using rule 43 (_5_items -> _5_items _5_item .)
     END             reduce using rule 43 (_5_items -> _5_items _5_item .)
 
 
-state 175
+state 180
 
     (45) _5_item -> NEWLINE expr .
     (26) binary_expr -> expr . INT_DIV expr
@@ -4650,7 +4767,7 @@ state 175
     CONCAT          shift and go to state 47
 
 
-state 176
+state 181
 
     (65) _11_optional -> < type . _12_repeat >
     (66) _12_repeat -> . _12_items
@@ -4659,44 +4776,44 @@ state 176
     (69) _12_items -> . _12_item
     (70) _12_item -> . , type
     >               reduce using rule 67 (_12_repeat -> .)
-    ,               shift and go to state 213
+    ,               shift and go to state 224
 
-    _12_repeat                     shift and go to state 190
-    _12_items                      shift and go to state 192
-    _12_item                       shift and go to state 194
+    _12_repeat                     shift and go to state 195
+    _12_items                      shift and go to state 197
+    _12_item                       shift and go to state 199
 
-state 177
+state 182
 
     (93) variant -> type_identifier _18_optional .
     TYPE_IDENTIFIER reduce using rule 93 (variant -> type_identifier _18_optional .)
     }               reduce using rule 93 (variant -> type_identifier _18_optional .)
 
 
-state 178
+state 183
 
     (94) _18_optional -> ( . fields_unnamed )
     (96) fields_unnamed -> . identifier _19_repeat
-    (160) identifier -> . IDENTIFIER
+    (172) identifier -> . IDENTIFIER
     IDENTIFIER      shift and go to state 26
 
-    fields_unnamed                 shift and go to state 214
+    fields_unnamed                 shift and go to state 225
     identifier                     shift and go to state 103
 
-state 179
+state 184
 
     (85) enum -> ENUM type_identifier _16_optional { _17_repeat } .
     NEWLINE         reduce using rule 85 (enum -> ENUM type_identifier _16_optional { _17_repeat } .)
     $end            reduce using rule 85 (enum -> ENUM type_identifier _16_optional { _17_repeat } .)
 
 
-state 180
+state 185
 
     (90) _17_items -> _17_items _17_item .
     TYPE_IDENTIFIER reduce using rule 90 (_17_items -> _17_items _17_item .)
     }               reduce using rule 90 (_17_items -> _17_items _17_item .)
 
 
-state 181
+state 186
 
     (99) _19_items -> _19_items _19_item .
     ,               reduce using rule 99 (_19_items -> _19_items _19_item .)
@@ -4704,7 +4821,7 @@ state 181
     )               reduce using rule 99 (_19_items -> _19_items _19_item .)
 
 
-state 182
+state 187
 
     (101) _19_item -> , identifier .
     ,               reduce using rule 101 (_19_item -> , identifier .)
@@ -4712,108 +4829,108 @@ state 182
     )               reduce using rule 101 (_19_item -> , identifier .)
 
 
-state 183
+state 188
 
     (72) struct -> STRUCT type_identifier _13_optional { _15_repeat } .
     NEWLINE         reduce using rule 72 (struct -> STRUCT type_identifier _13_optional { _15_repeat } .)
     $end            reduce using rule 72 (struct -> STRUCT type_identifier _13_optional { _15_repeat } .)
 
 
-state 184
+state 189
 
     (82) _15_items -> _15_items _15_item .
     IDENTIFIER      reduce using rule 82 (_15_items -> _15_items _15_item .)
     }               reduce using rule 82 (_15_items -> _15_items _15_item .)
 
 
-state 185
+state 190
 
     (84) _15_item -> identifier : . type
     (64) type -> . type_identifier _11_optional
-    (133) type_identifier -> . TYPE_IDENTIFIER
+    (145) type_identifier -> . TYPE_IDENTIFIER
     TYPE_IDENTIFIER shift and go to state 25
 
-    type                           shift and go to state 215
+    type                           shift and go to state 226
     type_identifier                shift and go to state 100
 
-state 186
+state 191
 
     (73) _13_optional -> < identifier _14_repeat > .
     {               reduce using rule 73 (_13_optional -> < identifier _14_repeat > .)
 
 
-state 187
+state 192
 
     (76) _14_items -> _14_items _14_item .
     ,               reduce using rule 76 (_14_items -> _14_items _14_item .)
     >               reduce using rule 76 (_14_items -> _14_items _14_item .)
 
 
-state 188
+state 193
 
     (78) _14_item -> , identifier .
     ,               reduce using rule 78 (_14_item -> , identifier .)
     >               reduce using rule 78 (_14_item -> , identifier .)
 
 
-state 189
+state 194
 
-    (161) variable_declaration -> identifier : type_identifier < type _33_repeat . NOT_LESS expr
-    NOT_LESS        shift and go to state 216
+    (173) variable_declaration -> identifier : type_identifier < type _36_repeat . NOT_LESS expr
+    NOT_LESS        shift and go to state 227
 
 
-state 190
+state 195
 
     (65) _11_optional -> < type _12_repeat . >
-    >               shift and go to state 217
+    >               shift and go to state 228
 
 
-state 191
+state 196
 
-    (162) _33_repeat -> _33_items .
-    (164) _33_items -> _33_items . _33_item
-    (166) _33_item -> . , type
-    NOT_LESS        reduce using rule 162 (_33_repeat -> _33_items .)
-    ,               shift and go to state 219
+    (174) _36_repeat -> _36_items .
+    (176) _36_items -> _36_items . _36_item
+    (178) _36_item -> . , type
+    NOT_LESS        reduce using rule 174 (_36_repeat -> _36_items .)
+    ,               shift and go to state 230
 
-    _33_item                       shift and go to state 218
+    _36_item                       shift and go to state 229
 
-state 192
+state 197
 
     (66) _12_repeat -> _12_items .
     (68) _12_items -> _12_items . _12_item
     (70) _12_item -> . , type
     >               reduce using rule 66 (_12_repeat -> _12_items .)
-    ,               shift and go to state 213
+    ,               shift and go to state 224
 
-    _12_item                       shift and go to state 220
+    _12_item                       shift and go to state 231
 
-state 193
+state 198
 
-    (165) _33_items -> _33_item .
-    ,               reduce using rule 165 (_33_items -> _33_item .)
-    NOT_LESS        reduce using rule 165 (_33_items -> _33_item .)
+    (177) _36_items -> _36_item .
+    ,               reduce using rule 177 (_36_items -> _36_item .)
+    NOT_LESS        reduce using rule 177 (_36_items -> _36_item .)
 
 
-state 194
+state 199
 
     (69) _12_items -> _12_item .
     ,               reduce using rule 69 (_12_items -> _12_item .)
     >               reduce using rule 69 (_12_items -> _12_item .)
 
 
-state 195
+state 200
 
-    (166) _33_item -> , . type
+    (178) _36_item -> , . type
     (70) _12_item -> , . type
     (64) type -> . type_identifier _11_optional
-    (133) type_identifier -> . TYPE_IDENTIFIER
+    (145) type_identifier -> . TYPE_IDENTIFIER
     TYPE_IDENTIFIER shift and go to state 25
 
-    type                           shift and go to state 221
+    type                           shift and go to state 232
     type_identifier                shift and go to state 100
 
-state 196
+state 201
 
     (114) case_of -> CASE expr OF case _24_repeat END .
     INT_DIV         reduce using rule 114 (case_of -> CASE expr OF case _24_repeat END .)
@@ -4839,54 +4956,111 @@ state 196
     ELSE            reduce using rule 114 (case_of -> CASE expr OF case _24_repeat END .)
 
 
-state 197
+state 202
 
     (117) _24_items -> _24_items _24_item .
+    [               reduce using rule 117 (_24_items -> _24_items _24_item .)
     TYPE_IDENTIFIER reduce using rule 117 (_24_items -> _24_items _24_item .)
     IDENTIFIER      reduce using rule 117 (_24_items -> _24_items _24_item .)
     END             reduce using rule 117 (_24_items -> _24_items _24_item .)
 
 
-state 198
+state 203
 
-    (130) enum_pattern -> type_identifier ( _26_optional . )
-    )               shift and go to state 222
-
-
-state 199
-
-    (131) _26_optional -> patterns .
-    )               reduce using rule 131 (_26_optional -> patterns .)
+    (125) array_pattern -> [ _25_optional _26_optional . ]
+    ]               shift and go to state 233
 
 
-state 200
+state 204
 
-    (124) patterns -> pattern . _25_repeat
-    (125) _25_repeat -> . _25_items
-    (126) _25_repeat -> .
-    (127) _25_items -> . _25_items _25_item
-    (128) _25_items -> . _25_item
-    (129) _25_item -> . , pattern
-    )               reduce using rule 126 (_25_repeat -> .)
-    ,               shift and go to state 226
+    (128) _26_optional -> spread .
+    ]               reduce using rule 128 (_26_optional -> spread .)
 
-    _25_repeat                     shift and go to state 223
-    _25_items                      shift and go to state 224
-    _25_item                       shift and go to state 225
 
-state 201
+state 205
+
+    (130) spread -> SPREAD . identifier _27_repeat
+    (172) identifier -> . IDENTIFIER
+    IDENTIFIER      shift and go to state 26
+
+    identifier                     shift and go to state 234
+
+state 206
+
+    (136) patterns -> pattern _28_repeat .
+    SPREAD          reduce using rule 136 (patterns -> pattern _28_repeat .)
+    ]               reduce using rule 136 (patterns -> pattern _28_repeat .)
+    )               reduce using rule 136 (patterns -> pattern _28_repeat .)
+
+
+state 207
+
+    (137) _28_repeat -> _28_items .
+    (139) _28_items -> _28_items . _28_item
+    (141) _28_item -> . , pattern
+    SPREAD          reduce using rule 137 (_28_repeat -> _28_items .)
+    ]               reduce using rule 137 (_28_repeat -> _28_items .)
+    )               reduce using rule 137 (_28_repeat -> _28_items .)
+    ,               shift and go to state 209
+
+    _28_item                       shift and go to state 235
+
+state 208
+
+    (140) _28_items -> _28_item .
+    ,               reduce using rule 140 (_28_items -> _28_item .)
+    SPREAD          reduce using rule 140 (_28_items -> _28_item .)
+    ]               reduce using rule 140 (_28_items -> _28_item .)
+    )               reduce using rule 140 (_28_items -> _28_item .)
+
+
+state 209
+
+    (141) _28_item -> , . pattern
+    (121) pattern -> . array_pattern
+    (122) pattern -> . enum_pattern
+    (123) pattern -> . param_pattern
+    (125) array_pattern -> . [ _25_optional _26_optional ]
+    (142) enum_pattern -> . type_identifier ( _29_optional )
+    (124) param_pattern -> . identifier
+    (145) type_identifier -> . TYPE_IDENTIFIER
+    (172) identifier -> . IDENTIFIER
+    [               shift and go to state 120
+    TYPE_IDENTIFIER shift and go to state 25
+    IDENTIFIER      shift and go to state 26
+
+    pattern                        shift and go to state 236
+    array_pattern                  shift and go to state 117
+    enum_pattern                   shift and go to state 118
+    param_pattern                  shift and go to state 119
+    type_identifier                shift and go to state 121
+    identifier                     shift and go to state 122
+
+state 210
+
+    (142) enum_pattern -> type_identifier ( _29_optional . )
+    )               shift and go to state 237
+
+
+state 211
+
+    (143) _29_optional -> patterns .
+    )               reduce using rule 143 (_29_optional -> patterns .)
+
+
+state 212
 
     (105) if_expr -> IF expr THEN _21_optional block_statement _22_optional . END
-    END             shift and go to state 227
+    END             shift and go to state 238
 
 
-state 202
+state 213
 
     (108) _22_optional -> or_else .
     END             reduce using rule 108 (_22_optional -> or_else .)
 
 
-state 203
+state 214
 
     (110) or_else -> ELIF . expr THEN block_statement _23_optional
     (12) expr -> . ( expr )
@@ -4903,8 +5077,8 @@ state 203
     (23) expr -> . def_expr
     (24) expr -> . literal
     (25) expr -> . do
-    (142) tuple -> . { _29_optional _30_repeat }
-    (134) array -> . [ _27_optional _28_repeat ]
+    (154) tuple -> . { _32_optional _33_repeat }
+    (146) array -> . [ _30_optional _31_repeat ]
     (26) binary_expr -> . expr INT_DIV expr
     (27) binary_expr -> . expr NOT_MORE expr
     (28) binary_expr -> . expr NOT_LESS expr
@@ -4915,19 +5089,19 @@ state 203
     (33) binary_expr -> . expr - expr
     (34) binary_expr -> . expr + expr
     (35) binary_expr -> . expr CONCAT expr
-    (133) type_identifier -> . TYPE_IDENTIFIER
-    (160) identifier -> . IDENTIFIER
-    (161) variable_declaration -> . identifier : type_identifier < type _33_repeat NOT_LESS expr
-    (167) variable_declaration -> . identifier _34_optional = expr
+    (145) type_identifier -> . TYPE_IDENTIFIER
+    (172) identifier -> . IDENTIFIER
+    (173) variable_declaration -> . identifier : type_identifier < type _36_repeat NOT_LESS expr
+    (179) variable_declaration -> . identifier _37_optional = expr
     (114) case_of -> . CASE expr OF case _24_repeat END
-    (150) call -> . callee ( _31_optional _32_repeat )
+    (162) call -> . callee ( _34_optional _35_repeat )
     (105) if_expr -> . IF expr THEN _21_optional block_statement _22_optional END
     (54) def_expr -> . DEF identifier ( _8_optional _9_repeat ) _10_optional do
-    (170) literal -> . STRING
-    (171) literal -> . NUMBER
+    (182) literal -> . STRING
+    (183) literal -> . NUMBER
     (36) do -> . DO _3_optional _4_optional _5_repeat END
-    (158) callee -> . type_identifier
-    (159) callee -> . identifier
+    (170) callee -> . type_identifier
+    (171) callee -> . identifier
     (               shift and go to state 11
     -               shift and go to state 12
     {               shift and go to state 9
@@ -4941,7 +5115,7 @@ state 203
     NUMBER          shift and go to state 32
     DO              shift and go to state 33
 
-    expr                           shift and go to state 228
+    expr                           shift and go to state 239
     tuple                          shift and go to state 13
     array                          shift and go to state 14
     binary_expr                    shift and go to state 15
@@ -4956,7 +5130,7 @@ state 203
     do                             shift and go to state 23
     callee                         shift and go to state 28
 
-state 204
+state 215
 
     (113) or_else -> ELSE . block_statement
     (46) block_statement -> . _6_optional _7_repeat
@@ -4976,8 +5150,8 @@ state 204
     (23) expr -> . def_expr
     (24) expr -> . literal
     (25) expr -> . do
-    (142) tuple -> . { _29_optional _30_repeat }
-    (134) array -> . [ _27_optional _28_repeat ]
+    (154) tuple -> . { _32_optional _33_repeat }
+    (146) array -> . [ _30_optional _31_repeat ]
     (26) binary_expr -> . expr INT_DIV expr
     (27) binary_expr -> . expr NOT_MORE expr
     (28) binary_expr -> . expr NOT_LESS expr
@@ -4988,19 +5162,19 @@ state 204
     (33) binary_expr -> . expr - expr
     (34) binary_expr -> . expr + expr
     (35) binary_expr -> . expr CONCAT expr
-    (133) type_identifier -> . TYPE_IDENTIFIER
-    (160) identifier -> . IDENTIFIER
-    (161) variable_declaration -> . identifier : type_identifier < type _33_repeat NOT_LESS expr
-    (167) variable_declaration -> . identifier _34_optional = expr
+    (145) type_identifier -> . TYPE_IDENTIFIER
+    (172) identifier -> . IDENTIFIER
+    (173) variable_declaration -> . identifier : type_identifier < type _36_repeat NOT_LESS expr
+    (179) variable_declaration -> . identifier _37_optional = expr
     (114) case_of -> . CASE expr OF case _24_repeat END
-    (150) call -> . callee ( _31_optional _32_repeat )
+    (162) call -> . callee ( _34_optional _35_repeat )
     (105) if_expr -> . IF expr THEN _21_optional block_statement _22_optional END
     (54) def_expr -> . DEF identifier ( _8_optional _9_repeat ) _10_optional do
-    (170) literal -> . STRING
-    (171) literal -> . NUMBER
+    (182) literal -> . STRING
+    (183) literal -> . NUMBER
     (36) do -> . DO _3_optional _4_optional _5_repeat END
-    (158) callee -> . type_identifier
-    (159) callee -> . identifier
+    (170) callee -> . type_identifier
+    (171) callee -> . identifier
     NEWLINE         reduce using rule 48 (_6_optional -> .)
     END             reduce using rule 48 (_6_optional -> .)
     (               shift and go to state 11
@@ -5016,9 +5190,9 @@ state 204
     NUMBER          shift and go to state 32
     DO              shift and go to state 33
 
-    block_statement                shift and go to state 229
-    _6_optional                    shift and go to state 165
-    expr                           shift and go to state 163
+    block_statement                shift and go to state 240
+    _6_optional                    shift and go to state 170
+    expr                           shift and go to state 168
     tuple                          shift and go to state 13
     array                          shift and go to state 14
     binary_expr                    shift and go to state 15
@@ -5033,7 +5207,7 @@ state 204
     do                             shift and go to state 23
     callee                         shift and go to state 28
 
-state 205
+state 216
 
     (46) block_statement -> _6_optional _7_repeat .
     ELIF            reduce using rule 46 (block_statement -> _6_optional _7_repeat .)
@@ -5041,7 +5215,7 @@ state 205
     END             reduce using rule 46 (block_statement -> _6_optional _7_repeat .)
 
 
-state 206
+state 217
 
     (49) _7_repeat -> _7_items .
     (51) _7_items -> _7_items . _7_item
@@ -5049,11 +5223,11 @@ state 206
     ELIF            reduce using rule 49 (_7_repeat -> _7_items .)
     ELSE            reduce using rule 49 (_7_repeat -> _7_items .)
     END             reduce using rule 49 (_7_repeat -> _7_items .)
-    NEWLINE         shift and go to state 208
+    NEWLINE         shift and go to state 219
 
-    _7_item                        shift and go to state 230
+    _7_item                        shift and go to state 241
 
-state 207
+state 218
 
     (52) _7_items -> _7_item .
     NEWLINE         reduce using rule 52 (_7_items -> _7_item .)
@@ -5062,7 +5236,7 @@ state 207
     END             reduce using rule 52 (_7_items -> _7_item .)
 
 
-state 208
+state 219
 
     (53) _7_item -> NEWLINE . expr
     (12) expr -> . ( expr )
@@ -5079,8 +5253,8 @@ state 208
     (23) expr -> . def_expr
     (24) expr -> . literal
     (25) expr -> . do
-    (142) tuple -> . { _29_optional _30_repeat }
-    (134) array -> . [ _27_optional _28_repeat ]
+    (154) tuple -> . { _32_optional _33_repeat }
+    (146) array -> . [ _30_optional _31_repeat ]
     (26) binary_expr -> . expr INT_DIV expr
     (27) binary_expr -> . expr NOT_MORE expr
     (28) binary_expr -> . expr NOT_LESS expr
@@ -5091,19 +5265,19 @@ state 208
     (33) binary_expr -> . expr - expr
     (34) binary_expr -> . expr + expr
     (35) binary_expr -> . expr CONCAT expr
-    (133) type_identifier -> . TYPE_IDENTIFIER
-    (160) identifier -> . IDENTIFIER
-    (161) variable_declaration -> . identifier : type_identifier < type _33_repeat NOT_LESS expr
-    (167) variable_declaration -> . identifier _34_optional = expr
+    (145) type_identifier -> . TYPE_IDENTIFIER
+    (172) identifier -> . IDENTIFIER
+    (173) variable_declaration -> . identifier : type_identifier < type _36_repeat NOT_LESS expr
+    (179) variable_declaration -> . identifier _37_optional = expr
     (114) case_of -> . CASE expr OF case _24_repeat END
-    (150) call -> . callee ( _31_optional _32_repeat )
+    (162) call -> . callee ( _34_optional _35_repeat )
     (105) if_expr -> . IF expr THEN _21_optional block_statement _22_optional END
     (54) def_expr -> . DEF identifier ( _8_optional _9_repeat ) _10_optional do
-    (170) literal -> . STRING
-    (171) literal -> . NUMBER
+    (182) literal -> . STRING
+    (183) literal -> . NUMBER
     (36) do -> . DO _3_optional _4_optional _5_repeat END
-    (158) callee -> . type_identifier
-    (159) callee -> . identifier
+    (170) callee -> . type_identifier
+    (171) callee -> . identifier
     (               shift and go to state 11
     -               shift and go to state 12
     {               shift and go to state 9
@@ -5117,7 +5291,7 @@ state 208
     NUMBER          shift and go to state 32
     DO              shift and go to state 33
 
-    expr                           shift and go to state 231
+    expr                           shift and go to state 242
     tuple                          shift and go to state 13
     array                          shift and go to state 14
     binary_expr                    shift and go to state 15
@@ -5132,63 +5306,63 @@ state 208
     do                             shift and go to state 23
     callee                         shift and go to state 28
 
-state 209
+state 220
 
     (103) _20_optional -> : type .
     ,               reduce using rule 103 (_20_optional -> : type .)
     )               reduce using rule 103 (_20_optional -> : type .)
 
 
-state 210
+state 221
 
     (54) def_expr -> DEF identifier ( _8_optional _9_repeat ) . _10_optional do
     (62) _10_optional -> . : type
     (63) _10_optional -> .
-    :               shift and go to state 233
+    :               shift and go to state 244
     DO              reduce using rule 63 (_10_optional -> .)
 
-    _10_optional                   shift and go to state 232
+    _10_optional                   shift and go to state 243
 
-state 211
+state 222
 
     (59) _9_items -> _9_items _9_item .
     ,               reduce using rule 59 (_9_items -> _9_items _9_item .)
     )               reduce using rule 59 (_9_items -> _9_items _9_item .)
 
 
-state 212
+state 223
 
     (61) _9_item -> , param .
     ,               reduce using rule 61 (_9_item -> , param .)
     )               reduce using rule 61 (_9_item -> , param .)
 
 
-state 213
+state 224
 
     (70) _12_item -> , . type
     (64) type -> . type_identifier _11_optional
-    (133) type_identifier -> . TYPE_IDENTIFIER
+    (145) type_identifier -> . TYPE_IDENTIFIER
     TYPE_IDENTIFIER shift and go to state 25
 
-    type                           shift and go to state 234
+    type                           shift and go to state 245
     type_identifier                shift and go to state 100
 
-state 214
+state 225
 
     (94) _18_optional -> ( fields_unnamed . )
-    )               shift and go to state 235
+    )               shift and go to state 246
 
 
-state 215
+state 226
 
     (84) _15_item -> identifier : type .
     IDENTIFIER      reduce using rule 84 (_15_item -> identifier : type .)
     }               reduce using rule 84 (_15_item -> identifier : type .)
 
 
-state 216
+state 227
 
-    (161) variable_declaration -> identifier : type_identifier < type _33_repeat NOT_LESS . expr
+    (173) variable_declaration -> identifier : type_identifier < type _36_repeat NOT_LESS . expr
     (12) expr -> . ( expr )
     (13) expr -> . - expr
     (14) expr -> . tuple
@@ -5203,8 +5377,8 @@ state 216
     (23) expr -> . def_expr
     (24) expr -> . literal
     (25) expr -> . do
-    (142) tuple -> . { _29_optional _30_repeat }
-    (134) array -> . [ _27_optional _28_repeat ]
+    (154) tuple -> . { _32_optional _33_repeat }
+    (146) array -> . [ _30_optional _31_repeat ]
     (26) binary_expr -> . expr INT_DIV expr
     (27) binary_expr -> . expr NOT_MORE expr
     (28) binary_expr -> . expr NOT_LESS expr
@@ -5215,19 +5389,19 @@ state 216
     (33) binary_expr -> . expr - expr
     (34) binary_expr -> . expr + expr
     (35) binary_expr -> . expr CONCAT expr
-    (133) type_identifier -> . TYPE_IDENTIFIER
-    (160) identifier -> . IDENTIFIER
-    (161) variable_declaration -> . identifier : type_identifier < type _33_repeat NOT_LESS expr
-    (167) variable_declaration -> . identifier _34_optional = expr
+    (145) type_identifier -> . TYPE_IDENTIFIER
+    (172) identifier -> . IDENTIFIER
+    (173) variable_declaration -> . identifier : type_identifier < type _36_repeat NOT_LESS expr
+    (179) variable_declaration -> . identifier _37_optional = expr
     (114) case_of -> . CASE expr OF case _24_repeat END
-    (150) call -> . callee ( _31_optional _32_repeat )
+    (162) call -> . callee ( _34_optional _35_repeat )
     (105) if_expr -> . IF expr THEN _21_optional block_statement _22_optional END
     (54) def_expr -> . DEF identifier ( _8_optional _9_repeat ) _10_optional do
-    (170) literal -> . STRING
-    (171) literal -> . NUMBER
+    (182) literal -> . STRING
+    (183) literal -> . NUMBER
     (36) do -> . DO _3_optional _4_optional _5_repeat END
-    (158) callee -> . type_identifier
-    (159) callee -> . identifier
+    (170) callee -> . type_identifier
+    (171) callee -> . identifier
     (               shift and go to state 11
     -               shift and go to state 12
     {               shift and go to state 9
@@ -5243,7 +5417,7 @@ state 216
 
     identifier                     shift and go to state 16
     type_identifier                shift and go to state 8
-    expr                           shift and go to state 236
+    expr                           shift and go to state 247
     tuple                          shift and go to state 13
     array                          shift and go to state 14
     binary_expr                    shift and go to state 15
@@ -5256,7 +5430,7 @@ state 216
     do                             shift and go to state 23
     callee                         shift and go to state 28
 
-state 217
+state 228
 
     (65) _11_optional -> < type _12_repeat > .
     =               reduce using rule 65 (_11_optional -> < type _12_repeat > .)
@@ -5283,90 +5457,94 @@ state 217
     }               reduce using rule 65 (_11_optional -> < type _12_repeat > .)
 
 
-state 218
+state 229
 
-    (164) _33_items -> _33_items _33_item .
-    ,               reduce using rule 164 (_33_items -> _33_items _33_item .)
-    NOT_LESS        reduce using rule 164 (_33_items -> _33_items _33_item .)
+    (176) _36_items -> _36_items _36_item .
+    ,               reduce using rule 176 (_36_items -> _36_items _36_item .)
+    NOT_LESS        reduce using rule 176 (_36_items -> _36_items _36_item .)
 
 
-state 219
+state 230
 
-    (166) _33_item -> , . type
+    (178) _36_item -> , . type
     (64) type -> . type_identifier _11_optional
-    (133) type_identifier -> . TYPE_IDENTIFIER
+    (145) type_identifier -> . TYPE_IDENTIFIER
     TYPE_IDENTIFIER shift and go to state 25
 
-    type                           shift and go to state 237
+    type                           shift and go to state 248
     type_identifier                shift and go to state 100
 
-state 220
+state 231
 
     (68) _12_items -> _12_items _12_item .
     ,               reduce using rule 68 (_12_items -> _12_items _12_item .)
     >               reduce using rule 68 (_12_items -> _12_items _12_item .)
 
 
-state 221
+state 232
 
-    (166) _33_item -> , type .
+    (178) _36_item -> , type .
     (70) _12_item -> , type .
-  ! reduce/reduce conflict for , resolved using rule 166 (_33_item -> , type .)
-    ,               reduce using rule 166 (_33_item -> , type .)
-    NOT_LESS        reduce using rule 166 (_33_item -> , type .)
+  ! reduce/reduce conflict for , resolved using rule 178 (_36_item -> , type .)
+    ,               reduce using rule 178 (_36_item -> , type .)
+    NOT_LESS        reduce using rule 178 (_36_item -> , type .)
     >               reduce using rule 70 (_12_item -> , type .)
 
 
-state 222
+state 233
 
-    (130) enum_pattern -> type_identifier ( _26_optional ) .
-    DO              reduce using rule 130 (enum_pattern -> type_identifier ( _26_optional ) .)
-    ,               reduce using rule 130 (enum_pattern -> type_identifier ( _26_optional ) .)
-    )               reduce using rule 130 (enum_pattern -> type_identifier ( _26_optional ) .)
-
-
-state 223
-
-    (124) patterns -> pattern _25_repeat .
-    )               reduce using rule 124 (patterns -> pattern _25_repeat .)
+    (125) array_pattern -> [ _25_optional _26_optional ] .
+    DO              reduce using rule 125 (array_pattern -> [ _25_optional _26_optional ] .)
+    ,               reduce using rule 125 (array_pattern -> [ _25_optional _26_optional ] .)
+    SPREAD          reduce using rule 125 (array_pattern -> [ _25_optional _26_optional ] .)
+    ]               reduce using rule 125 (array_pattern -> [ _25_optional _26_optional ] .)
+    )               reduce using rule 125 (array_pattern -> [ _25_optional _26_optional ] .)
 
 
-state 224
+state 234
 
-    (125) _25_repeat -> _25_items .
-    (127) _25_items -> _25_items . _25_item
-    (129) _25_item -> . , pattern
-    )               reduce using rule 125 (_25_repeat -> _25_items .)
-    ,               shift and go to state 226
+    (130) spread -> SPREAD identifier . _27_repeat
+    (131) _27_repeat -> . _27_items
+    (132) _27_repeat -> .
+    (133) _27_items -> . _27_items _27_item
+    (134) _27_items -> . _27_item
+    (135) _27_item -> . , pattern
+    ]               reduce using rule 132 (_27_repeat -> .)
+    ,               shift and go to state 252
 
-    _25_item                       shift and go to state 238
+    _27_repeat                     shift and go to state 249
+    _27_items                      shift and go to state 250
+    _27_item                       shift and go to state 251
 
-state 225
+state 235
 
-    (128) _25_items -> _25_item .
-    ,               reduce using rule 128 (_25_items -> _25_item .)
-    )               reduce using rule 128 (_25_items -> _25_item .)
+    (139) _28_items -> _28_items _28_item .
+    ,               reduce using rule 139 (_28_items -> _28_items _28_item .)
+    SPREAD          reduce using rule 139 (_28_items -> _28_items _28_item .)
+    ]               reduce using rule 139 (_28_items -> _28_items _28_item .)
+    )               reduce using rule 139 (_28_items -> _28_items _28_item .)
 
 
-state 226
+state 236
 
-    (129) _25_item -> , . pattern
-    (121) pattern -> . enum_pattern
-    (122) pattern -> . param_pattern
-    (130) enum_pattern -> . type_identifier ( _26_optional )
-    (123) param_pattern -> . identifier
-    (133) type_identifier -> . TYPE_IDENTIFIER
-    (160) identifier -> . IDENTIFIER
-    TYPE_IDENTIFIER shift and go to state 25
-    IDENTIFIER      shift and go to state 26
+    (141) _28_item -> , pattern .
+    ,               reduce using rule 141 (_28_item -> , pattern .)
+    SPREAD          reduce using rule 141 (_28_item -> , pattern .)
+    ]               reduce using rule 141 (_28_item -> , pattern .)
+    )               reduce using rule 141 (_28_item -> , pattern .)
 
-    pattern                        shift and go to state 239
-    enum_pattern                   shift and go to state 117
-    param_pattern                  shift and go to state 118
-    type_identifier                shift and go to state 119
-    identifier                     shift and go to state 120
 
-state 227
+state 237
+
+    (142) enum_pattern -> type_identifier ( _29_optional ) .
+    DO              reduce using rule 142 (enum_pattern -> type_identifier ( _29_optional ) .)
+    ,               reduce using rule 142 (enum_pattern -> type_identifier ( _29_optional ) .)
+    SPREAD          reduce using rule 142 (enum_pattern -> type_identifier ( _29_optional ) .)
+    ]               reduce using rule 142 (enum_pattern -> type_identifier ( _29_optional ) .)
+    )               reduce using rule 142 (enum_pattern -> type_identifier ( _29_optional ) .)
+
+
+state 238
 
     (105) if_expr -> IF expr THEN _21_optional block_statement _22_optional END .
     INT_DIV         reduce using rule 105 (if_expr -> IF expr THEN _21_optional block_statement _22_optional END .)
@@ -5392,7 +5570,7 @@ state 227
     ELSE            reduce using rule 105 (if_expr -> IF expr THEN _21_optional block_statement _22_optional END .)
 
 
-state 228
+state 239
 
     (110) or_else -> ELIF expr . THEN block_statement _23_optional
     (26) binary_expr -> expr . INT_DIV expr
@@ -5405,7 +5583,7 @@ state 228
     (33) binary_expr -> expr . - expr
     (34) binary_expr -> expr . + expr
     (35) binary_expr -> expr . CONCAT expr
-    THEN            shift and go to state 240
+    THEN            shift and go to state 253
     INT_DIV         shift and go to state 38
     NOT_MORE        shift and go to state 39
     NOT_LESS        shift and go to state 40
@@ -5418,13 +5596,13 @@ state 228
     CONCAT          shift and go to state 47
 
 
-state 229
+state 240
 
     (113) or_else -> ELSE block_statement .
     END             reduce using rule 113 (or_else -> ELSE block_statement .)
 
 
-state 230
+state 241
 
     (51) _7_items -> _7_items _7_item .
     NEWLINE         reduce using rule 51 (_7_items -> _7_items _7_item .)
@@ -5433,7 +5611,7 @@ state 230
     END             reduce using rule 51 (_7_items -> _7_items _7_item .)
 
 
-state 231
+state 242
 
     (53) _7_item -> NEWLINE expr .
     (26) binary_expr -> expr . INT_DIV expr
@@ -5462,41 +5640,41 @@ state 231
     CONCAT          shift and go to state 47
 
 
-state 232
+state 243
 
     (54) def_expr -> DEF identifier ( _8_optional _9_repeat ) _10_optional . do
     (36) do -> . DO _3_optional _4_optional _5_repeat END
     DO              shift and go to state 33
 
-    do                             shift and go to state 241
+    do                             shift and go to state 254
 
-state 233
+state 244
 
     (62) _10_optional -> : . type
     (64) type -> . type_identifier _11_optional
-    (133) type_identifier -> . TYPE_IDENTIFIER
+    (145) type_identifier -> . TYPE_IDENTIFIER
     TYPE_IDENTIFIER shift and go to state 25
 
-    type                           shift and go to state 242
+    type                           shift and go to state 255
     type_identifier                shift and go to state 100
 
-state 234
+state 245
 
     (70) _12_item -> , type .
     ,               reduce using rule 70 (_12_item -> , type .)
     >               reduce using rule 70 (_12_item -> , type .)
 
 
-state 235
+state 246
 
     (94) _18_optional -> ( fields_unnamed ) .
     TYPE_IDENTIFIER reduce using rule 94 (_18_optional -> ( fields_unnamed ) .)
     }               reduce using rule 94 (_18_optional -> ( fields_unnamed ) .)
 
 
-state 236
+state 247
 
-    (161) variable_declaration -> identifier : type_identifier < type _33_repeat NOT_LESS expr .
+    (173) variable_declaration -> identifier : type_identifier < type _36_repeat NOT_LESS expr .
     (26) binary_expr -> expr . INT_DIV expr
     (27) binary_expr -> expr . NOT_MORE expr
     (28) binary_expr -> expr . NOT_LESS expr
@@ -5507,21 +5685,21 @@ state 236
     (33) binary_expr -> expr . - expr
     (34) binary_expr -> expr . + expr
     (35) binary_expr -> expr . CONCAT expr
-    NOT_MORE        reduce using rule 161 (variable_declaration -> identifier : type_identifier < type _33_repeat NOT_LESS expr .)
-    NOT_LESS        reduce using rule 161 (variable_declaration -> identifier : type_identifier < type _33_repeat NOT_LESS expr .)
-    >               reduce using rule 161 (variable_declaration -> identifier : type_identifier < type _33_repeat NOT_LESS expr .)
-    <               reduce using rule 161 (variable_declaration -> identifier : type_identifier < type _33_repeat NOT_LESS expr .)
-    NEWLINE         reduce using rule 161 (variable_declaration -> identifier : type_identifier < type _33_repeat NOT_LESS expr .)
-    $end            reduce using rule 161 (variable_declaration -> identifier : type_identifier < type _33_repeat NOT_LESS expr .)
-    ,               reduce using rule 161 (variable_declaration -> identifier : type_identifier < type _33_repeat NOT_LESS expr .)
-    }               reduce using rule 161 (variable_declaration -> identifier : type_identifier < type _33_repeat NOT_LESS expr .)
-    )               reduce using rule 161 (variable_declaration -> identifier : type_identifier < type _33_repeat NOT_LESS expr .)
-    ]               reduce using rule 161 (variable_declaration -> identifier : type_identifier < type _33_repeat NOT_LESS expr .)
-    OF              reduce using rule 161 (variable_declaration -> identifier : type_identifier < type _33_repeat NOT_LESS expr .)
-    THEN            reduce using rule 161 (variable_declaration -> identifier : type_identifier < type _33_repeat NOT_LESS expr .)
-    END             reduce using rule 161 (variable_declaration -> identifier : type_identifier < type _33_repeat NOT_LESS expr .)
-    ELIF            reduce using rule 161 (variable_declaration -> identifier : type_identifier < type _33_repeat NOT_LESS expr .)
-    ELSE            reduce using rule 161 (variable_declaration -> identifier : type_identifier < type _33_repeat NOT_LESS expr .)
+    NOT_MORE        reduce using rule 173 (variable_declaration -> identifier : type_identifier < type _36_repeat NOT_LESS expr .)
+    NOT_LESS        reduce using rule 173 (variable_declaration -> identifier : type_identifier < type _36_repeat NOT_LESS expr .)
+    >               reduce using rule 173 (variable_declaration -> identifier : type_identifier < type _36_repeat NOT_LESS expr .)
+    <               reduce using rule 173 (variable_declaration -> identifier : type_identifier < type _36_repeat NOT_LESS expr .)
+    NEWLINE         reduce using rule 173 (variable_declaration -> identifier : type_identifier < type _36_repeat NOT_LESS expr .)
+    $end            reduce using rule 173 (variable_declaration -> identifier : type_identifier < type _36_repeat NOT_LESS expr .)
+    ,               reduce using rule 173 (variable_declaration -> identifier : type_identifier < type _36_repeat NOT_LESS expr .)
+    }               reduce using rule 173 (variable_declaration -> identifier : type_identifier < type _36_repeat NOT_LESS expr .)
+    )               reduce using rule 173 (variable_declaration -> identifier : type_identifier < type _36_repeat NOT_LESS expr .)
+    ]               reduce using rule 173 (variable_declaration -> identifier : type_identifier < type _36_repeat NOT_LESS expr .)
+    OF              reduce using rule 173 (variable_declaration -> identifier : type_identifier < type _36_repeat NOT_LESS expr .)
+    THEN            reduce using rule 173 (variable_declaration -> identifier : type_identifier < type _36_repeat NOT_LESS expr .)
+    END             reduce using rule 173 (variable_declaration -> identifier : type_identifier < type _36_repeat NOT_LESS expr .)
+    ELIF            reduce using rule 173 (variable_declaration -> identifier : type_identifier < type _36_repeat NOT_LESS expr .)
+    ELSE            reduce using rule 173 (variable_declaration -> identifier : type_identifier < type _36_repeat NOT_LESS expr .)
     INT_DIV         shift and go to state 38
     *               shift and go to state 43
     /               shift and go to state 44
@@ -5530,28 +5708,59 @@ state 236
     CONCAT          shift and go to state 47
 
 
-state 237
+state 248
 
-    (166) _33_item -> , type .
-    ,               reduce using rule 166 (_33_item -> , type .)
-    NOT_LESS        reduce using rule 166 (_33_item -> , type .)
-
-
-state 238
-
-    (127) _25_items -> _25_items _25_item .
-    ,               reduce using rule 127 (_25_items -> _25_items _25_item .)
-    )               reduce using rule 127 (_25_items -> _25_items _25_item .)
+    (178) _36_item -> , type .
+    ,               reduce using rule 178 (_36_item -> , type .)
+    NOT_LESS        reduce using rule 178 (_36_item -> , type .)
 
 
-state 239
+state 249
 
-    (129) _25_item -> , pattern .
-    ,               reduce using rule 129 (_25_item -> , pattern .)
-    )               reduce using rule 129 (_25_item -> , pattern .)
+    (130) spread -> SPREAD identifier _27_repeat .
+    ]               reduce using rule 130 (spread -> SPREAD identifier _27_repeat .)
 
 
-state 240
+state 250
+
+    (131) _27_repeat -> _27_items .
+    (133) _27_items -> _27_items . _27_item
+    (135) _27_item -> . , pattern
+    ]               reduce using rule 131 (_27_repeat -> _27_items .)
+    ,               shift and go to state 252
+
+    _27_item                       shift and go to state 256
+
+state 251
+
+    (134) _27_items -> _27_item .
+    ,               reduce using rule 134 (_27_items -> _27_item .)
+    ]               reduce using rule 134 (_27_items -> _27_item .)
+
+
+state 252
+
+    (135) _27_item -> , . pattern
+    (121) pattern -> . array_pattern
+    (122) pattern -> . enum_pattern
+    (123) pattern -> . param_pattern
+    (125) array_pattern -> . [ _25_optional _26_optional ]
+    (142) enum_pattern -> . type_identifier ( _29_optional )
+    (124) param_pattern -> . identifier
+    (145) type_identifier -> . TYPE_IDENTIFIER
+    (172) identifier -> . IDENTIFIER
+    [               shift and go to state 120
+    TYPE_IDENTIFIER shift and go to state 25
+    IDENTIFIER      shift and go to state 26
+
+    pattern                        shift and go to state 257
+    array_pattern                  shift and go to state 117
+    enum_pattern                   shift and go to state 118
+    param_pattern                  shift and go to state 119
+    type_identifier                shift and go to state 121
+    identifier                     shift and go to state 122
+
+state 253
 
     (110) or_else -> ELIF expr THEN . block_statement _23_optional
     (46) block_statement -> . _6_optional _7_repeat
@@ -5571,8 +5780,8 @@ state 240
     (23) expr -> . def_expr
     (24) expr -> . literal
     (25) expr -> . do
-    (142) tuple -> . { _29_optional _30_repeat }
-    (134) array -> . [ _27_optional _28_repeat ]
+    (154) tuple -> . { _32_optional _33_repeat }
+    (146) array -> . [ _30_optional _31_repeat ]
     (26) binary_expr -> . expr INT_DIV expr
     (27) binary_expr -> . expr NOT_MORE expr
     (28) binary_expr -> . expr NOT_LESS expr
@@ -5583,19 +5792,19 @@ state 240
     (33) binary_expr -> . expr - expr
     (34) binary_expr -> . expr + expr
     (35) binary_expr -> . expr CONCAT expr
-    (133) type_identifier -> . TYPE_IDENTIFIER
-    (160) identifier -> . IDENTIFIER
-    (161) variable_declaration -> . identifier : type_identifier < type _33_repeat NOT_LESS expr
-    (167) variable_declaration -> . identifier _34_optional = expr
+    (145) type_identifier -> . TYPE_IDENTIFIER
+    (172) identifier -> . IDENTIFIER
+    (173) variable_declaration -> . identifier : type_identifier < type _36_repeat NOT_LESS expr
+    (179) variable_declaration -> . identifier _37_optional = expr
     (114) case_of -> . CASE expr OF case _24_repeat END
-    (150) call -> . callee ( _31_optional _32_repeat )
+    (162) call -> . callee ( _34_optional _35_repeat )
     (105) if_expr -> . IF expr THEN _21_optional block_statement _22_optional END
     (54) def_expr -> . DEF identifier ( _8_optional _9_repeat ) _10_optional do
-    (170) literal -> . STRING
-    (171) literal -> . NUMBER
+    (182) literal -> . STRING
+    (183) literal -> . NUMBER
     (36) do -> . DO _3_optional _4_optional _5_repeat END
-    (158) callee -> . type_identifier
-    (159) callee -> . identifier
+    (170) callee -> . type_identifier
+    (171) callee -> . identifier
     NEWLINE         reduce using rule 48 (_6_optional -> .)
     ELIF            reduce using rule 48 (_6_optional -> .)
     ELSE            reduce using rule 48 (_6_optional -> .)
@@ -5613,9 +5822,9 @@ state 240
     NUMBER          shift and go to state 32
     DO              shift and go to state 33
 
-    expr                           shift and go to state 163
-    block_statement                shift and go to state 243
-    _6_optional                    shift and go to state 165
+    expr                           shift and go to state 168
+    block_statement                shift and go to state 258
+    _6_optional                    shift and go to state 170
     tuple                          shift and go to state 13
     array                          shift and go to state 14
     binary_expr                    shift and go to state 15
@@ -5630,7 +5839,7 @@ state 240
     do                             shift and go to state 23
     callee                         shift and go to state 28
 
-state 241
+state 254
 
     (54) def_expr -> DEF identifier ( _8_optional _9_repeat ) _10_optional do .
     INT_DIV         reduce using rule 54 (def_expr -> DEF identifier ( _8_optional _9_repeat ) _10_optional do .)
@@ -5656,13 +5865,27 @@ state 241
     ELSE            reduce using rule 54 (def_expr -> DEF identifier ( _8_optional _9_repeat ) _10_optional do .)
 
 
-state 242
+state 255
 
     (62) _10_optional -> : type .
     DO              reduce using rule 62 (_10_optional -> : type .)
 
 
-state 243
+state 256
+
+    (133) _27_items -> _27_items _27_item .
+    ,               reduce using rule 133 (_27_items -> _27_items _27_item .)
+    ]               reduce using rule 133 (_27_items -> _27_items _27_item .)
+
+
+state 257
+
+    (135) _27_item -> , pattern .
+    ,               reduce using rule 135 (_27_item -> , pattern .)
+    ]               reduce using rule 135 (_27_item -> , pattern .)
+
+
+state 258
 
     (110) or_else -> ELIF expr THEN block_statement . _23_optional
     (111) _23_optional -> . or_else
@@ -5670,19 +5893,19 @@ state 243
     (110) or_else -> . ELIF expr THEN block_statement _23_optional
     (113) or_else -> . ELSE block_statement
     END             reduce using rule 112 (_23_optional -> .)
-    ELIF            shift and go to state 203
-    ELSE            shift and go to state 204
+    ELIF            shift and go to state 214
+    ELSE            shift and go to state 215
 
-    _23_optional                   shift and go to state 244
-    or_else                        shift and go to state 245
+    _23_optional                   shift and go to state 259
+    or_else                        shift and go to state 260
 
-state 244
+state 259
 
     (110) or_else -> ELIF expr THEN block_statement _23_optional .
     END             reduce using rule 110 (or_else -> ELIF expr THEN block_statement _23_optional .)
 
 
-state 245
+state 260
 
     (111) _23_optional -> or_else .
     END             reduce using rule 111 (_23_optional -> or_else .)
@@ -5690,5 +5913,5 @@ state 245
 
 Conflicts:
 
-reduce/reduce conflict in state 221 resolved using rule _33_item -> , type
-rejected rule (_12_item -> , type) in state 221
+reduce/reduce conflict in state 232 resolved using rule _36_item -> , type
+rejected rule (_12_item -> , type) in state 232

@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from pathlib import WindowsPath
 from subprocess import check_output
 from compile import compile
@@ -24,33 +25,88 @@ def lexer():
     return UwuLexer()
 
 
-def token(type, value, lineno, index):
-    t = lex.Token()
-    t.type = type
-    t.value = value
-    t.lineno = lineno
-    t.index = index
+# @dataclass
+# class Token:
+#     type: str
+#     value: str
 
-    return t
+#     @classmethod
+#     def from_token(cls, t: lex.Token):
+#         return cls(t.type, t.value)
 
 
 # @pytest.mark.parametrize(
 #     'program, expected_tokens', [
-#         ("x:Option<Num>=None", [
-#          token('IDENTIFIER', value='x', lineno=1, index=0),
-#          token(type=':', value=':', lineno=1, index=1),
-#          token(type='IDENTIFIER', value='Option', lineno=1, index=2),
-#             token(type='<', value='<', lineno=1, index=8),
-#             token(type='IDENTIFIER', value='Num', lineno=1, index=9),
-#             token(type='>', value='>', lineno=1, index=15),
-#             token(type='=', value='=', lineno=1, index=16),
-#             token(type='IDENTIFIER', value='None', lineno=1, index=17),
 
-#          ])
+    # ("x:Option<Num>=None", [
+    #  token('IDENTIFIER', value='x', lineno=1, index=0),
+    #  token(type=':', value=':', lineno=1, index=1),
+    #  token(type='IDENTIFIER', value='Option', lineno=1, index=2),
+    #     token(type='<', value='<', lineno=1, index=8),
+    #     token(type='IDENTIFIER', value='Num', lineno=1, index=9),
+    #     token(type='>', value='>', lineno=1, index=15),
+    #     token(type='=', value='=', lineno=1, index=16),
+    #     token(type='IDENTIFIER', value='None', lineno=1, index=17),
+
+    #  ])
+
+#         ('case [Some(1), None()] of [Some(value), None()] do value end [None(), Some(value)] do 3 end [] do 4 end [...arr] do 5 end end', [
+#             Token(type='CASE', value='case'),
+#             Token(type='[', value='['),
+#             Token(type='TYPE_IDENTIFIER', value='Some'),
+#             Token(type='(', value='('),
+#             Token(type='NUMBER', value='1'),
+#             Token(type=')', value=')'),
+#             Token(type=',', value=','),
+#             Token(type='TYPE_IDENTIFIER', value='None'),
+#             Token(type='(', value='('),
+#             Token(type=')', value=')'),
+#             Token(type=']', value=']'),
+#             Token(type='OF', value='of'),
+#             Token(type='[', value='['),
+#             Token(type='TYPE_IDENTIFIER', value='Some'),
+#             Token(type='(', value='('),
+#             Token(type='IDENTIFIER', value='value'),
+#             Token(type=')', value=')'),
+#             Token(type=',', value=','),
+#             Token(type='TYPE_IDENTIFIER', value='None'),
+#             Token(type='(', value='('),
+#             Token(type=')', value=')'),
+#             Token(type=']', value=']'),
+#             Token(type='DO', value='do'),
+#             Token(type='IDENTIFIER', value='value'),
+#             Token(type='END', value='end'),
+#             Token(type='[', value='['),
+#             Token(type='TYPE_IDENTIFIER', value='None'),
+#             Token(type='(', value='('),
+#             Token(type=')', value=')'),
+#             Token(type=',', value=','),
+#             Token(type='TYPE_IDENTIFIER', value='Some'),
+#             Token(type='(', value='('),
+#             Token(type='IDENTIFIER', value='value'),
+#             Token(type=')', value=')'),
+#             Token(type=']', value=']'),
+#             Token(type='DO', value='do'),
+#             Token(type='NUMBER', value='3'),
+#             Token(type='END', value='end'),
+#             Token(type='[', value='['),
+#             Token(type=']', value=']'),
+#             Token(type='DO', value='do'),
+#             Token(type='NUMBER', value='4'),
+#             Token(type='END', value='end'),
+#             Token(type='[', value='['),
+#             Token(type='SPREAD', value='...'),
+#             Token(type='IDENTIFIER', value='arr'),
+#             Token(type=']', value=']'),
+#             Token(type='DO', value='do'),
+#             Token(type='NUMBER', value='5'),
+#             Token(type='END', value='end'),
+#             Token(type='END', value='end'),
+#         ])
 #     ])
 # def test_tokenizer(program, expected_tokens, lexer):
-#     tokens = [*lexer.tokenize(program)]
-#     assert tokens == expected_tokens
+#     tokens = map(Token.from_token, lexer.tokenize(program))
+#     assert [*tokens] == expected_tokens
 
 
 @pytest.mark.parametrize(
@@ -201,6 +257,33 @@ def token(type, value, lineno, index):
             name='A'), fields=EFieldsUnnamed(unnamed=[])), EVariant(id=EIdentifier(name='B'), fields=EFieldsUnnamed(unnamed=[]))])]),
         ('case x of Some(value) do 2 end None() do 3 end end', [ECaseOf(EIdentifier(name='x'), [ECase(EEnumPattern(EIdentifier(name='Some'), [
             EParamPattern(EIdentifier(name='value'))]), EDo([ELiteral(raw='2', value=2.0)])), ECase(EEnumPattern(EIdentifier(name='None'), []), EDo([ELiteral(raw='3', value=3.0)]))])]),
+        ('case [Some(1), None()] of [Some(value), None()] do value end end', [
+            ECaseOf(EArray([ECall(EIdentifier('Some'), [ELiteral('1', 1.0)]),
+                    ECall(EIdentifier('None'), [])]),
+                    cases=[ECase(pattern=EArrayPattern(first=[EEnumPattern(id=EIdentifier(name='Some'),
+                                                                           patterns=[EParamPattern(identifier=EIdentifier(name='value'))]),
+                                                              EEnumPattern(id=EIdentifier(name='None'),
+                                                                           patterns=[])],
+                                                       rest=None),
+                                 body=EDo(body=[EIdentifier(name='value')]))])]),
+
+        ('case [Some(1), None()] of [] do 4 end end', [
+            ECaseOf(EArray([ECall(EIdentifier('Some'), [ELiteral('1', 1)]),
+                    ECall(EIdentifier('None'), [])]), [
+                ECase(pattern=EArrayPattern(first=[],
+                                            rest=None),
+                      body=EDo(body=[ELiteral(raw='4', value=4.0)]))
+            ])
+        ]),
+        ('case [Some(1), None()] of [...arr] do 5 end end', [
+            ECaseOf(EArray([ECall(EIdentifier('Some'), [ELiteral('1', 1)]),
+                    ECall(EIdentifier('None'), [])]), [
+                ECase(pattern=EArrayPattern(first=[],
+                                            rest=ESpread(rest=EIdentifier(name='arr'),
+                                                         last=[])),
+                      body=EDo(body=[ELiteral(raw='5', value=5.0)]))
+            ])
+        ])
     ],
 )
 def test_parser(program, ast, parser, lexer):
@@ -280,6 +363,12 @@ def test_parser(program, ast, parser, lexer):
         ('x=Some(1)\ncase x of Some(value) do 2 end None() do 3 end end', typed.TNum()),
         ('def flatMap(v, fn) do case v of None() do None() end Some(value) do fn(value) end end end\nflatMap(Some(1),Some)',
          typed.TOption(typed.TNum())),
+        ('[Some(1), None()]',
+         typed.TArray(typed.TOption(typed.TNum()))),
+        ('case [Some(1), None()] of [Some(value), None()] do 2 end [None(), Some(value)] do 3 end [] do 4 end [...arr] do 5 end end',
+         typed.TNum()),
+        ('case [Some(1), None()] of [Some(value), None()] do [Some(value)] end [None(), Some(value)] do [Some(value)] end [] do [] end [...arr] do arr end end',
+         typed.TArray(typed.TOption(typed.TNum()))),
     ],
 )
 def test_infer(program, expected_type, parser, lexer):
@@ -309,6 +398,10 @@ def test_infer(program, expected_type, parser, lexer):
         ("enum Pair<a,b> {Pair(a,b)}\nprint(case Pair(1,2) of Pair(x, y) do y end end)", "2"),
         ("enum Pair<a,b> {Pair(a,b)}\nprint(case Pair(1,2) of Pair(a) do a end end)", "1"),
         ("enum Pair<a,b> {Pair(a,b)}\nprint(case Pair(1,Pair(2,3)) of Pair(x, Pair(y, z)) do z end Pair(c, v) do c end end)", "3"),
+        ('print(case [Some(1), None()] of [Some(value), None()] do value end [None(), Some(value)] do 3 end [] do 4 end [...arr] do 5 end end)', "1"),
+        ('print(case [] of [Some(value), None()] do 2 end [None(), Some(value)] do 3 end [] do 4 end [...arr] do 5 end end)', "4"),
+        ('print(case [None(), Some(1)] of [Some(value), None()] do 2 end [None(), Some(value)] do 3 end [] do 4 end [...arr] do 5 end end)', "3"),
+        ('print(case [Some(1), Some(1), None()] of [Some(value), None()] do 2 end [None(), Some(value)] do 3 end [] do 4 end [...arr] do 5 end end)', "5"),
     ],
 )
 def test_compile_with_snapshot(program, expected_output, snapshot, parser, lexer):

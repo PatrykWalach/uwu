@@ -77,6 +77,8 @@ class EDef:
 class EParam:
     identifier: EIdentifier
     hint: EHint | None = None
+
+
 @dataclasses.dataclass(frozen=True)
 class EParamPattern:
     identifier: EIdentifier
@@ -90,19 +92,24 @@ class ECaseOf:
 
 @dataclasses.dataclass(frozen=True)
 class ECase:
-    pattern: EEnumPattern | EParamPattern
+    pattern: Pattern
     body: EDo
 
 
 @dataclasses.dataclass(frozen=True)
 class EEnumPattern:
     id: EIdentifier
-    patterns: list[EEnumPattern | EParamPattern]
+    patterns: list[Pattern]
 
 
 @dataclasses.dataclass(frozen=True)
 class ECall:
     callee: EIdentifier
+    arguments: list[Expr]
+
+
+@dataclasses.dataclass(frozen=True)
+class EArray:
     arguments: list[Expr]
 
 
@@ -139,6 +146,19 @@ class EVariant:
 
 
 @dataclasses.dataclass(frozen=True)
+class EArrayPattern:
+    first: list[Pattern]
+    rest: ESpread | None
+
+
+@dataclasses.dataclass(frozen=True)
+class ESpread:
+    rest: EIdentifier
+    last: list[Pattern]
+    #
+
+
+@dataclasses.dataclass(frozen=True)
 class EFieldsUnnamed:
     unnamed: list[EIdentifier]
 
@@ -154,18 +174,18 @@ AstNode: typing.TypeAlias = (
     | EParam
     | ECaseOf
     | ECase
-    | ECall
+    | ECall | EArray
     | EIf
     | EBlockStmt
     | EEnumDeclaration
     | EEnumPattern
     | EFieldsUnnamed
     | EHint
-    | EVariant |EParamPattern
+    | EVariant | EParamPattern | EArrayPattern | ESpread
 
 )
 AstTree: typing.TypeAlias = AstNode
-
-Expr: typing.TypeAlias = EDo | ELiteral | EDef | EIf | ECall | ECaseOf | EVariableDeclaration | EIdentifier | EBinaryExpr
+Pattern: typing.TypeAlias = EParamPattern | EArrayPattern | EEnumPattern
+Expr: typing.TypeAlias = EDo | ELiteral | EDef | EIf | ECall | ECaseOf | EVariableDeclaration | EIdentifier | EBinaryExpr | EArray
 
 # 'type_identifier',  "array", "tuple",

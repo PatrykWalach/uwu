@@ -72,5 +72,29 @@ def compile(exp: terms.AstTree) -> str:
             fields = '&&'.join(fields)
 
             return f"((__)=>{{return {fields}}})"
+        case terms.EArray(args):
+            return f"[{','.join(map(compile, args))}]"
+        case terms.EArrayPattern(first, rest=None):
+            first = [f"{compile(element)}(__[{i}])" for i,
+                     element in enumerate(first)]
+            first = [f"__.length=={len(first)}", *first]
+            first = '&&'.join(first)
+
+            return f"((__)=>{{return {first} }})"
+        case terms.EArrayPattern(first, rest) if rest != None:
+            first = [f"{compile(element)}(__[{i}])" for i,
+                     element in enumerate(first)]
+            first = [f"__.length>={len(first)}", f'{compile(rest)}(__.slice({len(first)}))', *first]
+            first = '&&'.join(first)
+
+            return f"((__)=>{{return {first} }})"
+        case terms.ESpread(terms.EIdentifier(id), last):
+            last = [f"{compile(element)}(__[__.length-{i+1}])" for i,
+                    element in enumerate(reversed(last))]
+            last = [f"__.length>={len(last)}",
+                    f'({id}=__.slice(0, __.length-{len(last)}))', *last]
+            last = '&&'.join(last)
+
+            return f"((__)=>{{return {last} }})"
         case _:
             raise Exception(f"Unsupported expression: {exp}")

@@ -381,6 +381,42 @@ def infer(subst: Substitution, ctx: Context, exp: terms.AstTree) -> tuple[Substi
 
             subst = unify_subst(ty_id, typed.TDef(ty_patterns, ty), subst)
             return subst, ty
+        case terms.EArray(args):
+            ty = fresh_ty_var()
+            for arg in args:
+                subst, ty1 = infer(subst, ctx, arg)
+                subst = unify_subst(ty1, ty, subst)
+
+            return subst, typed.TArray(ty)
+        case terms.EArrayPattern(first, rest=None):
+            ty = fresh_ty_var()
+
+            for element in first:
+                subst, ty1 = infer(subst, ctx, element)
+                subst = unify_subst(ty1, ty, subst)
+
+            return subst, typed.TArray(ty)
+        case terms.EArrayPattern(first, rest) if rest != None:
+            ty = fresh_ty_var()
+
+            for element in first:
+                subst, ty1 = infer(subst, ctx, element)
+                subst = unify_subst(ty1, ty, subst)
+
+            subst, ty1 = infer(subst, ctx, rest)
+            subst = unify_subst(ty1, typed.TArray(ty), subst)
+
+            return subst, typed.TArray(ty)
+        case terms.ESpread(terms.EIdentifier(id),last):
+            ty = fresh_ty_var()
+            
+            for element in last:
+                subst, ty1 = infer(subst, ctx, element)
+                subst = unify_subst(ty1, ty, subst)
+
+            ctx[id] = Scheme.from_subst(subst, ctx, typed.TArray(ty))
+
+            return subst, typed.TArray(ty)
         case _:
             raise TypeError(f"Cannot infer type of {exp=}")
 

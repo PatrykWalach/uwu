@@ -50,5 +50,8 @@ def TBool() -> Type:
 def TOption(param: Type) -> Type:
     return TGeneric('Option', [param])
 
+def TArray(param: Type) -> Type:
+    return TGeneric('Array', [param])
+
 
 Type: TypeAlias = TVar | TGeneric

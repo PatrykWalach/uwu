@@ -252,7 +252,7 @@ class UwuParser(Parser):
         "param_pattern",
         "enum_pattern",
         # "tuple_pattern",
-        # "array_pattern",
+        "array_pattern",
     )
     def pattern(self, p):
         return p[0]
@@ -261,9 +261,16 @@ class UwuParser(Parser):
     def param_pattern(self, p):
         return terms.EParamPattern(p.identifier)
 
-    # @_("'[' { pattern ',' } [ SPREAD identifier { ',' pattern } ] ']'")
-    # def array_pattern(self, p):
-    #     return terms.ArrayPattern(concat(p.pattern0, p.pattern1))
+    @_("'[' [ patterns ] [ spread ] ']'")
+    def array_pattern(self, p):
+        patterns = p.patterns
+        if patterns == None:
+            patterns = []
+        return terms.EArrayPattern(patterns, p.spread)
+
+    @_("SPREAD identifier { ',' pattern }")
+    def spread(self, p):
+        return terms.ESpread(p.identifier, p.pattern)
 
     @_("pattern { ',' pattern }")
     def patterns(self, p):
@@ -287,7 +294,7 @@ class UwuParser(Parser):
 
     @_("'[' [ expr ] { ',' expr } ']'")
     def array(self, p):
-        raise NotImplemented
+        return terms.EArray(concat(p.expr0, p.expr1))
 
     @_("'{' [ expr ] { ',' expr } '}'")
     def tuple(self, p):
