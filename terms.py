@@ -119,11 +119,22 @@ class EArray:
 
 
 @dataclasses.dataclass(frozen=True)
+class EIfNone:
+    pass
+
+
+@dataclasses.dataclass(frozen=True)
 class EIf:
     test: Expr
     then: EBlockStmt
-    or_else: EBlockStmt | EIf | None
+    or_else: EBlockStmt | EIf | EIfNone = EIfNone()
     hint: EHint | EHintNone = EHintNone()
+
+    @staticmethod
+    def from_option(hint):
+        if hint == None:
+            return EIfNone()
+        return hint
 
 
 @dataclasses.dataclass(frozen=True)
@@ -192,6 +203,7 @@ AstNode: typing.TypeAlias = (
     | EArrayPattern
     | ESpread
     | EHintNone
+    | EIfNone
 )
 
 

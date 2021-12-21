@@ -236,7 +236,12 @@ class UwuParser(Parser):
 
     @_("IF expr THEN hint block_statement [ or_else ] END")
     def if_expr(self, p):
-        return terms.EIf(p.expr, then=p.block_statement, or_else=p.or_else, hint=p.hint)
+        return terms.EIf(
+            p.expr,
+            then=p.block_statement,
+            or_else=terms.EIf.from_option(p.or_else),
+            hint=p.type,
+        )
 
     @_("ELSE block_statement")
     def or_else(self, p):
@@ -244,7 +249,9 @@ class UwuParser(Parser):
 
     @_("ELIF expr THEN block_statement [ or_else ]")
     def or_else(self, p):
-        return terms.EIf(p.expr, then=p.block_statement, or_else=p.or_else)
+        return terms.EIf(
+            p.expr, then=p.block_statement, or_else=terms.EIf.from_option(p.or_else)
+        )
 
     @_("CASE expr OF case { case } END")
     def case_of(self, p):

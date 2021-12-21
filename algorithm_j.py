@@ -266,18 +266,7 @@ def infer(
             ctx[id] = Scheme.from_subst(subst, ctx, ty1)
 
             return subst, ty1
-        case terms.EIf(test, then, or_else=None, hint=hint):
-            subst, hint = infer(subst, ctx, hint)
-            subst = unify_subst(hint, typed.TOption(fresh_ty_var()), subst)
-
-            subst, ty_condition = infer(subst, ctx, test)
-            subst = unify_subst(ty_condition, typed.TBool(), subst)
-
-            subst, ty_then = infer(subst, ctx, then)
-            subst = unify_subst(ty_then, hint, subst)
-
-            return subst, hint
-        case terms.EIf(test, then, or_else, hint=hint) if or_else != None:
+        case terms.EIf(test, then, or_else, hint=hint):
             subst, hint = infer(subst, ctx, hint)
             subst, ty_condition = infer(subst, ctx, test)
             subst = unify_subst(ty_condition, typed.TBool(), subst)
@@ -289,6 +278,8 @@ def infer(
             subst = unify_subst(ty_or_else, hint, subst)
 
             return subst, hint
+        case terms.EIfNone():
+            return subst, typed.TOption(fresh_ty_var())
         case terms.EHintNone():
             return subst, fresh_ty_var()
         case terms.EHint(terms.EIdentifier(id), arguments):
