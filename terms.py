@@ -147,6 +147,12 @@ class EHint:
     id: EIdentifier
     arguments: list[EHint]
 
+    @staticmethod
+    def from_option(hint):
+        if hint == None:
+            return EHintNone()
+        return hint
+
 
 @dataclasses.dataclass(frozen=True)
 class EEnumDeclaration:

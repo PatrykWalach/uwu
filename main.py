@@ -166,10 +166,10 @@ class UwuParser(Parser):
         return terms.EBinaryExpr(p[1], p[0], p[2])
 
     @_(
-        "DO hint [ expr ] { NEWLINE expr } END",
+        "DO [ ':' type ] [ expr ] { NEWLINE expr } END",
     )
     def do(self, p):
-        return terms.EDo(concat(p.expr0, p.expr1), hint=p.hint)
+        return terms.EDo(concat(p.expr0, p.expr1), hint=terms.EHint.from_option(p.type))
 
     @_(
         "[ expr ] { NEWLINE expr }",
@@ -177,23 +177,18 @@ class UwuParser(Parser):
     def block_statement(self, p):
         return terms.EBlockStmt(concat(p.expr0, p.expr1))
 
-    @_("DEF identifier '(' [ param ] { ',' param } ')' hint do")
+    @_("DEF identifier '(' [ param ] { ',' param } ')' [ ':' type ] do")
     def def_expr(self, p):
         return terms.EDef(
-            p.identifier, concat(p.param0, p.param1), body=p.do, hint=p.hint
+            p.identifier,
+            concat(p.param0, p.param1),
+            body=p.do,
+            hint=terms.EHint.from_option(p.type),
         )
 
     @_("type_identifier [ '<' type { ',' type } '>' ]")
     def type(self, p):
         return terms.EHint(p.type_identifier, concat(p[1][1], p[1][2]))
-
-    @_("':' type")
-    def hint(self, p):
-        return p.type
-
-    @_("")
-    def hint(self, p):
-        return terms.EHintNone()
 
     @_(
         "STRUCT type_identifier [ '<' identifier { ',' identifier } '>' ] '{' { identifier ':' type } '}'"
@@ -230,17 +225,17 @@ class UwuParser(Parser):
     def fields_unnamed(self, p):
         return concat(p.identifier0, p.identifier1)
 
-    @_("identifier hint")
+    @_("identifier [ ':' type ]")
     def param(self, p):
-        return terms.EParam(p.identifier, p.hint)
+        return terms.EParam(p.identifier, terms.EHint.from_option(p.type))
 
-    @_("IF expr THEN hint block_statement [ or_else ] END")
+    @_("IF expr THEN [ ':' type ] block_statement [ or_else ] END")
     def if_expr(self, p):
         return terms.EIf(
             p.expr,
             then=p.block_statement,
             or_else=terms.EIf.from_option(p.or_else),
-            hint=p.type,
+            hint=terms.EHint.from_option(p.type),
         )
 
     @_("ELSE block_statement")
@@ -325,9 +320,11 @@ class UwuParser(Parser):
     def identifier(self, p):
         return terms.EIdentifier(p.IDENTIFIER)
 
-    @_("identifier hint '=' expr")
+    @_("identifier [ ':' type ] '=' expr")
     def variable_declaration(self, p):
-        return terms.EVariableDeclaration(id=p.identifier, init=p.expr, hint=p.hint)
+        return terms.EVariableDeclaration(
+            id=p.identifier, init=p.expr, hint=terms.EHint.from_option(p.type)
+        )
 
     @_("identifier ':' type_identifier '<' type { ',' type } NOT_LESS expr")
     def variable_declaration(self, p):
