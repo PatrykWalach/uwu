@@ -166,10 +166,10 @@ class UwuParser(Parser):
         return terms.EBinaryExpr(p[1], p[0], p[2])
 
     @_(
-        "DO [ ':' type ] [ expr ] { NEWLINE expr } END",
+        "DO hint [ expr ] { NEWLINE expr } END",
     )
     def do(self, p):
-        return terms.EDo(concat(p.expr0, p.expr1), hint=p.type)
+        return terms.EDo(concat(p.expr0, p.expr1), hint=p.hint)
 
     @_(
         "[ expr ] { NEWLINE expr }",
@@ -177,15 +177,23 @@ class UwuParser(Parser):
     def block_statement(self, p):
         return terms.EBlockStmt(concat(p.expr0, p.expr1))
 
-    @_("DEF identifier '(' [ param ] { ',' param } ')' [ ':' type ] do")
+    @_("DEF identifier '(' [ param ] { ',' param } ')' hint do")
     def def_expr(self, p):
         return terms.EDef(
-            p.identifier, concat(p.param0, p.param1), body=p.do, hint=p.type
+            p.identifier, concat(p.param0, p.param1), body=p.do, hint=p.hint
         )
 
     @_("type_identifier [ '<' type { ',' type } '>' ]")
     def type(self, p):
         return terms.EHint(p.type_identifier, concat(p[1][1], p[1][2]))
+
+    @_("':' type")
+    def hint(self, p):
+        return p.type
+
+    @_("")
+    def hint(self, p):
+        return terms.EHintNone()
 
     @_(
         "STRUCT type_identifier [ '<' identifier { ',' identifier } '>' ] '{' { identifier ':' type } '}'"
@@ -222,13 +230,13 @@ class UwuParser(Parser):
     def fields_unnamed(self, p):
         return concat(p.identifier0, p.identifier1)
 
-    @_("identifier [ ':' type ]")
+    @_("identifier hint")
     def param(self, p):
-        return terms.EParam(p.identifier, p.type)
+        return terms.EParam(p.identifier, p.hint)
 
-    @_("IF expr THEN [ ':' type ] block_statement [ or_else ] END")
+    @_("IF expr THEN hint block_statement [ or_else ] END")
     def if_expr(self, p):
-        return terms.EIf(p.expr, then=p.block_statement, or_else=p.or_else, hint=p.type)
+        return terms.EIf(p.expr, then=p.block_statement, or_else=p.or_else, hint=p.hint)
 
     @_("ELSE block_statement")
     def or_else(self, p):
@@ -310,9 +318,9 @@ class UwuParser(Parser):
     def identifier(self, p):
         return terms.EIdentifier(p.IDENTIFIER)
 
-    @_("identifier [ ':' type ] '=' expr")
+    @_("identifier hint '=' expr")
     def variable_declaration(self, p):
-        return terms.EVariableDeclaration(id=p.identifier, init=p.expr, hint=p.type)
+        return terms.EVariableDeclaration(id=p.identifier, init=p.expr, hint=p.hint)
 
     @_("identifier ':' type_identifier '<' type { ',' type } NOT_LESS expr")
     def variable_declaration(self, p):

@@ -256,9 +256,7 @@ def lexer():
                                 right=EIdentifier(name="b"),
                             )
                         ],
-                        hint=None,
                     ),
-                    hint=None,
                 ),
             ],
         ),

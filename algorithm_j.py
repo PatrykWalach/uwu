@@ -160,7 +160,7 @@ def infer(
             return subst, typed.TNum()
         case terms.EIdentifier(var):
             return subst, instantiate(ctx[var])
-        case terms.EDo(body, hint) if hint != None:
+        case terms.EDo(body, hint):
             subst, hint = infer(subst, ctx, hint)
             ty = fresh_ty_var()
             ctx = ctx.copy()
@@ -179,9 +179,7 @@ def infer(
                 subst, ty = infer(subst, ctx, exp)
 
             return subst, ty
-        case terms.EVariableDeclaration(
-            terms.EIdentifier(id), init, hint
-        ) if hint != None:
+        case terms.EVariableDeclaration(terms.EIdentifier(id), init, hint):
             subst, hint = infer(subst, ctx, hint)
             subst, t1 = infer(subst, ctx, init)
             subst = unify_subst(t1, hint, subst)
@@ -189,22 +187,6 @@ def infer(
             ctx[id] = Scheme.from_subst(subst, ctx, hint)
 
             return subst, hint
-        case terms.EVariableDeclaration(terms.EIdentifier(id), init, hint=None):
-            subst, t1 = infer(subst, ctx, init)
-
-            ctx[id] = Scheme.from_subst(subst, ctx, t1)
-            return subst, t1
-        # case terms.EFieldsUnnamed(unnamed):
-        #     types = list[typed.Type]()
-        #     for field in unnamed:
-        #         subst, ty = infer(subst, ctx, field)
-        #         types.append(ty)
-
-        #     return subst, typed.TGeneric(TFieldsMeta, types)
-        # case terms.EVariant(terms.EIdentifier(id), fields):
-        #     subst, ty = infer(subst, ctx, fields)
-        #     ctx[id] = Scheme.from_subst(subst, ctx, ty)
-        #     return subst, ty
         case terms.EEnumDeclaration(terms.EIdentifier(id), generics, variants=variants):
 
             for generic in generics:
@@ -244,17 +226,16 @@ def infer(
             subst, ty_right = infer(subst, ctx, right)
             subst = unify_subst(ty_right, typed.TNum(), subst)
             return subst, typed.TBool()
-        case terms.EParam(terms.EIdentifier(id), hint) if hint != None:
-            subst, hint = infer(subst, ctx, hint)
-            ctx[id] = Scheme.from_subst(subst, ctx, hint)
-            return subst, hint
-        case terms.EParam(terms.EIdentifier(id), hint=None) | terms.EParamPattern(
-            terms.EIdentifier(id)
-        ):
+        case terms.EParamPattern(terms.EIdentifier(id)):
             ty = fresh_ty_var()
-            # ctx[id] = Scheme.from_subst(subst, ctx, ty)
             ctx[id] = Scheme([], ty)
             return subst, ty
+
+        case terms.EParam(terms.EIdentifier(id), hint):
+            subst, hint = infer(subst, ctx, hint)
+            ctx[id] = Scheme([], hint)
+            return subst, hint
+
         case terms.ECall(id, args):
             ty_call = fresh_ty_var()
             subst, ty1 = infer(subst, ctx, id)
@@ -267,7 +248,7 @@ def infer(
             subst = unify_subst(ty1, typed.TDef(params, ty_call), subst)
 
             return subst, ty_call
-        case terms.EDef(terms.EIdentifier(id), params, body, hint) if hint != None:
+        case terms.EDef(terms.EIdentifier(id), params, body, hint):
             subst, hint = infer(subst, ctx, hint)
             t_ctx = ctx.copy()
 
@@ -277,50 +258,15 @@ def infer(
                 ty_params.append(t1)
 
             ty1 = typed.TDef(ty_params, hint)
-            ctx[id] = Scheme.from_subst(subst, ctx, ty1)
+            t_ctx[id] = Scheme.from_subst(subst, t_ctx, ty1)
 
             subst, ty_body = infer(subst, t_ctx, body)
             subst = unify_subst(ty_body, hint, subst)
 
-            return subst, ty1
-        case terms.EDef(terms.EIdentifier(id), params, body, hint=None):
-            t_ctx = ctx.copy()
-
-            ty_params = list[typed.Type]()
-            for param in params:
-                subst, t1 = infer(subst, t_ctx, param)
-                ty_params.append(t1)
-
-            ty1 = typed.TDef(ty_params, fresh_ty_var())
-            t_ctx[id] = Scheme.from_subst(subst, ctx, ty1)
-
-            subst, ty_body = infer(subst, t_ctx, body)
-
-            ty1 = typed.TDef(ty_params, ty_body)
-
             ctx[id] = Scheme.from_subst(subst, ctx, ty1)
 
             return subst, ty1
-        case terms.EIf(test, then, or_else=None, hint=None):
-            subst, ty_condition = infer(subst, ctx, test)
-            subst = unify_subst(ty_condition, typed.TBool(), subst)
-
-            subst, ty_then = infer(subst, ctx, then)
-            unify_subst(ty_then, typed.TOption(fresh_ty_var()), subst)
-
-            return subst, ty_then
-
-        case terms.EIf(test, then, or_else, hint=None) if or_else != None:
-            subst, ty_condition = infer(subst, ctx, test)
-            subst = unify_subst(ty_condition, typed.TBool(), subst)
-
-            subst, ty_then = infer(subst, ctx, then)
-
-            subst, ty_or_else = infer(subst, ctx, or_else)
-            subst = unify_subst(ty_or_else, ty_then, subst)
-
-            return subst, ty_then
-        case terms.EIf(test, then, or_else=None, hint=hint) if hint != None:
+        case terms.EIf(test, then, or_else=None, hint=hint):
             subst, hint = infer(subst, ctx, hint)
             subst = unify_subst(hint, typed.TOption(fresh_ty_var()), subst)
 
@@ -331,9 +277,7 @@ def infer(
             subst = unify_subst(ty_then, hint, subst)
 
             return subst, hint
-        case terms.EIf(
-            test, then, or_else, hint=hint
-        ) if or_else != None and hint != None:
+        case terms.EIf(test, then, or_else, hint=hint) if or_else != None:
             subst, hint = infer(subst, ctx, hint)
             subst, ty_condition = infer(subst, ctx, test)
             subst = unify_subst(ty_condition, typed.TBool(), subst)
@@ -345,6 +289,8 @@ def infer(
             subst = unify_subst(ty_or_else, hint, subst)
 
             return subst, hint
+        case terms.EHintNone():
+            return subst, fresh_ty_var()
         case terms.EHint(terms.EIdentifier(id), arguments):
             types = list[typed.Type]()
             for arg in arguments:
@@ -419,8 +365,6 @@ def infer(
             return subst, typed.TArray(ty)
         case _:
             raise TypeError(f"Cannot infer type of {exp=}")
-
-        # case terms.Def(id,params):
 
 
 def type_infer(ctx: Context, exp: terms.AstTree):

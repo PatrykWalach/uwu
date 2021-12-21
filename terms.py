@@ -30,16 +30,21 @@ Z = typing.TypeVar("Z")
 
 
 @dataclasses.dataclass(frozen=True)
+class EHintNone:
+    pass
+
+
+@dataclasses.dataclass(frozen=True)
 class EVariableDeclaration:
     id: EIdentifier
     init: Expr
-    hint: EHint | None = None
+    hint: EHint | EHintNone = EHintNone()
 
 
 @dataclasses.dataclass(frozen=True)
 class EDo:
     body: list[Expr]
-    hint: EHint | None = None
+    hint: EHint | EHintNone = EHintNone()
 
 
 @dataclasses.dataclass(frozen=True)
@@ -70,13 +75,13 @@ class EDef:
     identifier: EIdentifier
     params: list[EParam]
     body: EDo
-    hint: EHint | None = None
+    hint: EHint | EHintNone = EHintNone()
 
 
 @dataclasses.dataclass(frozen=True)
 class EParam:
     identifier: EIdentifier
-    hint: EHint | None = None
+    hint: EHint | EHintNone = EHintNone()
 
 
 @dataclasses.dataclass(frozen=True)
@@ -118,7 +123,7 @@ class EIf:
     test: Expr
     then: EBlockStmt
     or_else: EBlockStmt | EIf | None
-    hint: EHint | None = None
+    hint: EHint | EHintNone = EHintNone()
 
 
 @dataclasses.dataclass(frozen=True)
@@ -186,6 +191,7 @@ AstNode: typing.TypeAlias = (
     | EParamPattern
     | EArrayPattern
     | ESpread
+    | EHintNone
 )
 
 
