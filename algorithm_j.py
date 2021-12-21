@@ -212,18 +212,18 @@ def infer(
 
             for variant in variants:
 
-                types = list[typed.Type]()
+                types = typed.TGeneric(
+                    id, [ctx[generic.name].ty for generic in generics]
+                )
 
                 for field in variant.fields.unnamed:
                     subst, ty = infer(subst, ctx, field)
-                    types.append(ty)
+                    types = typed.TDef(ty, types)
 
-                ty = typed.TDef(
-                    types,
-                    typed.TGeneric(id, [ctx[generic.name].ty for generic in generics]),
-                )
+                if not variant.fields.unnamed:
+                    types = typed.TThunk(types)
 
-                ctx[variant.id.name] = Scheme.from_subst(subst, ctx, ty)
+                ctx[variant.id.name] = Scheme.from_subst(subst, ctx, types)
 
             ty = typed.TGeneric(id, [fresh_ty_var() for _ in generics])
             ctx[id] = Scheme([], ty)
@@ -255,52 +255,82 @@ def infer(
             # ctx[id] = Scheme.from_subst(subst, ctx, ty)
             ctx[id] = Scheme([], ty)
             return subst, ty
-        case terms.ECall(id, args):
-            ty_call = fresh_ty_var()
+        case terms.ECall(id, []):
+            ty = fresh_ty_var()
             subst, ty1 = infer(subst, ctx, id)
 
-            params = list[typed.Type]()
-            for arg in args:
-                subst, ty = infer(subst, ctx, arg)
-                params.append(ty)
+            subst = unify_subst(ty1, typed.TThunk(ty), subst)
 
-            subst = unify_subst(ty1, typed.TDef(params, ty_call), subst)
+            return subst, ty
+        case terms.ECall(id, args):
+            ty = fresh_ty_var()
+            subst, ty1 = infer(subst, ctx, id)
 
-            return subst, ty_call
-        case terms.EDef(terms.EIdentifier(id), params, body, hint) if hint != None:
+            ty_call = ty
+
+            for arg in reversed(args):
+                subst, ty_arg = infer(subst, ctx, arg)
+                ty_call = typed.TDef(ty_arg, ty_call)
+
+            subst = unify_subst(ty1, ty_call, subst)
+
+            return subst, ty
+        case terms.EDef(terms.EIdentifier(id), [], body, hint) if hint != None:
             subst, hint = infer(subst, ctx, hint)
             t_ctx = ctx.copy()
 
-            ty_params = list[typed.Type]()
-            for param in params:
-                subst, t1 = infer(subst, t_ctx, param)
-                ty_params.append(t1)
-
-            ty1 = typed.TDef(ty_params, hint)
+            ty1 = typed.TThunk(hint)
             ctx[id] = Scheme.from_subst(subst, ctx, ty1)
 
             subst, ty_body = infer(subst, t_ctx, body)
             subst = unify_subst(ty_body, hint, subst)
 
             return subst, ty1
-        case terms.EDef(terms.EIdentifier(id), params, body, hint=None):
+        case terms.EDef(terms.EIdentifier(id), [], body, hint=None):
             t_ctx = ctx.copy()
 
-            ty_params = list[typed.Type]()
-            for param in params:
-                subst, t1 = infer(subst, t_ctx, param)
-                ty_params.append(t1)
-
-            ty1 = typed.TDef(ty_params, fresh_ty_var())
+            ty1 = typed.TThunk(fresh_ty_var())
             t_ctx[id] = Scheme.from_subst(subst, ctx, ty1)
 
             subst, ty_body = infer(subst, t_ctx, body)
 
-            ty1 = typed.TDef(ty_params, ty_body)
+            ty1 = typed.TThunk(ty_body)
 
             ctx[id] = Scheme.from_subst(subst, ctx, ty1)
 
             return subst, ty1
+        case terms.EDef(terms.EIdentifier(id), params, body, hint) if hint != None:
+            subst, hint = infer(subst, ctx, hint)
+            t_ctx = ctx.copy()
+
+            ty = hint
+            for param in reversed(params):
+                subst, t1 = infer(subst, t_ctx, param)
+                ty = typed.TDef(t1, ty)
+
+            ctx[id] = Scheme.from_subst(subst, ctx, ty)
+
+            subst, ty_body = infer(subst, t_ctx, body)
+            subst = unify_subst(ty_body, hint, subst)
+
+            return subst, ty
+        case terms.EDef(terms.EIdentifier(id), params, body, hint=None):
+            t_ctx = ctx.copy()
+
+            hint = fresh_ty_var()
+            ty = hint
+            for param in reversed(params):
+                subst, t1 = infer(subst, t_ctx, param)
+                ty = typed.TDef(t1, ty)
+
+            t_ctx[id] = Scheme.from_subst(subst, ctx, ty)
+
+            subst, ty_body = infer(subst, t_ctx, body)
+            subst = unify_subst(ty_body, hint, subst)
+
+            ctx[id] = Scheme.from_subst(subst, ctx, ty)
+
+            return subst, ty
         case terms.EIf(test, then, or_else=None, hint=None):
             subst, ty_condition = infer(subst, ctx, test)
             subst = unify_subst(ty_condition, typed.TBool(), subst)
@@ -363,23 +393,28 @@ def infer(
             for case in cases:
                 ctx = ctx.copy()
                 subst, ty2 = infer(subst, ctx, case)
-                subst = unify_subst(ty2, typed.TDef([ty_of], ty1), subst)
+                subst = unify_subst(ty2, typed.TDef(ty_of, ty1), subst)
 
             return subst, ty1
         case terms.ECase(pattern, body):
             subst, ty_pattern = infer(subst, ctx, pattern)
             subst, ty_body = infer(subst, ctx, body)
-            return subst, typed.TDef([ty_pattern], ty_body)
+            return subst, typed.TDef(ty_pattern, ty_body)
+        case terms.EEnumPattern(id, []):
+            ty = fresh_ty_var()
+            subst, ty_id = infer(subst, ctx, id)
+            subst = unify_subst(ty_id, typed.TThunk(ty), subst)
+            return subst, ty
         case terms.EEnumPattern(id, patterns):
             ty = fresh_ty_var()
             subst, ty_id = infer(subst, ctx, id)
 
-            ty_patterns = list[typed.Type]()
-            for pattern in patterns:
+            ty_call = ty
+            for pattern in reversed(patterns):
                 subst, ty_pattern = infer(subst, ctx, pattern)
-                ty_patterns.append(ty_pattern)
+                ty_call = typed.TDef(ty_pattern, ty_call)
 
-            subst = unify_subst(ty_id, typed.TDef(ty_patterns, ty), subst)
+            subst = unify_subst(ty_id, ty_call, subst)
             return subst, ty
         case terms.EArray(args):
             ty = fresh_ty_var()
