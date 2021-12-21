@@ -6,7 +6,6 @@ import functools
 import typing
 import terms
 import typed
-from util import ap
 
 
 @dataclasses.dataclass
@@ -52,6 +51,7 @@ def compose_subst(s1: Substitution, s2: Substitution) -> Substitution:
     next_subst = dict(zip(s2.keys(), next_subst)) | s1
     return next_subst
 
+
 # T\x is remove x from T
 
 
@@ -63,9 +63,8 @@ def free_type_vars(type: typed.Type) -> set[int]:
         #     return set()
         case typed.TGeneric(_, params):
             return functools.reduce(
-                lambda acc, ty: acc | free_type_vars(ty),
-                params,
-                set())
+                lambda acc, ty: acc | free_type_vars(ty), params, set()
+            )
         case _:
             raise TypeError(f"Cannot free type vars from {type}")
 
@@ -92,13 +91,15 @@ def unify(a: typed.Type, b: typed.Type) -> Substitution:
     match (a, b):
         # case (typed.TNum(), typed.TNum()) | (typed.TStr(), typed.TStr()):
         #     return {}
-        case (typed.TGeneric(val0, params0), typed.TGeneric(val1, params1)) if val0 == val1 and len(params0) == len(params1):
+        case (
+            typed.TGeneric(val0, params0),
+            typed.TGeneric(val1, params1),
+        ) if val0 == val1 and len(params0) == len(params1):
 
             s1 = {}
 
             for param0, param1 in zip(params0, params1):
-                s2 = unify(apply_subst(s1, param0),
-                           apply_subst(s1, param1))
+                s2 = unify(apply_subst(s1, param0), apply_subst(s1, param1))
                 s1 = compose_subst(s2, s1)
 
             return s1
@@ -115,8 +116,7 @@ def var_bind(u: int, t: typed.Type) -> Substitution:
         case typed.TVar(_):
             return {u: t}
         case t if u in free_type_vars(t):
-            raise TypeError(f"circular use: {u} occurs in {t}"
-                            )
+            raise TypeError(f"circular use: {u} occurs in {t}")
         case t:
             return {u: t}
 
@@ -126,8 +126,7 @@ def apply_subst_scheme(subst: Substitution, scheme: Scheme) -> Scheme:
     for var in scheme.vars:
         subst.pop(var, None)
 
-    return Scheme(scheme.vars, apply_subst(
-        subst, scheme.ty))
+    return Scheme(scheme.vars, apply_subst(subst, scheme.ty))
 
 
 def apply_subst_ctx(subst: Substitution, ctx: Context) -> Context:
@@ -151,7 +150,9 @@ def unify_subst(a: typed.Type, b: typed.Type, subst: Substitution) -> Substituti
     return compose_subst(t, subst)
 
 
-def infer(subst: Substitution, ctx: Context, exp: terms.AstTree) -> tuple[Substitution, typed.Type]:
+def infer(
+    subst: Substitution, ctx: Context, exp: terms.AstTree
+) -> tuple[Substitution, typed.Type]:
     match exp:
         case terms.ELiteral(value=str()):
             return subst, typed.TStr()
@@ -178,12 +179,14 @@ def infer(subst: Substitution, ctx: Context, exp: terms.AstTree) -> tuple[Substi
                 subst, ty = infer(subst, ctx, exp)
 
             return subst, ty
-        case terms.EVariableDeclaration(terms.EIdentifier(id), init, hint) if hint != None:
+        case terms.EVariableDeclaration(
+            terms.EIdentifier(id), init, hint
+        ) if hint != None:
             subst, hint = infer(subst, ctx, hint)
             subst, t1 = infer(subst, ctx, init)
-            subst = unify_subst(t1, hint,  subst)
+            subst = unify_subst(t1, hint, subst)
 
-            ctx[id] = Scheme.from_subst(subst, ctx,  hint)
+            ctx[id] = Scheme.from_subst(subst, ctx, hint)
 
             return subst, hint
         case terms.EVariableDeclaration(terms.EIdentifier(id), init, hint=None):
@@ -215,8 +218,10 @@ def infer(subst: Substitution, ctx: Context, exp: terms.AstTree) -> tuple[Substi
                     subst, ty = infer(subst, ctx, field)
                     types.append(ty)
 
-                ty = typed.TDef(types, typed.TGeneric(
-                    id, [ctx[generic.name].ty for generic in generics]))
+                ty = typed.TDef(
+                    types,
+                    typed.TGeneric(id, [ctx[generic.name].ty for generic in generics]),
+                )
 
                 ctx[variant.id.name] = Scheme.from_subst(subst, ctx, ty)
 
@@ -227,13 +232,13 @@ def infer(subst: Substitution, ctx: Context, exp: terms.AstTree) -> tuple[Substi
                 del ctx[generic.name]
 
             return subst, ty
-        case terms.EBinaryExpr('+' | '*' | '/' | '//' | '-', left, right):
+        case terms.EBinaryExpr("+" | "*" | "/" | "//" | "-", left, right):
             subst, ty_left = infer(subst, ctx, left)
             subst = unify_subst(ty_left, typed.TNum(), subst)
             subst, ty_right = infer(subst, ctx, right)
             subst = unify_subst(ty_right, typed.TNum(), subst)
             return subst, typed.TNum()
-        case terms.EBinaryExpr('>' | '<' | '<=' | '>=', left, right):
+        case terms.EBinaryExpr(">" | "<" | "<=" | ">=", left, right):
             subst, ty_left = infer(subst, ctx, left)
             subst = unify_subst(ty_left, typed.TNum(), subst)
             subst, ty_right = infer(subst, ctx, right)
@@ -243,7 +248,9 @@ def infer(subst: Substitution, ctx: Context, exp: terms.AstTree) -> tuple[Substi
             subst, hint = infer(subst, ctx, hint)
             ctx[id] = Scheme.from_subst(subst, ctx, hint)
             return subst, hint
-        case terms.EParam(terms.EIdentifier(id), hint=None) | terms.EParamPattern(terms.EIdentifier(id)):
+        case terms.EParam(terms.EIdentifier(id), hint=None) | terms.EParamPattern(
+            terms.EIdentifier(id)
+        ):
             ty = fresh_ty_var()
             # ctx[id] = Scheme.from_subst(subst, ctx, ty)
             ctx[id] = Scheme([], ty)
@@ -257,10 +264,7 @@ def infer(subst: Substitution, ctx: Context, exp: terms.AstTree) -> tuple[Substi
                 subst, ty = infer(subst, ctx, arg)
                 params.append(ty)
 
-            subst = unify_subst(ty1, typed.TDef(
-                params,
-                ty_call
-            ), subst)
+            subst = unify_subst(ty1, typed.TDef(params, ty_call), subst)
 
             return subst, ty_call
         case terms.EDef(terms.EIdentifier(id), params, body, hint) if hint != None:
@@ -299,19 +303,16 @@ def infer(subst: Substitution, ctx: Context, exp: terms.AstTree) -> tuple[Substi
             return subst, ty1
         case terms.EIf(test, then, or_else=None, hint=None):
             subst, ty_condition = infer(subst, ctx, test)
-            subst = unify_subst(
-                ty_condition, typed.TBool(), subst)
+            subst = unify_subst(ty_condition, typed.TBool(), subst)
 
             subst, ty_then = infer(subst, ctx, then)
-            unify_subst(ty_then, typed.TOption(
-                fresh_ty_var()), subst)
+            unify_subst(ty_then, typed.TOption(fresh_ty_var()), subst)
 
             return subst, ty_then
 
         case terms.EIf(test, then, or_else, hint=None) if or_else != None:
             subst, ty_condition = infer(subst, ctx, test)
-            subst = unify_subst(
-                ty_condition, typed.TBool(), subst)
+            subst = unify_subst(ty_condition, typed.TBool(), subst)
 
             subst, ty_then = infer(subst, ctx, then)
 
@@ -321,22 +322,21 @@ def infer(subst: Substitution, ctx: Context, exp: terms.AstTree) -> tuple[Substi
             return subst, ty_then
         case terms.EIf(test, then, or_else=None, hint=hint) if hint != None:
             subst, hint = infer(subst, ctx, hint)
-            subst = unify_subst(hint, typed.TOption(
-                fresh_ty_var()), subst)
+            subst = unify_subst(hint, typed.TOption(fresh_ty_var()), subst)
 
             subst, ty_condition = infer(subst, ctx, test)
-            subst = unify_subst(
-                ty_condition, typed.TBool(), subst)
+            subst = unify_subst(ty_condition, typed.TBool(), subst)
 
             subst, ty_then = infer(subst, ctx, then)
             subst = unify_subst(ty_then, hint, subst)
 
             return subst, hint
-        case terms.EIf(test, then, or_else, hint=hint) if or_else != None and hint != None:
+        case terms.EIf(
+            test, then, or_else, hint=hint
+        ) if or_else != None and hint != None:
             subst, hint = infer(subst, ctx, hint)
             subst, ty_condition = infer(subst, ctx, test)
-            subst = unify_subst(
-                ty_condition, typed.TBool(), subst)
+            subst = unify_subst(ty_condition, typed.TBool(), subst)
 
             subst, ty_then = infer(subst, ctx, then)
             subst = unify_subst(ty_then, hint, subst)
@@ -407,9 +407,9 @@ def infer(subst: Substitution, ctx: Context, exp: terms.AstTree) -> tuple[Substi
             subst = unify_subst(ty1, typed.TArray(ty), subst)
 
             return subst, typed.TArray(ty)
-        case terms.ESpread(terms.EIdentifier(id),last):
+        case terms.ESpread(terms.EIdentifier(id), last):
             ty = fresh_ty_var()
-            
+
             for element in last:
                 subst, ty1 = infer(subst, ctx, element)
                 subst = unify_subst(ty1, ty, subst)
@@ -429,7 +429,7 @@ def type_infer(ctx: Context, exp: terms.AstTree):
 
 
 # def scheme_from_type(subst: Substitution, ctx: Context, ty: typed.Type):
-    # ftv = ftv = free_type_vars(apply_subst(
-    #     subst, ty)).difference(free_type_vars_ctx(apply_subst_ctx(subst, ctx)))
+# ftv = ftv = free_type_vars(apply_subst(
+#     subst, ty)).difference(free_type_vars_ctx(apply_subst_ctx(subst, ctx)))
 
-    # return Scheme(list(ftv), ty)
+# return Scheme(list(ftv), ty)

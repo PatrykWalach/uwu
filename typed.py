@@ -9,8 +9,9 @@ class TGeneric:
     params: list[Type]
 
     def __str__(self) -> str:
-        params = ''if len(self.params) < 1 else '<' + \
-            ','.join(map(str, self.params))+'>'
+        params = (
+            "" if len(self.params) < 1 else "<" + ",".join(map(str, self.params)) + ">"
+        )
         return f"{type(self).__name__}{params}"
 
 
@@ -20,38 +21,27 @@ class TVar:
 
 
 def TDef(params: list[Type], ret: Type) -> Type:
-    return TGeneric('Def', [TGeneric('Params', params), ret])
-
-
- 
+    return TGeneric("Def", [TGeneric("Params", params), ret])
 
 
 def TNum() -> Type:
-    return TGeneric('Num', [])
-
-
- 
+    return TGeneric("Num", [])
 
 
 def TStr() -> Type:
-    return TGeneric('Str', [])
-
-
- 
+    return TGeneric("Str", [])
 
 
 def TBool() -> Type:
-    return TGeneric('Bool', [])
-
-
- 
+    return TGeneric("Bool", [])
 
 
 def TOption(param: Type) -> Type:
-    return TGeneric('Option', [param])
+    return TGeneric("Option", [param])
+
 
 def TArray(param: Type) -> Type:
-    return TGeneric('Array', [param])
+    return TGeneric("Array", [param])
 
 
 Type: TypeAlias = TVar | TGeneric

@@ -49,7 +49,7 @@ class EProgram:
 
 @dataclasses.dataclass(frozen=True)
 class EBinaryExpr:
-    op: typing.Literal["++", "+", "-", "/", "*", "//", '>', '<', '<=', '>=']
+    op: typing.Literal["++", "+", "-", "/", "*", "//", ">", "<", "<=", ">="]
     left: Expr
     right: Expr
 
@@ -174,18 +174,34 @@ AstNode: typing.TypeAlias = (
     | EParam
     | ECaseOf
     | ECase
-    | ECall | EArray
+    | ECall
+    | EArray
     | EIf
     | EBlockStmt
     | EEnumDeclaration
     | EEnumPattern
     | EFieldsUnnamed
     | EHint
-    | EVariant | EParamPattern | EArrayPattern | ESpread
-
+    | EVariant
+    | EParamPattern
+    | EArrayPattern
+    | ESpread
 )
+
+
 AstTree: typing.TypeAlias = AstNode
 Pattern: typing.TypeAlias = EParamPattern | EArrayPattern | EEnumPattern
-Expr: typing.TypeAlias = EDo | ELiteral | EDef | EIf | ECall | ECaseOf | EVariableDeclaration | EIdentifier | EBinaryExpr | EArray
+Expr: typing.TypeAlias = (
+    EDo
+    | ELiteral
+    | EDef
+    | EIf
+    | ECall
+    | ECaseOf
+    | EVariableDeclaration
+    | EIdentifier
+    | EBinaryExpr
+    | EArray
+)
 
 # 'type_identifier',  "array", "tuple",

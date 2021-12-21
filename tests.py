@@ -38,17 +38,17 @@ def lexer():
 # @pytest.mark.parametrize(
 #     'program, expected_tokens', [
 
-    # ("x:Option<Num>=None", [
-    #  token('IDENTIFIER', value='x', lineno=1, index=0),
-    #  token(type=':', value=':', lineno=1, index=1),
-    #  token(type='IDENTIFIER', value='Option', lineno=1, index=2),
-    #     token(type='<', value='<', lineno=1, index=8),
-    #     token(type='IDENTIFIER', value='Num', lineno=1, index=9),
-    #     token(type='>', value='>', lineno=1, index=15),
-    #     token(type='=', value='=', lineno=1, index=16),
-    #     token(type='IDENTIFIER', value='None', lineno=1, index=17),
+# ("x:Option<Num>=None", [
+#  token('IDENTIFIER', value='x', lineno=1, index=0),
+#  token(type=':', value=':', lineno=1, index=1),
+#  token(type='IDENTIFIER', value='Option', lineno=1, index=2),
+#     token(type='<', value='<', lineno=1, index=8),
+#     token(type='IDENTIFIER', value='Num', lineno=1, index=9),
+#     token(type='>', value='>', lineno=1, index=15),
+#     token(type='=', value='=', lineno=1, index=16),
+#     token(type='IDENTIFIER', value='None', lineno=1, index=17),
 
-    #  ])
+#  ])
 
 #         ('case [Some(1), None()] of [Some(value), None()] do value end [None(), Some(value)] do 3 end [] do 4 end [...arr] do 5 end end', [
 #             Token(type='CASE', value='case'),
@@ -123,7 +123,6 @@ def lexer():
                     EBinaryExpr("*", ELiteral("2", 2), ELiteral("3", 3)),
                 )
             ],
-
         ),
         (
             "x=(2+3)*4",
@@ -137,7 +136,6 @@ def lexer():
                     ),
                 )
             ],
-
         ),
         # ("enum Option<value>{None\nSome(value)}\nx:Option<Num>=None"),
         (
@@ -156,10 +154,10 @@ def lexer():
                 EVariableDeclaration(
                     EIdentifier("y"),
                     ECall(EIdentifier("x"), [EIdentifier("n")]),
-                    hint=EHint(EIdentifier('Num'), []),
+                    hint=EHint(EIdentifier("Num"), []),
                 ),
                 EIdentifier("x"),
-            ]
+            ],
         ),
         # (
         #     "def flatMap(v, fn) do case v of None do None end Some(value) do fn(value) end end end",
@@ -196,7 +194,6 @@ def lexer():
                     ),
                 )
             ],
-
         ),
         (
             "do x = 1 end",
@@ -210,35 +207,47 @@ def lexer():
                     ],
                 )
             ],
-
         ),
-        ("id('abc')", [
-            ECall(EIdentifier("id"), [ELiteral("'abc'", "abc")])
-        ], ),
-        ("id(1)", [
-            ECall(EIdentifier("id"), [ELiteral("1", 1)])
-        ], ),
-        ("id('12')\nid(1)", [ECall(EIdentifier("id"), [ELiteral("'12'", "12")]),
-                             ECall(EIdentifier("id"), [ELiteral("1", 1)])
-                             ], ),
-        ("id(1+2)", [
-            ECall(EIdentifier("id"), [
-                EBinaryExpr("+", ELiteral("1", 1), ELiteral("2", 2))
-            ])
-        ], ),
-        ("x:Option<Num>=None()", [
-            EVariableDeclaration(EIdentifier(
-                'x'), ECall(EIdentifier('None'), []),
-                hint=EHint(EIdentifier('Option'), [
-                           EHint(EIdentifier('Num'), [])])
-            )]),
+        (
+            "id('abc')",
+            [ECall(EIdentifier("id"), [ELiteral("'abc'", "abc")])],
+        ),
+        (
+            "id(1)",
+            [ECall(EIdentifier("id"), [ELiteral("1", 1)])],
+        ),
+        (
+            "id('12')\nid(1)",
+            [
+                ECall(EIdentifier("id"), [ELiteral("'12'", "12")]),
+                ECall(EIdentifier("id"), [ELiteral("1", 1)]),
+            ],
+        ),
+        (
+            "id(1+2)",
+            [
+                ECall(
+                    EIdentifier("id"),
+                    [EBinaryExpr("+", ELiteral("1", 1), ELiteral("2", 2))],
+                )
+            ],
+        ),
+        (
+            "x:Option<Num>=None()",
+            [
+                EVariableDeclaration(
+                    EIdentifier("x"),
+                    ECall(EIdentifier("None"), []),
+                    hint=EHint(EIdentifier("Option"), [EHint(EIdentifier("Num"), [])]),
+                )
+            ],
+        ),
         (
             "def add(a, b) do a + b end",
             [
                 EDef(
                     identifier=EIdentifier(name="add"),
-                    params=[EParam(EIdentifier("a")),
-                            EParam(EIdentifier("b"))],
+                    params=[EParam(EIdentifier("a")), EParam(EIdentifier("b"))],
                     body=EDo(
                         body=[
                             EBinaryExpr(
@@ -253,37 +262,119 @@ def lexer():
                 ),
             ],
         ),
-        ('enum AOrB {A B}', [EEnumDeclaration(id=EIdentifier(name='AOrB'), generics=[], variants=[EVariant(id=EIdentifier(
-            name='A'), fields=EFieldsUnnamed(unnamed=[])), EVariant(id=EIdentifier(name='B'), fields=EFieldsUnnamed(unnamed=[]))])]),
-        ('case x of Some(value) do 2 end None() do 3 end end', [ECaseOf(EIdentifier(name='x'), [ECase(EEnumPattern(EIdentifier(name='Some'), [
-            EParamPattern(EIdentifier(name='value'))]), EDo([ELiteral(raw='2', value=2.0)])), ECase(EEnumPattern(EIdentifier(name='None'), []), EDo([ELiteral(raw='3', value=3.0)]))])]),
-        ('case [Some(1), None()] of [Some(value), None()] do value end end', [
-            ECaseOf(EArray([ECall(EIdentifier('Some'), [ELiteral('1', 1.0)]),
-                    ECall(EIdentifier('None'), [])]),
-                    cases=[ECase(pattern=EArrayPattern(first=[EEnumPattern(id=EIdentifier(name='Some'),
-                                                                           patterns=[EParamPattern(identifier=EIdentifier(name='value'))]),
-                                                              EEnumPattern(id=EIdentifier(name='None'),
-                                                                           patterns=[])],
-                                                       rest=None),
-                                 body=EDo(body=[EIdentifier(name='value')]))])]),
-
-        ('case [Some(1), None()] of [] do 4 end end', [
-            ECaseOf(EArray([ECall(EIdentifier('Some'), [ELiteral('1', 1)]),
-                    ECall(EIdentifier('None'), [])]), [
-                ECase(pattern=EArrayPattern(first=[],
-                                            rest=None),
-                      body=EDo(body=[ELiteral(raw='4', value=4.0)]))
-            ])
-        ]),
-        ('case [Some(1), None()] of [...arr] do 5 end end', [
-            ECaseOf(EArray([ECall(EIdentifier('Some'), [ELiteral('1', 1)]),
-                    ECall(EIdentifier('None'), [])]), [
-                ECase(pattern=EArrayPattern(first=[],
-                                            rest=ESpread(rest=EIdentifier(name='arr'),
-                                                         last=[])),
-                      body=EDo(body=[ELiteral(raw='5', value=5.0)]))
-            ])
-        ])
+        (
+            "enum AOrB {A B}",
+            [
+                EEnumDeclaration(
+                    id=EIdentifier(name="AOrB"),
+                    generics=[],
+                    variants=[
+                        EVariant(
+                            id=EIdentifier(name="A"), fields=EFieldsUnnamed(unnamed=[])
+                        ),
+                        EVariant(
+                            id=EIdentifier(name="B"), fields=EFieldsUnnamed(unnamed=[])
+                        ),
+                    ],
+                )
+            ],
+        ),
+        (
+            "case x of Some(value) do 2 end None() do 3 end end",
+            [
+                ECaseOf(
+                    EIdentifier(name="x"),
+                    [
+                        ECase(
+                            EEnumPattern(
+                                EIdentifier(name="Some"),
+                                [EParamPattern(EIdentifier(name="value"))],
+                            ),
+                            EDo([ELiteral(raw="2", value=2.0)]),
+                        ),
+                        ECase(
+                            EEnumPattern(EIdentifier(name="None"), []),
+                            EDo([ELiteral(raw="3", value=3.0)]),
+                        ),
+                    ],
+                )
+            ],
+        ),
+        (
+            "case [Some(1), None()] of [Some(value), None()] do value end end",
+            [
+                ECaseOf(
+                    EArray(
+                        [
+                            ECall(EIdentifier("Some"), [ELiteral("1", 1.0)]),
+                            ECall(EIdentifier("None"), []),
+                        ]
+                    ),
+                    cases=[
+                        ECase(
+                            pattern=EArrayPattern(
+                                first=[
+                                    EEnumPattern(
+                                        id=EIdentifier(name="Some"),
+                                        patterns=[
+                                            EParamPattern(
+                                                identifier=EIdentifier(name="value")
+                                            )
+                                        ],
+                                    ),
+                                    EEnumPattern(
+                                        id=EIdentifier(name="None"), patterns=[]
+                                    ),
+                                ],
+                                rest=None,
+                            ),
+                            body=EDo(body=[EIdentifier(name="value")]),
+                        )
+                    ],
+                )
+            ],
+        ),
+        (
+            "case [Some(1), None()] of [] do 4 end end",
+            [
+                ECaseOf(
+                    EArray(
+                        [
+                            ECall(EIdentifier("Some"), [ELiteral("1", 1)]),
+                            ECall(EIdentifier("None"), []),
+                        ]
+                    ),
+                    [
+                        ECase(
+                            pattern=EArrayPattern(first=[], rest=None),
+                            body=EDo(body=[ELiteral(raw="4", value=4.0)]),
+                        )
+                    ],
+                )
+            ],
+        ),
+        (
+            "case [Some(1), None()] of [...arr] do 5 end end",
+            [
+                ECaseOf(
+                    EArray(
+                        [
+                            ECall(EIdentifier("Some"), [ELiteral("1", 1)]),
+                            ECall(EIdentifier("None"), []),
+                        ]
+                    ),
+                    [
+                        ECase(
+                            pattern=EArrayPattern(
+                                first=[],
+                                rest=ESpread(rest=EIdentifier(name="arr"), last=[]),
+                            ),
+                            body=EDo(body=[ELiteral(raw="5", value=5.0)]),
+                        )
+                    ],
+                )
+            ],
+        ),
     ],
 )
 def test_parser(program, ast, parser, lexer):
@@ -291,7 +382,7 @@ def test_parser(program, ast, parser, lexer):
     assert program == EProgram(ast)
 
 
-@ pytest.mark.parametrize(
+@pytest.mark.parametrize(
     "program, expected_type",
     [
         ("1", typed.TNum()),
@@ -299,9 +390,8 @@ def test_parser(program, ast, parser, lexer):
         ("x = 1\na = x\na", typed.TNum()),
         ("x = 1\na = x", typed.TNum()),
         ("Some(1)", typed.TOption(typed.TNum())),
-        ('id(id(1))', typed.TNum()),
-        ("Some(Some(1))", typed.TOption(
-         typed.TOption(typed.TNum()))),
+        ("id(id(1))", typed.TNum()),
+        ("Some(Some(1))", typed.TOption(typed.TOption(typed.TNum()))),
         (
             "1+2*3",
             typed.TNum(),
@@ -311,23 +401,11 @@ def test_parser(program, ast, parser, lexer):
             typed.TNum(),
         ),
         # ("enum Option<value>{None\nSome(value)}\nx:Option<Num>=None"),
-        (
-            "def id2(a) do a end\nid2('12')",
-            typed.TStr()
-        ),
-        (
-            "def fun() do fun() + 1 end\nfun()",
-            typed.TNum()
-        ),
-        ('def fun() do: Num 1 end\n fun()', typed.TNum()),
-        (
-            "def id2(a) do a end\nid2(1)\nid2('12')",
-            typed.TStr()
-        ),
-        (
-            "def id2(a) do a end\nid2('12')\nid2(1)",
-            typed.TNum()
-        ),
+        ("def id2(a) do a end\nid2('12')", typed.TStr()),
+        ("def fun() do fun() + 1 end\nfun()", typed.TNum()),
+        ("def fun() do: Num 1 end\n fun()", typed.TNum()),
+        ("def id2(a) do a end\nid2(1)\nid2('12')", typed.TStr()),
+        ("def id2(a) do a end\nid2('12')\nid2(1)", typed.TNum()),
         #     "def flatMap(v, fn) do case v of None do None end Some(value) do fn(value) end end end",
         (
             "x=y=2+3",
@@ -338,37 +416,51 @@ def test_parser(program, ast, parser, lexer):
             typed.TNum(),
         ),
         ("id('12')", typed.TStr()),
-        ("id(1)",  typed.TNum()),
-        ("id('12')\nid(1)",  typed.TNum()),
+        ("id(1)", typed.TNum()),
+        ("id('12')\nid(1)", typed.TNum()),
         ("x:Option<Num>=None()", typed.TOption(typed.TNum())),
-        ("id(1+2)",  typed.TNum()),
+        ("id(1+2)", typed.TNum()),
         (
             "def add(a, b) do a + b end",
-            typed.TDef([typed.TNum(), typed.TNum()],    typed.TNum(),),
+            typed.TDef(
+                [typed.TNum(), typed.TNum()],
+                typed.TNum(),
+            ),
         ),
-        ("if 2 > 0 then: Option<Num> None() else None() end",
-         typed.TOption(typed.TNum())),
+        (
+            "if 2 > 0 then: Option<Num> None() else None() end",
+            typed.TOption(typed.TNum()),
+        ),
         ("if 2 > 0 then 1 else 2 end", typed.TNum()),
-        ("if 2 > 0 then Some(Some(1)) end",
-         typed.TOption(typed.TOption(typed.TNum()))),
-        ("if 2 > 0 then Some(1) elif 2 > 0 then Some(1) end",
-         typed.TOption(typed.TNum())),
-        ("if 2 > 0 then Some(1) end",
-         typed.TOption(typed.TNum())),
-        ("if 2 > 0 then Some(1) elif 2 > 0 then None() end",
-         typed.TOption(typed.TNum())),
-        ('enum AB {A B}\nx:AB=A()', typed.TGeneric('AB', [])),
-        ('enum ABC<x,y,z> {A(x)B(y)C(z)}\nx:ABC<Num,Num,Num>=A(1)',
-         typed.TGeneric('ABC', [typed.TNum(), typed.TNum(), typed.TNum()])),
-        ('x=Some(1)\ncase x of Some(value) do 2 end None() do 3 end end', typed.TNum()),
-        ('def flatMap(v, fn) do case v of None() do None() end Some(value) do fn(value) end end end\nflatMap(Some(1),Some)',
-         typed.TOption(typed.TNum())),
-        ('[Some(1), None()]',
-         typed.TArray(typed.TOption(typed.TNum()))),
-        ('case [Some(1), None()] of [Some(value), None()] do 2 end [None(), Some(value)] do 3 end [] do 4 end [...arr] do 5 end end',
-         typed.TNum()),
-        ('case [Some(1), None()] of [Some(value), None()] do [Some(value)] end [None(), Some(value)] do [Some(value)] end [] do [] end [...arr] do arr end end',
-         typed.TArray(typed.TOption(typed.TNum()))),
+        ("if 2 > 0 then Some(Some(1)) end", typed.TOption(typed.TOption(typed.TNum()))),
+        (
+            "if 2 > 0 then Some(1) elif 2 > 0 then Some(1) end",
+            typed.TOption(typed.TNum()),
+        ),
+        ("if 2 > 0 then Some(1) end", typed.TOption(typed.TNum())),
+        (
+            "if 2 > 0 then Some(1) elif 2 > 0 then None() end",
+            typed.TOption(typed.TNum()),
+        ),
+        ("enum AB {A B}\nx:AB=A()", typed.TGeneric("AB", [])),
+        (
+            "enum ABC<x,y,z> {A(x)B(y)C(z)}\nx:ABC<Num,Num,Num>=A(1)",
+            typed.TGeneric("ABC", [typed.TNum(), typed.TNum(), typed.TNum()]),
+        ),
+        ("x=Some(1)\ncase x of Some(value) do 2 end None() do 3 end end", typed.TNum()),
+        (
+            "def flatMap(v, fn) do case v of None() do None() end Some(value) do fn(value) end end end\nflatMap(Some(1),Some)",
+            typed.TOption(typed.TNum()),
+        ),
+        ("[Some(1), None()]", typed.TArray(typed.TOption(typed.TNum()))),
+        (
+            "case [Some(1), None()] of [Some(value), None()] do 2 end [None(), Some(value)] do 3 end [] do 4 end [...arr] do 5 end end",
+            typed.TNum(),
+        ),
+        (
+            "case [Some(1), None()] of [Some(value), None()] do [Some(value)] end [None(), Some(value)] do [Some(value)] end [] do [] end [...arr] do arr end end",
+            typed.TArray(typed.TOption(typed.TNum())),
+        ),
     ],
 )
 def test_infer(program, expected_type, parser, lexer):
@@ -377,7 +469,7 @@ def test_infer(program, expected_type, parser, lexer):
     assert type_infer(DEFAULT_CTX, program) == expected_type
 
 
-@ pytest.mark.parametrize(
+@pytest.mark.parametrize(
     "program, expected_output",
     [
         ("print(1)", "1"),
@@ -388,31 +480,68 @@ def test_infer(program, expected_type, parser, lexer):
         ("print(x=(2+3)*4)", "20"),
         ("print(if 2 > 0 then 1 else 2 end)", "1"),
         ("print(if 2 < 0 then 1 else 2 end)", "2"),
-        ("print(case Some(1) of Some() do 2 end None() do 3 end end)", '2'),
-        ("print(case Some(1) of Some(value) do 1 end None() do 3 end end)", '1'),
-        ("enum ABC<a,b,c> {A(a) B(b) C(c)}\nprint(case A(1) of A(a) do a end B(b) do b end C(c) do c end end)", "1"),
-        ("print(case Some(Some(1)) of Some(Some(value)) do value end None() do 2 end Some() do 3 end end)", "1"),
-        ("print(case None() of Some(Some(value)) do value end None() do 2 end Some() do 3 end end)", "2"),
-        ("print(case Some(None()) of Some(Some(value)) do value end None() do 2 end Some() do 3 end end)", "3"),
-        ("enum Pair<a,b> {Pair(a,b)}\nprint(case Pair(1,2) of Pair(x, y) do x end end)", "1"),
-        ("enum Pair<a,b> {Pair(a,b)}\nprint(case Pair(1,2) of Pair(x, y) do y end end)", "2"),
-        ("enum Pair<a,b> {Pair(a,b)}\nprint(case Pair(1,2) of Pair(a) do a end end)", "1"),
-        ("enum Pair<a,b> {Pair(a,b)}\nprint(case Pair(1,Pair(2,3)) of Pair(x, Pair(y, z)) do z end Pair(c, v) do c end end)", "3"),
-        ('print(case [Some(1), None()] of [Some(value), None()] do value end [None(), Some(value)] do 3 end [] do 4 end [...arr] do 5 end end)', "1"),
-        ('print(case [] of [Some(value), None()] do 2 end [None(), Some(value)] do 3 end [] do 4 end [...arr] do 5 end end)', "4"),
-        ('print(case [None(), Some(1)] of [Some(value), None()] do 2 end [None(), Some(value)] do 3 end [] do 4 end [...arr] do 5 end end)', "3"),
-        ('print(case [Some(1), Some(1), None()] of [Some(value), None()] do 2 end [None(), Some(value)] do 3 end [] do 4 end [...arr] do 5 end end)', "5"),
+        ("print(case Some(1) of Some() do 2 end None() do 3 end end)", "2"),
+        ("print(case Some(1) of Some(value) do 1 end None() do 3 end end)", "1"),
+        (
+            "enum ABC<a,b,c> {A(a) B(b) C(c)}\nprint(case A(1) of A(a) do a end B(b) do b end C(c) do c end end)",
+            "1",
+        ),
+        (
+            "print(case Some(Some(1)) of Some(Some(value)) do value end None() do 2 end Some() do 3 end end)",
+            "1",
+        ),
+        (
+            "print(case None() of Some(Some(value)) do value end None() do 2 end Some() do 3 end end)",
+            "2",
+        ),
+        (
+            "print(case Some(None()) of Some(Some(value)) do value end None() do 2 end Some() do 3 end end)",
+            "3",
+        ),
+        (
+            "enum Pair<a,b> {Pair(a,b)}\nprint(case Pair(1,2) of Pair(x, y) do x end end)",
+            "1",
+        ),
+        (
+            "enum Pair<a,b> {Pair(a,b)}\nprint(case Pair(1,2) of Pair(x, y) do y end end)",
+            "2",
+        ),
+        (
+            "enum Pair<a,b> {Pair(a,b)}\nprint(case Pair(1,2) of Pair(a) do a end end)",
+            "1",
+        ),
+        (
+            "enum Pair<a,b> {Pair(a,b)}\nprint(case Pair(1,Pair(2,3)) of Pair(x, Pair(y, z)) do z end Pair(c, v) do c end end)",
+            "3",
+        ),
+        (
+            "print(case [Some(1), None()] of [Some(value), None()] do value end [None(), Some(value)] do 3 end [] do 4 end [...arr] do 5 end end)",
+            "1",
+        ),
+        (
+            "print(case [] of [Some(value), None()] do 2 end [None(), Some(value)] do 3 end [] do 4 end [...arr] do 5 end end)",
+            "4",
+        ),
+        (
+            "print(case [None(), Some(1)] of [Some(value), None()] do 2 end [None(), Some(value)] do 3 end [] do 4 end [...arr] do 5 end end)",
+            "3",
+        ),
+        (
+            "print(case [Some(1), Some(1), None()] of [Some(value), None()] do 2 end [None(), Some(value)] do 3 end [] do 4 end [...arr] do 5 end end)",
+            "5",
+        ),
     ],
 )
 def test_compile_with_snapshot(program, expected_output, snapshot, parser, lexer):
     program = parser.parse(lexer.tokenize(program))
-    snapshot.assert_match(compile(EProgram(BUILTINS+program.body)), 'index.js')
+    snapshot.assert_match(compile(EProgram(BUILTINS + program.body)), "index.js")
     path: WindowsPath = snapshot.snapshot_dir
-    assert check_output(['node', path / 'index.js']
-                        ) == f"{expected_output}\n".encode('UTF-8')
+    assert check_output(["node", path / "index.js"]) == f"{expected_output}\n".encode(
+        "UTF-8"
+    )
 
 
-@ pytest.mark.parametrize(
+@pytest.mark.parametrize(
     "program",
     [
         "x: Str = 134",
@@ -423,7 +552,6 @@ def test_compile_with_snapshot(program, expected_output, snapshot, parser, lexer
         "if 2 > 0 then: Num 1 elif 2 > 0 then '12' else 1 end",
         "if 1+1 then 1 else 1 end",
         "if 2 > 0 then: Str 1 else 2 end",
-
     ],
 )
 def test_do_expection(program, parser, lexer):

@@ -47,7 +47,8 @@ class UwuLexer(Lexer):
         NEWLINE,
         THEN,
         NOT_LESS,
-        NOT_MORE, TYPE_IDENTIFIER
+        NOT_MORE,
+        TYPE_IDENTIFIER,
     }
     literals = {
         "=",
@@ -66,7 +67,7 @@ class UwuLexer(Lexer):
         "<",
         "*",
         "/",
-        "."
+        ".",
     }
     SPREAD = r"\.{3}"
     STRING = r"'[^(\\')]*?'"
@@ -118,9 +119,7 @@ class UwuParser(Parser):
 
     precedence = (
         ("left", "="),
-        ("left", "<", ">",
-         NOT_LESS, NOT_MORE
-         ),
+        ("left", "<", ">", NOT_LESS, NOT_MORE),
         ("left", CONCAT),
         ("left", "+", "-"),
         ("left", "*", "/", INT_DIV),
@@ -136,7 +135,7 @@ class UwuParser(Parser):
         "case_of",
         "variable_declaration",
         "identifier",
-        'type_identifier',
+        "type_identifier",
         "binary_expr",
         "array",
         "tuple",
@@ -201,7 +200,9 @@ class UwuParser(Parser):
             case None:
                 return terms.EEnumDeclaration(p.type_identifier, [], p.variant)
             case [*fields_unnamed]:
-                return terms.EEnumDeclaration(p.type_identifier, fields_unnamed, p.variant)
+                return terms.EEnumDeclaration(
+                    p.type_identifier, fields_unnamed, p.variant
+                )
             case _:
                 raise TypeError(f"{p.fields_unnamed=}")
 
@@ -211,7 +212,9 @@ class UwuParser(Parser):
             case None:
                 return terms.EVariant(p.type_identifier, terms.EFieldsUnnamed([]))
             case [*fields_unnamed]:
-                return terms.EVariant(p.type_identifier, terms.EFieldsUnnamed(fields_unnamed))
+                return terms.EVariant(
+                    p.type_identifier, terms.EFieldsUnnamed(fields_unnamed)
+                )
             case _:
                 raise TypeError(f"{p.fields_unnamed=}")
 
@@ -225,10 +228,7 @@ class UwuParser(Parser):
 
     @_("IF expr THEN [ ':' type ] block_statement [ or_else ] END")
     def if_expr(self, p):
-        return terms.EIf(p.expr,
-                         then=p.block_statement,
-                         or_else=p.or_else,
-                         hint=p.type)
+        return terms.EIf(p.expr, then=p.block_statement, or_else=p.or_else, hint=p.type)
 
     @_("ELSE block_statement")
     def or_else(self, p):
@@ -236,9 +236,7 @@ class UwuParser(Parser):
 
     @_("ELIF expr THEN block_statement [ or_else ]")
     def or_else(self, p):
-        return terms.EIf(p.expr,
-                         then=p.block_statement,
-                         or_else=p.or_else)
+        return terms.EIf(p.expr, then=p.block_statement, or_else=p.or_else)
 
     @_("CASE expr OF case { case } END")
     def case_of(self, p):
@@ -304,7 +302,7 @@ class UwuParser(Parser):
     def call(self, p):
         return terms.ECall(p.callee, concat(p.expr0, p.expr1))
 
-    @_("identifier", 'type_identifier')
+    @_("identifier", "type_identifier")
     def callee(self, p):
         return p[0]
 
@@ -318,7 +316,11 @@ class UwuParser(Parser):
 
     @_("identifier ':' type_identifier '<' type { ',' type } NOT_LESS expr")
     def variable_declaration(self, p):
-        return terms.EVariableDeclaration(id=p.identifier, init=p.expr, hint=terms.EHint(p.type_identifier, concat(p.type0, p.type1)))
+        return terms.EVariableDeclaration(
+            id=p.identifier,
+            init=p.expr,
+            hint=terms.EHint(p.type_identifier, concat(p.type0, p.type1)),
+        )
 
     @_("NUMBER")
     def literal(self, p):
@@ -358,37 +360,44 @@ ty_none = fresh_ty_var()
 ty_print = fresh_ty_var()
 
 
-BUILTINS = [terms.EEnumDeclaration(terms.EIdentifier('Some'), [
-                                   terms.EIdentifier('value')], [
-                                       terms.EVariant(terms.EIdentifier('Some'), terms.EFieldsUnnamed(
-                                           [terms.EIdentifier('value')])),
-    terms.EVariant(terms.EIdentifier('None'), terms.EFieldsUnnamed([]))
-]),
-    terms.EEnumDeclaration(terms.EIdentifier('Bool'), [
-    ], [
-        terms.EVariant(terms.EIdentifier('True'), terms.EFieldsUnnamed([]
-                                                                       )),
-        terms.EVariant(terms.EIdentifier('False'), terms.EFieldsUnnamed([]))
-    ]),
-    terms.EDef(terms.EIdentifier('id'), [terms.EParam(terms.EIdentifier('value'))], terms.EDo([
-        terms.EIdentifier('value')
-    ]))
+BUILTINS = [
+    terms.EEnumDeclaration(
+        terms.EIdentifier("Some"),
+        [terms.EIdentifier("value")],
+        [
+            terms.EVariant(
+                terms.EIdentifier("Some"),
+                terms.EFieldsUnnamed([terms.EIdentifier("value")]),
+            ),
+            terms.EVariant(terms.EIdentifier("None"), terms.EFieldsUnnamed([])),
+        ],
+    ),
+    terms.EEnumDeclaration(
+        terms.EIdentifier("Bool"),
+        [],
+        [
+            terms.EVariant(terms.EIdentifier("True"), terms.EFieldsUnnamed([])),
+            terms.EVariant(terms.EIdentifier("False"), terms.EFieldsUnnamed([])),
+        ],
+    ),
+    terms.EDef(
+        terms.EIdentifier("id"),
+        [terms.EParam(terms.EIdentifier("value"))],
+        terms.EDo([terms.EIdentifier("value")]),
+    ),
 ]
 
 DEFAULT_CTX: Context = {
-    'Str': Scheme([], typed.TStr()),
-    'Num': Scheme([], typed.TNum()),
-
-    'Bool': Scheme([], typed.TBool()),
-    'True': Scheme([], typed.TDef([], typed.TBool())),
-    'False': Scheme([], typed.TDef([], typed.TBool())),
-
-    'Option': Scheme([], typed.TOption(fresh_ty_var())),
-    'None': Scheme([ty_none.type], typed.TDef([], typed.TOption(ty_none))),
-    'Some': Scheme([ty_some.type],  typed.TDef([ty_some], typed.TOption(ty_some))),
-
-    'id': Scheme([ty_id.type], typed.TDef([ty_id], ty_id)),
-    'print': Scheme([ty_print.type], typed.TDef([ty_print], ty_print)),
+    "Str": Scheme([], typed.TStr()),
+    "Num": Scheme([], typed.TNum()),
+    "Bool": Scheme([], typed.TBool()),
+    "True": Scheme([], typed.TDef([], typed.TBool())),
+    "False": Scheme([], typed.TDef([], typed.TBool())),
+    "Option": Scheme([], typed.TOption(fresh_ty_var())),
+    "None": Scheme([ty_none.type], typed.TDef([], typed.TOption(ty_none))),
+    "Some": Scheme([ty_some.type], typed.TDef([ty_some], typed.TOption(ty_some))),
+    "id": Scheme([ty_id.type], typed.TDef([ty_id], ty_id)),
+    "print": Scheme([ty_print.type], typed.TDef([ty_print], ty_print)),
 }
 
 
@@ -399,14 +408,9 @@ if __name__ == "__main__":
     with open("test.uwu", "r") as f:
         data = f.read()
 
-    ast = parser.parse(
-        lexer.tokenize(
-            "def id(a) do a(1,2) end"
-        )
-    )
+    ast = parser.parse(lexer.tokenize("def id(a) do a(1,2) end"))
 
     if ast != None:
 
         with open("ast.json", "w") as f:
-            json.dump(type_infer(DEFAULT_CTX, ast),
-                      f, cls=AstEncoder, indent=4)
+            json.dump(type_infer(DEFAULT_CTX, ast), f, cls=AstEncoder, indent=4)
