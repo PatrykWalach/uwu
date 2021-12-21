@@ -24,9 +24,9 @@ def compile(exp: terms.AstTree) -> str:
             body = [compile(expr) for expr in body]
             return "(()=>{"+";".join(body)+"})()"
         case terms.EIf(test, then, or_else=None):
-            return f"(()=>{{if({compile(test)}._ == 'True'){{{compile(then)}}}else{{{{_:'None'}}}}}})()"
+            return f"(()=>{{if({compile(test)}.TAG == 'True'){{{compile(then)}}}else{{{{TAG:'None'}}}}}})()"
         case terms.EIf(test, then, or_else) if or_else != None:
-            return f"(()=>{{if({compile(test)}._ == 'True'){{{compile(then)}}}else{{{compile(or_else)}}}}})()"
+            return f"(()=>{{if({compile(test)}.TAG == 'True'){{{compile(then)}}}else{{{compile(or_else)}}}}})()"
         case terms.ECall(terms.EIdentifier('print'), [arg]):
             return f"console.log({compile(arg)})"
         case terms.ECall(terms.EIdentifier(id), args):
@@ -38,7 +38,7 @@ def compile(exp: terms.AstTree) -> str:
         case terms.EBinaryExpr('//', left, right):
             return f"Math.floor({compile( left)}/{compile( right)})"
         case terms.EBinaryExpr('>' | '<' | '<=' | '>=' as op, left, right):
-            return f"({compile( left)}{op}{compile( right)}?{{_:'True'}}:{{_:'False'}})"
+            return f"({compile( left)}{op}{compile( right)}?{{TAG:'True'}}:{{TAG:'False'}})"
         case terms.EBinaryExpr('+' | '-' | '/' | '*' as op, left, right):
             return f"({compile( left)}{op}{compile( right)})"
         case terms.EIdentifier(id):
@@ -50,7 +50,7 @@ def compile(exp: terms.AstTree) -> str:
                 fields = [f"_{i}: {field.name}" for i,
                           field in enumerate(var.fields.unnamed)]
 
-                str_variant = f"{var.id.name}=({','.join([field.name for field in var.fields.unnamed ])})=>{{return {{_:'{var.id.name}',{','.join(fields)}}}}}"
+                str_variant = f"{var.id.name}=({','.join([field.name for field in var.fields.unnamed ])})=>{{return {{TAG:'{var.id.name}',{','.join(fields)}}}}}"
 
                 str_variants.append(str_variant)
 
@@ -68,7 +68,7 @@ def compile(exp: terms.AstTree) -> str:
         case terms.EEnumPattern(terms.EIdentifier(id), fields):
             fields = [f"{compile(field)}(__._{i})" for i,
                       field in enumerate(fields)]
-            fields = [f"__._ === \"{id}\"", *fields]
+            fields = [f"__.TAG === \"{id}\"", *fields]
             fields = '&&'.join(fields)
 
             return f"((__)=>{{return {fields}}})"
