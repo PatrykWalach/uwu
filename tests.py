@@ -422,14 +422,7 @@ def test_parser(program, ast, parser, lexer):
         ("id(1+2)", typed.TNum()),
         (
             "def add(a, b) do a + b end",
-            typed.TDef(
-                [typed.TNum(), typed.TNum()],
-                typed.TNum(),
-            ),
-        ),
-        (
-            "if 2 > 0 then: Option<Num> None() else None() end",
-            typed.TOption(typed.TNum()),
+            typed.TDef(typed.TNum(), typed.TDef(typed.TNum(), typed.TNum())),
         ),
         ("if 2 > 0 then 1 else 2 end", typed.TNum()),
         ("if 2 > 0 then Some(Some(1)) end", typed.TOption(typed.TOption(typed.TNum()))),

@@ -392,13 +392,13 @@ DEFAULT_CTX: Context = {
     "Str": Scheme([], typed.TStr()),
     "Num": Scheme([], typed.TNum()),
     "Bool": Scheme([], typed.TBool()),
-    "True": Scheme([], typed.TDef([], typed.TBool())),
-    "False": Scheme([], typed.TDef([], typed.TBool())),
+    "True": Scheme([], typed.TThunk(typed.TBool())),
+    "False": Scheme([], typed.TThunk(typed.TBool())),
     "Option": Scheme([], typed.TOption(fresh_ty_var())),
-    "None": Scheme([ty_none.type], typed.TDef([], typed.TOption(ty_none))),
-    "Some": Scheme([ty_some.type], typed.TDef([ty_some], typed.TOption(ty_some))),
-    "id": Scheme([ty_id.type], typed.TDef([ty_id], ty_id)),
-    "print": Scheme([ty_print.type], typed.TDef([ty_print], ty_print)),
+    "None": Scheme([ty_none.type], typed.TThunk(typed.TOption(ty_none))),
+    "Some": Scheme([ty_some.type], typed.TDef(ty_some, typed.TOption(ty_some))),
+    "id": Scheme([ty_id.type], typed.TDef(ty_id, ty_id)),
+    "print": Scheme([ty_print.type], typed.TDef(ty_print, ty_print)),
 }
 
 
