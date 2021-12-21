@@ -1,0 +1,5 @@
+pre-commit==2.15.0
+pytest==6.2.5
+pytest-snapshot==0.8.0
+sly==0.4
+tox==3.24.4
