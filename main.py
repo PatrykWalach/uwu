@@ -1,6 +1,7 @@
 from __future__ import annotations
-from watchdog.events import FileSystemEventHandler
-from watchdog.observers import Observer
+
+# from watchdog.events import FileSystemEventHandler
+# from watchdog.observers import Observer
 import time
 import sys
 from typing import Callable, Protocol
@@ -337,18 +338,18 @@ class AstEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
-class Handler(FileSystemEventHandler):
-    def on_modified(self, event):
-        with open(event.src_path, "r") as f:
-            data = f.read()
+# class Handler(FileSystemEventHandler):
+#     def on_modified(self, event):
+#         with open(event.src_path, "r") as f:
+#             data = f.read()
 
-        ast = parser.parse(lexer.tokenize(data))
+#         ast = parser.parse(lexer.tokenize(data))
 
-        if ast == None:
-            return
+#         if ast == None:
+#             return
 
-        with open("ast.json", "w") as f:
-            json.dump(ast, f, cls=AstEncoder, indent=4)
+#         with open("ast.json", "w") as f:
+#             json.dump(ast, f, cls=AstEncoder, indent=4)
 
 
 ty_some = fresh_ty_var()
