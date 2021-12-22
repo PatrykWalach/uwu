@@ -162,7 +162,7 @@ def infer(
             return subst, instantiate(ctx[var])
         case terms.EDo(body, hint):
             subst, hint = infer(subst, ctx, hint)
-            ty = fresh_ty_var()
+            ty = typed.TUnit()
             ctx = ctx.copy()
 
             for exp in body:
@@ -171,7 +171,7 @@ def infer(
             subst = unify_subst(ty, hint, subst)
 
             return subst, hint
-        case terms.EProgram(body) | terms.EDo(body) | terms.EBlockStmt(body):
+        case terms.EProgram(body) | terms.EBlockStmt(body):
             ty = typed.TUnit()
             ctx = ctx.copy()
 
@@ -233,59 +233,49 @@ def infer(
             subst, hint = infer(subst, ctx, hint)
             ctx[id] = Scheme([], hint)
             return subst, hint
-
-
-        case terms.ECall(id, []):
-            ty = fresh_ty_var()
-            subst, ty1 = infer(subst, ctx, id)
-
-            subst = unify_subst(ty1, typed.TThunk(ty), subst)
-
-            return subst, ty
-
         case terms.ECall(id, args):
             ty = fresh_ty_var()
-            subst, ty1 = infer(subst, ctx, id)
+            subst, ty_id = infer(subst, ctx, id)
 
-            ty_call = ty
+            ty_args = list[typed.Type]()
 
             for arg in reversed(args):
                 subst, ty_arg = infer(subst, ctx, arg)
+                ty_args.append(ty_arg)
+
+            ty_call = ty
+            for ty_arg in ty_args or [typed.TUnit()]:
                 ty_call = typed.TDef(ty_arg, ty_call)
+            
+            subst = unify_subst(ty_id, ty_call, subst)
 
-
-            return subst, ty_call
+            return subst, ty
         case terms.EDef(terms.EIdentifier(id), params, body, hint):
             subst, hint = infer(subst, ctx, hint)
             t_ctx = ctx.copy()
 
-            ty=hint
-            for param in reversed(params):
-                subst, t1 = infer(subst, t_ctx, param)
-                ty=typed.TDef(t1,ty)
-
-            subst, ty_body = infer(subst, t_ctx, body)
-            t_ctx[id] = Scheme.from_subst(subst, t_ctx, ty)
-
-            subst = unify_subst(ty_body, hint,  subst)
             
+            ty_params = list[typed.Type]()
+            
+            for param in reversed(params):
+                subst, ty_param = infer(subst, t_ctx, param)
+                ty_params.append(ty_param)
+            
+
+            ty = hint
+
+            for ty_param in ty_params or [typed.TUnit()]:
+                ty = typed.TDef(ty_param, ty)
+            
+
+            t_ctx[id] = Scheme.from_subst(subst, t_ctx, ty)
+            subst, ty_body = infer(subst, t_ctx, body)
+
+            subst = unify_subst(ty_body, hint, subst)
+
             ctx[id] = Scheme.from_subst(subst, ctx, ty)
 
             return subst, ty
-        case terms.EDef(terms.EIdentifier(id), [], body, hint):
-            subst, hint = infer(subst, ctx, hint)
-            t_ctx = ctx.copy()
-
-            ty1 = typed.TThunk(hint)
-            t_ctx[id] = Scheme.from_subst(subst, t_ctx, ty1)
-
-            subst, ty_body = infer(subst, t_ctx, body)
-            subst = unify_subst(ty_body, hint, subst)
-
-
-            ctx[id] = Scheme.from_subst(subst, ctx, ty1)
-
-            return subst, ty1
         case terms.EIf(test, then, or_else, hint=hint):
 
             subst, hint = infer(subst, ctx, hint)
