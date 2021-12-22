@@ -104,7 +104,7 @@ class EEnumPattern:
 
 @dataclasses.dataclass(frozen=True)
 class ECall:
-    callee: EIdentifier
+    callee: Expr
     arguments: list[Expr]
 
 

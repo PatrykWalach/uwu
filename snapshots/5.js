@@ -1,0 +1,1 @@
+(()=>{Some=(value)=>({TAG:'Some',_0: value});None=()=>({TAG:'None',});True=()=>({TAG:'True',});False=()=>({TAG:'False',});id=(value)=>(()=>{return value})();console.log(x=((2.0+3.0)*4.0))})()
