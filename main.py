@@ -395,6 +395,7 @@ DEFAULT_CTX: Context = {
     "Some": Scheme([ty_some.type], typed.TDef(ty_some, typed.TOption(ty_some))),
     "id": Scheme([ty_id.type], typed.TDef(ty_id, ty_id)),
     "print": Scheme([ty_print.type], typed.TDef(ty_print, ty_print)),
+    "unit": Scheme([], typed.TUnit()),
 }
 
 
