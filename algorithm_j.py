@@ -172,7 +172,7 @@ def infer(
 
             return subst, hint
         case terms.EProgram(body) | terms.EDo(body) | terms.EBlockStmt(body):
-            ty = fresh_ty_var()
+            ty = typed.TUnit()
             ctx = ctx.copy()
 
             for exp in body:
@@ -207,29 +207,28 @@ def infer(
         #     return subst, ty
         case terms.EEnumDeclaration(terms.EIdentifier(id), generics, variants=variants):
 
+            t_ctx = ctx.copy()
+
             for generic in generics:
-                ctx[generic.name] = Scheme([], fresh_ty_var())
+                t_ctx[generic.name] = Scheme([], fresh_ty_var())
 
             for variant in variants:
 
                 types = typed.TGeneric(
-                    id, [ctx[generic.name].ty for generic in generics]
+                    id, [t_ctx[generic.name].ty for generic in generics]
                 )
 
                 for field in reversed(variant.fields.unnamed):
-                    subst, ty = infer(subst, ctx, field)
+                    subst, ty = infer(subst, t_ctx, field)
                     types = typed.TDef(ty, types)
 
                 if not variant.fields.unnamed:
                     types = typed.TThunk(types)
 
-                ctx[variant.id.name] = Scheme.from_subst(subst, ctx, types)
+                ctx[variant.id.name] = Scheme.from_subst(subst, t_ctx, types)
 
             ty = typed.TGeneric(id, [fresh_ty_var() for _ in generics])
             ctx[id] = Scheme([], ty)
-
-            for generic in generics:
-                del ctx[generic.name]
 
             return subst, ty
         case terms.EBinaryExpr("+" | "*" | "/" | "//" | "-", left, right):

@@ -458,6 +458,7 @@ def test_parser(program, ast, parser, lexer):
             "enum Point<x,y,z>{TwoD(x,y,z) ThreeD(x,y,z)}\nThreeD(1,'2',True())",
             typed.TGeneric("Point", [typed.TNum(), typed.TStr(), typed.TBool()]),
         ),
+        ("do end", typed.TUnit()),
     ],
 )
 def test_infer(program, expected_type, parser, lexer):
@@ -544,6 +545,15 @@ def test_infer(program, expected_type, parser, lexer):
                 (
                     "def partial(fn, arg) do def thunk() do fn(arg) end end\npartial(print,0)()",
                     "0",
+                ),
+                ("def zero() do 0 end\nprint(zero(unit))", "0"),
+                (
+                    "def partial(fn, arg) do def thunk() do fn(arg) end end\npartial(print,0,unit)",
+                    "0",
+                ),
+                (
+                    "print(do end)",
+                    "undefined",
                 ),
             ]
         )

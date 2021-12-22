@@ -25,11 +25,15 @@ def TDef(param: Type, ret: Type) -> Type:
 
 
 def TThunk(ret: Type) -> Type:
-    return TGeneric("Thunk", [ret])
+    return TDef(TUnit(), ret)
 
 
 def TNum() -> Type:
     return TGeneric("Num", [])
+
+
+def TUnit() -> Type:
+    return TGeneric("Unit", [])
 
 
 def TStr() -> Type:
