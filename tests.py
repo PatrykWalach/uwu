@@ -534,17 +534,6 @@ def test_infer(program, expected_type, parser, lexer):
                     "5",
                 ),
                 ("def add(a, b) do a + b end\naddTwo=add(2)\nprint(addTwo(3))", "5"),
-                (
-                    "def add(a) do def add(b) do a + b end end\naddTwo=add(2)\nprint(addTwo(3))",
-                    "5",
-                ),
-                ("def add(a, b) do a + b end\n\nprint(add(2,3))", "5"),
-                ("def add(a) do def add(b) do a + b end end\nprint(add(2,3))", "5"),
-                ("def zero() do 0 end\nprint(zero())", "0"),
-                (
-                    "def partial(fn, arg) do def thunk() do fn(arg) end end\npartial(print,0)()",
-                    "0",
-                ),
             ]
         )
     ),
