@@ -20,12 +20,20 @@ class TVar:
     type: int
 
 
-def TDef(params: list[Type], ret: Type) -> Type:
-    return TGeneric("Def", [TGeneric("Params", params), ret])
+def TDef(param: Type, ret: Type) -> Type:
+    return TGeneric("Def", [param, ret])
+
+
+def TThunk(ret: Type) -> Type:
+    return TDef(TUnit(), ret)
 
 
 def TNum() -> Type:
     return TGeneric("Num", [])
+
+
+def TUnit() -> Type:
+    return TGeneric("Unit", [])
 
 
 def TStr() -> Type:

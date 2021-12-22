@@ -1,6 +1,7 @@
 from __future__ import annotations
-from watchdog.events import FileSystemEventHandler
-from watchdog.observers import Observer
+
+# from watchdog.events import FileSystemEventHandler
+# from watchdog.observers import Observer
 import time
 import sys
 from typing import Callable, Protocol
@@ -123,6 +124,7 @@ class UwuParser(Parser):
         ("left", CONCAT),
         ("left", "+", "-"),
         ("left", "*", "/", INT_DIV),
+        ("left", "("),
         ("right", "UMINUS"),
     )
 
@@ -308,13 +310,9 @@ class UwuParser(Parser):
     def tuple(self, p):
         raise NotImplemented
 
-    @_("callee '(' [ expr ]  { ',' expr } ')'")
+    @_("expr '(' [ expr ]  { ',' expr } ')'")
     def call(self, p):
-        return terms.ECall(p.callee, concat(p.expr0, p.expr1))
-
-    @_("identifier", "type_identifier")
-    def callee(self, p):
-        return p[0]
+        return terms.ECall(p.expr0, concat(p.expr1, p.expr2))
 
     @_("IDENTIFIER")
     def identifier(self, p):
@@ -352,18 +350,18 @@ class AstEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
-class Handler(FileSystemEventHandler):
-    def on_modified(self, event):
-        with open(event.src_path, "r") as f:
-            data = f.read()
+# class Handler(FileSystemEventHandler):
+#     def on_modified(self, event):
+#         with open(event.src_path, "r") as f:
+#             data = f.read()
 
-        ast = parser.parse(lexer.tokenize(data))
+#         ast = parser.parse(lexer.tokenize(data))
 
-        if ast == None:
-            return
+#         if ast == None:
+#             return
 
-        with open("ast.json", "w") as f:
-            json.dump(ast, f, cls=AstEncoder, indent=4)
+#         with open("ast.json", "w") as f:
+#             json.dump(ast, f, cls=AstEncoder, indent=4)
 
 
 ty_some = fresh_ty_var()
@@ -403,13 +401,14 @@ DEFAULT_CTX: Context = {
     "Str": Scheme([], typed.TStr()),
     "Num": Scheme([], typed.TNum()),
     "Bool": Scheme([], typed.TBool()),
-    "True": Scheme([], typed.TDef([], typed.TBool())),
-    "False": Scheme([], typed.TDef([], typed.TBool())),
+    "True": Scheme([], typed.TThunk(typed.TBool())),
+    "False": Scheme([], typed.TThunk(typed.TBool())),
     "Option": Scheme([], typed.TOption(fresh_ty_var())),
-    "None": Scheme([ty_none.type], typed.TDef([], typed.TOption(ty_none))),
-    "Some": Scheme([ty_some.type], typed.TDef([ty_some], typed.TOption(ty_some))),
-    "id": Scheme([ty_id.type], typed.TDef([ty_id], ty_id)),
-    "print": Scheme([ty_print.type], typed.TDef([ty_print], ty_print)),
+    "None": Scheme([ty_none.type], typed.TThunk(typed.TOption(ty_none))),
+    "Some": Scheme([ty_some.type], typed.TDef(ty_some, typed.TOption(ty_some))),
+    "id": Scheme([ty_id.type], typed.TDef(ty_id, ty_id)),
+    "print": Scheme([ty_print.type], typed.TDef(ty_print, ty_print)),
+    "unit": Scheme([], typed.TUnit()),
 }
 
 
