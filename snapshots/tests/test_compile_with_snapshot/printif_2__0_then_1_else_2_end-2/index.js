@@ -1,0 +1,1 @@
+(()=>{Some=(value)=>{return {TAG:'Some',_0: value}};None=()=>{return {TAG:'None',}};True=()=>{return {TAG:'True',}};False=()=>{return {TAG:'False',}};id=(value)=>{return (()=>{return value})()};console.log((()=>{if((2.0<0.0?{TAG:'True'}:{TAG:'False'}).TAG == 'True'){return 1.0}else{return 2.0}})())})()

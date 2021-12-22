@@ -124,7 +124,6 @@ class UwuParser(Parser):
         ("left", CONCAT),
         ("left", "+", "-"),
         ("left", "*", "/", INT_DIV),
-        ("left", "("),
         ("right", "UMINUS"),
     )
 
@@ -300,9 +299,13 @@ class UwuParser(Parser):
     def tuple(self, p):
         raise NotImplemented
 
-    @_("expr '(' [ expr ]  { ',' expr } ')'")
+    @_("callee '(' [ expr ]  { ',' expr } ')'")
     def call(self, p):
-        return terms.ECall(p.expr0, concat(p.expr1, p.expr2))
+        return terms.ECall(p.callee, concat(p.expr0, p.expr1))
+
+    @_("identifier", "type_identifier")
+    def callee(self, p):
+        return p[0]
 
     @_("IDENTIFIER")
     def identifier(self, p):

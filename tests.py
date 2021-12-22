@@ -454,10 +454,6 @@ def test_parser(program, ast, parser, lexer):
             "case [Some(1), None()] of [Some(value), None()] do [Some(value)] end [None(), Some(value)] do [Some(value)] end [] do [] end [...arr] do arr end end",
             typed.TArray(typed.TOption(typed.TNum())),
         ),
-        (
-            "enum Point<x,y,z>{TwoD(x,y,z) ThreeD(x,y,z)}\nThreeD(1,'2',True())",
-            typed.TGeneric("Point", [typed.TNum(), typed.TStr(), typed.TBool()]),
-        ),
     ],
 )
 def test_infer(program, expected_type, parser, lexer):
@@ -467,85 +463,75 @@ def test_infer(program, expected_type, parser, lexer):
 
 
 @pytest.mark.parametrize(
-    "id, program, expected_output",
-    (
-        (str(id) + ".js", program, expected_output)
-        for id, (program, expected_output) in enumerate(
-            [
-                ("print(1)", "1"),
-                ("x = 1\nprint(x)", "1"),
-                ("x = 1\na = x\nprint(a)", "1"),
-                ("x = 1\nprint(a = x)", "1"),
-                ("print(1+2*3)", "7"),
-                ("print(x=(2+3)*4)", "20"),
-                ("print(if 2 > 0 then 1 else 2 end)", "1"),
-                ("print(if 2 < 0 then 1 else 2 end)", "2"),
-                ("print(case Some(1) of Some() do 2 end None() do 3 end end)", "2"),
-                (
-                    "print(case Some(1) of Some(value) do 1 end None() do 3 end end)",
-                    "1",
-                ),
-                (
-                    "enum ABC<a,b,c> {A(a) B(b) C(c)}\nprint(case A(1) of A(a) do a end B(b) do b end C(c) do c end end)",
-                    "1",
-                ),
-                (
-                    "print(case Some(Some(1)) of Some(Some(value)) do value end None() do 2 end Some() do 3 end end)",
-                    "1",
-                ),
-                (
-                    "print(case None() of Some(Some(value)) do value end None() do 2 end Some() do 3 end end)",
-                    "2",
-                ),
-                (
-                    "print(case Some(None()) of Some(Some(value)) do value end None() do 2 end Some() do 3 end end)",
-                    "3",
-                ),
-                (
-                    "enum Pair<a,b> {Pair(a,b)}\nprint(case Pair(1,2) of Pair(x, y) do x end end)",
-                    "1",
-                ),
-                (
-                    "enum Pair<a,b> {Pair(a,b)}\nprint(case Pair(1,2) of Pair(x, y) do y end end)",
-                    "2",
-                ),
-                (
-                    "enum Pair<a,b> {Pair(a,b)}\nprint(case Pair(1,2) of Pair(a) do a end end)",
-                    "1",
-                ),
-                (
-                    "enum Pair<a,b> {Pair(a,b)}\nprint(case Pair(1,Pair(2,3)) of Pair(x, Pair(y, z)) do z end Pair(c, v) do c end end)",
-                    "3",
-                ),
-                (
-                    "print(case [Some(1), None()] of [Some(value), None()] do value end [None(), Some(value)] do 3 end [] do 4 end [...arr] do 5 end end)",
-                    "1",
-                ),
-                (
-                    "print(case [] of [Some(value), None()] do 2 end [None(), Some(value)] do 3 end [] do 4 end [...arr] do 5 end end)",
-                    "4",
-                ),
-                (
-                    "print(case [None(), Some(1)] of [Some(value), None()] do 2 end [None(), Some(value)] do 3 end [] do 4 end [...arr] do 5 end end)",
-                    "3",
-                ),
-                (
-                    "print(case [Some(1), Some(1), None()] of [Some(value), None()] do 2 end [None(), Some(value)] do 3 end [] do 4 end [...arr] do 5 end end)",
-                    "5",
-                ),
-                ("def add(a, b) do a + b end\naddTwo=add(2)\nprint(addTwo(3))", "5"),
-            ]
-        )
-    ),
+    "program, expected_output",
+    [
+        ("print(1)", "1"),
+        ("x = 1\nprint(x)", "1"),
+        ("x = 1\na = x\nprint(a)", "1"),
+        ("x = 1\nprint(a = x)", "1"),
+        ("print(1+2*3)", "7"),
+        ("print(x=(2+3)*4)", "20"),
+        ("print(if 2 > 0 then 1 else 2 end)", "1"),
+        ("print(if 2 < 0 then 1 else 2 end)", "2"),
+        ("print(case Some(1) of Some() do 2 end None() do 3 end end)", "2"),
+        ("print(case Some(1) of Some(value) do 1 end None() do 3 end end)", "1"),
+        (
+            "enum ABC<a,b,c> {A(a) B(b) C(c)}\nprint(case A(1) of A(a) do a end B(b) do b end C(c) do c end end)",
+            "1",
+        ),
+        (
+            "print(case Some(Some(1)) of Some(Some(value)) do value end None() do 2 end Some() do 3 end end)",
+            "1",
+        ),
+        (
+            "print(case None() of Some(Some(value)) do value end None() do 2 end Some() do 3 end end)",
+            "2",
+        ),
+        (
+            "print(case Some(None()) of Some(Some(value)) do value end None() do 2 end Some() do 3 end end)",
+            "3",
+        ),
+        (
+            "enum Pair<a,b> {Pair(a,b)}\nprint(case Pair(1,2) of Pair(x, y) do x end end)",
+            "1",
+        ),
+        (
+            "enum Pair<a,b> {Pair(a,b)}\nprint(case Pair(1,2) of Pair(x, y) do y end end)",
+            "2",
+        ),
+        (
+            "enum Pair<a,b> {Pair(a,b)}\nprint(case Pair(1,2) of Pair(a) do a end end)",
+            "1",
+        ),
+        (
+            "enum Pair<a,b> {Pair(a,b)}\nprint(case Pair(1,Pair(2,3)) of Pair(x, Pair(y, z)) do z end Pair(c, v) do c end end)",
+            "3",
+        ),
+        (
+            "print(case [Some(1), None()] of [Some(value), None()] do value end [None(), Some(value)] do 3 end [] do 4 end [...arr] do 5 end end)",
+            "1",
+        ),
+        (
+            "print(case [] of [Some(value), None()] do 2 end [None(), Some(value)] do 3 end [] do 4 end [...arr] do 5 end end)",
+            "4",
+        ),
+        (
+            "print(case [None(), Some(1)] of [Some(value), None()] do 2 end [None(), Some(value)] do 3 end [] do 4 end [...arr] do 5 end end)",
+            "3",
+        ),
+        (
+            "print(case [Some(1), Some(1), None()] of [Some(value), None()] do 2 end [None(), Some(value)] do 3 end [] do 4 end [...arr] do 5 end end)",
+            "5",
+        ),
+    ],
 )
-def test_compile_with_snapshot(id, program, expected_output, snapshot, parser, lexer):
+def test_compile_with_snapshot(program, expected_output, snapshot, parser, lexer):
     program = parser.parse(lexer.tokenize(program))
-    snapshot.snapshot_dir = "snapshots"
-    snapshot.assert_match(compile(EProgram(BUILTINS + program.body)), id)
-    # path: WindowsPath = snapshot.snapshot_dir
-    assert check_output(
-        ["node", snapshot.snapshot_dir / id]
-    ) == f"{expected_output}\n".encode("UTF-8")
+    snapshot.assert_match(compile(EProgram(BUILTINS + program.body)), "index.js")
+    path: WindowsPath = snapshot.snapshot_dir
+    assert check_output(["node", path / "index.js"]) == f"{expected_output}\n".encode(
+        "UTF-8"
+    )
 
 
 @pytest.mark.parametrize(

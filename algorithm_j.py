@@ -216,7 +216,7 @@ def infer(
                     id, [ctx[generic.name].ty for generic in generics]
                 )
 
-                for field in reversed(variant.fields.unnamed):
+                for field in variant.fields.unnamed:
                     subst, ty = infer(subst, ctx, field)
                     types = typed.TDef(ty, types)
 

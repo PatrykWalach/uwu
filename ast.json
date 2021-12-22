@@ -4,21 +4,27 @@
     "params": [
         {
             "type": "TGeneric",
-            "id": "Def",
+            "id": "Params",
             "params": [
-                {
-                    "type": "TGeneric",
-                    "id": "Num",
-                    "params": []
-                },
                 {
                     "type": "TGeneric",
                     "id": "Def",
                     "params": [
                         {
                             "type": "TGeneric",
-                            "id": "Num",
-                            "params": []
+                            "id": "Params",
+                            "params": [
+                                {
+                                    "type": "TGeneric",
+                                    "id": "Num",
+                                    "params": []
+                                },
+                                {
+                                    "type": "TGeneric",
+                                    "id": "Num",
+                                    "params": []
+                                }
+                            ]
                         },
                         {
                             "type": 7

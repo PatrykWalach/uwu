@@ -1,6 +1,5 @@
 from algorithm_j import Context
 import terms
-import functools
 
 
 def compile(exp: terms.AstTree) -> str:
@@ -27,24 +26,12 @@ def compile(exp: terms.AstTree) -> str:
             return f"(()=>{{if({compile(test)}.TAG == 'True'){{{compile(then)}}}else{{{{TAG:'None'}}}}}})()"
         case terms.EIf(test, then, or_else) if or_else != None:
             return f"(()=>{{if({compile(test)}.TAG == 'True'){{{compile(then)}}}else{{{compile(or_else)}}}}})()"
-        case terms.EIdentifier("print"):
-            return f"console.log"
-        case terms.ECall(terms.EIdentifier(id), []):
-            return f"{id}()"
-        case terms.ECall((id), args):
-            return functools.reduce(
-                lambda acc, arg: f"{acc}({arg})", map(compile, args), compile(id)
-            )
-
+        case terms.ECall(terms.EIdentifier("print"), [arg]):
+            return f"console.log({compile(arg)})"
+        case terms.ECall(terms.EIdentifier(id), args):
+            return f"{id}({','.join(map(compile, args))})"
         case terms.EDef(terms.EIdentifier(id), args, body):
-
-            body = functools.reduce(
-                lambda acc, arg: f"({arg})=>{acc}",
-                map(compile, reversed(args)),
-                compile(body),
-            )
-
-            return f"{id}={body}"
+            return f"{id}=({','.join(map(compile, args))})=>{{return {compile(body)}}}"
         case terms.EBinaryExpr("++", left, right):
             return f"({compile( left)}+{compile( right)})"
         case terms.EBinaryExpr("//", left, right):
@@ -63,13 +50,7 @@ def compile(exp: terms.AstTree) -> str:
                     f"_{i}: {field.name}" for i, field in enumerate(var.fields.unnamed)
                 ]
 
-                body = functools.reduce(
-                    lambda acc, arg: f"({arg})=>{acc}",
-                    ([field.name for field in reversed(var.fields.unnamed)]) or [""],
-                    f"({{TAG:'{var.id.name}',{','.join(fields)}}})",
-                )
-
-                str_variant = f"{var.id.name}={  body  }"
+                str_variant = f"{var.id.name}=({','.join([field.name for field in var.fields.unnamed ])})=>{{return {{TAG:'{var.id.name}',{','.join(fields)}}}}}"
 
                 str_variants.append(str_variant)
 
