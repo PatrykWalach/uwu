@@ -29,18 +29,20 @@ def compile(exp: terms.AstTree) -> str:
             return f"(()=>{{if({compile(test)}.TAG == 'True'){{{compile(then)}}}else{{{compile(or_else)}}}}})()"
         case terms.EIdentifier("print"):
             return f"console.log"
-        case terms.ECall(terms.EIdentifier(id), []):
-            return f"{id}()"
+        # case terms.ECall(id, []):
+        #     return f"{compile(id)}()"
         case terms.ECall((id), args):
             return functools.reduce(
-                lambda acc, arg: f"{acc}({arg})", map(compile, args), compile(id)
+                lambda acc, arg: f"{acc}({arg})",
+                [*map(compile, args)] or [""],
+                compile(id),
             )
 
         case terms.EDef(terms.EIdentifier(id), args, body):
 
             body = functools.reduce(
                 lambda acc, arg: f"({arg})=>{acc}",
-                map(compile, reversed(args)),
+                [*map(compile, reversed(args))] or [""],
                 compile(body),
             )
 
