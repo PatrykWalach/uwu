@@ -127,3 +127,6 @@ def compile(exp: terms.AstTree) -> str:
             return f"((__)=>{{return {last}}})"
         case _:
             raise Exception(f"Unsupported expression: {exp}")
+
+
+ 

@@ -318,18 +318,18 @@ def infer(
             subst, ty_pattern = infer(subst, ctx, pattern)
             subst, ty_body = infer(subst, ctx, body)
             return subst, typed.TDef(ty_pattern, ty_body)
-        case terms.EEnumPattern(id, []):
-            ty = fresh_ty_var()
-            subst, ty_id = infer(subst, ctx, id)
-            subst = unify_subst(ty_id, typed.TThunk(ty), subst)
-            return subst, ty
         case terms.EEnumPattern(id, patterns):
             ty = fresh_ty_var()
             subst, ty_id = infer(subst, ctx, id)
 
-            ty_call = ty
+            ty_patterns = list[typed.Type]()
+
             for pattern in reversed(patterns):
                 subst, ty_pattern = infer(subst, ctx, pattern)
+                ty_patterns.append(ty_pattern)
+
+            ty_call = ty
+            for ty_pattern in ty_patterns or [typed.TUnit()]:
                 ty_call = typed.TDef(ty_pattern, ty_call)
 
             subst = unify_subst(ty_id, ty_call, subst)
