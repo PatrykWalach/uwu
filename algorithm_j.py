@@ -150,6 +150,14 @@ def unify_subst(a: typed.Type, b: typed.Type, subst: Substitution) -> Substituti
     return compose_subst(t, subst)
 
 
+def reduce_ty_call(ty_items, ty_call):
+    return functools.reduce(
+        lambda ty_call, ty_item: typed.TDef(ty_item, ty_call),
+        ty_items or [typed.TUnit()],
+        ty_call,
+    )
+
+
 def infer(
     subst: Substitution, ctx: Context, exp: terms.AstTree
 ) -> tuple[Substitution, typed.Type]:
@@ -196,18 +204,19 @@ def infer(
 
             for variant in variants:
 
-                types = typed.TGeneric(
+                ty = typed.TGeneric(
                     id, [t_ctx[generic.name].ty for generic in generics]
                 )
 
+                ty_fields = list[typed.Type]()
+
                 for field in reversed(variant.fields.unnamed):
-                    subst, ty = infer(subst, t_ctx, field)
-                    types = typed.TDef(ty, types)
+                    subst, ty_field = infer(subst, t_ctx, field)
+                    ty_fields.append(ty_field)
 
-                if not variant.fields.unnamed:
-                    types = typed.TThunk(types)
+                ty = reduce_ty_call(ty_fields, ty)
 
-                ctx[variant.id.name] = Scheme.from_subst(subst, t_ctx, types)
+                ctx[variant.id.name] = Scheme.from_subst(subst, t_ctx, ty)
 
             ty = typed.TGeneric(id, [fresh_ty_var() for _ in generics])
             ctx[id] = Scheme([], ty)
@@ -243,10 +252,8 @@ def infer(
                 subst, ty_arg = infer(subst, ctx, arg)
                 ty_args.append(ty_arg)
 
-            ty_call = ty
-            for ty_arg in ty_args or [typed.TUnit()]:
-                ty_call = typed.TDef(ty_arg, ty_call)
-            
+            ty_call = reduce_ty_call(ty_args, ty)
+
             subst = unify_subst(ty_id, ty_call, subst)
 
             return subst, ty
@@ -254,19 +261,13 @@ def infer(
             subst, hint = infer(subst, ctx, hint)
             t_ctx = ctx.copy()
 
-            
             ty_params = list[typed.Type]()
-            
+
             for param in reversed(params):
                 subst, ty_param = infer(subst, t_ctx, param)
                 ty_params.append(ty_param)
-            
 
-            ty = hint
-
-            for ty_param in ty_params or [typed.TUnit()]:
-                ty = typed.TDef(ty_param, ty)
-            
+            ty = reduce_ty_call(ty_params, hint)
 
             t_ctx[id] = Scheme.from_subst(subst, t_ctx, ty)
             subst, ty_body = infer(subst, t_ctx, body)
@@ -328,9 +329,10 @@ def infer(
                 subst, ty_pattern = infer(subst, ctx, pattern)
                 ty_patterns.append(ty_pattern)
 
-            ty_call = ty
-            for ty_pattern in ty_patterns or [typed.TUnit()]:
-                ty_call = typed.TDef(ty_pattern, ty_call)
+            ty_call = reduce_ty_call(
+                ty_patterns,
+                ty,
+            )
 
             subst = unify_subst(ty_id, ty_call, subst)
             return subst, ty
