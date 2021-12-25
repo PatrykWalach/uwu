@@ -85,7 +85,7 @@ class EParam:
 
 
 @dataclasses.dataclass(frozen=True)
-class EParamPattern:
+class EMatchAs:
     identifier: EIdentifier
 
 
@@ -115,6 +115,11 @@ class ECall:
 
 @dataclasses.dataclass(frozen=True)
 class EArray:
+    arguments: list[Expr]
+
+
+@dataclasses.dataclass(frozen=True)
+class ETuple:
     arguments: list[Expr]
 
 
@@ -168,16 +173,16 @@ class EVariant:
 
 
 @dataclasses.dataclass(frozen=True)
-class EArrayPattern:
-    first: list[Pattern]
-    rest: ESpread | None
+class EMatchArray:
+    patterns: list[Pattern]
+    rest: EIdentifier | None = None
 
 
 @dataclasses.dataclass(frozen=True)
-class ESpread:
-    rest: EIdentifier
-    last: list[Pattern]
-    #
+class EMatchTuple:
+    patterns: list[Pattern]
+    rest: EIdentifier | None = None
+
 
 
 @dataclasses.dataclass(frozen=True)
@@ -185,36 +190,9 @@ class EFieldsUnnamed:
     unnamed: list[EIdentifier]
 
 
-AstNode: typing.TypeAlias = (
-    EProgram
-    | EDo
-    | EVariableDeclaration
-    | EIdentifier
-    | EBinaryExpr
-    | ELiteral
-    | EDef
-    | EParam
-    | ECaseOf
-    | ECase
-    | ECall
-    | EArray
-    | EIf
-    | EBlockStmt
-    | EEnumDeclaration
-    | EEnumPattern
-    | EFieldsUnnamed
-    | EHint
-    | EVariant
-    | EParamPattern
-    | EArrayPattern
-    | ESpread
-    | EHintNone
-    | EIfNone
+Pattern: typing.TypeAlias = (
+    EMatchAs | EMatchArray | EEnumPattern | EMatchTuple
 )
-
-
-AstTree: typing.TypeAlias = AstNode
-Pattern: typing.TypeAlias = EParamPattern | EArrayPattern | EEnumPattern
 Expr: typing.TypeAlias = (
     EDo
     | ELiteral
@@ -226,6 +204,23 @@ Expr: typing.TypeAlias = (
     | EIdentifier
     | EBinaryExpr
     | EArray
+    | ETuple
 )
 
 # 'type_identifier',  "array", "tuple",
+
+AstTree: typing.TypeAlias = (
+    EProgram
+    | EParam
+    | ECaseOf
+    | ECase
+    | EBlockStmt
+    | EEnumDeclaration
+    | EFieldsUnnamed
+    | EHint
+    | EVariant
+    | EHintNone
+    | EIfNone
+    | Expr
+    | Pattern
+)

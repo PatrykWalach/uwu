@@ -286,7 +286,7 @@ def lexer():
                         ECase(
                             EEnumPattern(
                                 EIdentifier(name="Some"),
-                                [EParamPattern(EIdentifier(name="value"))],
+                                [EMatchAs(EIdentifier(name="value"))],
                             ),
                             EDo([ELiteral(raw="2", value=2.0)]),
                         ),
@@ -310,12 +310,12 @@ def lexer():
                     ),
                     cases=[
                         ECase(
-                            pattern=EArrayPattern(
-                                first=[
+                            pattern=EMatchArray(
+                                patterns=[
                                     EEnumPattern(
                                         id=EIdentifier(name="Some"),
                                         patterns=[
-                                            EParamPattern(
+                                            EMatchAs(
                                                 identifier=EIdentifier(name="value")
                                             )
                                         ],
@@ -324,7 +324,6 @@ def lexer():
                                         id=EIdentifier(name="None"), patterns=[]
                                     ),
                                 ],
-                                rest=None,
                             ),
                             body=EDo(body=[EIdentifier(name="value")]),
                         )
@@ -344,7 +343,7 @@ def lexer():
                     ),
                     [
                         ECase(
-                            pattern=EArrayPattern(first=[], rest=None),
+                            pattern=EMatchArray(patterns=[]),
                             body=EDo(body=[ELiteral(raw="4", value=4.0)]),
                         )
                     ],
@@ -352,21 +351,18 @@ def lexer():
             ],
         ),
         (
-            "case [Some(1), None()] of [...arr] do 5 end end",
+            "case [Some(1), None()] of arr do 5 end end",
             [
                 ECaseOf(
                     EArray(
                         [
-                            ECall(EIdentifier("Some"), [ELiteral("1", 1)]),
+                            ECall(EIdentifier("Some"), [ELiteral("1", 1.0)]),
                             ECall(EIdentifier("None"), []),
                         ]
                     ),
                     [
                         ECase(
-                            pattern=EArrayPattern(
-                                first=[],
-                                rest=ESpread(rest=EIdentifier(name="arr"), last=[]),
-                            ),
+                            pattern=EMatchAs(identifier=EIdentifier(name="arr")),
                             body=EDo(body=[ELiteral(raw="5", value=5.0)]),
                         )
                     ],
@@ -445,11 +441,11 @@ def test_parser(program, ast, parser, lexer):
         ),
         ("[Some(1), None()]", typed.TArray(typed.TOption(typed.TNum()))),
         (
-            "case [Some(1), None()] of [Some(value), None()] do 2 end [None(), Some(value)] do 3 end [] do 4 end [...arr] do 5 end end",
+            "case [Some(1), None()] of [Some(value), None()] do 2 end [None(), Some(value)] do 3 end [] do 4 end arr do 5 end end",
             typed.TNum(),
         ),
         (
-            "case [Some(1), None()] of [Some(value), None()] do [Some(value)] end [None(), Some(value)] do [Some(value)] end [] do [] end [...arr] do arr end end",
+            "case [Some(1), None()] of [Some(value), None()] do [Some(value)] end [None(), Some(value)] do [Some(value)] end [] do [] end arr do arr end end",
             typed.TArray(typed.TOption(typed.TNum())),
         ),
         (
@@ -517,19 +513,19 @@ def test_infer(program, expected_type, parser, lexer):
                     "3",
                 ),
                 (
-                    "print(case [Some(1), None()] of [Some(value), None()] do value end [None(), Some(value)] do 3 end [] do 4 end [...arr] do 5 end end)",
+                    "print(case [Some(1), None()] of [Some(value), None()] do value end [None(), Some(value)] do 3 end [] do 4 end arr do 5 end end)",
                     "1",
                 ),
                 (
-                    "print(case [] of [Some(value), None()] do 2 end [None(), Some(value)] do 3 end [] do 4 end [...arr] do 5 end end)",
+                    "print(case [] of [Some(value), None()] do 2 end [None(), Some(value)] do 3 end [] do 4 end arr do 5 end end)",
                     "4",
                 ),
                 (
-                    "print(case [None(), Some(1)] of [Some(value), None()] do 2 end [None(), Some(value)] do 3 end [] do 4 end [...arr] do 5 end end)",
+                    "print(case [None(), Some(1)] of [Some(value), None()] do 2 end [None(), Some(value)] do 3 end [] do 4 end arr do 5 end end)",
                     "3",
                 ),
                 (
-                    "print(case [Some(1), Some(1), None()] of [Some(value), None()] do 2 end [None(), Some(value)] do 3 end [] do 4 end [...arr] do 5 end end)",
+                    "print(case [Some(1), Some(1), None()] of [Some(value), None()] do 2 end [None(), Some(value)] do 3 end [] do 4 end arr do 5 end end)",
                     "5",
                 ),
                 ("def add(a, b) do a + b end\naddTwo=add(2)\nprint(addTwo(3))", "5"),
@@ -549,10 +545,9 @@ def test_infer(program, expected_type, parser, lexer):
                     "def partial(fn, arg) do def thunk() do fn(arg) end end\npartial(print,0,unit)",
                     "0",
                 ),
-                (
-                    "print(do end)",
-                    "undefined",
-                ),
+                ("print(do end)", "undefined"),
+                ("print(case {1,2} of {x,_} do x end end)", "1"),
+                ("print(case {1,2} of {_,y} do y end end)", "2"),
             ]
         )
     ),

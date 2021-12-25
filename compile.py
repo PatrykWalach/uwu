@@ -1,3 +1,5 @@
+import enum
+from attr.validators import instance_of
 from algorithm_j import Context
 import terms
 import functools
@@ -86,7 +88,7 @@ def compile(exp: terms.AstTree) -> str:
             return f"((__)=>{{{';'.join(cases)}}})({compile(of)})"
         case terms.ECase(pattern, body):
             return f"if({compile(pattern)}(__)){{return {compile(body)}}}"
-        case terms.EParamPattern(terms.EIdentifier(id)):
+        case terms.EMatchAs(terms.EIdentifier(id)):
             return f"((__)=>{{{id}=__; return true}})"
         case terms.EEnumPattern(terms.EIdentifier(id), fields):
             fields = [f"{compile(field)}(__._{i})" for i, field in enumerate(fields)]
@@ -94,39 +96,18 @@ def compile(exp: terms.AstTree) -> str:
             fields = "&&".join(fields)
 
             return f"((__)=>{{return {fields}}})"
-        case terms.EArray(args):
+        case terms.EArray(args) | terms.ETuple(args):
             return f"[{','.join(map(compile, args))}]"
-        case terms.EArrayPattern(first, rest=None):
-            first = [f"{compile(element)}(__[{i}])" for i, element in enumerate(first)]
-            first = [f"__.length=={len(first)}", *first]
-            first = "&&".join(first)
+        case terms.EMatchTuple(patterns)|terms.EMatchArray(patterns):
 
-            return f"((__)=>{{return {first}}})"
-        case terms.EArrayPattern(first, rest) if rest != None:
-            first = [f"{compile(element)}(__[{i}])" for i, element in enumerate(first)]
-            first = [
-                f"__.length>={len(first)}",
-                f"{compile(rest)}(__.slice({len(first)}))",
-                *first,
+            patterns = [f"{compile(pattern)}(__[{i}])" for i, pattern in enumerate(patterns)]
+            patterns = [
+                f"__.length=={len(patterns)}",
+                *patterns,
             ]
-            first = "&&".join(first)
 
-            return f"((__)=>{{return {first}}})"
-        case terms.ESpread(terms.EIdentifier(id), last):
-            last = [
-                f"{compile(element)}(__[__.length-{i+1}])"
-                for i, element in enumerate(reversed(last))
-            ]
-            last = [
-                f"__.length>={len(last)}",
-                f"({id}=__.slice(0, __.length-{len(last)}))",
-                *last,
-            ]
-            last = "&&".join(last)
+            patterns = "&&".join(patterns)
 
-            return f"((__)=>{{return {last}}})"
+            return f"((__)=>{{return {patterns}}})"
         case _:
             raise Exception(f"Unsupported expression: {exp}")
-
-
- 

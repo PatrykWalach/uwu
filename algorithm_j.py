@@ -234,7 +234,7 @@ def infer(
             subst, ty_right = infer(subst, ctx, right)
             subst = unify_subst(ty_right, typed.TNum(), subst)
             return subst, typed.TBool()
-        case terms.EParamPattern(terms.EIdentifier(id)):
+        case terms.EMatchAs(terms.EIdentifier(id)):
             ty = fresh_ty_var()
             ctx[id] = Scheme([], ty)
             return subst, ty
@@ -343,35 +343,23 @@ def infer(
                 subst = unify_subst(ty1, ty, subst)
 
             return subst, typed.TArray(ty)
-        case terms.EArrayPattern(first, rest=None):
+        case terms.EMatchArray(patterns):
             ty = fresh_ty_var()
 
-            for element in first:
-                subst, ty1 = infer(subst, ctx, element)
+            for pattern in patterns:
+                subst, ty1 = infer(subst, ctx, pattern)
                 subst = unify_subst(ty1, ty, subst)
 
             return subst, typed.TArray(ty)
-        case terms.EArrayPattern(first, rest) if rest != None:
-            ty = fresh_ty_var()
+        
+        case terms.EMatchTuple(patterns):
+            ty_patterns =  list[typed.Type]()
 
-            for element in first:
-                subst, ty1 = infer(subst, ctx, element)
-                subst = unify_subst(ty1, ty, subst)
+            for pattern in patterns:
+                subst, ty1 = infer(subst, ctx, pattern)
+                ty_patterns.append(ty1)
 
-            subst, ty1 = infer(subst, ctx, rest)
-            subst = unify_subst(ty1, typed.TArray(ty), subst)
-
-            return subst, typed.TArray(ty)
-        case terms.ESpread(terms.EIdentifier(id), last):
-            ty = fresh_ty_var()
-
-            for element in last:
-                subst, ty1 = infer(subst, ctx, element)
-                subst = unify_subst(ty1, ty, subst)
-
-            ctx[id] = Scheme.from_subst(subst, ctx, typed.TArray(ty))
-
-            return subst, typed.TArray(ty)
+            return subst, typed.TTuple(ty_patterns)
         case _:
             raise TypeError(f"Cannot infer type of {exp=}")
 

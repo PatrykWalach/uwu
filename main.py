@@ -39,7 +39,6 @@ class UwuLexer(Lexer):
         ELSE,
         CASE,
         OF,
-        SPREAD,
         CONCAT,
         ELIF,
         INT_DIV,
@@ -70,7 +69,6 @@ class UwuLexer(Lexer):
         "/",
         ".",
     }
-    SPREAD = r"\.{3}"
     STRING = r"'[^(\\')]*?'"
     NUMBER = r"\d+"
     CONCAT = r"\+{2}"
@@ -78,7 +76,7 @@ class UwuLexer(Lexer):
     NOT_MORE = r"<="
     INT_DIV = r"/{2}"
     TYPE_IDENTIFIER = r"[A-Z]\w*"
-    IDENTIFIER = r"[a-z]\w*"
+    IDENTIFIER = r"[a-z_]\w*"
     IDENTIFIER["def"] = DEF
     IDENTIFIER["do"] = DO
     IDENTIFIER["end"] = END
@@ -258,49 +256,32 @@ class UwuParser(Parser):
     def case(self, p):
         return terms.ECase(p.pattern, p.do)
 
-    @_(
-        "param_pattern",
-        "enum_pattern",
-        # "tuple_pattern",
-        "array_pattern",
-    )
+    @_("param_pattern", "enum_pattern", "tuple_pattern", "array_pattern")
     def pattern(self, p):
         return p[0]
 
     @_("identifier")
     def param_pattern(self, p):
-        return terms.EParamPattern(p.identifier)
+        return terms.EMatchAs(p.identifier)
 
-    @_("'[' [ patterns ] [ spread ] ']'")
+    @_("'[' [ pattern ] { ',' pattern } ']'")
     def array_pattern(self, p):
-        patterns = p.patterns
-        if patterns == None:
-            patterns = []
-        return terms.EArrayPattern(patterns, p.spread)
+        return terms.EMatchArray(concat(p.pattern0,p.pattern1))
 
-    @_("SPREAD identifier { ',' pattern }")
-    def spread(self, p):
-        return terms.ESpread(p.identifier, p.pattern)
+    @_("'{' [ pattern ] { ',' pattern } '}'")
+    def tuple_pattern(self, p):
+        return terms.EMatchTuple(concat(p.pattern0,p.pattern1))
 
-    @_("pattern { ',' pattern }")
-    def patterns(self, p):
-        return concat(p.pattern0, p.pattern1)
-
-    @_("type_identifier '(' [ patterns ] ')'")
+    @_("type_identifier '(' [ pattern ] { ',' pattern } ')'")
     def enum_pattern(self, p):
-        patterns = p.patterns
-        if patterns == None:
-            patterns = []
 
-        return terms.EEnumPattern(p.type_identifier, patterns)
+        return terms.EEnumPattern(
+            p.type_identifier, concat(p.pattern0,p.pattern1)
+        )
 
     @_("TYPE_IDENTIFIER")
     def type_identifier(self, p):
         return terms.EIdentifier(p.TYPE_IDENTIFIER)
-
-    # @_("'{' { pattern ',' } [ SPREAD identifier { ',' pattern } ] '}'")
-    # def tuple_pattern(self, p):
-    #     raise NotImplemented
 
     @_("'[' [ expr ] { ',' expr } ']'")
     def array(self, p):
@@ -308,7 +289,7 @@ class UwuParser(Parser):
 
     @_("'{' [ expr ] { ',' expr } '}'")
     def tuple(self, p):
-        raise NotImplemented
+        return terms.ETuple(concat(p.expr0, p.expr1))
 
     @_("expr '(' [ expr ]  { ',' expr } ')'")
     def call(self, p):
@@ -411,8 +392,10 @@ DEFAULT_CTX: Context = {
     "unit": Scheme([], typed.TUnit()),
 }
 
+import ast
 
 if __name__ == "__main__":
+
     lexer = UwuLexer()
     parser = UwuParser()
 
