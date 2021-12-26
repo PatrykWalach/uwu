@@ -453,6 +453,7 @@ def test_parser(program, ast, parser, lexer):
             typed.TGeneric("Point", [typed.TNum(), typed.TStr(), typed.TBool()]),
         ),
         ("do end", typed.TUnit()),
+        ("{1,'2'}", typed.TTuple([typed.TNum(),typed.TStr()])),
     ],
 )
 def test_infer(program, expected_type, parser, lexer):

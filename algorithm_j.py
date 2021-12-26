@@ -360,6 +360,14 @@ def infer(
                 ty_patterns.append(ty1)
 
             return subst, typed.TTuple(ty_patterns)
+        case terms.ETuple(exprs):
+            ty_exprs =  list[typed.Type]()
+
+            for expr in exprs:
+                subst, ty1 = infer(subst, ctx, expr)
+                ty_exprs.append(ty1)
+
+            return subst, typed.TTuple(ty_exprs)
         case _:
             raise TypeError(f"Cannot infer type of {exp=}")
 

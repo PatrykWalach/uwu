@@ -51,5 +51,8 @@ def TOption(param: Type) -> Type:
 def TArray(param: Type) -> Type:
     return TGeneric("Array", [param])
 
+def TTuple(types: list[Type]) -> Type:
+    return TGeneric("TTuple", types)
+
 
 Type: TypeAlias = TVar | TGeneric
