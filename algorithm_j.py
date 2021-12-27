@@ -205,7 +205,7 @@ def infer(
             for variant in variants:
 
                 ty = typed.TGeneric(
-                    id, [t_ctx[generic.name].ty for generic in generics]
+                    id, [instantiate(t_ctx[generic.name]) for generic in generics]
                 )
 
                 ty_fields = list[typed.Type]()
