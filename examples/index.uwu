@@ -1,0 +1,103 @@
+enum TTuple<A,B>{Tuple(A,B)}
+
+def traverse(arr, fn) do
+    #def rec_traverse(i, acc) do
+    #    case get_item(arr, i) of
+    #        Some(value) do
+    #            case fn(value) of
+    #                Some(value) do rec_traverse(i+1, append(acc, value)) end
+    #                None() do None() end
+    #            end
+    #        end
+    #        None() do Some(acc) end
+    #    end
+    #end
+
+    def reducer(acc, value) do
+        case id(acc) of
+            None() do None() end
+            Some(acc_value) do 
+                case fn(value) of 
+                    Some(next_value) do Some(js__array__concat(acc_value, [next_value])) end
+                    None() do None() end
+                end
+            end
+        end
+
+        #case 
+        #    acc = Some(_acc), next_value = Some(_value) do
+        #        Some(js__array__concat(_acc, [_value]))
+        #        Some(`_acc.concat([{_value}])`)
+        #    end
+        #    acc = _, next_value = _ do
+        #        None()
+        #    end
+        #end
+    end
+
+    js__array__reduce(arr, reducer, Some([]))
+
+    #rec_traverse(0,[])
+end
+
+
+
+def half(n) do
+    if n % 2 > 0 then
+        None()
+    else
+        Some(n / 2)
+    end
+end
+
+let arr = [2,4,6]
+
+js__console__log(traverse(arr, half))
+
+
+#let x = A(C(B(A(1))))
+
+
+let x = Some(Some(9))
+
+case x of
+    Some(Some(num)) do Some(num) end
+    _ do Some(2) end
+end
+
+enum ABC<X> {A(X) B(X) C(X)}
+enum SABC {SA SB SC}
+
+def test_sabc(abc) do
+    case abc of
+        SA() do 1 end
+        SB() do 2 end
+        SC() do 3 end
+    end
+end
+
+def test_abc(abc) do
+    case abc of
+        A(a) do 1 end
+        B(a) do 2 end
+        #_ do 3 end
+        C(a) do 4 end
+    end
+end
+
+#case x of
+#    A(A(B(C(a)))) do a end
+#    B(A(C(A(a)))) do a end
+#    B(C(C(A(a)))) do a end
+#    A(C(C(A(a)))) do a end
+#    A(a) do a end
+#    C(C(A(a))) do a end
+#end
+
+#def add(a, b) do
+#    a + b
+#end
+#
+#let arr = [1,2,3]
+#
+#js__console__log(js__array__reduce(arr, add, 0))

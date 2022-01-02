@@ -35,21 +35,26 @@ class EHintNone:
 
 
 @dataclasses.dataclass(frozen=True)
-class EVariableDeclaration:
-    id: EIdentifier
+class ELet:
+    id: str
     init: Expr
     hint: EHint | EHintNone = EHintNone()
 
 
 @dataclasses.dataclass(frozen=True)
+class EGenericId:
+    id: str
+
+
+@dataclasses.dataclass(frozen=True)
 class EDo:
-    body: list[Expr]
+    body: list[Expr]= dataclasses.field(default_factory=list)
     hint: EHint | EHintNone = EHintNone()
 
 
 @dataclasses.dataclass(frozen=True)
 class EProgram:
-    body: list[Expr | EEnumDeclaration]
+    body: list[Expr | EEnumDeclaration]= dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -71,8 +76,13 @@ class ELiteral:
 
 
 @dataclasses.dataclass(frozen=True)
+class EExternal:
+    value: str
+
+
+@dataclasses.dataclass(frozen=True)
 class EDef:
-    identifier: EIdentifier
+    identifier: str
     params: list[EParam]
     body: EDo
     hint: EHint | EHintNone = EHintNone()
@@ -80,47 +90,53 @@ class EDef:
 
 @dataclasses.dataclass(frozen=True)
 class EParam:
-    identifier: EIdentifier
+    identifier: str
     hint: EHint | EHintNone = EHintNone()
 
 
 @dataclasses.dataclass(frozen=True)
 class EMatchAs:
-    identifier: EIdentifier
+    identifier: str
 
 
 @dataclasses.dataclass(frozen=True)
 class ECaseOf:
-    of: Expr
-    cases: list[ECase]
+    expr: Expr
+    cases: list[ECase]= dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass(frozen=True)
 class ECase:
-    pattern: Pattern
+    patterns: dict[str, Pattern]
     body: EDo
 
 
 @dataclasses.dataclass(frozen=True)
-class EEnumPattern:
-    id: EIdentifier
-    patterns: list[Pattern]
+class EMatchVariant:
+    id: str
+    patterns: list[Pattern]= dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass(frozen=True)
 class ECall:
     callee: Expr
-    arguments: list[Expr]
+    args: list[Expr]= dataclasses.field(default_factory=list)
+
+
+@dataclasses.dataclass(frozen=True)
+class EVariantCall:
+    callee: str
+    args: list[Expr]= dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass(frozen=True)
 class EArray:
-    arguments: list[Expr]
+    args: list[Expr]= dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass(frozen=True)
 class ETuple:
-    arguments: list[Expr]
+    args: list[Expr]= dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -131,8 +147,8 @@ class EIfNone:
 @dataclasses.dataclass(frozen=True)
 class EIf:
     test: Expr
-    then: EBlockStmt
-    or_else: EBlockStmt | EIf | EIfNone = EIfNone()
+    then: EBlock
+    or_else: EBlock | EIf | EIfNone = EIfNone()
     hint: EHint | EHintNone = EHintNone()
 
     @staticmethod
@@ -143,14 +159,14 @@ class EIf:
 
 
 @dataclasses.dataclass(frozen=True)
-class EBlockStmt:
-    body: list[Expr]
+class EBlock:
+    body: list[Expr]= dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass(frozen=True)
 class EHint:
-    id: EIdentifier
-    arguments: list[EHint]
+    id: str
+    args: list[Type]= dataclasses.field(default_factory=list)
 
     @staticmethod
     def from_option(hint):
@@ -161,15 +177,15 @@ class EHint:
 
 @dataclasses.dataclass(frozen=True)
 class EEnumDeclaration:
-    id: EIdentifier
-    generics: list[EIdentifier]
-    variants: list[EVariant]
+    id: str
+    variants: list[EVariant] = dataclasses.field(default_factory=list)
+    generics: list[EIdentifier] = dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass(frozen=True)
 class EVariant:
-    id: EIdentifier
-    fields: EFieldsUnnamed
+    id: str
+    fields: list[EHint] = dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -184,15 +200,13 @@ class EMatchTuple:
     rest: EIdentifier | None = None
 
 
-
 @dataclasses.dataclass(frozen=True)
 class EFieldsUnnamed:
     unnamed: list[EIdentifier]
 
 
-Pattern: typing.TypeAlias = (
-    EMatchAs | EMatchArray | EEnumPattern | EMatchTuple
-)
+Pattern: typing.TypeAlias = EMatchAs | EMatchVariant
+
 Expr: typing.TypeAlias = (
     EDo
     | ELiteral
@@ -200,26 +214,28 @@ Expr: typing.TypeAlias = (
     | EIf
     | ECall
     | ECaseOf
-    | EVariableDeclaration
+    | ELet
     | EIdentifier
     | EBinaryExpr
     | EArray
     | ETuple
+    | EVariantCall
+    | EExternal
 )
 
 # 'type_identifier',  "array", "tuple",
+Type: typing.TypeAlias = EHint | EGenericId | EHintNone
 
 AstTree: typing.TypeAlias = (
     EProgram
     | EParam
     | ECaseOf
     | ECase
-    | EBlockStmt
+    | EBlock
     | EEnumDeclaration
     | EFieldsUnnamed
-    | EHint
+    | Type
     | EVariant
-    | EHintNone
     | EIfNone
     | Expr
     | Pattern

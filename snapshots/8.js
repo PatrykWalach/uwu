@@ -1,1 +1,1 @@
-(()=>{Some=(value)=>({TAG:'Some',_0: value});None=()=>({TAG:'None',});True=()=>({TAG:'True',});False=()=>({TAG:'False',});id=(value)=>(()=>{return value})();console.log(((__)=>{if(((__)=>{return __.TAG==="Some"})(__)){return (()=>{return 2.0})()};if(((__)=>{return __.TAG==="None"})(__)){return (()=>{return 3.0})()}})(Some(1.0)))})()
+;;id=(id)=>(()=>{return id})();unit=undefined;console.log((()=>{const $={TAG:'Some',_0:1.0};if(typeof $ !== 'string'&&$.TAG==='Some'){_=$._0;return 2.0}if($==='None'){return 3.0}throw new Error('Non-exhaustive pattern match')})())
