@@ -1,6 +1,8 @@
 from __future__ import annotations
+
 import dataclasses
 import typing
+
 import typed
 
 A = typing.TypeVar("A")
@@ -48,13 +50,13 @@ class EGenericId:
 
 @dataclasses.dataclass(frozen=True)
 class EDo:
-    body: list[Expr]= dataclasses.field(default_factory=list)
+    body: list[Expr] = dataclasses.field(default_factory=list)
     hint: EHint | EHintNone = EHintNone()
 
 
 @dataclasses.dataclass(frozen=True)
 class EProgram:
-    body: list[Expr | EEnumDeclaration]= dataclasses.field(default_factory=list)
+    body: list[Expr | EEnumDeclaration] = dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -71,7 +73,6 @@ class EIdentifier:
 
 @dataclasses.dataclass(frozen=True)
 class ELiteral:
-    raw: str
     value: float | str
 
 
@@ -102,7 +103,7 @@ class EMatchAs:
 @dataclasses.dataclass(frozen=True)
 class ECaseOf:
     expr: Expr
-    cases: list[ECase]= dataclasses.field(default_factory=list)
+    cases: list[ECase] = dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -114,29 +115,29 @@ class ECase:
 @dataclasses.dataclass(frozen=True)
 class EMatchVariant:
     id: str
-    patterns: list[Pattern]= dataclasses.field(default_factory=list)
+    patterns: list[Pattern] = dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass(frozen=True)
 class ECall:
     callee: Expr
-    args: list[Expr]= dataclasses.field(default_factory=list)
+    args: list[Expr] = dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass(frozen=True)
 class EVariantCall:
     callee: str
-    args: list[Expr]= dataclasses.field(default_factory=list)
+    args: list[Expr] = dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass(frozen=True)
 class EArray:
-    args: list[Expr]= dataclasses.field(default_factory=list)
+    args: list[Expr] = dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass(frozen=True)
 class ETuple:
-    args: list[Expr]= dataclasses.field(default_factory=list)
+    args: list[Expr] = dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -160,13 +161,13 @@ class EIf:
 
 @dataclasses.dataclass(frozen=True)
 class EBlock:
-    body: list[Expr]= dataclasses.field(default_factory=list)
+    body: list[Expr] = dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass(frozen=True)
 class EHint:
     id: str
-    args: list[Type]= dataclasses.field(default_factory=list)
+    args: list[Type] = dataclasses.field(default_factory=list)
 
     @staticmethod
     def from_option(hint):

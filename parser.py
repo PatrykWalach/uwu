@@ -1,22 +1,24 @@
 from __future__ import annotations
 
+import dataclasses
+import functools
+import json
+import operator
+import random
+import sys
+
 # from watchdog.events import FileSystemEventHandler
 # from watchdog.observers import Observer
 import time
-import sys
-from typing import Callable, Protocol
-import dataclasses
-from algorithm_j import Context, Scheme, fresh_ty_var, type_infer
+from functools import partial, reduce, wraps
+from itertools import product
+from typing import Any, Callable, Generic, Protocol, TypeAlias, TypeVar, Union, overload
+
+from sly import Lexer, Parser
+
 import terms
 import typed
-from typing import Any, Callable, Generic, TypeAlias, TypeVar, Union, overload
-from itertools import product
-from functools import partial, reduce, wraps
-import random
-import operator
-import json
-import functools
-from sly import Parser, Lexer
+from algorithm_j import Context, Scheme, fresh_ty_var, type_infer
 
 
 def _(fn: str, *args: str) -> Callable[[R], R]:
@@ -215,13 +217,12 @@ class UwuParser(Parser):
     )
     def enum(self, p):
         return terms.EEnumDeclaration(
-                    p.type_identifier0.name,
-                    p.variant,
-                    concat(p.type_identifier1, p.type_identifier2),
-                )
-    @_(
-        "ENUM type_identifier '{' { variant } '}'"
-    )
+            p.type_identifier0.name,
+            p.variant,
+            concat(p.type_identifier1, p.type_identifier2),
+        )
+
+    @_("ENUM type_identifier '{' { variant } '}'")
     def enum(self, p):
         return terms.EEnumDeclaration(p.type_identifier.name, p.variant)
 
@@ -262,9 +263,9 @@ class UwuParser(Parser):
 
     @_("CASE expr OF { pattern do } END")
     def case_of(self, p):
-        return terms.ECaseOf(p.expr,
-                    [terms.ECase({"$": pattern}, do) for pattern, do in p[3]]
-                )
+        return terms.ECaseOf(
+            p.expr, [terms.ECase({"$": pattern}, do) for pattern, do in p[3]]
+        )
 
     # @_("clause { ',' clause } do")
     # def case(self, p):
@@ -296,7 +297,9 @@ class UwuParser(Parser):
 
     @_("type_identifier '(' [ pattern ] { ',' pattern } ')'")
     def match_variant(self, p):
-        return terms.EMatchVariant(p.type_identifier.name, concat(p.pattern0, p.pattern1))
+        return terms.EMatchVariant(
+            p.type_identifier.name, concat(p.pattern0, p.pattern1)
+        )
 
     @_("type_identifier")
     def match_variant(self, p):
@@ -338,8 +341,8 @@ class UwuParser(Parser):
 
     @_("NUMBER")
     def literal(self, p):
-        return terms.ELiteral(p.NUMBER, float(p.NUMBER))
+        return terms.ELiteral(float(p.NUMBER))
 
     @_("STRING")
     def literal(self, p):
-        return terms.ELiteral(p.STRING, p.STRING[1:-1])
+        return terms.ELiteral(p.STRING[1:-1])

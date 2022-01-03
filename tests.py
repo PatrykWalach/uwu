@@ -1,17 +1,16 @@
+import json
 from dataclasses import dataclass
 from pathlib import WindowsPath
 from subprocess import check_output
-from compile import compile
-from sly import lex
-import json
-
 from typing import Generic
+
 import pytest
-from algorithm_j import Scheme, UnifyException, type_infer
-from main import BUILTINS, DEFAULT_CTX, AstEncoder, UwuLexer, UwuParser
+from sly import lex
 
 import typed
-
+from algorithm_j import Scheme, UnifyException, type_infer
+from compile import compile
+from main import BUILTINS, DEFAULT_CTX, AstEncoder, UwuLexer, UwuParser
 from terms import *
 
 
@@ -112,15 +111,15 @@ def lexer():
 @pytest.mark.parametrize(
     "program, ast",
     [
-        ("1", [ELiteral("1", 1)]),
-        ("'abc'", [ELiteral("'abc'", "abc")]),
+        ("1", [ELiteral(1)]),
+        ("'abc'", [ELiteral("abc")]),
         (
             "1+2*3",
             [
                 EBinaryExpr(
                     "+",
-                    ELiteral("1", 1),
-                    EBinaryExpr("*", ELiteral("2", 2), ELiteral("3", 3)),
+                    ELiteral(1),
+                    EBinaryExpr("*", ELiteral(2), ELiteral(3)),
                 )
             ],
         ),
@@ -131,8 +130,8 @@ def lexer():
                     "x",
                     EBinaryExpr(
                         "*",
-                        EBinaryExpr("+", ELiteral("2", 2), ELiteral("3", 3)),
-                        ELiteral("4", 4),
+                        EBinaryExpr("+", ELiteral(2), ELiteral(3)),
+                        ELiteral(4),
                     ),
                 )
             ],
@@ -142,7 +141,7 @@ def lexer():
             "def x(k) do k() end\ndef n() do 12 end\nlet y:Num=x(n)\nx",
             [
                 EDef("x", [EParam("k")], EDo([ECall(EIdentifier("k"))])),
-                EDef("n", [], EDo([ELiteral("12", 12)])),
+                EDef("n", [], EDo([ELiteral(12)])),
                 ELet(
                     "y",
                     ECall(EIdentifier("x"), [EIdentifier("n")]),
@@ -177,33 +176,29 @@ def lexer():
         #     ],
         (
             "let x=let y=2+3",
-            [
-                ELet(
-                    "x", ELet("y", EBinaryExpr("+", ELiteral("2", 2), ELiteral("3", 3)))
-                )
-            ],
+            [ELet("x", ELet("y", EBinaryExpr("+", ELiteral(2), ELiteral(3))))],
         ),
         (
             "do let x = 1 end",
             [
                 EDo(
-                    [ELet("x", ELiteral("1", 1))],
+                    [ELet("x", ELiteral(1))],
                 )
             ],
         ),
         (
             "id('abc')",
-            [ECall(EIdentifier("id"), [ELiteral("'abc'", "abc")])],
+            [ECall(EIdentifier("id"), [ELiteral("abc")])],
         ),
         (
             "id(1)",
-            [ECall(EIdentifier("id"), [ELiteral("1", 1)])],
+            [ECall(EIdentifier("id"), [ELiteral(1)])],
         ),
         (
             "id('12')\nid(1)",
             [
-                ECall(EIdentifier("id"), [ELiteral("'12'", "12")]),
-                ECall(EIdentifier("id"), [ELiteral("1", 1)]),
+                ECall(EIdentifier("id"), [ELiteral("12")]),
+                ECall(EIdentifier("id"), [ELiteral(1)]),
             ],
         ),
         (
@@ -211,7 +206,7 @@ def lexer():
             [
                 ECall(
                     EIdentifier("id"),
-                    [EBinaryExpr("+", ELiteral("1", 1), ELiteral("2", 2))],
+                    [EBinaryExpr("+", ELiteral(1), ELiteral(2))],
                 )
             ],
         ),
@@ -268,11 +263,11 @@ def lexer():
                                     patterns=[EMatchAs("value")],
                                 )
                             },
-                            EDo([ELiteral(raw="2", value=2.0)]),
+                            EDo([ELiteral(value=2.0)]),
                         ),
                         ECase(
                             {"$": EMatchVariant("None")},
-                            EDo([ELiteral(raw="3", value=3.0)]),
+                            EDo([ELiteral(value=3.0)]),
                         ),
                     ],
                 )
@@ -603,7 +598,7 @@ def test_infer(program, expected_type, parser, lexer):
     ),
 )
 def test_compile_with_snapshot(id, program, expected_output, snapshot, parser, lexer):
-    id = id +'.js'
+    id = id + ".js"
     program = parser.parse(lexer.tokenize(program))
     snapshot.snapshot_dir = "snapshots"
     snapshot.assert_match(compile(EProgram([*BUILTINS, program])), id)
