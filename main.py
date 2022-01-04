@@ -16,15 +16,11 @@ from parser import UwuLexer, UwuParser
 from subprocess import check_output
 from typing import Any, Callable, Generic, Protocol, TypeAlias, TypeVar, Union, overload
 
-from sly import Lexer, Parser
-from watchdog.events import FileSystemEventHandler, PatternMatchingEventHandler
-from watchdog.observers import Observer
-
 import algorithm_j
 import compile
 import terms
 import typed
-from algorithm_j import Context, Scheme, fresh_ty_var, infer, type_infer
+from algorithm_j import Context, Scheme, type_infer
 
 
 class AstEncoder(json.JSONEncoder):
