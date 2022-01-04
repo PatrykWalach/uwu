@@ -37,6 +37,7 @@ class AstEncoder(json.JSONEncoder):
             return type(obj).__name__
         return json.JSONEncoder.default(self, obj)
 
+
 BUILTINS: list[terms.Expr | terms.EEnumDeclaration] = [
     terms.EEnumDeclaration(
         "Option",
@@ -66,38 +67,28 @@ for builitin in BUILTINS:
     type_infer(DEFAULT_CTX, builitin)
 
 
-
-
-
-
 def main():
     lexer = UwuLexer()
     parser = UwuParser()
 
     src_path = "examples/index.uwu"
 
-    with open("examples/builtins.uwu", "r") as f:
-        builtins = f.read()
-
     with open(src_path, "r") as f:
         data = f.read()
 
-    ast = parser.parse(lexer.tokenize(builtins + data))
+    ast = parser.parse(lexer.tokenize(data))
 
     if ast == None:
         logging.error("Failed to parse")
         return
+
+    ast = terms.EProgram([*BUILTINS, ast])
+
     logging.info("Parsed")
 
     try:
         type_infer(
-            {
-                "Str": DEFAULT_CTX["Str"],
-                "Num": DEFAULT_CTX["Num"],
-                "Array": DEFAULT_CTX["Array"],
-                "Unit": DEFAULT_CTX["Unit"],
-                "Callable": DEFAULT_CTX["Callable"],
-            },
+            DEFAULT_CTX,
             ast,
         )
     except Exception as e:
@@ -120,7 +111,6 @@ def main():
         f.write(js)
 
     logging.info("Written")
-
 
 
 if __name__ == "__main__":
