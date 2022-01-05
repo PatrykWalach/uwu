@@ -1,11 +1,15 @@
 from __future__ import annotations
+
 import dataclasses
 import enum
-from typing import Sequence
-from attr.validators import instance_of
-from algorithm_j import Context, Scheme, fresh_ty_var
-import terms
 import functools
+from typing import Sequence
+
+from attr.validators import instance_of
+
+import case_tree
+import terms
+from algorithm_j import Context, Scheme, fresh_ty_var
 
 
 def compile(exp: terms.AstTree) -> str:
@@ -81,7 +85,7 @@ def compile(exp: terms.AstTree) -> str:
             return ""
         case terms.EParam(id):
             return id
-        case terms.ECaseOf(expr,cases):
+        case terms.ECaseOf(expr, cases):
             return f"(()=>{{const $={compile(expr)};{compile_case_tree(case_tree.gen_match(cases))}}})()"
             # cases = [f"{compile(case)}" for case in cases]
             # cases = [*cases, "throw new Error('Unhandled case of')"]
@@ -122,9 +126,6 @@ def compile(exp: terms.AstTree) -> str:
             raise Exception(f"Unsupported expression: {exp}")
 
 
-import case_tree
-
-
 def compile_case_tree(tree: case_tree.CaseTree):
     match tree:
         case case_tree.Leaf(body):
@@ -134,7 +135,7 @@ def compile_case_tree(tree: case_tree.CaseTree):
         case case_tree.Node(var, pattern_name, vars, yes, no):
             conditions = []
 
-            if pattern_name =='True':
+            if pattern_name == "True":
                 conditions.append(f"{var}")
             if pattern_name == "False":
                 conditions.append(f"!{var}")

@@ -136,7 +136,26 @@ def lexer():
                 )
             ],
         ),
-        # ("enum Option<value>{None\nSome(value)}\nx:Option<Num>=None"),
+        (
+            "enum StrOrNum{String(Str)\nNumber(Num)}\nlet x=Number(1)\nlet x=String('12')",
+            [
+                EEnumDeclaration(
+                    id="StrOrNum",
+                    variants=[
+                        EVariant(id="String", fields=[EHint(id="Str")]),
+                        EVariant(id="Number", fields=[EHint(id="Num")]),
+                    ],
+                ),
+                ELet(
+                    id="x",
+                    init=EVariantCall(callee="Number", args=[ELiteral(value=1.0)]),
+                ),
+                ELet(
+                    id="x",
+                    init=EVariantCall(callee="String", args=[ELiteral(value="12")]),
+                ),
+            ],
+        ),
         (
             "def x(k) do k() end\ndef n() do 12 end\nlet y:Num=x(n)\nx",
             [
@@ -474,6 +493,10 @@ def test_parser(program, ast, parser, lexer):
             ),
         ),
         ("do end", typed.TUnit()),
+        (
+            "enum StrOrNum{String(Str)\nNumber(Num)}\nlet x=Number(1)\nlet x=String('12')",
+            typed.TCon("StrOrNum", typed.KStar()),
+        ),
         # ("{1,'2'}", typed.TTuple([typed.TNum(), typed.TStr()])),
     ],
 )
