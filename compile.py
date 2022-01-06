@@ -1,15 +1,9 @@
 from __future__ import annotations
 
-import dataclasses
-import enum
 import functools
-from typing import Sequence
-
-from attr.validators import instance_of
 
 import case_tree
 import terms
-from algorithm_j import Context, Scheme, fresh_ty_var
 
 
 def compile(exp: terms.AstTree) -> str:

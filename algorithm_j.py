@@ -2,9 +2,6 @@ from __future__ import annotations
 
 import dataclasses
 import functools
-import itertools
-import logging
-import operator
 import typing
 
 import case_tree
@@ -26,7 +23,7 @@ class Scheme:
 
 
 Substitution: typing.TypeAlias = dict[int, typed.Type]
-Context: typing.TypeAlias = dict[str, Scheme]  # dict[str, Scheme]
+Context: typing.TypeAlias = dict[str, Scheme]
 
 counter = 0
 

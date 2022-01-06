@@ -1,20 +1,9 @@
 from __future__ import annotations
 
-import ast
 import dataclasses
-import functools
 import json
 import logging
-import operator
-import random
-import sys
-import time
-from functools import partial, reduce, wraps
-from itertools import product
-from os import terminal_size
 from parser import UwuLexer, UwuParser
-from subprocess import check_output
-from typing import Any, Callable, Generic, Protocol, TypeAlias, TypeVar, Union, overload
 
 import algorithm_j
 import compile
