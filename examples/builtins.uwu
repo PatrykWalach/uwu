@@ -1,17 +1,17 @@
 
-external js__console__log: Callable<@A, Unit> = 'console.log'
-external js__console__log2: Callable<@A, Callable<@B, Unit>> = 'console.log'
-external js__console__log_many: Callable<Array<@A>, Unit> = 'console.log'
+let js__console__log: Callable<@A, Unit> = `console.log`
+let js__console__log2: Callable<@A, Callable<@B, Unit>> = `console.log`
+let js__console__log_many: Callable<Array<@A>, Unit> = `console.log`
 
-external js__number__to_string: Callable<Num, Str> = '(n)=>n.toString()'
+let js__number__to_string: Callable<Num, Str> = `(n)=>n.toString()`
 
-external js__array__push: Callable<Array<@A>, Callable<@A, Num>> = '(arr)=>(v)=>arr.push(v)'
-external js__array__length: Callable<Array<@B>, Num> = '(arr)=>arr.length'
-external js__array__concat: Callable<Array<@C>, Callable<Array<@C>, Array<@C>>> = '(a)=>(b)=>a.concat(b)'
-external js__array__reduce: Callable<Array<@D>, Callable<Callable<@E,Callable<@D,@E>>, Callable<@E, @E>>> = '(arr)=>(fn)=>(acc)=>arr.reduce((acc,v)=>fn(acc)(v),acc)'
+let js__array__push: Callable<Array<@A>, Callable<@A, Num>> = `(arr)=>(v)=>arr.push(v)`
+let js__array__length: Callable<Array<@B>, Num> = `(arr)=>arr.length`
+let js__array__concat = `(a)=>(b)=>a.concat(b)`
+let js__array__reduce = `(arr)=>(fn)=>(acc)=>arr.reduce((acc,v)=>fn(acc)(v),acc)`
 
-external node__process__exit: Callable<Num, Unit> = 'process.exit'
-external unit: Unit = 'undefined'
+let node__process__exit: Callable<Num, Unit> = 'process.exit'
+let unit: Unit = 'undefined'
 
 
 enum Option<V>{Some(V) None}

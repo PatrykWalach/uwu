@@ -44,11 +44,6 @@ class ELet:
 
 
 @dataclasses.dataclass(frozen=True)
-class EGenericId:
-    id: str
-
-
-@dataclasses.dataclass(frozen=True)
 class EDo:
     body: list[Expr] = dataclasses.field(default_factory=list)
     hint: EHint | EHintNone = EHintNone()
@@ -225,7 +220,7 @@ Expr: typing.TypeAlias = (
 )
 
 # 'type_identifier',  "array", "tuple",
-Type: typing.TypeAlias = EHint | EGenericId | EHintNone
+Type: typing.TypeAlias = EHint | EHintNone
 
 AstTree: typing.TypeAlias = (
     EProgram

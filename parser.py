@@ -50,7 +50,6 @@ class UwuLexer(Lexer):
         TYPE_IDENTIFIER,
         LET,
         EXTERNAL,
-        GENERIC_IDENTIFIER,
         NUM_NOT_EQUAL,
     }
     literals = {
@@ -82,7 +81,6 @@ class UwuLexer(Lexer):
     INT_DIV = r"/{2}"
     TYPE_IDENTIFIER = r"[A-Z\d][\w\d]*"
     IDENTIFIER = r"[a-z_][\w\d]*"
-    GENERIC_IDENTIFIER = r"@[A-Z]\w*"
     IDENTIFIER["def"] = DEF
     IDENTIFIER["do"] = DO
     IDENTIFIER["end"] = END
@@ -207,10 +205,6 @@ class UwuParser(Parser):
     @_("type_identifier '<' type { ',' type } '>'")
     def type(self, p):
         return terms.EHint(p.type_identifier.name, concat(p.type0, p.type1))
-
-    @_("GENERIC_IDENTIFIER")
-    def type(self, p):
-        return terms.EGenericId(p.GENERIC_IDENTIFIER)
 
     @_(
         "ENUM type_identifier '<' type_identifier { ',' type_identifier } '>' '{' { variant } '}'"

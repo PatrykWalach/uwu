@@ -262,15 +262,6 @@ def infer(
             subst, ty_right = infer(subst, ctx, right)
             subst = unify_subst(ty_right, typed.TNum(), subst)
             return subst, typed.TBool()
-        case terms.EGenericId(id):
-            scheme = getattr(ctx, id, None)
-            if scheme != None:
-                return subst, scheme.ty
-
-            ty = fresh_ty_var()
-            # ctx[id] = Scheme.from_subst(subst, ctx, ty)
-            ctx[id] = Scheme([], ty)
-            return subst, ty
         case terms.EMatchAs(id):
             ty = fresh_ty_var()
             ctx[id] = Scheme([], ty)
@@ -581,7 +572,6 @@ def is_case_tree_exhaustive(
     tree: case_tree.CaseTree,
     remaining_cons: frozenset[str] = frozenset(),
 ):
-    print(f"{remaining_cons=} {type(tree).__name__}")
     match tree:
         case case_tree.MissingLeaf():
             if remaining_cons:
