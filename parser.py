@@ -46,7 +46,6 @@ class UwuLexer(Lexer):
         INT_DIV,
         ENUM,
         THEN,
-        NOT_MORE,
         TYPE_IDENTIFIER,
         LET,
         EXTERNAL,
@@ -69,15 +68,13 @@ class UwuLexer(Lexer):
         "<",
         "*",
         "/",
-        # ".",
-        ";",
+        "|",
         "%",
     }
     NUM_NOT_EQUAL = r"<>"
-    STRING = r"'.*'"
+    STRING = r"'[^']*'"
     NUMBER = r"\d+"
     CONCAT = r"\+{2}"
-    NOT_MORE = r"<="
     INT_DIV = r"/{2}"
     TYPE_IDENTIFIER = r"[A-Z\d][\w\d]*"
     IDENTIFIER = r"[a-z_][\w\d]*"
@@ -93,7 +90,7 @@ class UwuLexer(Lexer):
 
     IDENTIFIER["of"] = OF
     IDENTIFIER["let"] = LET
-    EXTERNAL = r"`.*`"
+    EXTERNAL = r"`[^`]*`"
 
     ignore_comment = r"\#.*"
     ignore = " \t"
@@ -123,7 +120,7 @@ class UwuParser(Parser):
         return p[0]
 
     precedence = (
-        ("left", "=", "<", ">", NOT_MORE, NUM_NOT_EQUAL),
+        ("left", "=", "<", ">", "|", NUM_NOT_EQUAL),
         ("left", CONCAT),
         ("left", "%"),
         ("left", "+", "-"),
@@ -170,8 +167,8 @@ class UwuParser(Parser):
         "expr '<' expr",
         "expr '%' expr",
         "expr '>' expr",
+        "expr '|' expr",
         "expr NUM_NOT_EQUAL expr",
-        "expr NOT_MORE expr",
         "expr INT_DIV expr",
     )
     def binary_expr(self, p):

@@ -250,13 +250,26 @@ def infer(
             ctx[id] = Scheme.from_subst(subst, ctx, ty_con)
 
             return subst, ty_con
-        case terms.EBinaryExpr("+" | "*" | "/" | "//" | "-" | "%", left, right):
+        case terms.EBinaryExpr("|", left, right):
+            ty = fresh_ty_var()
+            subst, ty_left = infer(subst, ctx, left)
+            subst = unify_subst(ty_left, typed.TArray(ty), subst)
+            subst, ty_right = infer(subst, ctx, right)
+            subst = unify_subst(ty_right, typed.TArray(ty), subst)
+            return subst, typed.TArray(ty)
+        case terms.EBinaryExpr("++", left, right):
+            subst, ty_left = infer(subst, ctx, left)
+            subst = unify_subst(ty_left, typed.TStr(), subst)
+            subst, ty_right = infer(subst, ctx, right)
+            subst = unify_subst(ty_right, typed.TStr(), subst)
+            return subst, typed.TStr()
+        case terms.EBinaryExpr("+" | "-" | "*" | "/" | "//" | "%", left, right):
             subst, ty_left = infer(subst, ctx, left)
             subst = unify_subst(ty_left, typed.TNum(), subst)
             subst, ty_right = infer(subst, ctx, right)
             subst = unify_subst(ty_right, typed.TNum(), subst)
             return subst, typed.TNum()
-        case terms.EBinaryExpr(">" | "<" | "<=" | "<>", left, right):
+        case terms.EBinaryExpr(">" | "<" | "<>", left, right):
             subst, ty_left = infer(subst, ctx, left)
             subst = unify_subst(ty_left, typed.TNum(), subst)
             subst, ty_right = infer(subst, ctx, right)

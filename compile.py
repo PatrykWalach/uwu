@@ -63,15 +63,17 @@ def compile(exp: terms.AstTree) -> str:
             )
 
             return f"{id}={args}{compile(body)}"
+        case terms.EBinaryExpr("|", left, right):
+            return f"{compile( left)}.concat({compile( right)})"
         case terms.EBinaryExpr("++", left, right):
             return f"({compile( left)}+{compile( right)})"
         case terms.EBinaryExpr("//", left, right):
             return f"Math.floor({compile( left)}/{compile( right)})"
         case terms.EBinaryExpr("<>", left, right):
             return f"({compile( left)}!=={compile( right)})"
-        case terms.EBinaryExpr(">" | "<" | "<=" as op, left, right):
-            return f"({compile( left)}{op}{compile( right)})"
-        case terms.EBinaryExpr("+" | "-" | "/" | "*" | "%" as op, left, right):
+        case terms.EBinaryExpr(
+            ">" | "<" | "+" | "-" | "/" | "*" | "%" as op, left, right
+        ):
             return f"({compile( left)}{op}{compile( right)})"
         case terms.EIdentifier(id):
             return id

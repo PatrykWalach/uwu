@@ -1,1 +1,1 @@
-(()=>{Some=(value)=>({TAG:'Some',_0: value});None=()=>({TAG:'None',});True=()=>({TAG:'True',});False=()=>({TAG:'False',});id=(value)=>(()=>{return value})()})()
+;;id=(id)=>(()=>{return id})();unit=undefined;console.log((()=>{if(((2.0*2.0)!==4.0)){return 0.0}else{return 1.0}})())

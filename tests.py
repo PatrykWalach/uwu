@@ -616,6 +616,9 @@ def test_infer(program, expected_type, parser, lexer):
                 ("30", "`console.log`(do end)", "undefined"),
                 # ("31", "`console.log`(case {1,2} of {x,_} do x end end)", "1"),
                 # ("32", "`console.log`(case {1,2} of {_,y} do y end end)", "2"),
+                ("33", "`console.log`(if 2*2 <> 4 then 0 else 1 end)", "1"),
+                ("34", "`console.log`('a'++'b')", "ab"),
+                ("35", "`console.log`([1]|[2])", "[ 1, 2 ]"),
             ]
         )
     ),
