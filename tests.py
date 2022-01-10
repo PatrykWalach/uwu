@@ -113,6 +113,27 @@ def lexer():
     [
         ("1", [ELiteral(1)]),
         ("'abc'", [ELiteral("abc")]),
+        ("-2+2", [EBinaryExpr("+", EUnaryMinus(ELiteral(2)), ELiteral(2))]),
+        ("-(2+2)", [EUnaryMinus(EBinaryExpr("+", ELiteral(2), ELiteral(2)))]),
+        (
+            "Some(2)",
+            [EVariantCall("Some", [ELiteral(2)])],
+        ),
+        (
+            "Some(2)\n(2)",
+            [ECall(EVariantCall("Some", [ELiteral(2)]), [ELiteral(2)])],
+        ),
+        (
+            "let x=2\n-id(2)",
+            [
+                ELet(
+                    "x",
+                    EBinaryExpr(
+                        "-", ELiteral(2), ECall(EIdentifier("id"), [ELiteral(2)])
+                    ),
+                )
+            ],
+        ),
         (
             "1+2*3",
             [
@@ -379,6 +400,7 @@ def test_parser(program, ast, parser, lexer):
         ("let x=1\nlet a=x", typed.TNum()),
         ("Some(1)", typed.TOption(typed.TNum())),
         ("id(id(1))", typed.TNum()),
+        ("2+id(1)", typed.TNum()),
         ("Some(Some(1))", typed.TOption(typed.TOption(typed.TNum()))),
         (
             "1+2*3",
@@ -389,7 +411,8 @@ def test_parser(program, ast, parser, lexer):
             typed.TNum(),
         ),
         # ("enum Option<value>{None\nSome(value)}\nx:Option<Num>=None"),
-        ("def id2(a) do a end\nid2('12')", typed.TStr()),
+        ("def id2(a) do a end\nid2(12)\nid2('12')", typed.TStr()),
+        ("def id2<T>(a:T):T do a end\nid2(12)\nid2('12')", typed.TStr()),
         pytest.param(
             "def fun() do fun() + 1 end\nfun()",
             typed.TNum(),
@@ -619,6 +642,7 @@ def test_infer(program, expected_type, parser, lexer):
                 ("33", "`console.log`(if 2*2 <> 4 then 0 else 1 end)", "1"),
                 ("34", "`console.log`('a'++'b')", "ab"),
                 ("35", "`console.log`([1]|[2])", "[ 1, 2 ]"),
+                ("36", "`console.log`(-2+2)", "0"),
             ]
         )
     ),

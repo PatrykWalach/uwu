@@ -82,12 +82,18 @@ class EDef:
     params: list[EParam]
     body: EDo
     hint: EHint | EHintNone = EHintNone()
+    generics: list[EIdentifier] = dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass(frozen=True)
 class EParam:
     identifier: str
     hint: EHint | EHintNone = EHintNone()
+
+
+@dataclasses.dataclass(frozen=True)
+class EUnaryMinus:
+    expr: Expr
 
 
 @dataclasses.dataclass(frozen=True)
@@ -217,6 +223,7 @@ Expr: typing.TypeAlias = (
     | ETuple
     | EVariantCall
     | EExternal
+    | EUnaryMinus
 )
 
 # 'type_identifier',  "array", "tuple",

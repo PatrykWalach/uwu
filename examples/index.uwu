@@ -1,8 +1,12 @@
 enum TTuple<A,B>{Tuple(A,B)}
 
+def reduce<A, T>(arr: Array<T>, reducer: Callable<A, Callable<T, A>>, acc:A): A do
+    `arr.reduce((acc,v)=>reducer(acc)(v),acc)`
+end
 
-let reduce = `(arr)=> (reducer)=>(acc)=>arr.reduce((acc,v)=>reducer(acc)(v),acc)`
-
+def console_log<A>(value: A): Unit do
+    `console.log`(value)
+end
 
 def traverse(arr, fn) do
     #def rec_traverse(i, acc) do
@@ -22,7 +26,7 @@ def traverse(arr, fn) do
             None() do None() end
             Some(acc_value) do 
                 case fn(value) of 
-                    Some(next_value) do Some(`acc_value.concat`([next_value])) end
+                    Some(next_value) do Some(acc_value | [next_value]) end
                     None() do None() end
                 end
             end
@@ -57,7 +61,7 @@ end
 
 let arr = [2,4,6]
 
-`console.log`(traverse(arr, half))
+console_log(traverse(arr, half))
 
 
 #let x = A(C(B(A(1))))
@@ -115,7 +119,7 @@ end
 #
 #let arr = [1,2,3]
 #
-#`console.log`(js__array__reduce(arr, add, 0))
+#console_log(js__array__reduce(arr, add, 0))
 
 
 #let x: Callable<Callable<Num, Str>, Bool> = 2

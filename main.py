@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import dataclasses
+import glob
 import json
 import logging
+import sys
 from parser import UwuLexer, UwuParser
 
 import algorithm_j
@@ -56,46 +58,48 @@ def main():
     lexer = UwuLexer()
     parser = UwuParser()
 
-    src_path = "examples/index.uwu"
+    match sys.argv:
+        case [_, arg]:
+            pattern = arg
+        case _:
+            pattern = "**/*.uwu"
 
-    with open(src_path, "r") as f:
-        data = f.read()
+    for src_path in glob.glob(pattern):
+        try:
+            with open(src_path, "r") as f:
+                data = f.read()
 
-    ast = parser.parse(lexer.tokenize(data))
+            ast = parser.parse(lexer.tokenize(data))
 
-    if ast == None:
-        logging.error("Failed to parse")
-        return
+            if ast == None:
+                logging.error(f"Failed {src_path} to parse")
+                return
 
-    ast = terms.EProgram([*BUILTINS, ast])
+            ast = terms.EProgram([*BUILTINS, ast])
 
-    logging.info("Parsed")
+            logging.info(f"Parsed {src_path}")
 
-    try:
-        type_infer(
-            DEFAULT_CTX,
-            ast,
-        )
-    except Exception as e:
-        logging.exception(e)
-        return
+            type_infer(
+                DEFAULT_CTX,
+                ast,
+            )
 
-    try:
-        algorithm_j.is_exhaustive({}, ast)
-    except Exception as e:
-        logging.exception(e)
-        return
+            algorithm_j.is_exhaustive({}, ast)
 
-    logging.info("Inferred")
+            logging.info(f"Inferred {src_path}")
 
-    js = compile.compile(ast)
-    logging.info("Compiled")
+            js = compile.compile(ast)
+            logging.info(f"Compiled {src_path}")
 
-    path = src_path + ".js"
-    with open(path, "w") as f:
-        f.write(js)
+            path = src_path + ".js"
+            with open(path, "w") as f:
+                f.write(js)
 
-    logging.info("Written")
+            logging.info(f"Written {src_path}")
+
+        except Exception as e:
+            logging.exception(e)
+            return
 
 
 if __name__ == "__main__":

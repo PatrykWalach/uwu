@@ -111,25 +111,22 @@ class UwuParser(Parser):
     tokens = UwuLexer.tokens
     debugfile = "parser.out"
 
-    @_("{ stmt }")
+    @_("{ expr }")
     def program(self, p):
-        return terms.EProgram(p.stmt)
-
-    @_("expr", "enum")  # "struct",
-    def stmt(self, p):
-        return p[0]
+        return terms.EProgram(p.expr)
 
     precedence = (
-        ("left", "=", "<", ">", "|", NUM_NOT_EQUAL),
-        ("left", CONCAT),
-        ("left", "%"),
-        ("left", "+", "-"),
-        ("left", "*", "/", INT_DIV),
-        ("left", "(", ")"),
+        ("left", "="),
+        ("left", NUM_NOT_EQUAL),
+        ("left", "<", ">"),
+        ("left", "+", "-", "|", CONCAT),
+        ("left", "*", "/", INT_DIV, "%"),
         ("right", "UMINUS"),
+        ("left", "(", ")"),
     )
 
     @_(
+        "enum",
         "external",
         "do",
         "literal",
@@ -148,11 +145,16 @@ class UwuParser(Parser):
         return p[0]
 
     @_(
-        "'-' expr %prec UMINUS",
         "'(' expr ')'",
     )
     def expr(self, p):
         return p[1]
+
+    @_(
+        "'-' expr %prec UMINUS",
+    )
+    def expr(self, p):
+        return terms.EUnaryMinus(p.expr)
 
     @_("EXTERNAL")
     def external(self, p):
@@ -185,6 +187,18 @@ class UwuParser(Parser):
     )
     def block_statement(self, p):
         return terms.EBlock(p.expr)
+
+    @_(
+        "DEF identifier '<' type_identifier { ',' type_identifier } '>' '(' [ param ] { ',' param } ')' [ ':' type ] do"
+    )
+    def def_expr(self, p):
+        return terms.EDef(
+            p.identifier.name,
+            concat(p.param0, p.param1),
+            body=p.do,
+            hint=terms.EHint.from_option(p.type),
+            generics=concat(p.type_identifier0, p.type_identifier1),
+        )
 
     @_("DEF identifier '(' [ param ] { ',' param } ')' [ ':' type ] do")
     def def_expr(self, p):

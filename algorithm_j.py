@@ -249,7 +249,11 @@ def infer(
 
             ctx[id] = Scheme.from_subst(subst, ctx, ty_con)
 
-            return subst, ty_con
+            return subst, typed.TUnit()
+        case terms.EUnaryMinus(expr):
+            subst, ty_expr = infer(subst, ctx, expr)
+            subst = unify_subst(ty_expr, typed.TNum(), subst)
+            return subst, typed.TNum()
         case terms.EBinaryExpr("|", left, right):
             ty = fresh_ty_var()
             subst, ty_left = infer(subst, ctx, left)
@@ -324,9 +328,14 @@ def infer(
             subst = unify_subst(ty_fn, reduce_args(ty_args, ty), subst)
 
             return subst, ty
-        case terms.EDef(id, params, body, hint):
-            subst, hint = infer(subst, ctx, hint)
+        case terms.EDef(id, params, body, hint, generics):
             t_ctx = ctx.copy()
+
+            for generic in generics:
+                ty_generic = fresh_ty_var()
+                t_ctx[generic.name] = Scheme([], ty_generic)
+
+            subst, hint = infer(subst, t_ctx, hint)
 
             ty_params = list[typed.Type]()
 

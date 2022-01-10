@@ -105,6 +105,8 @@ def compile(exp: terms.AstTree) -> str:
             return f"((__)=>{{return {fields}}})"
         case terms.EArray(args) | terms.ETuple(args):
             return f"[{','.join(map(compile, args))}]"
+        case terms.EUnaryMinus(expr):
+            return f"-({compile(expr)})"
         case terms.EMatchTuple(patterns) | terms.EMatchArray(patterns):
 
             patterns = [
