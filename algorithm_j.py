@@ -250,7 +250,7 @@ def infer(
             ctx[id] = Scheme.from_subst(subst, ctx, ty_con)
 
             return subst, typed.TUnit()
-        case terms.EUnaryMinus(expr):
+        case terms.EUnaryExpr("-", expr):
             subst, ty_expr = infer(subst, ctx, expr)
             subst = unify_subst(ty_expr, typed.TNum(), subst)
             return subst, typed.TNum()
@@ -273,7 +273,12 @@ def infer(
             subst, ty_right = infer(subst, ctx, right)
             subst = unify_subst(ty_right, typed.TNum(), subst)
             return subst, typed.TNum()
-        case terms.EBinaryExpr(">" | "<" | "<>", left, right):
+        case terms.EBinaryExpr("!=" | "==", left, right):
+            subst, ty_left = infer(subst, ctx, left)
+            subst, ty_right = infer(subst, ctx, right)
+            subst = unify_subst(ty_right, ty_left, subst)
+            return subst, typed.TBool()
+        case terms.EBinaryExpr(">" | "<", left, right):
             subst, ty_left = infer(subst, ctx, left)
             subst = unify_subst(ty_left, typed.TNum(), subst)
             subst, ty_right = infer(subst, ctx, right)

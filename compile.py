@@ -69,8 +69,8 @@ def compile(exp: terms.AstTree) -> str:
             return f"({compile( left)}+{compile( right)})"
         case terms.EBinaryExpr("//", left, right):
             return f"Math.floor({compile( left)}/{compile( right)})"
-        case terms.EBinaryExpr("<>", left, right):
-            return f"({compile( left)}!=={compile( right)})"
+        case terms.EBinaryExpr("!=" | "==" as op, left, right):
+            return f"({compile( left)}{op}={compile( right)})"
         case terms.EBinaryExpr(
             ">" | "<" | "+" | "-" | "/" | "*" | "%" as op, left, right
         ):
@@ -105,8 +105,8 @@ def compile(exp: terms.AstTree) -> str:
             return f"((__)=>{{return {fields}}})"
         case terms.EArray(args) | terms.ETuple(args):
             return f"[{','.join(map(compile, args))}]"
-        case terms.EUnaryMinus(expr):
-            return f"-({compile(expr)})"
+        case terms.EUnaryExpr(op, expr):
+            return f"{op}({compile(expr)})"
         case terms.EMatchTuple(patterns) | terms.EMatchArray(patterns):
 
             patterns = [

@@ -113,15 +113,33 @@ def lexer():
     [
         ("1", [ELiteral(1)]),
         ("'abc'", [ELiteral("abc")]),
-        ("-2+2", [EBinaryExpr("+", EUnaryMinus(ELiteral(2)), ELiteral(2))]),
-        ("-(2+2)", [EUnaryMinus(EBinaryExpr("+", ELiteral(2), ELiteral(2)))]),
+        ("-2+2", [EBinaryExpr("+", EUnaryExpr("-", ELiteral(2)), ELiteral(2))]),
+        ("-(2+2)", [EUnaryExpr("-", EBinaryExpr("+", ELiteral(2), ELiteral(2)))]),
+        ("let x=2\n-1", [ELet("x", ELiteral(2)), EUnaryExpr("-", ELiteral(1))]),
+        ("let x=2-1", [ELet("x", EBinaryExpr("-", ELiteral(2), ELiteral(1)))]),
         (
             "Some(2)",
             [EVariantCall("Some", [ELiteral(2)])],
         ),
         (
-            "Some(2)\n(2)",
+            "Some(2)(2)",
             [ECall(EVariantCall("Some", [ELiteral(2)]), [ELiteral(2)])],
+        ),
+        (
+            "Some(2)\n(2)",
+            [EVariantCall("Some", [ELiteral(2)]), ELiteral(2)],
+        ),
+        (
+            "let x=id(2)",
+            [ELet("x", ECall(EIdentifier("id"), [ELiteral(2)]))],
+        ),
+        (
+            "(let x=id)(2)",
+            [ECall(ELet("x", EIdentifier("id")), [ELiteral(2)])],
+        ),
+        (
+            "let x=id\n(2)",
+            [ELet("x", EIdentifier("id")), ELiteral(2)],
         ),
         (
             "let x=2\n-id(2)",
@@ -639,7 +657,8 @@ def test_infer(program, expected_type, parser, lexer):
                 ("30", "`console.log`(do end)", "undefined"),
                 # ("31", "`console.log`(case {1,2} of {x,_} do x end end)", "1"),
                 # ("32", "`console.log`(case {1,2} of {_,y} do y end end)", "2"),
-                ("33", "`console.log`(if 2*2 <> 4 then 0 else 1 end)", "1"),
+                ("33", "`console.log`(if 2*2 != 4 then 0 else 1 end)", "1"),
+                ("37", "`console.log`(if 2*2 == 4 then 0 else 1 end)", "0"),
                 ("34", "`console.log`('a'++'b')", "ab"),
                 ("35", "`console.log`([1]|[2])", "[ 1, 2 ]"),
                 ("36", "`console.log`(-2+2)", "0"),

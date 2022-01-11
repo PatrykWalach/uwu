@@ -49,7 +49,8 @@ class UwuLexer(Lexer):
         TYPE_IDENTIFIER,
         LET,
         EXTERNAL,
-        NUM_NOT_EQUAL,
+        NOT_EQUAL,
+        EQUAL,
     }
     literals = {
         "=",
@@ -71,7 +72,8 @@ class UwuLexer(Lexer):
         "|",
         "%",
     }
-    NUM_NOT_EQUAL = r"<>"
+    NOT_EQUAL = r"!="
+    EQUAL = r"=="
     STRING = r"'[^']*'"
     NUMBER = r"\d+"
     CONCAT = r"\+{2}"
@@ -117,7 +119,7 @@ class UwuParser(Parser):
 
     precedence = (
         ("left", "="),
-        ("left", NUM_NOT_EQUAL),
+        ("left", NOT_EQUAL, EQUAL),
         ("left", "<", ">"),
         ("left", "+", "-", "|", CONCAT),
         ("left", "*", "/", INT_DIV, "%"),
@@ -154,7 +156,7 @@ class UwuParser(Parser):
         "'-' expr %prec UMINUS",
     )
     def expr(self, p):
-        return terms.EUnaryMinus(p.expr)
+        return terms.EUnaryExpr(p[0], p.expr)
 
     @_("EXTERNAL")
     def external(self, p):
@@ -170,7 +172,8 @@ class UwuParser(Parser):
         "expr '%' expr",
         "expr '>' expr",
         "expr '|' expr",
-        "expr NUM_NOT_EQUAL expr",
+        "expr NOT_EQUAL expr",
+        "expr EQUAL expr",
         "expr INT_DIV expr",
     )
     def binary_expr(self, p):

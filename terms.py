@@ -56,7 +56,7 @@ class EProgram:
 
 @dataclasses.dataclass(frozen=True)
 class EBinaryExpr:
-    op: typing.Literal["++", "+", "-", "/", "*", "%", "//", ">", "<", "|", "<>"]
+    op: typing.Literal["++", "+", "-", "/", "*", "%", "//", ">", "<", "|", "!=", "=="]
     left: Expr
     right: Expr
 
@@ -92,7 +92,8 @@ class EParam:
 
 
 @dataclasses.dataclass(frozen=True)
-class EUnaryMinus:
+class EUnaryExpr:
+    op: typing.Literal["-"]
     expr: Expr
 
 
@@ -223,7 +224,7 @@ Expr: typing.TypeAlias = (
     | ETuple
     | EVariantCall
     | EExternal
-    | EUnaryMinus
+    | EUnaryExpr
 )
 
 # 'type_identifier',  "array", "tuple",
