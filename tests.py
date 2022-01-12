@@ -142,17 +142,6 @@ def lexer():
             [ELet("x", EIdentifier("id")), ELiteral(2)],
         ),
         (
-            "let x=2\n-id(2)",
-            [
-                ELet(
-                    "x",
-                    EBinaryExpr(
-                        "-", ELiteral(2), ECall(EIdentifier("id"), [ELiteral(2)])
-                    ),
-                )
-            ],
-        ),
-        (
             "1+2*3",
             [
                 EBinaryExpr(
@@ -331,6 +320,11 @@ def lexer():
                 )
             ],
         ),
+        (
+            "f(\na\n,\nb\n)",
+            [ECall(EIdentifier("f"), [EIdentifier("a"), EIdentifier("b")])],
+        ),
+        ("None()", [EVariantCall("None")]),
         # (
         #     "case [Some(1), None()] of [Some(value), None()] do value end end",
         #     [
