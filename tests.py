@@ -320,11 +320,90 @@ def lexer():
                 )
             ],
         ),
+        ("\n\n", []),
+        ("\nid\n", [EIdentifier("id")]),
         (
-            "f(\na\n,\nb\n)",
-            [ECall(EIdentifier("f"), [EIdentifier("a"), EIdentifier("b")])],
+            "case x of\n\nend",
+            [ECaseOf(EIdentifier("x"), [])],
+        ),
+        (
+            "case x of\nSome() do end\nend",
+            [ECaseOf(EIdentifier("x"), [ECase(patterns={"$": EMatchVariant("Some")})])],
+        ),
+        (
+            "case x of Some(a,\nb,\nc\n) do end end",
+            [
+                ECaseOf(
+                    EIdentifier("x"),
+                    [
+                        ECase(
+                            patterns={
+                                "$": EMatchVariant(
+                                    "Some",
+                                    [EMatchAs("a"), EMatchAs("b"), EMatchAs("c")],
+                                )
+                            }
+                        )
+                    ],
+                )
+            ],
+        ),
+        (
+            "case x of Some(a\n,b\n,c\n) do end end",
+            [
+                ECaseOf(
+                    EIdentifier("x"),
+                    [
+                        ECase(
+                            patterns={
+                                "$": EMatchVariant(
+                                    "Some",
+                                    [EMatchAs("a"), EMatchAs("b"), EMatchAs("c")],
+                                )
+                            }
+                        )
+                    ],
+                )
+            ],
+        ),
+        ("do\n\nend", [EDo()]),
+        ("do\nid\nend", [EDo([EIdentifier("id")])]),
+        (
+            "f(a\n,b\n,c\n)",
+            [
+                ECall(
+                    EIdentifier("f"),
+                    [EIdentifier("a"), EIdentifier("b"), EIdentifier("c")],
+                )
+            ],
+        ),
+        (
+            "f(a,\nb,\nc\n)",
+            [
+                ECall(
+                    EIdentifier("f"),
+                    [EIdentifier("a"), EIdentifier("b"), EIdentifier("c")],
+                )
+            ],
+        ),
+        (
+            "F(a\n,b\n,c\n)",
+            [EVariantCall("F", [EIdentifier("a"), EIdentifier("b"), EIdentifier("c")])],
+        ),
+        (
+            "F(a,\nb,\nc\n)",
+            [EVariantCall("F", [EIdentifier("a"), EIdentifier("b"), EIdentifier("c")])],
+        ),
+        (
+            "[a\n,b\n,c\n]",
+            [EArray([EIdentifier("a"), EIdentifier("b"), EIdentifier("c")])],
+        ),
+        (
+            "[a,\nb,\nc\n]",
+            [EArray([EIdentifier("a"), EIdentifier("b"), EIdentifier("c")])],
         ),
         ("None()", [EVariantCall("None")]),
+        ("def x() do\ny\n\n#comment\n\nend", [EDef("x", [], EDo([EIdentifier("y")]))]),
         # (
         #     "case [Some(1), None()] of [Some(value), None()] do value end end",
         #     [
@@ -453,16 +532,16 @@ def test_parser(program, ast, parser, lexer):
         ),
         ("if 2 > 0 then 1 else 2 end", typed.TNum()),
         (
-            "if 2 > 0 then Some(Some(1)) else None end",
+            "if 2 > 0 then Some(Some(1)) else None() end",
             typed.TOption(typed.TOption(typed.TNum())),
         ),
         (
-            "if 2 > 0 then Some(1) elif 2 > 0 then Some(1) else None end",
+            "if 2 > 0 then Some(1) elif 2 > 0 then Some(1) else None() end",
             typed.TOption(typed.TNum()),
         ),
-        ("if 2 > 0 then Some(1) else None end", typed.TOption(typed.TNum())),
+        ("if 2 > 0 then Some(1) else None() end", typed.TOption(typed.TNum())),
         (
-            "if 2 > 0 then Some(1) elif 2 > 0 then None() else None end",
+            "if 2 > 0 then Some(1) elif 2 > 0 then None() else None() end",
             typed.TOption(typed.TNum()),
         ),
         ("enum AB{A B}\nlet x:AB=A()", typed.TCon("AB", typed.KStar())),
@@ -630,7 +709,7 @@ def test_infer(program, expected_type, parser, lexer):
                     "def add(a) do def add(b) do a + b end end\nlet addTwo=add(2)\n`console.log`(addTwo(3))",
                     "5",
                 ),
-                ("24", "def add(a, b) do a + b end\n\n`console.log`(add(2,3))", "5"),
+                ("24", "def add(a, b) do a + b end\n`console.log`(add(2,3))", "5"),
                 (
                     "25",
                     "def add(a) do def add(b) do a + b end end\n`console.log`(add(2,3))",

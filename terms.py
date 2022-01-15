@@ -111,7 +111,7 @@ class ECaseOf:
 @dataclasses.dataclass(frozen=True)
 class ECase:
     patterns: dict[str, Pattern]
-    body: EDo
+    body: EDo = dataclasses.field(default_factory=EDo)
 
 
 @dataclasses.dataclass(frozen=True)
