@@ -207,7 +207,7 @@ class UwuParser(Parser):
         return terms.EDef(
             p.identifier.name,
             p.params or [],
-            body=p.expr,
+            body=p.do,
             hint=terms.EHint.from_option(p.type),
             generics=concat(p.type_identifier0, p.type_identifier1),
         )
