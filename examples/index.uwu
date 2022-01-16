@@ -59,15 +59,15 @@ def half(n) do
     end
 end
 
-let arr = [2,4,6]
+arr = [2,4,6]
 
 console_log(traverse(arr, half))
 
 
-#let x = A(C(B(A(1))))
+#x = A(C(B(A(1))))
 
 
-let x = Some(Some(9))
+x = Some(Some(9))
 
 case x of
     Some(Some(num)) do Some(num) end
@@ -117,11 +117,11 @@ end
 #    a + b
 #end
 #
-#let arr = [1,2,3]
+#arr = [1,2,3]
 #
 #console_log(js__array__reduce(arr, add, 0))
 
 
-#let x: Callable<Callable<Num, Str>, Bool> = 2
-#let x: Array<Callable<Num, Str>> = 2
-#let x: Callable<Num, Callable<Num, Str>> = 2
+#x: Callable<Callable<Num, Str>, Bool> = 2
+#x: Array<Callable<Num, Str>> = 2
+#x: Callable<Num, Callable<Num, Str>> = 2

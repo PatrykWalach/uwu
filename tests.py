@@ -115,8 +115,8 @@ def lexer():
         ("'abc'", [ELiteral("abc")]),
         ("-2+2", [EBinaryExpr("+", EUnaryExpr("-", ELiteral(2)), ELiteral(2))]),
         ("-(2+2)", [EUnaryExpr("-", EBinaryExpr("+", ELiteral(2), ELiteral(2)))]),
-        ("let x=2\n-1", [ELet("x", ELiteral(2)), EUnaryExpr("-", ELiteral(1))]),
-        ("let x=2-1", [ELet("x", EBinaryExpr("-", ELiteral(2), ELiteral(1)))]),
+        ("x=2\n-1", [ELet("x", ELiteral(2)), EUnaryExpr("-", ELiteral(1))]),
+        ("x=2-1", [ELet("x", EBinaryExpr("-", ELiteral(2), ELiteral(1)))]),
         (
             "Some(2)",
             [EVariantCall("Some", [ELiteral(2)])],
@@ -130,15 +130,15 @@ def lexer():
             [EVariantCall("Some", [ELiteral(2)]), ELiteral(2)],
         ),
         (
-            "let x=id(2)",
+            "x=id(2)",
             [ELet("x", ECall(EIdentifier("id"), [ELiteral(2)]))],
         ),
         (
-            "(let x=id)(2)",
+            "(x=id)(2)",
             [ECall(ELet("x", EIdentifier("id")), [ELiteral(2)])],
         ),
         (
-            "let x=id\n(2)",
+            "x=id\n(2)",
             [ELet("x", EIdentifier("id")), ELiteral(2)],
         ),
         (
@@ -152,7 +152,7 @@ def lexer():
             ],
         ),
         (
-            "let x=(2+3)*4",
+            "x=(2+3)*4",
             [
                 ELet(
                     "x",
@@ -165,7 +165,7 @@ def lexer():
             ],
         ),
         (
-            "enum StrOrNum{String(Str)\nNumber(Num)}\nlet x=Number(1)\nlet x=String('12')",
+            "enum StrOrNum{String(Str)\nNumber(Num)}\nx=Number(1)\nx=String('12')",
             [
                 EEnumDeclaration(
                     id="StrOrNum",
@@ -185,7 +185,7 @@ def lexer():
             ],
         ),
         (
-            "def x(k) do k() end\ndef n() do 12 end\nlet y:Num=x(n)\nx",
+            "def x(k) do k() end\ndef n() do 12 end\ny:Num=x(n)\nx",
             [
                 EDef("x", [EParam("k")], EDo([ECall(EIdentifier("k"))])),
                 EDef("n", [], EDo([ELiteral(12)])),
@@ -222,11 +222,11 @@ def lexer():
         #         )
         #     ],
         (
-            "let x=let y=2+3",
+            "x=y=2+3",
             [ELet("x", ELet("y", EBinaryExpr("+", ELiteral(2), ELiteral(3))))],
         ),
         (
-            "do let x = 1 end",
+            "do x = 1 end",
             [
                 EDo(
                     [ELet("x", ELiteral(1))],
@@ -258,7 +258,7 @@ def lexer():
             ],
         ),
         (
-            "let x:Option<Num>=None()",
+            "x:Option<Num>=None()",
             [
                 ELet(
                     "x",
@@ -480,9 +480,9 @@ def test_parser(program, ast, parser, lexer):
     "program, expected_type",
     [
         ("1", typed.TNum()),
-        ("let x=1\nx", typed.TNum()),
-        ("let x=1\nlet a=x\na", typed.TNum()),
-        ("let x=1\nlet a=x", typed.TNum()),
+        ("x=1\nx", typed.TNum()),
+        ("x=1\na=x\na", typed.TNum()),
+        ("x=1\na=x", typed.TNum()),
         ("Some(1)", typed.TOption(typed.TNum())),
         ("id(id(1))", typed.TNum()),
         ("2+id(1)", typed.TNum()),
@@ -492,7 +492,7 @@ def test_parser(program, ast, parser, lexer):
             typed.TNum(),
         ),
         (
-            "let x=(2+3)*4",
+            "x=(2+3)*4",
             typed.TNum(),
         ),
         # ("enum Option<value>{None\nSome(value)}\nx:Option<Num>=None"),
@@ -506,19 +506,19 @@ def test_parser(program, ast, parser, lexer):
         ("def fun() do: Num 1 end\n fun()", typed.TNum()),
         ("def id2(a) do a end\nid2(1)\nid2('12')", typed.TStr()),
         ("def id2(a) do a end\nid2('12')\nid2(1)", typed.TNum()),
-        ("let x=Some(1)\nlet x:Option<Str>=None()", typed.TOption(typed.TStr())),
+        ("x=Some(1)\nx:Option<Str>=None()", typed.TOption(typed.TStr())),
         (
-            "let x=y=2+3",
+            "x=y=2+3",
             typed.TNum(),
         ),
         (
-            "do let x=1 end",
+            "do x=1 end",
             typed.TNum(),
         ),
         ("id('12')", typed.TStr()),
         ("id(1)", typed.TNum()),
         ("id('12')\nid(1)", typed.TNum()),
-        ("let x:Option<Num>=None()", typed.TOption(typed.TNum())),
+        ("x:Option<Num>=None()", typed.TOption(typed.TNum())),
         ("id(1+2)", typed.TNum()),
         (
             "def add(a, b) do a + b end",
@@ -538,9 +538,9 @@ def test_parser(program, ast, parser, lexer):
             "if 2 > 0 then Some(1) elif 2 > 0 then None() else None() end",
             typed.TOption(typed.TNum()),
         ),
-        ("enum AB{A B}\nlet x:AB=A()", typed.TCon("AB", typed.KStar())),
+        ("enum AB{A B}\nx:AB=A()", typed.TCon("AB", typed.KStar())),
         (
-            "enum ABC<X,Y,Z> {A(X)B(Y)C(Z)}\nlet x:ABC<Num,Num,Num>=A(1)",
+            "enum ABC<X,Y,Z> {A(X)B(Y)C(Z)}\nx:ABC<Num,Num,Num>=A(1)",
             typed.TAp(
                 typed.TAp(
                     typed.TAp(
@@ -562,7 +562,7 @@ def test_parser(program, ast, parser, lexer):
             ),
         ),
         (
-            "let x=Some(1)\ncase x of Some(value) do 2 end None() do 3 end end",
+            "x=Some(1)\ncase x of Some(value) do 2 end None() do 3 end end",
             typed.TNum(),
         ),
         (
@@ -602,7 +602,7 @@ def test_parser(program, ast, parser, lexer):
         ),
         ("do end", typed.TUnit()),
         (
-            "enum StrOrNum{String(Str)\nNumber(Num)}\nlet x=Number(1)\nlet x=String('12')",
+            "enum StrOrNum{String(Str)\nNumber(Num)}\nx=Number(1)\nx=String('12')",
             typed.TCon("StrOrNum", typed.KStar()),
         ),
         # ("{1,'2'}", typed.TTuple([typed.TNum(), typed.TStr()])),
@@ -620,11 +620,11 @@ def test_infer(program, expected_type, parser, lexer):
         (
             [
                 ("0", "`console.log`(1)", "1"),
-                ("1", "let x=1\n`console.log`(x)", "1"),
-                ("2", "let x=1\nlet a = x\n`console.log`(a)", "1"),
-                ("3", "let x=1\n`console.log`(let a = x)", "1"),
+                ("1", "x=1\n`console.log`(x)", "1"),
+                ("2", "x=1\na = x\n`console.log`(a)", "1"),
+                ("3", "x=1\n`console.log`(a = x)", "1"),
                 ("4", "`console.log`(1+2*3)", "7"),
-                ("5", "`console.log`(let x=(2+3)*4)", "20"),
+                ("5", "`console.log`(x=(2+3)*4)", "20"),
                 ("6", "`console.log`(if 2 > 0 then 1 else 2 end)", "1"),
                 ("7", "`console.log`(if 2 < 0 then 1 else 2 end)", "2"),
                 (
@@ -695,12 +695,12 @@ def test_infer(program, expected_type, parser, lexer):
                 # ),
                 (
                     "22",
-                    "def add(a, b) do a + b end\nlet addTwo=add(2)\n`console.log`(addTwo(3))",
+                    "def add(a, b) do a + b end\naddTwo=add(2)\n`console.log`(addTwo(3))",
                     "5",
                 ),
                 (
                     "23",
-                    "def add(a) do def add(b) do a + b end end\nlet addTwo=add(2)\n`console.log`(addTwo(3))",
+                    "def add(a) do def add(b) do a + b end end\naddTwo=add(2)\n`console.log`(addTwo(3))",
                     "5",
                 ),
                 ("24", "def add(a, b) do a + b end\n`console.log`(add(2,3))", "5"),
@@ -747,7 +747,7 @@ def test_compile_with_snapshot(id, program, expected_output, snapshot, parser, l
 @pytest.mark.parametrize(
     "program",
     [
-        "let x: Str = 134",
+        "x: Str = 134",
         "do: Str 1 end",
         "def fun(): Str do 1 end",
         "if 2 > 0 then: Num 1 else '12' end",

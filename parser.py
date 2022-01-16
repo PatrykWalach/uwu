@@ -47,7 +47,6 @@ class UwuLexer(Lexer):
         ENUM,
         THEN,
         TYPE_IDENTIFIER,
-        LET,
         EXTERNAL,
         NOT_EQUAL,
         EQUAL,
@@ -92,7 +91,6 @@ class UwuLexer(Lexer):
     IDENTIFIER["then"] = THEN
 
     IDENTIFIER["of"] = OF
-    IDENTIFIER["let"] = LET
     EXTERNAL = r"`[^`]*`"
 
     ignore_comment = r"\#.*"
@@ -209,7 +207,7 @@ class UwuParser(Parser):
         return terms.EDef(
             p.identifier.name,
             p.params or [],
-            body=p.do,
+            body=p.expr,
             hint=terms.EHint.from_option(p.type),
             generics=concat(p.type_identifier0, p.type_identifier1),
         )
@@ -384,7 +382,7 @@ class UwuParser(Parser):
     def type_identifier(self, p):
         return terms.EIdentifier(p.TYPE_IDENTIFIER)
 
-    @_("LET identifier [ ':' type ] '=' expr")
+    @_("identifier [ ':' type ] '=' expr")
     def variable_declaration(self, p):
         return terms.ELet(
             id=p.identifier.name, init=p.expr, hint=terms.EHint.from_option(p.type)
