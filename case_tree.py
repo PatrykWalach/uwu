@@ -4,27 +4,33 @@ import typing
 import terms
 
 
-def subst_var_eqs(case: terms.ECase):
+@dataclasses.dataclass(frozen=True)
+class Clause:
+    patterns: dict[str, terms.Pattern]
+    body: terms.EDo = dataclasses.field(default_factory=terms.EDo)
+
+
+def subst_var_eqs(clause: Clause):
     substitutions = {
         pattern.identifier: id
-        for id, pattern in case.patterns.items()
+        for id, pattern in clause.patterns.items()
         if isinstance(pattern, terms.EMatchAs)
     }
 
     patterns = {
         id: pattern
-        for id, pattern in case.patterns.items()
+        for id, pattern in clause.patterns.items()
         if not isinstance(pattern, terms.EMatchAs)
     }
 
     return patterns, dataclasses.replace(
-        case.body,
+        clause.body,
         body=[]
         + [
             terms.ELet(id, terms.EIdentifier(value))
             for id, value in substitutions.items()
         ]
-        + case.body.body,
+        + clause.body.body,
     )
 
 
@@ -59,52 +65,56 @@ class Node:
 CaseTree: typing.TypeAlias = Node | MissingLeaf | Leaf
 
 
-def gen_match(cases1: typing.Sequence[terms.ECase]) -> CaseTree:
+def gen_match(cases: typing.Sequence[terms.ECase]):
+    return gen_match2([Clause({"$": case.pattern}, case.body) for case in cases])
 
-    cases = [subst_var_eqs(case) for case in cases1]
 
-    match cases:
+def gen_match2(clauses1: typing.Sequence[Clause]) -> CaseTree:
+
+    clauses = [subst_var_eqs(clause) for clause in clauses1]
+
+    match clauses:
         case []:
             return MissingLeaf()
         case [(patterns, body), *_] if not patterns:
             return Leaf(body)
         case [(patterns, body), *_]:
-            branch_var = branching_heuristic(patterns, cases)
+            branch_var = branching_heuristic(patterns, clauses)
             branch_pattern = patterns[branch_var]
-            yes = list[terms.ECase]()
-            no = list[terms.ECase]()
+            yes = list[Clause]()
+            no = list[Clause]()
 
             # vars = [fresh() for _ in branch_pattern.patterns]
             vars = [f"{branch_var}._{i}" for i in range(len(branch_pattern.patterns))]
 
-            for patterns, body in cases:
-                case = terms.ECase(dict[str, terms.Pattern](patterns), body)
+            for patterns, body in clauses:
+                clause = Clause(dict[str, terms.Pattern](patterns), body)
                 match patterns.get(branch_var, None):
                     case None:
-                        yes.append(case)
-                        no.append(case)
-                        pass
+                        yes.append(clause)
+                        no.append(clause)
+
                     case terms.EMatchVariant(id, patterns) if id == branch_pattern.id:
                         yes.append(
                             dataclasses.replace(
-                                case,
+                                clause,
                                 patterns={
                                     key: value
-                                    for key, value in case.patterns.items()
+                                    for key, value in clause.patterns.items()
                                     if key != branch_var
                                 }
                                 | dict(zip(vars, patterns)),
                             )
                         )
-                        pass
+
                     case terms.EMatchVariant():
-                        no.append(case)
-                        pass
+                        no.append(clause)
+
                     case match:
                         raise TypeError(f"Unsupported pattern: {match}")
 
             return Node(
-                branch_var, branch_pattern.id, vars, gen_match(yes), gen_match(no)
+                branch_var, branch_pattern.id, vars, gen_match2(yes), gen_match2(no)
             )
         case _:
             raise TypeError("Unsupported case")

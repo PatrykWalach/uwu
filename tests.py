@@ -304,16 +304,14 @@ def lexer():
                     EIdentifier(name="x"),
                     [
                         ECase(
-                            {
-                                "$": EMatchVariant(
-                                    id="Some",
-                                    patterns=[EMatchAs("value")],
-                                )
-                            },
+                            EMatchVariant(
+                                id="Some",
+                                patterns=[EMatchAs("value")],
+                            ),
                             EDo([ELiteral(value=2.0)]),
                         ),
                         ECase(
-                            {"$": EMatchVariant("None")},
+                            EMatchVariant("None"),
                             EDo([ELiteral(value=3.0)]),
                         ),
                     ],
@@ -328,7 +326,7 @@ def lexer():
         ),
         (
             "case x of\nSome() do end\nend",
-            [ECaseOf(EIdentifier("x"), [ECase(patterns={"$": EMatchVariant("Some")})])],
+            [ECaseOf(EIdentifier("x"), [ECase(EMatchVariant("Some"))])],
         ),
         (
             "case x of Some(a,\nb,\nc\n) do end end",
@@ -337,12 +335,10 @@ def lexer():
                     EIdentifier("x"),
                     [
                         ECase(
-                            patterns={
-                                "$": EMatchVariant(
-                                    "Some",
-                                    [EMatchAs("a"), EMatchAs("b"), EMatchAs("c")],
-                                )
-                            }
+                            EMatchVariant(
+                                "Some",
+                                [EMatchAs("a"), EMatchAs("b"), EMatchAs("c")],
+                            )
                         )
                     ],
                 )
@@ -355,12 +351,10 @@ def lexer():
                     EIdentifier("x"),
                     [
                         ECase(
-                            patterns={
-                                "$": EMatchVariant(
-                                    "Some",
-                                    [EMatchAs("a"), EMatchAs("b"), EMatchAs("c")],
-                                )
-                            }
+                            EMatchVariant(
+                                "Some",
+                                [EMatchAs("a"), EMatchAs("b"), EMatchAs("c")],
+                            )
                         )
                     ],
                 )

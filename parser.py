@@ -302,11 +302,11 @@ class UwuParser(Parser):
 
     @_("cases pattern do [ NEWLINE ]")
     def cases(self, p):
-        return p.cases + [terms.ECase({"$": p.pattern}, p.do)]
+        return p.cases + [terms.ECase(p.pattern, p.do)]
 
     @_("pattern do [ NEWLINE ]")
     def cases(self, p):
-        return [terms.ECase({"$": p.pattern}, p.do)]
+        return [terms.ECase(p.pattern, p.do)]
 
     # @_("clause { ',' clause } do")
     # def case(self, p):
