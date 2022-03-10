@@ -4,3 +4,11 @@ repos:
     hooks:
     -   id: black
         args: [--target-version=py310]
+-   repo: local
+    hooks:
+      - id: pre-commit-chktex
+        name: Check Latex
+        entry: ./bin/chktex.exe
+        language: system
+        args: [-wall, -n22, -n30, -e16, -n8, -q]
+        types: [tex]
