@@ -9,3 +9,13 @@ repos:
     rev: 5.6.4
     hooks:
       - id: isort
+
+  - repo: local
+    hooks:
+      - id: pre-commit-chktex
+        name: Check Latex
+        entry: ./bin/chktex.exe
+        language: system
+        args: [-wall, -n22, -n30, -e16, -n8, -q]
+        types: [tex]
+
