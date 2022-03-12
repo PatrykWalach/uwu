@@ -1,6 +1,8 @@
 from __future__ import annotations
+
 import dataclasses
 import typing
+
 import typed
 
 A = typing.TypeVar("A")
@@ -30,26 +32,31 @@ Z = typing.TypeVar("Z")
 
 
 @dataclasses.dataclass(frozen=True)
-class EVariableDeclaration:
-    id: EIdentifier
+class EHintNone:
+    pass
+
+
+@dataclasses.dataclass(frozen=True)
+class ELet:
+    id: str
     init: Expr
-    hint: EHint | None = None
+    hint: EHint | EHintNone = EHintNone()
 
 
 @dataclasses.dataclass(frozen=True)
 class EDo:
-    body: list[Expr]
-    hint: EHint | None = None
+    body: list[Expr] = dataclasses.field(default_factory=list)
+    hint: EHint | EHintNone = EHintNone()
 
 
 @dataclasses.dataclass(frozen=True)
 class EProgram:
-    body: list[Expr | EEnumDeclaration]
+    body: list[Expr | EEnumDeclaration] = dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass(frozen=True)
 class EBinaryExpr:
-    op: typing.Literal["++", "+", "-", "/", "*", "//", ">", "<", "<=", ">="]
+    op: typing.Literal["++", "+", "-", "/", "*", "%", "//", ">", "<", "|", "!=", "=="]
     left: Expr
     right: Expr
 
@@ -61,101 +68,139 @@ class EIdentifier:
 
 @dataclasses.dataclass(frozen=True)
 class ELiteral:
-    raw: str
     value: float | str
 
 
 @dataclasses.dataclass(frozen=True)
+class EExternal:
+    value: str
+
+
+@dataclasses.dataclass(frozen=True)
 class EDef:
-    identifier: EIdentifier
+    identifier: str
     params: list[EParam]
     body: EDo
-    hint: EHint | None = None
+    hint: EHint | EHintNone = EHintNone()
+    generics: list[EIdentifier] = dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass(frozen=True)
 class EParam:
-    identifier: EIdentifier
-    hint: EHint | None = None
+    identifier: str
+    hint: EHint | EHintNone = EHintNone()
 
 
 @dataclasses.dataclass(frozen=True)
-class EParamPattern:
-    identifier: EIdentifier
+class EUnaryExpr:
+    op: typing.Literal["-"]
+    expr: Expr
+
+
+@dataclasses.dataclass(frozen=True)
+class EMatchAs:
+    identifier: str
 
 
 @dataclasses.dataclass(frozen=True)
 class ECaseOf:
-    of: Expr
-    cases: list[ECase]
+    expr: Expr
+    cases: list[ECase] = dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass(frozen=True)
 class ECase:
     pattern: Pattern
-    body: EDo
+    body: EDo = dataclasses.field(default_factory=EDo)
 
 
 @dataclasses.dataclass(frozen=True)
-class EEnumPattern:
-    id: EIdentifier
-    patterns: list[Pattern]
+class EMatchVariant:
+    id: str
+    patterns: list[Pattern] = dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass(frozen=True)
 class ECall:
     callee: Expr
-    arguments: list[Expr]
+    args: list[Expr] = dataclasses.field(default_factory=list)
+
+
+@dataclasses.dataclass(frozen=True)
+class EVariantCall:
+    callee: str
+    args: list[Expr] = dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass(frozen=True)
 class EArray:
-    arguments: list[Expr]
+    args: list[Expr] = dataclasses.field(default_factory=list)
+
+
+@dataclasses.dataclass(frozen=True)
+class ETuple:
+    args: list[Expr] = dataclasses.field(default_factory=list)
+
+
+@dataclasses.dataclass(frozen=True)
+class EIfNone:
+    pass
 
 
 @dataclasses.dataclass(frozen=True)
 class EIf:
     test: Expr
-    then: EBlockStmt
-    or_else: EBlockStmt | EIf | None
-    hint: EHint | None = None
+    then: EBlock
+    or_else: EBlock | EIf | EIfNone = EIfNone()
+    hint: EHint | EHintNone = EHintNone()
+
+    @staticmethod
+    def from_option(hint):
+        if hint == None:
+            return EIfNone()
+        return hint
 
 
 @dataclasses.dataclass(frozen=True)
-class EBlockStmt:
-    body: list[Expr]
+class EBlock:
+    body: list[Expr] = dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass(frozen=True)
 class EHint:
-    id: EIdentifier
-    arguments: list[EHint]
+    id: str
+    args: list[Type] = dataclasses.field(default_factory=list)
+
+    @staticmethod
+    def from_option(hint):
+        if hint == None:
+            return EHintNone()
+        return hint
 
 
 @dataclasses.dataclass(frozen=True)
 class EEnumDeclaration:
-    id: EIdentifier
-    generics: list[EIdentifier]
-    variants: list[EVariant]
+    id: str
+    variants: list[EVariant] = dataclasses.field(default_factory=list)
+    generics: list[EIdentifier] = dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass(frozen=True)
 class EVariant:
-    id: EIdentifier
-    fields: EFieldsUnnamed
+    id: str
+    fields: list[EHint] = dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass(frozen=True)
-class EArrayPattern:
-    first: list[Pattern]
-    rest: ESpread | None
+class EMatchArray:
+    patterns: list[Pattern]
+    rest: EIdentifier | None = None
 
 
 @dataclasses.dataclass(frozen=True)
-class ESpread:
-    rest: EIdentifier
-    last: list[Pattern]
-    #
+class EMatchTuple:
+    patterns: list[Pattern]
+    rest: EIdentifier | None = None
 
 
 @dataclasses.dataclass(frozen=True)
@@ -163,34 +208,8 @@ class EFieldsUnnamed:
     unnamed: list[EIdentifier]
 
 
-AstNode: typing.TypeAlias = (
-    EProgram
-    | EDo
-    | EVariableDeclaration
-    | EIdentifier
-    | EBinaryExpr
-    | ELiteral
-    | EDef
-    | EParam
-    | ECaseOf
-    | ECase
-    | ECall
-    | EArray
-    | EIf
-    | EBlockStmt
-    | EEnumDeclaration
-    | EEnumPattern
-    | EFieldsUnnamed
-    | EHint
-    | EVariant
-    | EParamPattern
-    | EArrayPattern
-    | ESpread
-)
+Pattern: typing.TypeAlias = EMatchAs | EMatchVariant
 
-
-AstTree: typing.TypeAlias = AstNode
-Pattern: typing.TypeAlias = EParamPattern | EArrayPattern | EEnumPattern
 Expr: typing.TypeAlias = (
     EDo
     | ELiteral
@@ -198,10 +217,30 @@ Expr: typing.TypeAlias = (
     | EIf
     | ECall
     | ECaseOf
-    | EVariableDeclaration
+    | ELet
     | EIdentifier
     | EBinaryExpr
     | EArray
+    | ETuple
+    | EVariantCall
+    | EExternal
+    | EUnaryExpr
 )
 
 # 'type_identifier',  "array", "tuple",
+Type: typing.TypeAlias = EHint | EHintNone
+
+AstTree: typing.TypeAlias = (
+    EProgram
+    | EParam
+    | ECaseOf
+    | ECase
+    | EBlock
+    | EEnumDeclaration
+    | EFieldsUnnamed
+    | Type
+    | EVariant
+    | EIfNone
+    | Expr
+    | Pattern
+)

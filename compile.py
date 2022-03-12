@@ -1,18 +1,23 @@
-from algorithm_j import Context
-import terms
+from __future__ import annotations
+
 import functools
+
+import case_tree
+import terms
 
 
 def compile(exp: terms.AstTree) -> str:
 
     match exp:
+        case terms.EExternal(value=value):
+            return f"{value}"
         case terms.ELiteral(value=str()):
             return f'"{exp.value}"'
         case terms.ELiteral(value=float()):
             return f"{exp.value}"
-        case terms.EVariableDeclaration(terms.EIdentifier(id), init):
+        case terms.ELet(id, init):
             return f"{id}={compile( init)}"
-        case terms.EBlockStmt(body):
+        case terms.EBlock(body):
             body = [compile(expr) for expr in body]
             if body:
                 body[-1] = "return " + body[-1]
@@ -24,23 +29,32 @@ def compile(exp: terms.AstTree) -> str:
             return "(()=>{" + ";".join(body) + "})()"
         case terms.EProgram(body):
             body = [compile(expr) for expr in body]
-            return "(()=>{" + ";".join(body) + "})()"
-        case terms.EIf(test, then, or_else=None):
-            return f"(()=>{{if({compile(test)}.TAG==='True'){{{compile(then)}}}else{{{{TAG:'None'}}}}}})()"
-        case terms.EIf(test, then, or_else) if or_else != None:
-            return f"(()=>{{if({compile(test)}.TAG==='True'){{{compile(then)}}}else{{{compile(or_else)}}}}})()"
-        case terms.EIdentifier("print"):
-            return f"console.log"
-        case terms.EIdentifier("unit"):
-            return f"undefined"
-        case terms.ECall((id), args):
+            return ";".join(body)
+        case terms.EIfNone():
+            return f"return"
+        case terms.EIf(test, then, or_else):
+            return f"(()=>{{if({compile(test)}){{{compile(then)}}}else{{{compile(or_else)}}}}})()"
+        case terms.ECall(id, args):
             return functools.reduce(
                 lambda acc, arg: f"{acc}({arg})",
                 [compile(arg) for arg in args] or [""],
                 compile(id),
             )
 
-        case terms.EDef(terms.EIdentifier(id), args, body):
+        case terms.EVariantCall("True", []):
+            return f"true"
+        case terms.EVariantCall("False", []):
+            return f"false"
+
+        case terms.EVariantCall(id, []):
+            return f"'{id}'"
+
+        case terms.EVariantCall(id, args) if args:
+            args = [f"_{i}:{compile(arg)}" for i, arg in enumerate(args)]
+
+            return f"{{TAG:'{id}',{','.join(args)}}}"
+
+        case terms.EDef(id, args, body):
 
             args = functools.reduce(
                 lambda acc, arg: f"{acc}({arg})=>",
@@ -49,81 +63,89 @@ def compile(exp: terms.AstTree) -> str:
             )
 
             return f"{id}={args}{compile(body)}"
+        case terms.EBinaryExpr("|", left, right):
+            return f"{compile( left)}.concat({compile( right)})"
         case terms.EBinaryExpr("++", left, right):
             return f"({compile( left)}+{compile( right)})"
         case terms.EBinaryExpr("//", left, right):
             return f"Math.floor({compile( left)}/{compile( right)})"
-        case terms.EBinaryExpr(">" | "<" | "<=" | ">=" as op, left, right):
-            return f"({compile( left)}{op}{compile( right)}?{{TAG:'True'}}:{{TAG:'False'}})"
-        case terms.EBinaryExpr("+" | "-" | "/" | "*" as op, left, right):
+        case terms.EBinaryExpr("!=" | "==" as op, left, right):
+            return f"({compile( left)}{op}={compile( right)})"
+        case terms.EBinaryExpr(
+            ">" | "<" | "+" | "-" | "/" | "*" | "%" as op, left, right
+        ):
             return f"({compile( left)}{op}{compile( right)})"
         case terms.EIdentifier(id):
             return id
-        case terms.EEnumDeclaration(terms.EIdentifier(id), generics, variants):
-            str_variants = list[str]()
-
-            for var in variants:
-                fields = [
-                    f"_{i}: {field.name}" for i, field in enumerate(var.fields.unnamed)
-                ]
-
-                body = functools.reduce(
-                    lambda acc, arg: f"({arg})=>{acc}",
-                    ([field.name for field in reversed(var.fields.unnamed)]) or [""],
-                    f"({{TAG:'{var.id.name}',{','.join(fields)}}})",
-                )
-
-                str_variant = f"{var.id.name}={  body  }"
-
-                str_variants.append(str_variant)
-
-            return ";".join(str_variants)
-        case terms.EParam(terms.EIdentifier(id)):
+        case terms.EEnumDeclaration():
+            return ""
+        case terms.EParam(id):
             return id
-        case terms.ECaseOf(of, cases):
-            cases = [f"{compile(case)}" for case in cases]
+        case terms.ECaseOf(expr, cases):
+            return f"(()=>{{const $={compile(expr)};{compile_case_tree(case_tree.gen_match(cases))}}})()"
+            # cases = [f"{compile(case)}" for case in cases]
+            # cases = [*cases, "throw new Error('Unhandled case of')"]
 
-            return f"((__)=>{{{';'.join(cases)}}})({compile(of)})"
-        case terms.ECase(pattern, body):
-            return f"if({compile(pattern)}(__)){{return {compile(body)}}}"
-        case terms.EParamPattern(terms.EIdentifier(id)):
+            # return f"((__)=>{{{';'.join(cases)}}})({compile(of)})"
+        # case terms.ECase(pattern, body):
+        #     return f"if({compile(pattern)}(__)){{return {compile(body)}}}"
+        case terms.EMatchAs(id):
             return f"((__)=>{{{id}=__; return true}})"
-        case terms.EEnumPattern(terms.EIdentifier(id), fields):
+        case terms.EMatchVariant("True", []):
+            return f"((__)=>{{return __===true}})"
+        case terms.EMatchVariant("False", []):
+            return f"((__)=>{{return __===false}})"
+        case terms.EMatchVariant(id, []):
+            return f"((__)=>{{return __==='{id}'}})"
+        case terms.EMatchVariant(id, fields) if fields:
             fields = [f"{compile(field)}(__._{i})" for i, field in enumerate(fields)]
             fields = [f'__.TAG==="{id}"', *fields]
             fields = "&&".join(fields)
 
             return f"((__)=>{{return {fields}}})"
-        case terms.EArray(args):
+        case terms.EArray(args) | terms.ETuple(args):
             return f"[{','.join(map(compile, args))}]"
-        case terms.EArrayPattern(first, rest=None):
-            first = [f"{compile(element)}(__[{i}])" for i, element in enumerate(first)]
-            first = [f"__.length=={len(first)}", *first]
-            first = "&&".join(first)
+        case terms.EUnaryExpr(op, expr):
+            return f"{op}({compile(expr)})"
+        case terms.EMatchTuple(patterns) | terms.EMatchArray(patterns):
 
-            return f"((__)=>{{return {first}}})"
-        case terms.EArrayPattern(first, rest) if rest != None:
-            first = [f"{compile(element)}(__[{i}])" for i, element in enumerate(first)]
-            first = [
-                f"__.length>={len(first)}",
-                f"{compile(rest)}(__.slice({len(first)}))",
-                *first,
+            patterns = [
+                f"{compile(pattern)}(__[{i}])" for i, pattern in enumerate(patterns)
             ]
-            first = "&&".join(first)
+            patterns = [
+                f"__.length=={len(patterns)}",
+                *patterns,
+            ]
 
-            return f"((__)=>{{return {first}}})"
-        case terms.ESpread(terms.EIdentifier(id), last):
-            last = [
-                f"{compile(element)}(__[__.length-{i+1}])"
-                for i, element in enumerate(reversed(last))
-            ]
-            last = [
-                f"__.length>={len(last)}",
-                f"({id}=__.slice(0, __.length-{len(last)}))",
-                *last,
-            ]
-            last = "&&".join(last)
+            patterns = "&&".join(patterns)
 
-            return f"((__)=>{{return {last}}})"
+            return f"((__)=>{{return {patterns}}})"
         case _:
             raise Exception(f"Unsupported expression: {exp}")
+
+
+def compile_case_tree(tree: case_tree.CaseTree):
+    match tree:
+        case case_tree.Leaf(body):
+            return compile(terms.EBlock(body.body))
+        case case_tree.MissingLeaf():
+            return "throw new Error('Non-exhaustive pattern match')"
+        case case_tree.Node(var, pattern_name, vars, yes, no):
+            conditions = []
+
+            if pattern_name == "True":
+                conditions.append(f"{var}")
+            if pattern_name == "False":
+                conditions.append(f"!{var}")
+            elif vars:
+                conditions.insert(0, f"{var}.TAG==='{pattern_name}'")
+                conditions.insert(0, f"typeof {var} !== 'string'")
+            else:
+                conditions.insert(0, f"{var}==='{pattern_name}'")
+
+            # if isinstance(no, case_tree.MissingLeaf):
+            #     return compile_case_tree(yes)
+
+            return f"if({'&&'.join(conditions)}){{{compile_case_tree(yes)}}}{compile_case_tree(no)}"
+        case _:
+            raise TypeError("Unsupported case")

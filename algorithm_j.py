@@ -1,9 +1,10 @@
 from __future__ import annotations
-import logging
-import itertools
+
 import dataclasses
 import functools
 import typing
+
+import case_tree
 import terms
 import typed
 
@@ -22,28 +23,27 @@ class Scheme:
 
 
 Substitution: typing.TypeAlias = dict[int, typed.Type]
-Context: typing.TypeAlias = dict[str, Scheme]  # dict[str, Scheme]
+Context: typing.TypeAlias = dict[str, Scheme]
 
 counter = 0
 
 
-def fresh_ty_var() -> typed.TVar:
+def fresh_ty_var(kind=typed.KStar()) -> typed.TVar:
     global counter
     counter += 1
-    return typed.TVar(counter)
+    return typed.TVar(counter, kind)
 
 
 def apply_subst(subst: Substitution, ty: typed.Type) -> typed.Type:
     match ty:
-        # case typed.TNum() | typed.TStr():
-        #     return ty
         case typed.TVar(var):
-            return subst.get(var, typed.TVar(var))
-        case typed.TGeneric(id, params):
-            params = [apply_subst(subst, ty) for ty in params]
-            return typed.TGeneric(id, params)
+            return subst.get(var, ty)
+        case typed.TAp(arg, ret):
+            return typed.TAp(apply_subst(subst, arg), apply_subst(subst, ret))
+        case typed.TCon():
+            return ty
         case _:
-            raise TypeError(f"Cannot apply substitution to {ty}")
+            raise TypeError(f"Cannot apply substitution to {ty=}")
 
 
 def compose_subst(s1: Substitution, s2: Substitution) -> Substitution:
@@ -55,18 +55,16 @@ def compose_subst(s1: Substitution, s2: Substitution) -> Substitution:
 # T\x is remove x from T
 
 
-def free_type_vars(type: typed.Type) -> set[int]:
-    match type:
+def free_type_vars(ty: typed.Type) -> set[int]:
+    match ty:
         case typed.TVar(var):
             return {var}
-        # case typed.TNum() | typed.TStr():
-        #     return set()
-        case typed.TGeneric(_, params):
-            return functools.reduce(
-                lambda acc, ty: acc | free_type_vars(ty), params, set()
-            )
+        case typed.TAp(arg, ret):
+            return free_type_vars(arg) | free_type_vars(ret)
+        case typed.TCon():
+            return set()
         case _:
-            raise TypeError(f"Cannot free type vars from {type}")
+            raise TypeError(f"Cannot free type vars from {ty=}")
 
 
 def free_type_vars_scheme(scheme: Scheme):
@@ -87,22 +85,27 @@ class UnifyException(Exception):
     pass
 
 
+class CircularUseException(Exception):
+    def __init__(self, *args: object, u, t) -> None:
+        self.u = u
+        self.t = t
+        super().__init__(*args)
+
+
 def unify(a: typed.Type, b: typed.Type) -> Substitution:
     match (a, b):
-        # case (typed.TNum(), typed.TNum()) | (typed.TStr(), typed.TStr()):
-        #     return {}
+        case (typed.TCon(), typed.TCon()) if a == b:
+            return {}
         case (
-            typed.TGeneric(val0, params0),
-            typed.TGeneric(val1, params1),
-        ) if val0 == val1 and len(params0) == len(params1):
+            typed.TAp(arg0, ret0),
+            typed.TAp(arg1, ret1),
+        ):
+            subst = unify_subst(arg0, arg1, {})
+            subst = unify_subst(ret0, ret1, subst)
 
-            s1 = {}
-
-            for param0, param1 in zip(params0, params1):
-                s2 = unify(apply_subst(s1, param0), apply_subst(s1, param1))
-                s1 = compose_subst(s2, s1)
-
-            return s1
+            return subst
+        case (typed.TVar(u), t) | (t, typed.TVar(u)) if typed.kind(a) != typed.kind(b):
+            raise UnifyException(f"Kind for {a=} and {b=} does not match")
         case (typed.TVar(u), t) | (t, typed.TVar(u)):
             return var_bind(u, t)
         case _:
@@ -150,6 +153,14 @@ def unify_subst(a: typed.Type, b: typed.Type, subst: Substitution) -> Substituti
     return compose_subst(t, subst)
 
 
+def reduce_args(ty_items: list[typed.Type], ty_call: typed.Type):
+    return functools.reduce(
+        flip(typed.TDef),
+        ty_items or [typed.TUnit()],
+        ty_call,
+    )
+
+
 def infer(
     subst: Substitution, ctx: Context, exp: terms.AstTree
 ) -> tuple[Substitution, typed.Type]:
@@ -160,9 +171,9 @@ def infer(
             return subst, typed.TNum()
         case terms.EIdentifier(var):
             return subst, instantiate(ctx[var])
-        case terms.EDo(body, hint) if hint != None:
+        case terms.EDo(body, hint):
             subst, hint = infer(subst, ctx, hint)
-            ty = fresh_ty_var()
+            ty = typed.TUnit()
             ctx = ctx.copy()
 
             for exp in body:
@@ -171,7 +182,7 @@ def infer(
             subst = unify_subst(ty, hint, subst)
 
             return subst, hint
-        case terms.EProgram(body) | terms.EDo(body) | terms.EBlockStmt(body):
+        case terms.EProgram(body) | terms.EBlock(body):
             ty = typed.TUnit()
             ctx = ctx.copy()
 
@@ -179,9 +190,7 @@ def infer(
                 subst, ty = infer(subst, ctx, exp)
 
             return subst, ty
-        case terms.EVariableDeclaration(
-            terms.EIdentifier(id), init, hint
-        ) if hint != None:
+        case terms.ELet(id, init, hint):
             subst, hint = infer(subst, ctx, hint)
             subst, t1 = infer(subst, ctx, init)
             subst = unify_subst(t1, hint, subst)
@@ -189,180 +198,168 @@ def infer(
             ctx[id] = Scheme.from_subst(subst, ctx, hint)
 
             return subst, hint
-        case terms.EVariableDeclaration(terms.EIdentifier(id), init, hint=None):
-            subst, t1 = infer(subst, ctx, init)
+        case terms.EExternal():
+            return subst, fresh_ty_var()
 
-            ctx[id] = Scheme.from_subst(subst, ctx, t1)
-            return subst, t1
-        # case terms.EFieldsUnnamed(unnamed):
-        #     types = list[typed.Type]()
-        #     for field in unnamed:
-        #         subst, ty = infer(subst, ctx, field)
-        #         types.append(ty)
-
-        #     return subst, typed.TGeneric(TFieldsMeta, types)
-        # case terms.EVariant(terms.EIdentifier(id), fields):
-        #     subst, ty = infer(subst, ctx, fields)
-        #     ctx[id] = Scheme.from_subst(subst, ctx, ty)
-        #     return subst, ty
-        case terms.EEnumDeclaration(terms.EIdentifier(id), generics, variants=variants):
+        case terms.EEnumDeclaration(id, generics=generics, variants=variants):
+            # option_con = TCon('Option', KFun(KStar(),KStar()))
+            # ty = TAp<option_con, var1>
+            # ty_variant_con = TCon('Some', KFun(KStar(),KStar()))
+            # ty_variant = TAp<ty_var_con, var1>
+            # ty_con = ty_variant -> ty
 
             t_ctx = ctx.copy()
 
+            ty_generics = list[typed.Type]()
+
             for generic in generics:
-                t_ctx[generic.name] = Scheme([], fresh_ty_var())
+
+                ty_generic = fresh_ty_var()
+                t_ctx[generic.name] = Scheme([], ty_generic)
+                ty_generics.append(ty_generic)
+
+            ty_kind = functools.reduce(
+                flip(typed.KFun),
+                map(typed.kind, ty_generics),
+                typed.KStar(),
+            )
+
+            ty_con = typed.TCon(id, ty_kind)
+
+            ty = functools.reduce(typed.TAp, ty_generics, ty_con)
 
             for variant in variants:
+                ty_fields = list[typed.Type]()
 
-                types = typed.TGeneric(
-                    id, [t_ctx[generic.name].ty for generic in generics]
+                for field in variant.fields:
+                    subst, ty_field = infer(subst, t_ctx, field)
+                    ty_fields.append(ty_field)
+
+                ty_variant_co_kind = functools.reduce(
+                    flip(typed.KFun),
+                    map(typed.kind, ty_fields),
+                    typed.KStar(),
+                )
+                ty_variant_con = typed.TCon(variant.id, ty_variant_co_kind)
+                ty_variant = functools.reduce(typed.TAp, ty_fields, ty_variant_con)
+
+                ctx[variant.id] = Scheme.from_subst(
+                    subst, ctx, typed.TDef(ty_variant, ty)
                 )
 
-                for field in reversed(variant.fields.unnamed):
-                    subst, ty = infer(subst, t_ctx, field)
-                    types = typed.TDef(ty, types)
+            ctx[id] = Scheme.from_subst(subst, ctx, ty_con)
 
-                if not variant.fields.unnamed:
-                    types = typed.TThunk(types)
-
-                ctx[variant.id.name] = Scheme.from_subst(subst, t_ctx, types)
-
-            ty = typed.TGeneric(id, [fresh_ty_var() for _ in generics])
-            ctx[id] = Scheme([], ty)
-
-            return subst, ty
-        case terms.EBinaryExpr("+" | "*" | "/" | "//" | "-", left, right):
+            return subst, typed.TUnit()
+        case terms.EUnaryExpr("-", expr):
+            subst, ty_expr = infer(subst, ctx, expr)
+            subst = unify_subst(ty_expr, typed.TNum(), subst)
+            return subst, typed.TNum()
+        case terms.EBinaryExpr("|", left, right):
+            ty = fresh_ty_var()
+            subst, ty_left = infer(subst, ctx, left)
+            subst = unify_subst(ty_left, typed.TArray(ty), subst)
+            subst, ty_right = infer(subst, ctx, right)
+            subst = unify_subst(ty_right, typed.TArray(ty), subst)
+            return subst, typed.TArray(ty)
+        case terms.EBinaryExpr("++", left, right):
+            subst, ty_left = infer(subst, ctx, left)
+            subst = unify_subst(ty_left, typed.TStr(), subst)
+            subst, ty_right = infer(subst, ctx, right)
+            subst = unify_subst(ty_right, typed.TStr(), subst)
+            return subst, typed.TStr()
+        case terms.EBinaryExpr("+" | "-" | "*" | "/" | "//" | "%", left, right):
             subst, ty_left = infer(subst, ctx, left)
             subst = unify_subst(ty_left, typed.TNum(), subst)
             subst, ty_right = infer(subst, ctx, right)
             subst = unify_subst(ty_right, typed.TNum(), subst)
             return subst, typed.TNum()
-        case terms.EBinaryExpr(">" | "<" | "<=" | ">=", left, right):
+        case terms.EBinaryExpr("!=" | "==", left, right):
+            subst, ty_left = infer(subst, ctx, left)
+            subst, ty_right = infer(subst, ctx, right)
+            subst = unify_subst(ty_right, ty_left, subst)
+            return subst, typed.TBool()
+        case terms.EBinaryExpr(">" | "<", left, right):
             subst, ty_left = infer(subst, ctx, left)
             subst = unify_subst(ty_left, typed.TNum(), subst)
             subst, ty_right = infer(subst, ctx, right)
             subst = unify_subst(ty_right, typed.TNum(), subst)
             return subst, typed.TBool()
-        case terms.EParam(terms.EIdentifier(id), hint) if hint != None:
-            subst, hint = infer(subst, ctx, hint)
-            ctx[id] = Scheme.from_subst(subst, ctx, hint)
-            return subst, hint
-        case terms.EParam(terms.EIdentifier(id), hint=None) | terms.EParamPattern(
-            terms.EIdentifier(id)
-        ):
+        case terms.EMatchAs(id):
             ty = fresh_ty_var()
-            # ctx[id] = Scheme.from_subst(subst, ctx, ty)
             ctx[id] = Scheme([], ty)
             return subst, ty
-        case terms.ECall(id, []):
+        case terms.EParam(id, hint):
+            subst, hint = infer(subst, ctx, hint)
+            ctx[id] = Scheme([], hint)
+            return subst, hint
+        case terms.EVariantCall(id, args):
+            # option_con = TCon('Option', KFun(KStar(),KStar()))
+            # ty = TAp<option_con, var1>
+            # ty_variant_con = TCon('Some', KFun(KStar(),KStar()))
+            # ty_variant = TAp<ty_var_con, var1>
+            # ty_con = ty_variant -> ty
             ty = fresh_ty_var()
-            subst, ty1 = infer(subst, ctx, id)
+            subst, ty_con = infer(subst, ctx, terms.EIdentifier(id))
 
-            subst = unify_subst(ty1, typed.TThunk(ty), subst)
+            ty_args = list[typed.Type]()
+
+            for arg in args:
+                subst, ty_arg = infer(subst, ctx, arg)
+                ty_args.append(ty_arg)
+
+            ty_variant_con = functools.reduce(
+                flip(typed.KFun), map(typed.kind, ty_args), typed.KStar()
+            )
+
+            ty_variant = functools.reduce(
+                typed.TAp,
+                ty_args,
+                typed.TCon(id, ty_variant_con),
+            )
+
+            subst = unify_subst(ty_con, typed.TDef(ty_variant, ty), subst)
 
             return subst, ty
         case terms.ECall(id, args):
-            ty = fresh_ty_var()
-            subst, ty1 = infer(subst, ctx, id)
+            subst, ty_fn = infer(subst, ctx, id)
 
-            ty_call = ty
+            ty_args = list[typed.Type]()
 
             for arg in reversed(args):
                 subst, ty_arg = infer(subst, ctx, arg)
-                ty_call = typed.TDef(ty_arg, ty_call)
+                ty_args.append(ty_arg)
 
-            subst = unify_subst(ty1, ty_call, subst)
-
-            return subst, ty
-        case terms.EDef(terms.EIdentifier(id), [], body, hint) if hint != None:
-            subst, hint = infer(subst, ctx, hint)
-            t_ctx = ctx.copy()
-
-            ty1 = typed.TThunk(hint)
-            ctx[id] = Scheme.from_subst(subst, ctx, ty1)
-
-            subst, ty_body = infer(subst, t_ctx, body)
-            subst = unify_subst(ty_body, hint, subst)
-
-            return subst, ty1
-        case terms.EDef(terms.EIdentifier(id), [], body, hint=None):
-            t_ctx = ctx.copy()
-
-            ty1 = typed.TThunk(fresh_ty_var())
-            t_ctx[id] = Scheme.from_subst(subst, ctx, ty1)
-
-            subst, ty_body = infer(subst, t_ctx, body)
-
-            ty1 = typed.TThunk(ty_body)
-
-            ctx[id] = Scheme.from_subst(subst, ctx, ty1)
-
-            return subst, ty1
-        case terms.EDef(terms.EIdentifier(id), params, body, hint) if hint != None:
-            subst, hint = infer(subst, ctx, hint)
-            t_ctx = ctx.copy()
-
-            ty = hint
-            for param in reversed(params):
-                subst, t1 = infer(subst, t_ctx, param)
-                ty = typed.TDef(t1, ty)
-
-            ctx[id] = Scheme.from_subst(subst, ctx, ty)
-
-            subst, ty_body = infer(subst, t_ctx, body)
-            subst = unify_subst(ty_body, hint, subst)
+            ty = fresh_ty_var()
+            subst = unify_subst(ty_fn, reduce_args(ty_args, ty), subst)
 
             return subst, ty
-        case terms.EDef(terms.EIdentifier(id), params, body, hint=None):
+        case terms.EDef(id, params, body, hint, generics):
             t_ctx = ctx.copy()
 
-            hint = fresh_ty_var()
-            ty = hint
+            for generic in generics:
+                ty_generic = fresh_ty_var()
+                t_ctx[generic.name] = Scheme([], ty_generic)
+
+            subst, hint = infer(subst, t_ctx, hint)
+
+            ty_params = list[typed.Type]()
+
             for param in reversed(params):
-                subst, t1 = infer(subst, t_ctx, param)
-                ty = typed.TDef(t1, ty)
+                subst, ty_param = infer(subst, t_ctx, param)
+                ty_params.append(ty_param)
 
-            t_ctx[id] = Scheme.from_subst(subst, ctx, ty)
+            ty = reduce_args(ty_params, hint)
 
+            # t_ctx[id] = Scheme.from_subst(subst, t_ctx, ty)
             subst, ty_body = infer(subst, t_ctx, body)
+
             subst = unify_subst(ty_body, hint, subst)
 
             ctx[id] = Scheme.from_subst(subst, ctx, ty)
 
             return subst, ty
-        case terms.EIf(test, then, or_else=None, hint=None):
-            subst, ty_condition = infer(subst, ctx, test)
-            subst = unify_subst(ty_condition, typed.TBool(), subst)
+        case terms.EIf(test, then, or_else, hint=hint):
 
-            subst, ty_then = infer(subst, ctx, then)
-            unify_subst(ty_then, typed.TOption(fresh_ty_var()), subst)
-
-            return subst, ty_then
-
-        case terms.EIf(test, then, or_else, hint=None) if or_else != None:
-            subst, ty_condition = infer(subst, ctx, test)
-            subst = unify_subst(ty_condition, typed.TBool(), subst)
-
-            subst, ty_then = infer(subst, ctx, then)
-
-            subst, ty_or_else = infer(subst, ctx, or_else)
-            subst = unify_subst(ty_or_else, ty_then, subst)
-
-            return subst, ty_then
-        case terms.EIf(test, then, or_else=None, hint=hint) if hint != None:
-            subst, hint = infer(subst, ctx, hint)
-            subst = unify_subst(hint, typed.TOption(fresh_ty_var()), subst)
-
-            subst, ty_condition = infer(subst, ctx, test)
-            subst = unify_subst(ty_condition, typed.TBool(), subst)
-
-            subst, ty_then = infer(subst, ctx, then)
-            subst = unify_subst(ty_then, hint, subst)
-
-            return subst, hint
-        case terms.EIf(
-            test, then, or_else, hint=hint
-        ) if or_else != None and hint != None:
             subst, hint = infer(subst, ctx, hint)
             subst, ty_condition = infer(subst, ctx, test)
             subst = unify_subst(ty_condition, typed.TBool(), subst)
@@ -374,46 +371,67 @@ def infer(
             subst = unify_subst(ty_or_else, hint, subst)
 
             return subst, hint
-        case terms.EHint(terms.EIdentifier(id), arguments):
-            types = list[typed.Type]()
-            for arg in arguments:
+        case terms.EIfNone():
+            return subst, typed.TUnit()
+        case terms.EHintNone():
+            return subst, fresh_ty_var()
+        case terms.EHint(id, args):
+            subst, ty_con = infer(subst, ctx, terms.EIdentifier(id))
+
+            ty_args = list[typed.Type]()
+            for arg in args:
                 subst, ty = infer(subst, ctx, arg)
-                types.append(ty)
+                ty_args.append(ty)
 
-            subst, ty1 = infer(subst, ctx, terms.EIdentifier(id))
-            subst = unify_subst(ty1, typed.TGeneric(id, types), subst)
-
-            return subst, typed.TGeneric(id, types)
-        case terms.ECaseOf(of, cases):
-            ty1 = fresh_ty_var()
-
-            subst, ty_of = infer(subst, ctx, of)
-
-            for case in cases:
-                ctx = ctx.copy()
-                subst, ty2 = infer(subst, ctx, case)
-                subst = unify_subst(ty2, typed.TDef(ty_of, ty1), subst)
-
-            return subst, ty1
-        case terms.ECase(pattern, body):
-            subst, ty_pattern = infer(subst, ctx, pattern)
-            subst, ty_body = infer(subst, ctx, body)
-            return subst, typed.TDef(ty_pattern, ty_body)
-        case terms.EEnumPattern(id, []):
             ty = fresh_ty_var()
-            subst, ty_id = infer(subst, ctx, id)
-            subst = unify_subst(ty_id, typed.TThunk(ty), subst)
+            subst = unify_subst(
+                functools.reduce(typed.TAp, ty_args, ty_con),
+                ty,
+                subst,
+            )
+
             return subst, ty
-        case terms.EEnumPattern(id, patterns):
-            ty = fresh_ty_var()
-            subst, ty_id = infer(subst, ctx, id)
+        case terms.ECaseOf(expr, cases=cases):
 
-            ty_call = ty
+            subst, ty_expr = infer(subst, ctx, expr)
+            ctx["$"] = Scheme.from_subst(subst, ctx, ty_expr)
+
+            tree = case_tree.gen_match(cases)
+            subst, ty = infer_case_tree(subst, ctx, tree)
+
+            # print(f"{is_case_tree_exhaustive(apply_subst_ctx(subst, ctx),tree)=}")
+
+            return subst, ty
+
+            # # subst, ty_of = infer(subst, ctx, of)
+            # for case in cases:
+            #     # ctx = ctx.copy()
+            #     subst, ty2 = infer(subst, ctx, case)
+            #     subst = unify_subst(ty2, ty1, subst)
+            #     # subst = unify_subst(ty2, typed.TCallable(ty_of, ty1), subst)
+
+            # return subst, ty1
+        # case terms.ECase(patterns, body):
+        #     t_ctx = ctx.copy()
+        #     for id, pattern in patterns.items():
+        #         subst, ty_pattern = infer(subst, t_ctx, pattern)
+        #         subst, ty_id = infer(subst, ctx, terms.EIdentifier(id))
+        #         subst = unify_subst(ty_id, ty_pattern, subst)
+
+        #     subst, ty_body = infer(subst, t_ctx, body)
+        #     return subst, ty_body
+        case terms.EMatchVariant(id, patterns):
+            ty = fresh_ty_var()
+            subst, ty_id = infer(subst, ctx, terms.EIdentifier(id))
+
+            ty_patterns = list[typed.Type]()
+
             for pattern in reversed(patterns):
                 subst, ty_pattern = infer(subst, ctx, pattern)
-                ty_call = typed.TDef(ty_pattern, ty_call)
+                ty_patterns.append(ty_pattern)
 
-            subst = unify_subst(ty_id, ty_call, subst)
+            subst = unify_subst(ty_id, reduce_args(ty_patterns, ty), subst)
+
             return subst, ty
         case terms.EArray(args):
             ty = fresh_ty_var()
@@ -422,39 +440,33 @@ def infer(
                 subst = unify_subst(ty1, ty, subst)
 
             return subst, typed.TArray(ty)
-        case terms.EArrayPattern(first, rest=None):
-            ty = fresh_ty_var()
+        # case terms.EMatchArray(patterns):
+        #     ty = fresh_ty_var()
 
-            for element in first:
-                subst, ty1 = infer(subst, ctx, element)
-                subst = unify_subst(ty1, ty, subst)
+        #     for pattern in patterns:
+        #         subst, ty1 = infer(subst, ctx, pattern)
+        #         subst = unify_subst(ty1, ty, subst)
 
-            return subst, typed.TArray(ty)
-        case terms.EArrayPattern(first, rest) if rest != None:
-            ty = fresh_ty_var()
+        #     return subst, typed.TArray(ty)
 
-            for element in first:
-                subst, ty1 = infer(subst, ctx, element)
-                subst = unify_subst(ty1, ty, subst)
+        # case terms.EMatchTuple(patterns):
+        #     ty_patterns = list[typed.Type]()
 
-            subst, ty1 = infer(subst, ctx, rest)
-            subst = unify_subst(ty1, typed.TArray(ty), subst)
+        #     for pattern in patterns:
+        #         subst, ty1 = infer(subst, ctx, pattern)
+        #         ty_patterns.append(ty1)
 
-            return subst, typed.TArray(ty)
-        case terms.ESpread(terms.EIdentifier(id), last):
-            ty = fresh_ty_var()
+        #     return subst, typed.TTuple(ty_patterns)
+        # case terms.ETuple(exprs):
+        #     ty_exprs = list[typed.Type]()
 
-            for element in last:
-                subst, ty1 = infer(subst, ctx, element)
-                subst = unify_subst(ty1, ty, subst)
+        #     for expr in exprs:
+        #         subst, ty1 = infer(subst, ctx, expr)
+        #         ty_exprs.append(ty1)
 
-            ctx[id] = Scheme.from_subst(subst, ctx, typed.TArray(ty))
+        #     return subst, typed.TTuple(ty_exprs)
 
-            return subst, typed.TArray(ty)
-        case _:
-            raise TypeError(f"Cannot infer type of {exp=}")
-
-        # case terms.Def(id,params):
+    raise TypeError(f"Cannot infer type of {exp=}")
 
 
 def type_infer(ctx: Context, exp: terms.AstTree):
@@ -467,3 +479,142 @@ def type_infer(ctx: Context, exp: terms.AstTree):
 #     subst, ty)).difference(free_type_vars_ctx(apply_subst_ctx(subst, ctx)))
 
 # return Scheme(list(ftv), ty)
+
+
+class NonExhaustiveMatchException(Exception):
+    pass
+
+
+A = typing.TypeVar("A")
+B = typing.TypeVar("B")
+C = typing.TypeVar("C")
+
+
+def flip(fn: typing.Callable[[B, C], A]) -> typing.Callable[[C, B], A]:
+    return functools.wraps(fn)(lambda *args: fn(*args[::-1]))
+
+
+def infer_case_tree(
+    subst: Substitution, ctx: Context, tree: case_tree.CaseTree
+) -> tuple[Substitution, typed.Type]:
+    match tree:
+        case case_tree.MissingLeaf():
+            return subst, fresh_ty_var()
+        case case_tree.Node(var, pattern_name, vars, yes, no):
+            subst, ty_var = infer(subst, ctx, terms.EIdentifier(var))  # x | x.0
+            subst, ty_pattern_name = infer(
+                subst, ctx, terms.EIdentifier(pattern_name)
+            )  # Some() | None()
+            t_ctx = ctx.copy()
+
+            ty_vars = list[typed.Type](fresh_ty_var() for var in vars)
+
+            pattern_name_con = typed.TCon(
+                pattern_name,
+                functools.reduce(
+                    flip(typed.KFun),
+                    map(typed.kind, ty_vars),
+                    typed.KStar(),
+                ),
+            )
+
+            subst = unify_subst(
+                ty_pattern_name,
+                typed.TDef(
+                    functools.reduce(
+                        typed.TAp,
+                        ty_vars,
+                        pattern_name_con,
+                    ),
+                    ty_var,
+                ),
+                subst,
+            )
+
+            for var, ty_var in zip(vars, ty_vars):
+                t_ctx[var] = Scheme.from_subst(subst, t_ctx, ty_var)
+
+            # subst return type
+            ty = fresh_ty_var()
+
+            subst, ty_yes = infer_case_tree(subst, t_ctx, yes)
+            subst = unify_subst(ty_yes, ty, subst)
+            subst, ty_no = infer_case_tree(
+                subst,
+                ctx,
+                no,
+            )
+            subst = unify_subst(ty_no, ty, subst)
+
+            return subst, ty
+        case case_tree.Leaf(do):
+            subst, ty_do = infer(subst, ctx, do)
+
+            return subst, ty_do
+
+    raise TypeError(f"Unsupported case tree {tree}")
+
+
+Variants: typing.TypeAlias = dict[str, frozenset[str]]
+
+
+def is_exhaustive(variants: Variants, ast: terms.AstTree):
+    match ast:
+        case terms.EEnumDeclaration(variants=enum_variants):
+            for variant in enum_variants:
+                variants[variant.id] = frozenset(
+                    variant.id for variant in enum_variants
+                )
+        case terms.ECaseOf(expr, cases):
+            is_exhaustive(variants, expr)
+            tree = case_tree.gen_match(cases)
+            is_case_tree_exhaustive(variants, tree)
+        case terms.EProgram(exps) | terms.EDo(exps) | terms.EBlock(exps) | terms.EDef(
+            body=terms.EDo(exps)
+        ) | terms.EVariantCall(args=exps) | terms.EArray(exps):
+            for exp in exps:
+                is_exhaustive(variants, exp)
+        case terms.ELet(init=exp):
+            is_exhaustive(variants, exp)
+        case terms.ECall(exp, args=exps):
+            is_exhaustive(variants, exp)
+            for exp in exps:
+                is_exhaustive(variants, exp)
+        case terms.EIf(test, then, or_else):
+            is_exhaustive(variants, test)
+            is_exhaustive(variants, then)
+            is_exhaustive(variants, or_else)
+        case terms.EBinaryExpr(left=expr0, right=expr1):
+            is_exhaustive(variants, expr0)
+            is_exhaustive(variants, expr1)
+        case terms.EExternal() | terms.EIdentifier() | terms.ELiteral():
+            pass
+
+        case _:
+            raise TypeError(f"Unsupported ast {ast=}")
+
+
+def is_case_tree_exhaustive(
+    variants: Variants,
+    tree: case_tree.CaseTree,
+    remaining_cons: frozenset[str] = frozenset(),
+):
+    match tree:
+        case case_tree.MissingLeaf():
+            if remaining_cons:
+                raise NonExhaustiveMatchException(
+                    f"Non exhaustive pattern {remaining_cons}"
+                )
+        case case_tree.Node(pattern_name=pattern_name, yes=yes, no=no):
+            if not remaining_cons:
+                remaining_cons = variants[pattern_name]
+
+            is_case_tree_exhaustive(variants, yes, frozenset())
+
+            is_case_tree_exhaustive(
+                variants, no, remaining_cons.difference({pattern_name})
+            )
+        case case_tree.Leaf(do):
+            is_exhaustive(variants, do)
+        case _:
+            raise TypeError(f"Unsupported case tree {tree}")

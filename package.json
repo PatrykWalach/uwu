@@ -1,0 +1,30 @@
+{
+  "name": "uwu",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "example": "examples"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "python:dev": "nodemon --exec \"python\" main.py -e .py,.uwu",
+    "node:dev": "nodemon examples/index.uwu.js",
+    "pytest:snapshot": "nodemon --delay 3 --exec \"pytest -k snap --snapshot-update\" -e .py,.uwu -vv",
+    "pytest": "nodemon --delay 3 --exec pytest -e .py,.js -vv"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PatrykWalach/uwu.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/PatrykWalach/uwu/issues"
+  },
+  "homepage": "https://github.com/PatrykWalach/uwu#readme"
+}

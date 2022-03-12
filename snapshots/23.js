@@ -1,1 +1,1 @@
-(()=>{Some=(value)=>({TAG:'Some',_0: value});None=()=>({TAG:'None',});True=()=>({TAG:'True',});False=()=>({TAG:'False',});id=(value)=>(()=>{return value})();add=(a)=>(()=>{return add=(b)=>(()=>{return (a+b)})()})();addTwo=add(2.0);console.log(addTwo(3.0))})()
+;;id=(id)=>(()=>{return id})();unit=undefined;add=(a)=>(()=>{return add=(b)=>(()=>{return (a+b)})()})();addTwo=add(2.0);console.log(addTwo(3.0))
