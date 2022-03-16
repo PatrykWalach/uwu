@@ -224,7 +224,7 @@ def infer(
                 typed.KStar(),
             )
 
-            ty_con = typed.TCon(id, ty_kind)
+            ty_con = typed.TCon(id, ty_kind, [variant.id for variant in variants])
 
             ty = functools.reduce(typed.TAp, ty_generics, ty_con)
 
@@ -397,6 +397,7 @@ def infer(
             ctx["$"] = Scheme.from_subst(subst, ctx, ty_expr)
 
             tree = case_tree.gen_match(cases)
+
             subst, ty = infer_case_tree(subst, ctx, tree)
 
             # print(f"{is_case_tree_exhaustive(apply_subst_ctx(subst, ctx),tree)=}")
@@ -494,20 +495,45 @@ def flip(fn: typing.Callable[[B, C], A]) -> typing.Callable[[C, B], A]:
     return functools.wraps(fn)(lambda *args: fn(*args[::-1]))
 
 
+def alternatives(ty: typed.Type):
+    match ty:
+        case typed.TCon(alts=alts):
+            return alts
+        case typed.TAp(con=con, arg=arg):
+            return alternatives(con) + alternatives(arg)
+        case _:
+            return []
+
+
 def infer_case_tree(
-    subst: Substitution, ctx: Context, tree: case_tree.CaseTree
+    subst: Substitution,
+    ctx: Context,
+    tree: case_tree.CaseTree,
+    o_alts: dict[str, list[str]] | None = None,
 ) -> tuple[Substitution, typed.Type]:
+    alts = o_alts or {}
+
     match tree:
         case case_tree.MissingLeaf():
+            if any(alts.values()):
+                raise NonExhaustiveMatchException()
             return subst, fresh_ty_var()
         case case_tree.Node(var, pattern_name, vars, yes, no):
+
             subst, ty_var = infer(subst, ctx, terms.EIdentifier(var))  # x | x.0
             subst, ty_pattern_name = infer(
                 subst, ctx, terms.EIdentifier(pattern_name)
             )  # Some() | None()
             t_ctx = ctx.copy()
 
-            ty_vars = list[typed.Type](fresh_ty_var() for var in vars)
+            # exhaustive
+            if var not in alts:
+                alts[var] = alternatives(ty_pattern_name)
+
+            if pattern_name in alts[var]:
+                alts[var].remove(pattern_name)
+
+            ty_vars = list[typed.Type](fresh_ty_var() for _ in vars)
 
             pattern_name_con = typed.TCon(
                 pattern_name,
@@ -531,19 +557,22 @@ def infer_case_tree(
                 subst,
             )
 
-            for var, ty_var in zip(vars, ty_vars):
-                t_ctx[var] = Scheme.from_subst(subst, t_ctx, ty_var)
+            for var2, ty_var in zip(vars, ty_vars):
+                t_ctx[var2] = Scheme.from_subst(subst, t_ctx, ty_var)
 
             # subst return type
             ty = fresh_ty_var()
 
-            subst, ty_yes = infer_case_tree(subst, t_ctx, yes)
-            subst = unify_subst(ty_yes, ty, subst)
-            subst, ty_no = infer_case_tree(
+            subst, ty_yes = infer_case_tree(
                 subst,
-                ctx,
-                no,
+                t_ctx,
+                yes,
+                {key: value for key, value in alts.items() if key != var}
+                | {var2: alternatives(t_ctx[var2].ty) for var2 in vars},
             )
+            subst = unify_subst(ty_yes, ty, subst)
+
+            subst, ty_no = infer_case_tree(subst, ctx, no, alts)
             subst = unify_subst(ty_no, ty, subst)
 
             return subst, ty
@@ -556,65 +585,3 @@ def infer_case_tree(
 
 
 Variants: typing.TypeAlias = dict[str, frozenset[str]]
-
-
-def is_exhaustive(variants: Variants, ast: terms.AstTree):
-    match ast:
-        case terms.EEnumDeclaration(variants=enum_variants):
-            for variant in enum_variants:
-                variants[variant.id] = frozenset(
-                    variant.id for variant in enum_variants
-                )
-        case terms.ECaseOf(expr, cases):
-            is_exhaustive(variants, expr)
-            tree = case_tree.gen_match(cases)
-            is_case_tree_exhaustive(variants, tree)
-        case terms.EProgram(exps) | terms.EDo(exps) | terms.EBlock(exps) | terms.EDef(
-            body=terms.EDo(exps)
-        ) | terms.EVariantCall(args=exps) | terms.EArray(exps):
-            for exp in exps:
-                is_exhaustive(variants, exp)
-        case terms.ELet(init=exp):
-            is_exhaustive(variants, exp)
-        case terms.ECall(exp, args=exps):
-            is_exhaustive(variants, exp)
-            for exp in exps:
-                is_exhaustive(variants, exp)
-        case terms.EIf(test, then, or_else):
-            is_exhaustive(variants, test)
-            is_exhaustive(variants, then)
-            is_exhaustive(variants, or_else)
-        case terms.EBinaryExpr(left=expr0, right=expr1):
-            is_exhaustive(variants, expr0)
-            is_exhaustive(variants, expr1)
-        case terms.EExternal() | terms.EIdentifier() | terms.ELiteral():
-            pass
-
-        case _:
-            raise TypeError(f"Unsupported ast {ast=}")
-
-
-def is_case_tree_exhaustive(
-    variants: Variants,
-    tree: case_tree.CaseTree,
-    remaining_cons: frozenset[str] = frozenset(),
-):
-    match tree:
-        case case_tree.MissingLeaf():
-            if remaining_cons:
-                raise NonExhaustiveMatchException(
-                    f"Non exhaustive pattern {remaining_cons}"
-                )
-        case case_tree.Node(pattern_name=pattern_name, yes=yes, no=no):
-            if not remaining_cons:
-                remaining_cons = variants[pattern_name]
-
-            is_case_tree_exhaustive(variants, yes, frozenset())
-
-            is_case_tree_exhaustive(
-                variants, no, remaining_cons.difference({pattern_name})
-            )
-        case case_tree.Leaf(do):
-            is_exhaustive(variants, do)
-        case _:
-            raise TypeError(f"Unsupported case tree {tree}")

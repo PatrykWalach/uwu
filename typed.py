@@ -8,6 +8,7 @@ from typing import TypeAlias
 class TCon:
     id: str
     kind: Kind
+    alts: list[str] = dataclasses.field(default_factory=list)
 
     def __repr__(self):
         return f"{self.id}"
@@ -93,7 +94,7 @@ def TArray(t: Type):
 
 
 def TOptionCon():
-    return TCon("Option", KFun(KStar(), KStar()))
+    return TCon("Option", KFun(KStar(), KStar()), ["Some", "None"])
 
 
 def TOption(t: Type):
@@ -101,7 +102,7 @@ def TOption(t: Type):
 
 
 def TBool():
-    return TCon("Bool", KStar())
+    return TCon("Bool", KStar(), ["True", "False"])
 
 
 def kind(t: Type) -> Kind:

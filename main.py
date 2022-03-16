@@ -84,8 +84,6 @@ def main():
                 ast,
             )
 
-            algorithm_j.is_exhaustive({}, ast)
-
             logging.info(f"Inferred {src_path}")
 
             js = compile.compile(ast)
