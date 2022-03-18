@@ -112,17 +112,21 @@ class UwuParser(Parser):
     tokens = UwuLexer.tokens
     debugfile = "parser.out"
 
-    @_("[ NEWLINE ] [ do_exprs ]")
-    def program(self, p):
-        return terms.EProgram(p.do_exprs or [])
+    @_("[ NEWLINE ] [ stmts ]")
+    def program(self, p) -> terms.EProgram:
+        return terms.EProgram(p.stmts or [])
 
-    @_("expr NEWLINE do_exprs")
-    def do_exprs(self, p):
-        return [p.expr] + p.do_exprs
+    @_("stmt NEWLINE stmts")
+    def stmts(self, p) -> list[terms.Stmt]:
+        return [p.stmt] + p.stmts
 
-    @_("expr [ NEWLINE ]")
-    def do_exprs(self, p):
-        return [p.expr]
+    @_("stmt [ NEWLINE ]")
+    def stmts(self, p) -> list[terms.Stmt]:
+        return [p.stmt]
+
+    @_("expr", "variable_declaration", "enum", "def_expr")
+    def stmt(self, p) -> terms.Stmt:
+        return p[0]
 
     precedence = (
         ("left", "="),
@@ -137,16 +141,13 @@ class UwuParser(Parser):
     )
 
     @_(
-        "enum",
         "external",
         "do",
         "literal",
-        "def_expr",
         "if_expr",
         "binary_expr",
         "case_of",
         "call",
-        "variable_declaration",
         "identifier",
         "variant_call",
         "array",
@@ -189,16 +190,16 @@ class UwuParser(Parser):
         return terms.EBinaryExpr(p[1], p[0], p[2])
 
     @_(
-        "DO [ ':' type ] [ NEWLINE ] [ do_exprs ] END",
+        "DO [ ':' type ] [ NEWLINE ] [ stmts ] END",
     )
     def do(self, p):
-        return terms.EDo(p.do_exprs or [], hint=terms.EHint.from_option(p.type))
+        return terms.EDo(p.stmts or [], hint=terms.EHint.from_option(p.type))
 
     @_(
-        "[ NEWLINE ] [ do_exprs ]",
+        "[ NEWLINE ] [ stmts ]",
     )
     def block_statement(self, p):
-        return terms.EBlock(p.do_exprs or [])
+        return terms.EBlock(p.stmts or [])
 
     @_(
         "DEF identifier '<' type_identifier { ',' type_identifier } '>' '(' [ NEWLINE ] [ params ] ')' [ ':' type ] do"

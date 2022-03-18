@@ -49,10 +49,10 @@ def lexer():
             "x=id(2)",
             [ELet("x", ECall(EIdentifier("id"), [ELiteral(2)]))],
         ),
-        (
-            "(x=id)(2)",
-            [ECall(ELet("x", EIdentifier("id")), [ELiteral(2)])],
-        ),
+        # (
+        #     "(x=id)(2)",
+        #     [ECall(ELet("x", EIdentifier("id")), [ELiteral(2)])],
+        # ),
         (
             "x=id\n(2)",
             [ELet("x", EIdentifier("id")), ELiteral(2)],
@@ -137,10 +137,10 @@ def lexer():
         #             ),
         #         )
         #     ],
-        (
-            "x=y=2+3",
-            [ELet("x", ELet("y", EBinaryExpr("+", ELiteral(2), ELiteral(3))))],
-        ),
+        # (
+        #     "x=y=2+3",
+        #     [ELet("x", ELet("y", EBinaryExpr("+", ELiteral(2), ELiteral(3))))],
+        # ),
         (
             "do x = 1 end",
             [
@@ -422,7 +422,6 @@ def test_parser(program, ast, parser, lexer):
         ("def fun() do: Num 1 end\n fun()", typed.TNum()),
         ("def id2(a) do a end\nid2(1)\nid2('12')", typed.TStr()),
         ("def id2(a) do a end\nid2('12')\nid2(1)", typed.TNum()),
-        ("x=Some(1)\nx:Option<Str>=None()", typed.TOption(typed.TStr())),
         (
             "x=y=2+3",
             typed.TNum(),
@@ -520,9 +519,10 @@ def test_parser(program, ast, parser, lexer):
         ),
         ("do end", typed.TUnit()),
         (
-            "enum StrOrNum{String(Str)\nNumber(Num)}\nx=Number(1)\nx=String('12')",
+            "enum StrOrNum{String(Str)\nNumber(Num)}\nx=Number(1)\ny=String('12')",
             typed.TCon("StrOrNum", typed.KStar(), ["String", "Number"]),
         ),
+        ("x=Some(1)\ny:Option<Str>=None()", typed.TOption(typed.TStr())),
         (
             "enum TupleType<A, B>{Tuple(A, B)}\ncase Tuple(Some(1), Some(2)) of Tuple(None(), _) do 2 end Tuple(_, None()) do 3 end Tuple(Some(a), Some(b)) do a + b end end",
             typed.TNum(),
@@ -547,10 +547,8 @@ def test_infer(program, expected_type, parser, lexer):
             [
                 ("0", "`console.log`(1)", "1"),
                 ("1", "x=1\n`console.log`(x)", "1"),
-                ("2", "x=1\na = x\n`console.log`(a)", "1"),
-                ("3", "x=1\n`console.log`(a = x)", "1"),
+                ("2", "x=1\na=x\n`console.log`(a)", "1"),
                 ("4", "`console.log`(1+2*3)", "7"),
-                ("5", "`console.log`(x=(2+3)*4)", "20"),
                 ("6", "`console.log`(if 2 > 0 then 1 else 2 end)", "1"),
                 ("7", "`console.log`(if 2 < 0 then 1 else 2 end)", "2"),
                 (
@@ -626,25 +624,25 @@ def test_infer(program, expected_type, parser, lexer):
                 ),
                 (
                     "23",
-                    "def add(a) do def add(b) do a + b end end\naddTwo=add(2)\n`console.log`(addTwo(3))",
+                    "def add(a) do def add(b) do a + b end\nadd end\naddTwo=add(2)\n`console.log`(addTwo(3))",
                     "5",
                 ),
                 ("24", "def add(a, b) do a + b end\n`console.log`(add(2,3))", "5"),
                 (
                     "25",
-                    "def add(a) do def add(b) do a + b end end\n`console.log`(add(2,3))",
+                    "def add(a) do def add(b) do a + b end\nadd end\n`console.log`(add(2,3))",
                     "5",
                 ),
                 ("26", "def zero() do 0 end\n`console.log`(zero())", "0"),
                 (
                     "27",
-                    "def partial(fn, arg) do def thunk() do fn(arg) end end\npartial(`console.log`,0)()",
+                    "def partial(fn, arg) do def thunk() do fn(arg) end\nthunk end\npartial(`console.log`,0)()",
                     "0",
                 ),
                 ("28", "def zero() do 0 end\n`console.log`(zero(unit))", "0"),
                 (
                     "29",
-                    "def partial(fn, arg) do def thunk() do fn(arg) end end\npartial(`console.log`,0,unit)",
+                    "def partial(fn, arg) do def thunk() do fn(arg) end\nthunk end\npartial(`console.log`,0,unit)",
                     "0",
                 ),
                 ("30", "`console.log`(do end)", "undefined"),

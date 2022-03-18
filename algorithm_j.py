@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import dataclasses
 import functools
+import operator
 import typing
 
 import case_tree
@@ -17,13 +18,58 @@ class Scheme:
     @staticmethod
     def from_subst(subst: Substitution, ctx: Context, ty1: typed.Type):
         ftv = free_type_vars(apply_subst(subst, ty1))
-        ftv -= free_type_vars_ctx(apply_subst_ctx(subst, ctx))
+        ftv -= free_type_vars_ctx(ctx.apply_subst_ctx(subst))
 
         return Scheme(list(ftv), apply_subst(subst, ty1))
 
 
 Substitution: typing.TypeAlias = dict[int, typed.Type]
-Context: typing.TypeAlias = dict[str, Scheme]
+
+
+class Context:
+    def apply_subst_ctx(self, subst: Substitution) -> Context:
+
+        self.levels = [
+            {key: apply_subst_scheme(subst, value) for key, value in level.items()}
+            for level in self.levels
+        ]
+        return self
+
+    def __init__(self, *kargs: dict[str, Scheme]) -> None:
+        self.levels = list(kargs)
+
+    def copy(self):
+        self.levels.append({})
+
+    def pop(self):
+        self.levels.pop()
+
+    def __getitem__(self, key: str):
+        for level in reversed(self.levels):
+            if key in level:
+                return level[key]
+        raise KeyError(key)
+
+    def __setitem__(self, key: str, value: Scheme):
+        if key in self.levels[-1]:
+            raise VariableAlreadyDefinedException(f"'{key}'")
+        self.levels[-1][key] = value
+
+    def __contains__(self, key: str):
+        for level in reversed(self.levels):
+            if key in level:
+                return True
+        return False
+
+    def items(self) -> list[tuple[str, Scheme]]:
+        return functools.reduce(operator.__or__, self.levels).items()
+
+    def values(self) -> list[Scheme]:
+        return [value for _, value in self.items()]
+
+    def keys(self) -> list[str]:
+        return [key for key, _ in self.items()]
+
 
 counter = 0
 
@@ -85,6 +131,10 @@ class UnifyException(Exception):
     pass
 
 
+class VariableAlreadyDefinedException(Exception):
+    pass
+
+
 class CircularUseException(Exception):
     def __init__(self, *args: object, u, t) -> None:
         self.u = u
@@ -132,16 +182,6 @@ def apply_subst_scheme(subst: Substitution, scheme: Scheme) -> Scheme:
     return Scheme(scheme.vars, apply_subst(subst, scheme.ty))
 
 
-def apply_subst_ctx(subst: Substitution, ctx: Context) -> Context:
-    for key in ctx.keys():
-        ctx[key] = apply_subst_scheme(subst, ctx[key])
-    return ctx
-    # return ctx
-    # next_ctx = [apply_subst_scheme(subst, scheme) for scheme in ctx.values()]
-    # next_ctx = dict(zip(ctx.keys(), next_ctx))
-    # return next_ctx
-
-
 def instantiate(scheme: Scheme) -> typed.Type:
     newVars: list[typed.Type] = [fresh_ty_var() for _ in scheme.vars]
     subst = dict(zip(scheme.vars, newVars))
@@ -174,26 +214,34 @@ def infer(
         case terms.EDo(body, hint):
             subst, hint = infer(subst, ctx, hint)
             ty = typed.TUnit()
-            ctx = ctx.copy()
+            ctx.copy()
 
             for exp in body:
                 subst, ty = infer(subst, ctx, exp)
 
             subst = unify_subst(ty, hint, subst)
 
+            ctx.pop()
             return subst, hint
         case terms.EProgram(body) | terms.EBlock(body):
             ty = typed.TUnit()
-            ctx = ctx.copy()
+            ctx.copy()
 
             for exp in body:
                 subst, ty = infer(subst, ctx, exp)
 
+            ctx.pop()
+
             return subst, ty
         case terms.ELet(id, init, hint):
             subst, hint = infer(subst, ctx, hint)
+
+            ctx.copy()
+            ctx[id] = Scheme.from_subst(subst, ctx, hint)
+
             subst, t1 = infer(subst, ctx, init)
             subst = unify_subst(t1, hint, subst)
+            ctx.pop()
 
             ctx[id] = Scheme.from_subst(subst, ctx, hint)
 
@@ -208,14 +256,14 @@ def infer(
             # ty_variant = TAp<ty_var_con, var1>
             # ty_con = ty_variant -> ty
 
-            t_ctx = ctx.copy()
+            ctx.copy()
 
             ty_generics = list[typed.Type]()
 
             for generic in generics:
 
                 ty_generic = fresh_ty_var()
-                t_ctx[generic.name] = Scheme([], ty_generic)
+                ctx[generic.name] = Scheme([], ty_generic)
                 ty_generics.append(ty_generic)
 
             ty_kind = functools.reduce(
@@ -228,11 +276,13 @@ def infer(
 
             ty = functools.reduce(typed.TAp, ty_generics, ty_con)
 
+            ty_variants = list[typed.Type]()
+
             for variant in variants:
                 ty_fields = list[typed.Type]()
 
                 for field in variant.fields:
-                    subst, ty_field = infer(subst, t_ctx, field)
+                    subst, ty_field = infer(subst, ctx, field)
                     ty_fields.append(ty_field)
 
                 ty_variant_co_kind = functools.reduce(
@@ -243,9 +293,12 @@ def infer(
                 ty_variant_con = typed.TCon(variant.id, ty_variant_co_kind)
                 ty_variant = functools.reduce(typed.TAp, ty_fields, ty_variant_con)
 
-                ctx[variant.id] = Scheme.from_subst(
-                    subst, ctx, typed.TDef(ty_variant, ty)
-                )
+                ty_variants.append(typed.TDef(ty_variant, ty))
+
+            ctx.pop()
+
+            for variant, ty_variant in zip(variants, ty_variants):
+                ctx[variant.id] = Scheme.from_subst(subst, ctx, ty_variant)
 
             ctx[id] = Scheme.from_subst(subst, ctx, ty_con)
 
@@ -334,26 +387,31 @@ def infer(
 
             return subst, ty
         case terms.EDef(id, params, body, hint, generics):
-            t_ctx = ctx.copy()
+            ctx.copy()
 
             for generic in generics:
                 ty_generic = fresh_ty_var()
-                t_ctx[generic.name] = Scheme([], ty_generic)
+                ctx[generic.name] = Scheme([], ty_generic)
 
-            subst, hint = infer(subst, t_ctx, hint)
+            subst, hint = infer(subst, ctx, hint)
 
             ty_params = list[typed.Type]()
+            ty = fresh_ty_var()
+            ctx[id] = Scheme.from_subst(subst, ctx, ty)
+            ctx.copy()
 
             for param in reversed(params):
-                subst, ty_param = infer(subst, t_ctx, param)
+                subst, ty_param = infer(subst, ctx, param)
                 ty_params.append(ty_param)
 
-            ty = reduce_args(ty_params, hint)
+            ty2 = reduce_args(ty_params, hint)
+            subst = unify_subst(ty2, ty, subst)
 
-            # t_ctx[id] = Scheme.from_subst(subst, t_ctx, ty)
-            subst, ty_body = infer(subst, t_ctx, body)
-
+            subst, ty_body = infer(subst, ctx, body)
             subst = unify_subst(ty_body, hint, subst)
+
+            ctx.pop()
+            ctx.pop()
 
             ctx[id] = Scheme.from_subst(subst, ctx, ty)
 
@@ -393,13 +451,15 @@ def infer(
             return subst, ty
         case terms.ECaseOf(expr, cases=cases):
 
+            ctx.copy()
+
             subst, ty_expr = infer(subst, ctx, expr)
             ctx["$"] = Scheme.from_subst(subst, ctx, ty_expr)
 
             tree = case_tree.gen_match(cases)
 
             subst, ty = infer_case_tree(subst, ctx, tree)
-
+            ctx.pop()
             # print(f"{is_case_tree_exhaustive(apply_subst_ctx(subst, ctx),tree)=}")
 
             return subst, ty
@@ -524,7 +584,7 @@ def infer_case_tree(
             subst, ty_pattern_name = infer(
                 subst, ctx, terms.EIdentifier(pattern_name)
             )  # Some() | None()
-            t_ctx = ctx.copy()
+            ctx.copy()
 
             # exhaustive
             if var not in alts:
@@ -558,22 +618,24 @@ def infer_case_tree(
             )
 
             for var2, ty_var in zip(vars, ty_vars):
-                t_ctx[var2] = Scheme.from_subst(subst, t_ctx, ty_var)
+                ctx[var2] = Scheme.from_subst(subst, ctx, ty_var)
 
             # subst return type
             ty = fresh_ty_var()
 
             subst, ty_yes = infer_case_tree(
                 subst,
-                t_ctx,
+                ctx,
                 yes,
                 {key: value for key, value in alts.items() if key != var}
-                | {var2: alternatives(t_ctx[var2].ty) for var2 in vars},
+                | {var2: alternatives(ctx[var2].ty) for var2 in vars},
             )
             subst = unify_subst(ty_yes, ty, subst)
 
             subst, ty_no = infer_case_tree(subst, ctx, no, alts)
             subst = unify_subst(ty_no, ty, subst)
+
+            ctx.pop()
 
             return subst, ty
         case case_tree.Leaf(do):

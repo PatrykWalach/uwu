@@ -16,7 +16,7 @@ def compile(exp: terms.AstTree) -> str:
         case terms.ELiteral(value=float()):
             return f"{exp.value}"
         case terms.ELet(id, init):
-            return f"{id}={compile( init)}"
+            return f"const {id}={compile( init)}"
         case terms.EBlock(body):
             body = [compile(expr) for expr in body]
             if body:
@@ -62,7 +62,7 @@ def compile(exp: terms.AstTree) -> str:
                 "",
             )
 
-            return f"{id}={args}{compile(body)}"
+            return f"const {id}={args}{compile(body)}"
         case terms.EBinaryExpr("|", left, right):
             return f"{compile( left)}.concat({compile( right)})"
         case terms.EBinaryExpr("++", left, right):

@@ -42,13 +42,15 @@ BUILTINS: list[terms.Expr | terms.EEnumDeclaration] = [
     terms.ELet("unit", terms.EExternal("undefined"), terms.EHint("Unit")),
 ]
 
-DEFAULT_CTX: Context = {
-    "Str": Scheme([], typed.TStr()),
-    "Num": Scheme([], typed.TNum()),
-    "Unit": Scheme([], typed.TUnit()),
-    "Callable": Scheme([], typed.TCallableCon()),
-    "Array": Scheme([], typed.TArrayCon()),
-}
+DEFAULT_CTX = Context(
+    {
+        "Str": Scheme([], typed.TStr()),
+        "Num": Scheme([], typed.TNum()),
+        "Unit": Scheme([], typed.TUnit()),
+        "Callable": Scheme([], typed.TCallableCon()),
+        "Array": Scheme([], typed.TArrayCon()),
+    }
+)
 
 for builitin in BUILTINS:
     type_infer(DEFAULT_CTX, builitin)

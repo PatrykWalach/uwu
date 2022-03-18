@@ -45,13 +45,13 @@ class ELet:
 
 @dataclasses.dataclass(frozen=True)
 class EDo:
-    body: list[Expr] = dataclasses.field(default_factory=list)
+    body: list[Stmt] = dataclasses.field(default_factory=list)
     hint: EHint | EHintNone = EHintNone()
 
 
 @dataclasses.dataclass(frozen=True)
 class EProgram:
-    body: list[Expr | EEnumDeclaration] = dataclasses.field(default_factory=list)
+    body: list[Stmt] = dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -155,7 +155,7 @@ class EIf:
     hint: EHint | EHintNone = EHintNone()
 
     @staticmethod
-    def from_option(hint):
+    def from_option(hint: None | EHint):
         if hint == None:
             return EIfNone()
         return hint
@@ -163,7 +163,7 @@ class EIf:
 
 @dataclasses.dataclass(frozen=True)
 class EBlock:
-    body: list[Expr] = dataclasses.field(default_factory=list)
+    body: list[Stmt] = dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -211,13 +211,10 @@ class EFieldsUnnamed:
 Pattern: typing.TypeAlias = EMatchAs | EMatchVariant
 
 Expr: typing.TypeAlias = (
-    EDo
-    | ELiteral
-    | EDef
+    ELiteral
     | EIf
     | ECall
     | ECaseOf
-    | ELet
     | EIdentifier
     | EBinaryExpr
     | EArray
@@ -230,17 +227,18 @@ Expr: typing.TypeAlias = (
 # 'type_identifier',  "array", "tuple",
 Type: typing.TypeAlias = EHint | EHintNone
 
+Stmt: typing.TypeAlias = Expr | ELet | EEnumDeclaration | EDef
+
 AstTree: typing.TypeAlias = (
     EProgram
     | EParam
     | ECaseOf
     | ECase
     | EBlock
-    | EEnumDeclaration
     | EFieldsUnnamed
     | Type
     | EVariant
     | EIfNone
-    | Expr
     | Pattern
+    | Stmt
 )

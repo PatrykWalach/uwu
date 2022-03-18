@@ -1,1 +1,1 @@
-;;id=(id)=>(()=>{return id})();unit=undefined;console.log((()=>{if(((2.0*2.0)===4.0)){return 0.0}else{return 1.0}})())
+;;const id=(id)=>(()=>{return id})();const unit=undefined;console.log((()=>{if(((2.0*2.0)===4.0)){return 0.0}else{return 1.0}})())
