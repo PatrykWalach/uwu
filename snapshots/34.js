@@ -1,1 +1,1 @@
-;;id=(id)=>(()=>{return id})();unit=undefined;console.log(("a"+"b"))
+;;id=(id)=>{return id};unit=undefined;console.log(("a"+"b"))

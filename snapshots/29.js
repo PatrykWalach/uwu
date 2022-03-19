@@ -1,1 +1,1 @@
-;;id=(id)=>(()=>{return id})();unit=undefined;partial=(fn)=>(arg)=>(()=>{return thunk=()=>(()=>{return fn(arg)})()})();partial(console.log)(0.0)(unit)
+;;id=(id)=>{return id};unit=undefined;partial=(fn)=>(arg)=>{return thunk=()=>{return fn(arg)}};partial(console.log)(0.0)(unit)

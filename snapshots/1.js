@@ -1,1 +1,1 @@
-;;id=(id)=>(()=>{return id})();unit=undefined;x=1.0;console.log(x)
+;;id=(id)=>{return id};unit=undefined;x=1.0;console.log(x)

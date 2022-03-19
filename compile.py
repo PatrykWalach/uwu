@@ -54,7 +54,7 @@ def compile(exp: terms.AstTree) -> str:
 
             return f"{{TAG:'{id}',{','.join(args)}}}"
 
-        case terms.EDef(id, args, body):
+        case terms.EDef(id, args, terms.EDo(body)):
 
             args = functools.reduce(
                 lambda acc, arg: f"{acc}({arg})=>",
@@ -62,7 +62,7 @@ def compile(exp: terms.AstTree) -> str:
                 "",
             )
 
-            return f"{id}={args}{compile(body)}"
+            return f"{id}={args}{{{compile(terms.EBlock(body))}}}"
         case terms.EBinaryExpr("|", left, right):
             return f"{compile( left)}.concat({compile( right)})"
         case terms.EBinaryExpr("++", left, right):
