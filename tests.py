@@ -663,7 +663,7 @@ def test_compile_with_snapshot(id, program, expected_output, snapshot, parser, l
     id = id + ".js"
     program = parser.parse(lexer.tokenize(program))
     snapshot.snapshot_dir = "snapshots"
-    snapshot.assert_match(compile(EProgram([*BUILTINS, program])), id)
+    snapshot.assert_match(compile(EProgram([*BUILTINS, *program.body])), id)
     # path: WindowsPath = snapshot.snapshot_dir
     assert check_output(
         ["node", snapshot.snapshot_dir / id]

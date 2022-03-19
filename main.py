@@ -75,7 +75,7 @@ def main():
                 logging.error(f"Failed {src_path} to parse")
                 return
 
-            ast = terms.EProgram([*BUILTINS, ast])
+            ast = terms.EProgram([*BUILTINS, *ast.body])
 
             logging.info(f"Parsed {src_path}")
 
@@ -85,7 +85,6 @@ def main():
             )
 
             logging.info(f"Inferred {src_path}")
-
             js = compile.compile(ast)
             logging.info(f"Compiled {src_path}")
 
