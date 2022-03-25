@@ -21,15 +21,18 @@
 \subsection{Algorytm W}
 \section{Rescript/ReasonML jako języki realizujące podobne zadania}
 \section{Założenia i priorytety opracowanej aplikacji}
-Ze względu na popularność języka javascript oraz fakt, że jest to język bez typów, postanowiłem skupić się na tworzeniu języka w którym zmienne posiadają typy co pozwala na znalezienie błędów w procesie kompilacji. Aplikacja składać ma się z kilku części:
-\begin{itemize}
-    \item lexera
-    \item parsera tworzącego drzewo AST
-    \item funkcji spradzającej typy
-    \item funkcji generującej kod wykonywalny języka javascript
-\end{itemize}
-Język powinien zawierać zmienne, funkcje, liczby, stringi, tablice, operacje binarne i unarne.
-Język powinien zawierać podstawowe typy: Num, Str, Bool, Array, Callable, Unit.
+Tworząc aplikację, chciałem, by język posiadał podstawowe typy danych (liczby, stringi, wartość logiczna), kilka typów generycznych (funkcje, tablice), typ `Option', oraz możliwość tworzenia własnych typów.
+Dodatkowo nie powinno być potrzeby podawania typów zmiennych w większości przypadków, kompilator sam powinien wykrywać typy zmiennych na podstawie ich użycia.
+ 
+
+Język poza zmiennymi, potrzebuje możliwości wykonywania operacji na danych, dlatego ważne było dla mnie, by zaimplementować operatory binarane, oraz unarne. Operatory te miały też spełniać ważną rolą w trakcie inferencji typów. W języku javascript operator `+' może być wykorzystywany do dodawania liczb jak i konkatenacji stringów, ważne więc było by stworzyć dwa oddzielne operatory.
+
+
+Chciałem również by funkcje wieloargumentowe kompilowane były jako funkcje jednoargumentowe zwracające kolejne funkcje, co pozwala na wywoływanie funkcji bez wszystkich argumentów w celu zwrócenia funkcji przyjmującej resztę argumentów tzw. currying. 
+
+
+Jednym z ważniejszych elemenów każdego języka jest możliwość wykonywania różnego zbioru instrukcji, warunkowo. W tym celu planowałem zaimplementowanie instrukcji `if', oraz `case'. Instrukcja `case' wykonywać ma dopasowanie do wzorca (tzw. pattern-matching), wykonywać, odpowiedni zbiór instrukcji zależnie od wprowadzonych danych. Kompilator, powinien ostrzegać, jeżeli ścieżka dla jednego z typów danych nie została zaimplementowana.
+
 \subsection{Opis formaly składni języka}
 %  notacja wirta
 \section{Narzędzia}
