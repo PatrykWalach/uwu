@@ -33,6 +33,8 @@ Chciałem również by funkcje wieloargumentowe kompilowane były jako funkcje j
 
 Jednym z ważniejszych elemenów każdego języka jest możliwość wykonywania różnego zbioru instrukcji, warunkowo. W tym celu planowałem zaimplementowanie instrukcji `if', oraz `case'. Instrukcja `case' wykonywać ma dopasowanie do wzorca (tzw. pattern-matching), wykonywać, odpowiedni zbiór instrukcji zależnie od wprowadzonych danych. Kompilator, powinien ostrzegać, jeżeli ścieżka dla jednego z typów danych nie została zaimplementowana.
 
+Kolejnym dość ważnym elementem języka jest brak wyrażenia `return', które jest wykorzystywane do zwrócenia wartości z funkcji. Zamiast tego każdy bloku instrukcji powinien zwracać ostatnie wyrażenie. Pozwoli to na łatwiejsze inicjowanie zmiennych, w przypadku gdy inicializacja wymaga więcej niż jedenej linii kodu. 
+
 \subsection{Opis formaly składni języka}
 %  notacja wirta
 \section{Narzędzia}
