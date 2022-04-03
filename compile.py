@@ -22,11 +22,6 @@ def compile(exp: terms.AstTree) -> str:
             if body:
                 body[-1] = "return " + body[-1]
             return ";".join(body)
-        case terms.EDo(body):
-            body = [compile(expr) for expr in body]
-            if body:
-                body[-1] = "return " + body[-1]
-            return "(()=>{" + ";".join(body) + "})()"
         case terms.EProgram(body):
             body = [compile(expr) for expr in body]
             return ";".join(body)
@@ -38,7 +33,7 @@ def compile(exp: terms.AstTree) -> str:
             return functools.reduce(
                 lambda acc, arg: f"{acc}({arg})",
                 [compile(arg) for arg in args] or [""],
-                compile(id),
+                f"({compile(id)})",
             )
 
         case terms.EVariantCall("True", []):
@@ -54,15 +49,13 @@ def compile(exp: terms.AstTree) -> str:
 
             return f"{{TAG:'{id}',{','.join(args)}}}"
 
-        case terms.EDef(id, args, terms.EDo(body)):
-
+        case terms.EFn(args, body):
             args = functools.reduce(
                 lambda acc, arg: f"{acc}({arg})=>",
                 [compile(arg) for arg in args] or [""],
                 "",
             )
-
-            return f"{id}={args}{{{compile(terms.EBlock(body))}}}"
+            return f"{args}{{{compile(body)}}}"
         case terms.EBinaryExpr("|", left, right):
             return f"{compile( left)}.concat({compile( right)})"
         case terms.EBinaryExpr("++", left, right):
@@ -127,7 +120,7 @@ def compile(exp: terms.AstTree) -> str:
 def compile_case_tree(tree: case_tree.CaseTree):
     match tree:
         case case_tree.Leaf(body):
-            return compile(terms.EBlock(body.body))
+            return compile(body)
         case case_tree.MissingLeaf():
             return "throw new Error('Non-exhaustive pattern match')"
         case case_tree.Node(var, pattern_name, vars, yes, no):

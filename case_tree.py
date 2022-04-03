@@ -7,7 +7,7 @@ import terms
 @dataclasses.dataclass(frozen=True)
 class Clause:
     patterns: dict[str, terms.Pattern]
-    body: terms.EDo = dataclasses.field(default_factory=terms.EDo)
+    body: terms.Expr = terms.EDo([])
 
 
 def subst_var_eqs(clause: Clause):
@@ -22,15 +22,30 @@ def subst_var_eqs(clause: Clause):
         for id, pattern in clause.patterns.items()
         if not isinstance(pattern, terms.EMatchAs)
     }
+    if not substitutions:
+        return patterns, clause.body
 
-    return patterns, dataclasses.replace(
-        clause.body,
-        body=[]
+    match clause.body:
+        case terms.ECall(
+            terms.EFn(
+                params=[],
+                body=terms.EBlock(body),
+            ),
+            [],
+        ):
+            return patterns, append_substitutions(substitutions, body)
+
+    return patterns, append_substitutions(substitutions, [clause.body])
+
+
+def append_substitutions(substitutions: dict[str, str], body: list[terms.Expr]):
+    return terms.EDo(
+        list[terms.Expr]()
         + [
             terms.ELet(id, terms.EIdentifier(value))
             for id, value in substitutions.items()
         ]
-        + clause.body.body,
+        + body
     )
 
 

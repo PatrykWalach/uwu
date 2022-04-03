@@ -171,17 +171,6 @@ def infer(
             return subst, typed.TNum()
         case terms.EIdentifier(var):
             return subst, instantiate(ctx[var])
-        case terms.EDo(body, hint):
-            subst, hint = infer(subst, ctx, hint)
-            ty = typed.TUnit()
-            ctx = ctx.copy()
-
-            for exp in body:
-                subst, ty = infer(subst, ctx, exp)
-
-            subst = unify_subst(ty, hint, subst)
-
-            return subst, hint
         case terms.EProgram(body) | terms.EBlock(body):
             ty = typed.TUnit()
             ctx = ctx.copy()
@@ -333,7 +322,7 @@ def infer(
             subst = unify_subst(ty_fn, reduce_args(ty_args, ty), subst)
 
             return subst, ty
-        case terms.EDef(id, params, body, hint, generics):
+        case terms.EFn(params, body, hint, generics):
             t_ctx = ctx.copy()
 
             for generic in generics:
@@ -354,8 +343,6 @@ def infer(
             subst, ty_body = infer(subst, t_ctx, body)
 
             subst = unify_subst(ty_body, hint, subst)
-
-            ctx[id] = Scheme.from_subst(subst, ctx, ty)
 
             return subst, ty
         case terms.EIf(test, then, or_else, hint=hint):

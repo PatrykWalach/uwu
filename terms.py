@@ -43,10 +43,11 @@ class ELet:
     hint: EHint | EHintNone = EHintNone()
 
 
-@dataclasses.dataclass(frozen=True)
-class EDo:
-    body: list[Expr] = dataclasses.field(default_factory=list)
-    hint: EHint | EHintNone = EHintNone()
+def EDo(
+    body: list[Expr] = [],
+    hint: EHint | EHintNone = EHintNone(),
+) -> ECall:
+    return ECall(EFn([], EBlock(body), hint))
 
 
 @dataclasses.dataclass(frozen=True)
@@ -76,11 +77,20 @@ class EExternal:
     value: str
 
 
+def EDef(
+    identifier: str,
+    params: list[EParam],
+    body: Expr,
+    hint: EHint | EHintNone = EHintNone(),
+    generics: list[EIdentifier] = [],
+) -> ELet:
+    return ELet(identifier, EFn(params, body, hint, generics))
+
+
 @dataclasses.dataclass(frozen=True)
-class EDef:
-    identifier: str
+class EFn:
     params: list[EParam]
-    body: EDo
+    body: Expr | EBlock
     hint: EHint | EHintNone = EHintNone()
     generics: list[EIdentifier] = dataclasses.field(default_factory=list)
 
@@ -111,7 +121,7 @@ class ECaseOf:
 @dataclasses.dataclass(frozen=True)
 class ECase:
     pattern: Pattern
-    body: EDo = dataclasses.field(default_factory=EDo)
+    body: Expr = dataclasses.field(default_factory=EDo)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -211,9 +221,8 @@ class EFieldsUnnamed:
 Pattern: typing.TypeAlias = EMatchAs | EMatchVariant
 
 Expr: typing.TypeAlias = (
-    EDo
-    | ELiteral
-    | EDef
+    ELiteral
+    | EFn
     | EIf
     | ECall
     | ECaseOf
