@@ -57,7 +57,7 @@ Rule 53    _10_params_optional -> params
 Rule 54    _10_params_optional -> <empty>
 Rule 55    _11_0x3a_type_optional -> : type
 Rule 56    _11_0x3a_type_optional -> <empty>
-Rule 57    def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr  [precedence=left, level=7]
+Rule 57    def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do  [precedence=left, level=7]
 Rule 58    _12_0x2c_type_identifier_repeat -> _12_0x2c_type_identifier_items
 Rule 59    _12_0x2c_type_identifier_repeat -> <empty>
 Rule 60    _12_0x2c_type_identifier_items -> _12_0x2c_type_identifier_items _12_0x2c_type_identifier_item
@@ -291,10 +291,10 @@ call                 : 16
 case_of              : 17
 cases                : 127 132
 def_expr             : 20
-do                   : 22 50 129 132
+do                   : 22 50 57 129 132
 do_exprs             : 4 9 43 48
 enum                 : 24
-expr                 : 6 9 10 11 26 26 27 27 28 28 29 29 30 30 31 31 32 32 33 33 34 34 35 35 36 36 37 37 57 115 120 124 157 167 170 177
+expr                 : 6 9 10 11 26 26 27 27 28 28 29 29 30 30 31 31 32 32 33 33 34 34 35 35 36 36 37 37 115 120 124 157 167 170 177
 exprs                : 155 160 165 170
 external             : 23
 identifier           : 14 50 57 112 137 177
@@ -388,7 +388,7 @@ state 2
     (37) binary_expr -> . expr CONCAT expr
     (115) if_expr -> . IF expr THEN _29_0x3a_type_optional block_statement _30_or_else_optional END
     (50) def_expr -> . DEF identifier ( _9_NEWLINE_optional _10_params_optional ) _11_0x3a_type_optional do
-    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr
+    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do
     (180) literal -> . STRING
     (181) literal -> . NUMBER
     (38) do -> . DO _4_0x3a_type_optional _5_NEWLINE_optional _6_do_exprs_optional END
@@ -538,7 +538,7 @@ state 7
     (37) binary_expr -> . expr CONCAT expr
     (115) if_expr -> . IF expr THEN _29_0x3a_type_optional block_statement _30_or_else_optional END
     (50) def_expr -> . DEF identifier ( _9_NEWLINE_optional _10_params_optional ) _11_0x3a_type_optional do
-    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr
+    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do
     (180) literal -> . STRING
     (181) literal -> . NUMBER
     (38) do -> . DO _4_0x3a_type_optional _5_NEWLINE_optional _6_do_exprs_optional END
@@ -614,7 +614,7 @@ state 8
     (37) binary_expr -> . expr CONCAT expr
     (115) if_expr -> . IF expr THEN _29_0x3a_type_optional block_statement _30_or_else_optional END
     (50) def_expr -> . DEF identifier ( _9_NEWLINE_optional _10_params_optional ) _11_0x3a_type_optional do
-    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr
+    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do
     (180) literal -> . STRING
     (181) literal -> . NUMBER
     (38) do -> . DO _4_0x3a_type_optional _5_NEWLINE_optional _6_do_exprs_optional END
@@ -1120,7 +1120,7 @@ state 25
     (37) binary_expr -> . expr CONCAT expr
     (115) if_expr -> . IF expr THEN _29_0x3a_type_optional block_statement _30_or_else_optional END
     (50) def_expr -> . DEF identifier ( _9_NEWLINE_optional _10_params_optional ) _11_0x3a_type_optional do
-    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr
+    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do
     (180) literal -> . STRING
     (181) literal -> . NUMBER
     (38) do -> . DO _4_0x3a_type_optional _5_NEWLINE_optional _6_do_exprs_optional END
@@ -1196,7 +1196,7 @@ state 26
     (37) binary_expr -> . expr CONCAT expr
     (115) if_expr -> . IF expr THEN _29_0x3a_type_optional block_statement _30_or_else_optional END
     (50) def_expr -> . DEF identifier ( _9_NEWLINE_optional _10_params_optional ) _11_0x3a_type_optional do
-    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr
+    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do
     (180) literal -> . STRING
     (181) literal -> . NUMBER
     (38) do -> . DO _4_0x3a_type_optional _5_NEWLINE_optional _6_do_exprs_optional END
@@ -1237,7 +1237,7 @@ state 26
 state 27
 
     (50) def_expr -> DEF . identifier ( _9_NEWLINE_optional _10_params_optional ) _11_0x3a_type_optional do
-    (57) def_expr -> DEF . identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr
+    (57) def_expr -> DEF . identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do
     (175) identifier -> . IDENTIFIER
     IDENTIFIER      shift and go to state 24
 
@@ -1439,7 +1439,7 @@ state 35
     (37) binary_expr -> . expr CONCAT expr
     (115) if_expr -> . IF expr THEN _29_0x3a_type_optional block_statement _30_or_else_optional END
     (50) def_expr -> . DEF identifier ( _9_NEWLINE_optional _10_params_optional ) _11_0x3a_type_optional do
-    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr
+    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do
     (180) literal -> . STRING
     (181) literal -> . NUMBER
     (38) do -> . DO _4_0x3a_type_optional _5_NEWLINE_optional _6_do_exprs_optional END
@@ -1543,7 +1543,7 @@ state 37
     (37) binary_expr -> . expr CONCAT expr
     (115) if_expr -> . IF expr THEN _29_0x3a_type_optional block_statement _30_or_else_optional END
     (50) def_expr -> . DEF identifier ( _9_NEWLINE_optional _10_params_optional ) _11_0x3a_type_optional do
-    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr
+    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do
     (180) literal -> . STRING
     (181) literal -> . NUMBER
     (38) do -> . DO _4_0x3a_type_optional _5_NEWLINE_optional _6_do_exprs_optional END
@@ -1619,7 +1619,7 @@ state 38
     (37) binary_expr -> . expr CONCAT expr
     (115) if_expr -> . IF expr THEN _29_0x3a_type_optional block_statement _30_or_else_optional END
     (50) def_expr -> . DEF identifier ( _9_NEWLINE_optional _10_params_optional ) _11_0x3a_type_optional do
-    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr
+    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do
     (180) literal -> . STRING
     (181) literal -> . NUMBER
     (38) do -> . DO _4_0x3a_type_optional _5_NEWLINE_optional _6_do_exprs_optional END
@@ -1695,7 +1695,7 @@ state 39
     (37) binary_expr -> . expr CONCAT expr
     (115) if_expr -> . IF expr THEN _29_0x3a_type_optional block_statement _30_or_else_optional END
     (50) def_expr -> . DEF identifier ( _9_NEWLINE_optional _10_params_optional ) _11_0x3a_type_optional do
-    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr
+    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do
     (180) literal -> . STRING
     (181) literal -> . NUMBER
     (38) do -> . DO _4_0x3a_type_optional _5_NEWLINE_optional _6_do_exprs_optional END
@@ -1771,7 +1771,7 @@ state 40
     (37) binary_expr -> . expr CONCAT expr
     (115) if_expr -> . IF expr THEN _29_0x3a_type_optional block_statement _30_or_else_optional END
     (50) def_expr -> . DEF identifier ( _9_NEWLINE_optional _10_params_optional ) _11_0x3a_type_optional do
-    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr
+    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do
     (180) literal -> . STRING
     (181) literal -> . NUMBER
     (38) do -> . DO _4_0x3a_type_optional _5_NEWLINE_optional _6_do_exprs_optional END
@@ -1847,7 +1847,7 @@ state 41
     (37) binary_expr -> . expr CONCAT expr
     (115) if_expr -> . IF expr THEN _29_0x3a_type_optional block_statement _30_or_else_optional END
     (50) def_expr -> . DEF identifier ( _9_NEWLINE_optional _10_params_optional ) _11_0x3a_type_optional do
-    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr
+    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do
     (180) literal -> . STRING
     (181) literal -> . NUMBER
     (38) do -> . DO _4_0x3a_type_optional _5_NEWLINE_optional _6_do_exprs_optional END
@@ -1923,7 +1923,7 @@ state 42
     (37) binary_expr -> . expr CONCAT expr
     (115) if_expr -> . IF expr THEN _29_0x3a_type_optional block_statement _30_or_else_optional END
     (50) def_expr -> . DEF identifier ( _9_NEWLINE_optional _10_params_optional ) _11_0x3a_type_optional do
-    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr
+    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do
     (180) literal -> . STRING
     (181) literal -> . NUMBER
     (38) do -> . DO _4_0x3a_type_optional _5_NEWLINE_optional _6_do_exprs_optional END
@@ -1999,7 +1999,7 @@ state 43
     (37) binary_expr -> . expr CONCAT expr
     (115) if_expr -> . IF expr THEN _29_0x3a_type_optional block_statement _30_or_else_optional END
     (50) def_expr -> . DEF identifier ( _9_NEWLINE_optional _10_params_optional ) _11_0x3a_type_optional do
-    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr
+    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do
     (180) literal -> . STRING
     (181) literal -> . NUMBER
     (38) do -> . DO _4_0x3a_type_optional _5_NEWLINE_optional _6_do_exprs_optional END
@@ -2075,7 +2075,7 @@ state 44
     (37) binary_expr -> . expr CONCAT expr
     (115) if_expr -> . IF expr THEN _29_0x3a_type_optional block_statement _30_or_else_optional END
     (50) def_expr -> . DEF identifier ( _9_NEWLINE_optional _10_params_optional ) _11_0x3a_type_optional do
-    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr
+    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do
     (180) literal -> . STRING
     (181) literal -> . NUMBER
     (38) do -> . DO _4_0x3a_type_optional _5_NEWLINE_optional _6_do_exprs_optional END
@@ -2151,7 +2151,7 @@ state 45
     (37) binary_expr -> . expr CONCAT expr
     (115) if_expr -> . IF expr THEN _29_0x3a_type_optional block_statement _30_or_else_optional END
     (50) def_expr -> . DEF identifier ( _9_NEWLINE_optional _10_params_optional ) _11_0x3a_type_optional do
-    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr
+    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do
     (180) literal -> . STRING
     (181) literal -> . NUMBER
     (38) do -> . DO _4_0x3a_type_optional _5_NEWLINE_optional _6_do_exprs_optional END
@@ -2227,7 +2227,7 @@ state 46
     (37) binary_expr -> . expr CONCAT expr
     (115) if_expr -> . IF expr THEN _29_0x3a_type_optional block_statement _30_or_else_optional END
     (50) def_expr -> . DEF identifier ( _9_NEWLINE_optional _10_params_optional ) _11_0x3a_type_optional do
-    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr
+    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do
     (180) literal -> . STRING
     (181) literal -> . NUMBER
     (38) do -> . DO _4_0x3a_type_optional _5_NEWLINE_optional _6_do_exprs_optional END
@@ -2303,7 +2303,7 @@ state 47
     (37) binary_expr -> . expr CONCAT expr
     (115) if_expr -> . IF expr THEN _29_0x3a_type_optional block_statement _30_or_else_optional END
     (50) def_expr -> . DEF identifier ( _9_NEWLINE_optional _10_params_optional ) _11_0x3a_type_optional do
-    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr
+    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do
     (180) literal -> . STRING
     (181) literal -> . NUMBER
     (38) do -> . DO _4_0x3a_type_optional _5_NEWLINE_optional _6_do_exprs_optional END
@@ -2379,7 +2379,7 @@ state 48
     (37) binary_expr -> . expr CONCAT expr
     (115) if_expr -> . IF expr THEN _29_0x3a_type_optional block_statement _30_or_else_optional END
     (50) def_expr -> . DEF identifier ( _9_NEWLINE_optional _10_params_optional ) _11_0x3a_type_optional do
-    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr
+    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do
     (180) literal -> . STRING
     (181) literal -> . NUMBER
     (38) do -> . DO _4_0x3a_type_optional _5_NEWLINE_optional _6_do_exprs_optional END
@@ -2549,7 +2549,7 @@ state 53
     (37) binary_expr -> . expr CONCAT expr
     (115) if_expr -> . IF expr THEN _29_0x3a_type_optional block_statement _30_or_else_optional END
     (50) def_expr -> . DEF identifier ( _9_NEWLINE_optional _10_params_optional ) _11_0x3a_type_optional do
-    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr
+    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do
     (180) literal -> . STRING
     (181) literal -> . NUMBER
     (38) do -> . DO _4_0x3a_type_optional _5_NEWLINE_optional _6_do_exprs_optional END
@@ -2699,7 +2699,7 @@ state 57
 state 58
 
     (50) def_expr -> DEF identifier . ( _9_NEWLINE_optional _10_params_optional ) _11_0x3a_type_optional do
-    (57) def_expr -> DEF identifier . < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr
+    (57) def_expr -> DEF identifier . < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do
     (               shift and go to state 88
     <               shift and go to state 89
 
@@ -2797,7 +2797,7 @@ state 63
     (37) binary_expr -> . expr CONCAT expr
     (115) if_expr -> . IF expr THEN _29_0x3a_type_optional block_statement _30_or_else_optional END
     (50) def_expr -> . DEF identifier ( _9_NEWLINE_optional _10_params_optional ) _11_0x3a_type_optional do
-    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr
+    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do
     (180) literal -> . STRING
     (181) literal -> . NUMBER
     (38) do -> . DO _4_0x3a_type_optional _5_NEWLINE_optional _6_do_exprs_optional END
@@ -3415,7 +3415,7 @@ state 78
     (37) binary_expr -> . expr CONCAT expr
     (115) if_expr -> . IF expr THEN _29_0x3a_type_optional block_statement _30_or_else_optional END
     (50) def_expr -> . DEF identifier ( _9_NEWLINE_optional _10_params_optional ) _11_0x3a_type_optional do
-    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr
+    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do
     (180) literal -> . STRING
     (181) literal -> . NUMBER
     (38) do -> . DO _4_0x3a_type_optional _5_NEWLINE_optional _6_do_exprs_optional END
@@ -3581,7 +3581,7 @@ state 84
     (37) binary_expr -> . expr CONCAT expr
     (115) if_expr -> . IF expr THEN _29_0x3a_type_optional block_statement _30_or_else_optional END
     (50) def_expr -> . DEF identifier ( _9_NEWLINE_optional _10_params_optional ) _11_0x3a_type_optional do
-    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr
+    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do
     (180) literal -> . STRING
     (181) literal -> . NUMBER
     (38) do -> . DO _4_0x3a_type_optional _5_NEWLINE_optional _6_do_exprs_optional END
@@ -3692,7 +3692,7 @@ state 88
 
 state 89
 
-    (57) def_expr -> DEF identifier < . type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr
+    (57) def_expr -> DEF identifier < . type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do
     (176) type_identifier -> . TYPE_IDENTIFIER
     TYPE_IDENTIFIER shift and go to state 33
 
@@ -3740,7 +3740,7 @@ state 90
     (37) binary_expr -> . expr CONCAT expr
     (115) if_expr -> . IF expr THEN _29_0x3a_type_optional block_statement _30_or_else_optional END
     (50) def_expr -> . DEF identifier ( _9_NEWLINE_optional _10_params_optional ) _11_0x3a_type_optional do
-    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr
+    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do
     (180) literal -> . STRING
     (181) literal -> . NUMBER
     (38) do -> . DO _4_0x3a_type_optional _5_NEWLINE_optional _6_do_exprs_optional END
@@ -4083,7 +4083,7 @@ state 110
 
 state 111
 
-    (57) def_expr -> DEF identifier < type_identifier . _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr
+    (57) def_expr -> DEF identifier < type_identifier . _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do
     (58) _12_0x2c_type_identifier_repeat -> . _12_0x2c_type_identifier_items
     (59) _12_0x2c_type_identifier_repeat -> .
     (60) _12_0x2c_type_identifier_items -> . _12_0x2c_type_identifier_items _12_0x2c_type_identifier_item
@@ -4229,7 +4229,7 @@ state 119
     (37) binary_expr -> . expr CONCAT expr
     (115) if_expr -> . IF expr THEN _29_0x3a_type_optional block_statement _30_or_else_optional END
     (50) def_expr -> . DEF identifier ( _9_NEWLINE_optional _10_params_optional ) _11_0x3a_type_optional do
-    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr
+    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do
     (180) literal -> . STRING
     (181) literal -> . NUMBER
     (38) do -> . DO _4_0x3a_type_optional _5_NEWLINE_optional _6_do_exprs_optional END
@@ -4442,7 +4442,7 @@ state 130
     (37) binary_expr -> . expr CONCAT expr
     (115) if_expr -> . IF expr THEN _29_0x3a_type_optional block_statement _30_or_else_optional END
     (50) def_expr -> . DEF identifier ( _9_NEWLINE_optional _10_params_optional ) _11_0x3a_type_optional do
-    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr
+    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do
     (180) literal -> . STRING
     (181) literal -> . NUMBER
     (38) do -> . DO _4_0x3a_type_optional _5_NEWLINE_optional _6_do_exprs_optional END
@@ -4567,7 +4567,7 @@ state 136
 
 state 137
 
-    (57) def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat . > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr
+    (57) def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat . > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do
     >               shift and go to state 171
 
 
@@ -4879,7 +4879,7 @@ state 161
     (37) binary_expr -> . expr CONCAT expr
     (115) if_expr -> . IF expr THEN _29_0x3a_type_optional block_statement _30_or_else_optional END
     (50) def_expr -> . DEF identifier ( _9_NEWLINE_optional _10_params_optional ) _11_0x3a_type_optional do
-    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr
+    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do
     (180) literal -> . STRING
     (181) literal -> . NUMBER
     (38) do -> . DO _4_0x3a_type_optional _5_NEWLINE_optional _6_do_exprs_optional END
@@ -5013,7 +5013,7 @@ state 170
 
 state 171
 
-    (57) def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > . ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr
+    (57) def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > . ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do
     (               shift and go to state 200
 
 
@@ -5344,7 +5344,7 @@ state 199
 
 state 200
 
-    (57) def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( . _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr
+    (57) def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( . _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do
     (63) _13_NEWLINE_optional -> . NEWLINE
     (64) _13_NEWLINE_optional -> .
     NEWLINE         shift and go to state 215
@@ -5508,7 +5508,7 @@ state 213
 
 state 214
 
-    (57) def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional . _14_params_optional ) _15_0x3a_type_optional expr
+    (57) def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional . _14_params_optional ) _15_0x3a_type_optional do
     (65) _14_params_optional -> . params
     (66) _14_params_optional -> .
     (69) params -> . param _16_NEWLINE_optional
@@ -5653,7 +5653,7 @@ state 228
 
 state 229
 
-    (57) def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional . ) _15_0x3a_type_optional expr
+    (57) def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional . ) _15_0x3a_type_optional do
     )               shift and go to state 240
 
 
@@ -5746,23 +5746,11 @@ state 239
 
 state 240
 
-    (57) def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) . _15_0x3a_type_optional expr
+    (57) def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) . _15_0x3a_type_optional do
     (67) _15_0x3a_type_optional -> . : type
     (68) _15_0x3a_type_optional -> .
     :               shift and go to state 244
-    -               reduce using rule 68 (_15_0x3a_type_optional -> .)
-    (               reduce using rule 68 (_15_0x3a_type_optional -> .)
-    [               reduce using rule 68 (_15_0x3a_type_optional -> .)
-    IDENTIFIER      reduce using rule 68 (_15_0x3a_type_optional -> .)
-    CASE            reduce using rule 68 (_15_0x3a_type_optional -> .)
-    IF              reduce using rule 68 (_15_0x3a_type_optional -> .)
-    DEF             reduce using rule 68 (_15_0x3a_type_optional -> .)
-    STRING          reduce using rule 68 (_15_0x3a_type_optional -> .)
-    NUMBER          reduce using rule 68 (_15_0x3a_type_optional -> .)
     DO              reduce using rule 68 (_15_0x3a_type_optional -> .)
-    EXTERNAL        reduce using rule 68 (_15_0x3a_type_optional -> .)
-    ENUM            reduce using rule 68 (_15_0x3a_type_optional -> .)
-    TYPE_IDENTIFIER reduce using rule 68 (_15_0x3a_type_optional -> .)
 
     _15_0x3a_type_optional         shift and go to state 243
 
@@ -5807,79 +5795,11 @@ state 242
 
 state 243
 
-    (57) def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional . expr
-    (10) expr -> . - expr
-    (11) expr -> . ( expr )
-    (12) expr -> . array
-    (13) expr -> . variant_call
-    (14) expr -> . identifier
-    (15) expr -> . variable_declaration
-    (16) expr -> . call
-    (17) expr -> . case_of
-    (18) expr -> . binary_expr
-    (19) expr -> . if_expr
-    (20) expr -> . def_expr
-    (21) expr -> . literal
-    (22) expr -> . do
-    (23) expr -> . external
-    (24) expr -> . enum
-    (152) array -> . [ _41_NEWLINE_optional _42_exprs_optional ]
-    (162) variant_call -> . type_identifier ( _45_NEWLINE_optional _46_exprs_optional )
-    (175) identifier -> . IDENTIFIER
-    (177) variable_declaration -> . identifier _50_0x3a_type_optional = expr
-    (157) call -> . expr ( _43_NEWLINE_optional _44_exprs_optional )
-    (124) case_of -> . CASE expr OF _32_NEWLINE_optional _33_cases_optional END
-    (26) binary_expr -> . expr INT_DIV expr
-    (27) binary_expr -> . expr EQUAL expr
-    (28) binary_expr -> . expr NOT_EQUAL expr
-    (29) binary_expr -> . expr | expr
-    (30) binary_expr -> . expr > expr
-    (31) binary_expr -> . expr % expr
-    (32) binary_expr -> . expr < expr
-    (33) binary_expr -> . expr * expr
-    (34) binary_expr -> . expr / expr
-    (35) binary_expr -> . expr - expr
-    (36) binary_expr -> . expr + expr
-    (37) binary_expr -> . expr CONCAT expr
-    (115) if_expr -> . IF expr THEN _29_0x3a_type_optional block_statement _30_or_else_optional END
-    (50) def_expr -> . DEF identifier ( _9_NEWLINE_optional _10_params_optional ) _11_0x3a_type_optional do
-    (57) def_expr -> . DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr
-    (180) literal -> . STRING
-    (181) literal -> . NUMBER
+    (57) def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional . do
     (38) do -> . DO _4_0x3a_type_optional _5_NEWLINE_optional _6_do_exprs_optional END
-    (25) external -> . EXTERNAL
-    (84) enum -> . ENUM type_identifier { _20_NEWLINE_optional _21_variants_optional }
-    (89) enum -> . ENUM type_identifier < type_identifier _22_0x2c_type_identifier_repeat > { _23_NEWLINE_optional _24_variants_optional }
-    (176) type_identifier -> . TYPE_IDENTIFIER
-    -               shift and go to state 7
-    (               shift and go to state 8
-    [               shift and go to state 22
-    IDENTIFIER      shift and go to state 24
-    CASE            shift and go to state 25
-    IF              shift and go to state 26
-    DEF             shift and go to state 27
-    STRING          shift and go to state 28
-    NUMBER          shift and go to state 29
     DO              shift and go to state 30
-    EXTERNAL        shift and go to state 31
-    ENUM            shift and go to state 32
-    TYPE_IDENTIFIER shift and go to state 33
 
-    identifier                     shift and go to state 11
-    type_identifier                shift and go to state 23
-    expr                           shift and go to state 247
-    array                          shift and go to state 9
-    variant_call                   shift and go to state 10
-    variable_declaration           shift and go to state 12
-    call                           shift and go to state 13
-    case_of                        shift and go to state 14
-    binary_expr                    shift and go to state 15
-    if_expr                        shift and go to state 16
-    def_expr                       shift and go to state 17
-    literal                        shift and go to state 18
-    do                             shift and go to state 19
-    external                       shift and go to state 20
-    enum                           shift and go to state 21
+    do                             shift and go to state 247
 
 state 244
 
@@ -5908,58 +5828,33 @@ state 246
 
 state 247
 
-    (57) def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr .
-    (157) call -> expr . ( _43_NEWLINE_optional _44_exprs_optional )
-    (26) binary_expr -> expr . INT_DIV expr
-    (27) binary_expr -> expr . EQUAL expr
-    (28) binary_expr -> expr . NOT_EQUAL expr
-    (29) binary_expr -> expr . | expr
-    (30) binary_expr -> expr . > expr
-    (31) binary_expr -> expr . % expr
-    (32) binary_expr -> expr . < expr
-    (33) binary_expr -> expr . * expr
-    (34) binary_expr -> expr . / expr
-    (35) binary_expr -> expr . - expr
-    (36) binary_expr -> expr . + expr
-    (37) binary_expr -> expr . CONCAT expr
-    NEWLINE         reduce using rule 57 (def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr .)
-    (               reduce using rule 57 (def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr .)
-    INT_DIV         reduce using rule 57 (def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr .)
-    EQUAL           reduce using rule 57 (def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr .)
-    NOT_EQUAL       reduce using rule 57 (def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr .)
-    |               reduce using rule 57 (def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr .)
-    >               reduce using rule 57 (def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr .)
-    %               reduce using rule 57 (def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr .)
-    <               reduce using rule 57 (def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr .)
-    *               reduce using rule 57 (def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr .)
-    /               reduce using rule 57 (def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr .)
-    -               reduce using rule 57 (def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr .)
-    +               reduce using rule 57 (def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr .)
-    CONCAT          reduce using rule 57 (def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr .)
-    $end            reduce using rule 57 (def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr .)
-    )               reduce using rule 57 (def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr .)
-    OF              reduce using rule 57 (def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr .)
-    THEN            reduce using rule 57 (def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr .)
-    END             reduce using rule 57 (def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr .)
-    ELIF            reduce using rule 57 (def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr .)
-    ELSE            reduce using rule 57 (def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr .)
-    ,               reduce using rule 57 (def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr .)
-    ]               reduce using rule 57 (def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional expr .)
+    (57) def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do .
+    NEWLINE         reduce using rule 57 (def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do .)
+    (               reduce using rule 57 (def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do .)
+    INT_DIV         reduce using rule 57 (def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do .)
+    EQUAL           reduce using rule 57 (def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do .)
+    NOT_EQUAL       reduce using rule 57 (def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do .)
+    |               reduce using rule 57 (def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do .)
+    >               reduce using rule 57 (def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do .)
+    %               reduce using rule 57 (def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do .)
+    <               reduce using rule 57 (def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do .)
+    *               reduce using rule 57 (def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do .)
+    /               reduce using rule 57 (def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do .)
+    -               reduce using rule 57 (def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do .)
+    +               reduce using rule 57 (def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do .)
+    CONCAT          reduce using rule 57 (def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do .)
+    $end            reduce using rule 57 (def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do .)
+    )               reduce using rule 57 (def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do .)
+    OF              reduce using rule 57 (def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do .)
+    THEN            reduce using rule 57 (def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do .)
+    END             reduce using rule 57 (def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do .)
+    ELIF            reduce using rule 57 (def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do .)
+    ELSE            reduce using rule 57 (def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do .)
+    ,               reduce using rule 57 (def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do .)
+    ]               reduce using rule 57 (def_expr -> DEF identifier < type_identifier _12_0x2c_type_identifier_repeat > ( _13_NEWLINE_optional _14_params_optional ) _15_0x3a_type_optional do .)
 
 
 state 248
 
     (67) _15_0x3a_type_optional -> : type .
-    -               reduce using rule 67 (_15_0x3a_type_optional -> : type .)
-    (               reduce using rule 67 (_15_0x3a_type_optional -> : type .)
-    [               reduce using rule 67 (_15_0x3a_type_optional -> : type .)
-    IDENTIFIER      reduce using rule 67 (_15_0x3a_type_optional -> : type .)
-    CASE            reduce using rule 67 (_15_0x3a_type_optional -> : type .)
-    IF              reduce using rule 67 (_15_0x3a_type_optional -> : type .)
-    DEF             reduce using rule 67 (_15_0x3a_type_optional -> : type .)
-    STRING          reduce using rule 67 (_15_0x3a_type_optional -> : type .)
-    NUMBER          reduce using rule 67 (_15_0x3a_type_optional -> : type .)
     DO              reduce using rule 67 (_15_0x3a_type_optional -> : type .)
-    EXTERNAL        reduce using rule 67 (_15_0x3a_type_optional -> : type .)
-    ENUM            reduce using rule 67 (_15_0x3a_type_optional -> : type .)
-    TYPE_IDENTIFIER reduce using rule 67 (_15_0x3a_type_optional -> : type .)

@@ -189,7 +189,7 @@ def _compile(exp: terms.AstTree) -> str:
                 "",
             )
 
-            return f"const {id}={args}{_compile(body)}"
+            return f"const {id}={args}{{{_compile(terms.EBlock(body))}}}"
         case terms.EBinaryExpr("|", left, right):
             return f"{_compile( left)}.concat({_compile( right)})"
         case terms.EBinaryExpr("++", left, right):
