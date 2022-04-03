@@ -7,11 +7,13 @@
     "example": "examples"
   },
   "devDependencies": {
-    "nodemon": "^2.0.15"
+    "nodemon": "^2.0.15",
+    "prettier": "^2.6.2"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "python:dev": "nodemon --exec \"python\" main.py -e .py,.uwu",
+    "dev:prettier": "nodemon -e .js --exec \"prettier --write ./**/*.js\"",
     "node:dev": "nodemon examples/index.uwu.js",
     "pytest:snapshot": "nodemon --delay 3 --exec \"pytest -k snap --snapshot-update\" -e .py,.uwu -vv",
     "pytest": "nodemon --delay 3 --exec pytest -e .py,.js -vv"

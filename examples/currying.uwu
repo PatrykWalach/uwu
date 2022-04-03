@@ -1,0 +1,30 @@
+abs: Callable<Num, Num> = `Math.abs`
+
+def add(a, b) do
+    a + b
+end
+
+def multiply(a, b) do
+    a * b
+end
+
+def to_upper(s: Str): Str do
+    `s.toUpperCase()`
+end
+
+def classy_greeting(first_name, last_name) do
+    `"The name's "` ++ last_name ++ ', ' ++ first_name ++ ' ' ++ last_name
+end
+
+def compose1(f, g, a) do
+    f(g(a))
+end
+
+def compose2(f, g, a, b) do
+    f(g(a, b))
+end
+
+yell_greetings = compose2(to_upper, classy_greeting)
+yell_greetings('James', 'Bond') # "THE NAME'S BOND, JAMES BOND"
+
+compose1(compose1(abs, add(1)), multiply(2))(-4) # 7

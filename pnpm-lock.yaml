@@ -2,9 +2,11 @@ lockfileVersion: 5.3
 
 specifiers:
   nodemon: ^2.0.15
+  prettier: ^2.6.2
 
 devDependencies:
   nodemon: 2.0.15
+  prettier: 2.6.2
 
 packages:
 
@@ -519,6 +521,12 @@ packages:
   /prepend-http/2.0.0:
     resolution: {integrity: sha1-6SQ0v6XqjBn0HN/UAddBo8gZ2Jc=}
     engines: {node: '>=4'}
+    dev: true
+
+  /prettier/2.6.2:
+    resolution: {integrity: sha512-PkUpF+qoXTqhOeWL9fu7As8LXsIUZ1WYaJiY/a7McAQzxjk82OF0tibkFXVCDImZtWxbvojFjerkiLb0/q8mew==}
+    engines: {node: '>=10.13.0'}
+    hasBin: true
     dev: true
 
   /pstree.remy/1.1.8:

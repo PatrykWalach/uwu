@@ -1,0 +1,29 @@
+def add_one(x) do
+    x + 1
+end
+
+def map<T, R>(arr: Array<T>, func: Callable<T, R>): Array<R> do
+    `arr.map(func)`
+end
+
+def filter<T>(arr: Array<T>, func: Callable<T, Bool>): Array<T> do
+    `arr.filter(func)`
+end
+
+is_morning = False()
+
+message = if is_morning then
+  'Good morning!'
+else 
+  'Hello!'
+end
+
+
+result = do
+    arr1 = [1, 2, 3]
+    arr2 = map(arr1, add_one)
+
+    filter(arr1, def is_even(x) do
+        x % 2 == 0
+    end)
+end

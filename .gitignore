@@ -3,3 +3,9 @@
 /__pycache__
 /.vscode
 node_modules
+*.log
+*.synctex.gz
+*.fdb_latexmk
+*.aux
+*.fls
+/_minted-README

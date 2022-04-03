@@ -10,16 +10,27 @@ import terms
 import typed
 
 
-def hoist_do(
-    node: terms.EDo,
-) -> terms.EDo:
+def hoist_expr_list(body: list[terms.Expr]) -> list[terms.Expr]:
     body2 = list[terms.Expr]()
-    for expr in node.body:
+
+    for expr in body:
         let, expr2 = hoist_expr(expr)
         body2.extend(let)
         body2.append(expr2)
 
-    return terms.EDo(body2)
+    return body2
+
+
+def filter_identifiers(body: list[terms.Expr]):
+    return list(filter(lambda expr: not isinstance(expr, terms.EIdentifier), body))
+
+
+def hoist_do(
+    node: terms.EDo,
+) -> terms.EDo:
+    body2 = hoist_expr_list(node.body)
+
+    return terms.EDo(filter_identifiers(body2[:-1:]) + body2[-1::])
 
 
 def hoist_case(
@@ -36,17 +47,14 @@ def hoist(
     node: terms.EProgram | terms.EBlock,
 ) -> terms.EProgram | terms.EBlock:
     match node:
-        case terms.EBlock(body) | terms.EProgram(body):
-            body2 = list[terms.Expr]()
-            for expr in body:
-                let, expr2 = hoist_expr(expr)
-                body2.extend(let)
-                body2.append(expr2)
+        case terms.EBlock(body):
+            body2 = hoist_expr_list(body)
+            return terms.EBlock(filter_identifiers(body2[:-1:]) + body2[-1::])
 
-            return dataclasses.replace(
-                node,
-                body=list(body2),
-            )
+        case terms.EProgram(body):
+            body2 = hoist_expr_list(body)
+            return terms.EProgram(filter_identifiers(body2))
+
         case node:
             typed.assert_never(node)
 
