@@ -1,5 +1,5 @@
-enum TTuple<A,B>{Tuple(A,B)}
-
+#enum TTuple<A,B>{Tuple(A,B)}
+#
 def reduce<A, T>(arr: Array<T>, reducer: Callable<A, Callable<T, A>>, acc:A): A do
     `arr.reduce((acc,v)=>reducer(acc)(v),acc)`
 end
@@ -7,7 +7,7 @@ end
 def console_log<A>(value: A): Unit do
     `console.log`(value)
 end
-
+#
 def traverse(arr, fn) do
     #def rec_traverse(i, acc) do
     #    case get_item(arr, i) of
@@ -47,81 +47,214 @@ def traverse(arr, fn) do
 
     #rec_traverse(0,[])
 end
-
-
-
-
-def half(n) do
-    if n % 2 > 0 then
-        None()
-    else
-        Some(n / 2)
-    end
-end
-
-arr = [2,4,6]
-
-console_log(traverse(arr, half))
-
-
-#x = A(C(B(A(1))))
-
-
-x = Some(Some(9))
-
-case x of
-    Some(Some(num)) do Some(num) end
-    _ do Some(2) end
-end
-
-enum ABC<X> {A(X) B(X) C(X)}
-enum SABC {SA SB SC}
-
-def test_sabc(abc) do
-    case abc of
-        SA() do 1 end
-        SB() do 2 end
-        SC() do 3 end
-    end
-end
-
-def test_abc(abc) do
-    case abc of
-        A(a) do 1 end
-        B(a) do 2 end
-        #_ do 3 end
-        C(a) do 4 end
-    end
-end
-
-def test_option_abc(abc) do
-    case abc of
-        Some(A(a)) do 1 end
-        Some(B(a)) do 2 end
-        #_ do 3 end
-        Some(C(a)) do 4 end
-        None() do 5 end
-    end
-end
-
+#
+#
+#
+#
+#def half(n) do
+#    if n % 2 > 0 then
+#        None()
+#    else
+#        Some(n / 2)
+#    end
+#end
+#
+#arr = [2,4,6]
+#
+#console_log(traverse(arr, half))
+#
+#
+##x = A(C(B(A(1))))
+#
+#
+#x = Some(Some(9))
+#
 #case x of
-#    A(A(B(C(a)))) do a end
-#    B(A(C(A(a)))) do a end
-#    B(C(C(A(a)))) do a end
-#    A(C(C(A(a)))) do a end
-#    A(a) do a end
-#    C(C(A(a))) do a end
-#end
-
-#def add(a, b) do
-#    a + b
+#    Some(Some(num)) do Some(num) end
+#    _ do Some(2) end
 #end
 #
-#arr = [1,2,3]
+#enum ABC<X> {A(X) B(X) C(X)}
+#enum SABC {SA SB SC}
 #
-#console_log(js__array__reduce(arr, add, 0))
+#def test_sabc(abc) do
+#    case abc of
+#        SA() do 1 end
+#        SB() do 2 end
+#        SC() do 3 end
+#    end
+#end
+#
+#def test_abc(abc) do
+#    case abc of
+#        A(a) do 1 end
+#        B(a) do 2 end
+#        #_ do 3 end
+#        C(a) do 4 end
+#    end
+#end
+#
+#def test_option_abc(abc) do
+#    case abc of
+#        Some(A(a)) do 1 end
+#        Some(B(a)) do 2 end
+#        #_ do 3 end
+#        Some(C(a)) do 4 end
+#        None() do 5 end
+#    end
+#end
+#
+##case x of
+##    A(A(B(C(a)))) do a end
+##    B(A(C(A(a)))) do a end
+##    B(C(C(A(a)))) do a end
+##    A(C(C(A(a)))) do a end
+##    A(a) do a end
+##    C(C(A(a))) do a end
+##end
+#
+##def add(a, b) do
+##    a + b
+##end
+##
+##arr = [1,2,3]
+##
+##console_log(js__array__reduce(arr, add, 0))
+#
+#
+##x: Callable<Callable<Num, Str>, Bool> = 2
+##x: Array<Callable<Num, Str>> = 2
+##x: Callable<Num, Callable<Num, Str>> = 2
+
+def min(a, b) do
+    if a < b then
+        a
+    else
+        b
+    end
+end
+
+def max(a, b) do
+    if a > b then
+        a
+    else
+        b
+    end
+end
+
+def len<A>(arr: Array<A>): Num do
+    `arr.length`
+end
+
+enum Shift<A, B> {
+    Empty
+    Head(A, B)
+}
+
+enum TupleType<A, B> {
+    Tuple(A, B)
+}
+
+def head<A>(arr: Array<A>) do
+    if len(arr) < 1 then
+        Empty()
+    else
+        `const [_head, ..._rest] = arr`
+        list_head: Num = `_head` 
+        rest: Array<Num> = `_rest` 
+        Head(list_head, rest)
+    end
+end
+
+def bubble_sort(cmp, arr) do
+    
+    def swap_till(acc, value) do
+        swap_till2: Callable<Array<Num>, Callable<Num, Array<Num>>> = `swap_till`
+
+        case head(acc) of
+            Empty() do [value] end
+            Head(arr_head, rest) do
+                if cmp(value, arr_head) < 0 then
+                    [value] | swap_till2(rest, arr_head)
+                else
+                    [arr_head] | swap_till2(rest, value)
+                end
+            end
+        end
+    end    
+    
+    reduce(arr, swap_till, [])
+end
 
 
-#x: Callable<Callable<Num, Str>, Bool> = 2
-#x: Array<Callable<Num, Str>> = 2
-#x: Callable<Num, Callable<Num, Str>> = 2
+
+
+
+
+
+def merge<A>(a, b) do
+    merge2: Callable<Array<A>, Callable<Array<A>, Array<A>>> = `merge`
+
+    case Tuple(head(a), head(b)) of
+        Tuple(Empty(), _) do b end
+        Tuple(_, Empty()) do a end
+        Tuple(Head(head_a, rest_a), Head(head_b, rest_b)) do
+            if head_a < head_b then
+                [head_a] | merge2(rest_a, b)
+            else
+                [head_b] | merge2(a, rest_b)
+            end
+        end
+    end
+end
+
+
+def take<A>(arr: Array<A>, n: Num): Array<A> do
+    `arr.slice(0, n)`
+end
+
+def drop<A>(arr: Array<A>, n: Num): Array<A> do
+    `arr.slice(n)`
+end
+
+
+def merge_sort<A>(arr) do
+    merge_sort2: Callable<Array<A>, Array<A>> = `merge_sort`
+
+    if len(arr) < 2 then
+        arr
+    else
+        right = merge_sort2(take(arr, len(arr) // 2))
+        left = merge_sort2(drop(arr, len(arr) // 2))
+
+        merge(right, left)
+    end 
+end
+
+
+def number__cmp(a, b) do
+    a - b
+end
+
+number__bubble_sort = bubble_sort(number__cmp)
+
+console_log(number__bubble_sort([17,9,21,3,0])) 
+console_log(merge_sort([17,9,21,3,0])) 
+
+
+case Some(1) of 
+    Some(x) do unit end
+    None() do unit end
+end
+
+
+case Tuple(1, '12') of 
+    Tuple(_, _) do unit end
+end
+
+
+
+#case Some(1) of
+#    Some(z) do [id(z=z=z)] end
+#    None() do [id(x=y=2)] end
+#end
