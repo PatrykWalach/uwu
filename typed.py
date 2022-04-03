@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
+import typing
 from typing import TypeAlias
 
 
@@ -117,3 +118,8 @@ def kind(t: Type) -> Kind:
                     return k
 
     raise TypeError(f"kind of {t}")
+
+
+def assert_never(value: typing.NoReturn) -> typing.NoReturn:
+    # This also works at runtime as well
+    assert False, f"This code should never be reached, got: {value}"
