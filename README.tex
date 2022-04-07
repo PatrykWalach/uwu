@@ -82,6 +82,7 @@ morestring=[b]"
 
 \section{Ogólne wprowadzenie}
 \subsection{Parsowanie i tokenkizowanie}
+Tokenizowanie polega na podzieleniu ciągu znaków na tokeny poprzez matchowania początku ciągu za pomocą wyrażeń regularnych różnych typów.
 \subsection{Co to typy?}
 \section{Inferencja typów w teori}
 \subsection{System typów Hindley–Milner}
@@ -111,7 +112,7 @@ Prymitywne typy danych:
     Powiązane operacje: \lstinline!+!, \lstinline!-!, \lstinline!*!, \lstinline!/!, \lstinline!*!, \lstinline!%!, \lstinline!//!
 \end{itemize}
 
-% typing.Literal["++", "+", "-", "/", "*", "%", "//", ">", "<", "|", "!=", "=="]
+% typing.Literal["|", "!=", "=="]
 
 \newpage
 Chciałem również by funkcje wieloargumentowe kompilowane były jako funkcje jednoargumentowe zwracające kolejne funkcje, co pozwala na wywoływanie funkcji bez wszystkich argumentów w celu zwrócenia funkcji przyjmującej resztę argumentów tzw. currying.
