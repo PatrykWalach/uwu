@@ -82,7 +82,17 @@ morestring=[b]"
 
 \section{Ogólne wprowadzenie}
 \subsection{Parsowanie i tokenkizowanie}
-Tokenizowanie polega na podzieleniu ciągu znaków na tokeny poprzez matchowania początku ciągu za pomocą wyrażeń regularnych różnych typów.
+Analiza leksykalna w informatyce jest to proces rozbijania program źródłowych na jednostki logiczne (zwane leksemami) złożone z jednego lub więcej znaków, które łącznie mają jakieś znaczenie. Przykładami leksemów mogą być słowa kluczowe (np. while), identyfikator lub liczba składająca się z cyfr. Rozdzielaniem programu źródłowego, na leksemy, zajmuje się lekser. 
+
+Token jest strukturą reprezentującą leksem i wprost go kategoryzującą, co ułatwia późniejszą pracę parserowi. Tokeny kategoryzuje się na komputerowy odpowiednik tego, co lingwiści określiliby mianem części mowy. Biorąc jako przykład poniższy kod w języku C:
+\begin{lstlisting}[language=c]
+  x = a + b * 2;
+\end{lstlisting}
+analiza leksykalna, zwraca tokeny:
+\begin{lstlisting}
+  [(identifier, x), (operator, =), (identifier, a), (operator, +), (identifier, b), (operator, *), (literal, 2), (separator, ;)]
+\end{lstlisting}
+Dwoma ważnymi przypadkami są znaki białe i komentarze. One również muszą być uwzględnione w gramatyce i przeanalizowane przez lexer, lecz mogą być odrzucone (nie produkować żadnych tokenów) i traktowane jako spełniające mało znaczące zadanie, rozdzielania dwóch tokenów (np. w \lstinline{if x} zamiast \lstinline{ifx}).
 \subsection{Co to typy?}
 \section{Inferencja typów w teori}
 \subsection{System typów Hindley–Milner}
