@@ -18,9 +18,8 @@ from sly import Parser
 
 import terms
 import typed
+import uwu
 from algorithm_j import Context, Scheme, fresh_ty_var, type_infer
-
-from .uwu import UwuLexer as Lexer
 
 
 def _(fn: str, *args: str) -> Callable[[R], R]:
@@ -32,10 +31,10 @@ R = TypeVar("R")
 
 
 class UwuLexer:
-    tokens = Lexer.tokens
+    tokens = uwu.UwuLexerFull.tokens
 
     def tokenize(self, text: str):
-        lexer = Lexer()
+        lexer = uwu.UwuLexerFull()
         for token in lexer.tokenize(text):
             match token.type:
                 case "COMMENT" | "WHITESPACE":

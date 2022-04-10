@@ -5,7 +5,7 @@ from pygments.lexer import Lexer as PygmentsLexer
 from sly import Lexer
 
 
-class UwuLexer(Lexer):
+class UwuLexerFull(Lexer):
     tokens = {
         NUMBER,
         STRING,
@@ -84,7 +84,7 @@ def map_token(token) -> t._TokenType:
     match str(token):
         case "DEF" | "EXTERNAL":
             return t.Token.Keyword.Declaration
-        case "DEF" | "DO" | "END" | "IF" | "ELSE" | "CASE" | "OF" | "ELIF" | "ENUM" | "ENUM" | "THEN" | "EXTERNAL":
+        case "DO" | "END" | "IF" | "ELSE" | "CASE" | "OF" | "ELIF" | "ENUM" | "ENUM" | "THEN":
             return t.Token.Keyword
         case "STRING":
             return t.Token.Literal.String.Single
@@ -110,8 +110,5 @@ class CustomLexer(PygmentsLexer):
     def get_tokens_unprocessed(
         self, text: str
     ) -> Iterator[tuple[int, t._TokenType, str]]:
-        for token in UwuLexer().tokenize(text):
-            try:
-                yield (token.index, map_token(token.type), token.value)
-            except:
-                pass
+        for token in UwuLexerFull().tokenize(text):
+            yield (token.index, map_token(token.type), token.value)
