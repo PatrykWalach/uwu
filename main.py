@@ -61,8 +61,8 @@ DEFAULT_CTX: Context = {
     "Array": Scheme([], typed.TArrayCon()),
 }
 
-# for builitin in BUILTINS:
-#     type_infer(DEFAULT_CTX, builitin)
+for builitin in BUILTINS:
+    type_infer(DEFAULT_CTX, builitin)
 
 
 def main():
