@@ -77,14 +77,15 @@ morestring=[b]"
 \begin{document}
 
 \maketitle
+\tableofcontents
 
 \section{[Wstęp]}
 
 \section{Ogólne wprowadzenie}
-\subsection{Parsowanie i tokenkizowanie}
-Analiza leksykalna w informatyce jest to proces rozbijania program źródłowych na jednostki logiczne (zwane leksemami) złożone z jednego lub więcej znaków, które łącznie mają jakieś znaczenie. Przykładami leksemów mogą być słowa kluczowe (np. while), identyfikator lub liczba składająca się z cyfr. Rozdzielaniem programu źródłowego, na leksemy, zajmuje się lekser. 
+\subsection{Analiza leksykalna}
+Analiza leksykalna w informatyce jest to proces rozbijania program źródłowych na jednostki logiczne (zwane leksemami) złożone z jednego lub więcej znaków, które łącznie mają jakieś znaczenie\cite{Hopcroft__Motwani__Ullman__2005}. Przykładami leksemów mogą być słowa kluczowe (np. while), identyfikator lub liczba składająca się z cyfr. Rozdzielaniem programu źródłowego, na leksemy, zajmuje się lekser. 
 
-Token jest strukturą reprezentującą leksem i wprost go kategoryzującą, co ułatwia późniejszą pracę parserowi. Tokeny kategoryzuje się na komputerowy odpowiednik tego, co lingwiści określiliby mianem części mowy. Biorąc jako przykład poniższy kod w języku C:
+Token jest strukturą reprezentującą leksem i wprost go kategoryzującą\cite{ Aho__Sethi__Ullman__1986}, co ułatwia późniejszą pracę parserowi. Tokeny kategoryzuje się na komputerowy odpowiednik tego, co lingwiści określiliby mianem części mowy. Biorąc jako przykład poniższy kod w języku C:
 \begin{lstlisting}[language=c]
   x = a + b * 2;
 \end{lstlisting}
@@ -93,6 +94,24 @@ analiza leksykalna, zwraca tokeny:
   [(identifier, x), (operator, =), (identifier, a), (operator, +), (identifier, b), (operator, *), (literal, 2), (separator, ;)]
 \end{lstlisting}
 Dwoma ważnymi przypadkami są znaki białe i komentarze. One również muszą być uwzględnione w gramatyce i przeanalizowane przez lexer, lecz mogą być odrzucone (nie produkować żadnych tokenów) i traktowane jako spełniające mało znaczące zadanie, rozdzielania dwóch tokenów (np. w \lstinline{if x} zamiast \lstinline{ifx}).
+
+\subsection{Parser}
+Analizator składniowy, parser – program dokonujący analizy składniowej danych wejściowych w celu określenia ich struktury gramatycznej w związku z określoną gramatyką formalną. Analizator składniowy umożliwia przetworzenie tekstu czytelnego dla człowieka w strukturę danych przydatną dla oprogramowania komputera. Wynikiem analizy składni, dokonywanej przez parser, najczęściej jest drzewo składniowe nazywane czasami drzewem wyprowadzenia\cite{Aho__Sethi__Ullman__2002}.
+
+
+\newpage
+Zadanie parsera sprowadza się do sprawdzenia czy i jak dane wejściowe mogą zostać wyprowadzone z symbolu startowego. To zadanie można zrealizować na dwa sposoby:
+
+
+\begin{itemize}
+  \item Analiza zstępująca (ang. top-down parsing) to strategia znajdowania powiązań między danymi przez stawianie hipotez dotyczących drzewa rozbioru składniowego i sprawdzanie, czy zależności między danymi są zgodne z tymi hipotezami.
+  \item Analiza wstępująca (ang. bottom-up parsing) – ogólna metoda analizy składniowej, w której zaczyna się od słowa wejściowego i próbuje się zredukować je do symbolu startowego. Drzewo wyprowadzenia jest konstruowane od liści do korzenia (stąd nazwa). W każdym momencie w trakcie tego procesu mamy formę zdaniową, która zawiera segment, powstały w ostatnim kroku wyprowadzenia. Segment ten (nazywany uchwytem (ang. handle) jest prawą stroną produkcji i powinien zostać w tym kroku zredukowany do jej lewej strony, w wyniku czego powstanie poprzednia forma zdaniowa z wyprowadzenia. Główna trudność w analizie wstępującej polega właśnie na odpowiednim znajdywaniu uchwytów.
+
+  Analiza wstępująca może przebiegać w określonym kierunku (np. od lewej do prawej), lub w sposób bezkierunkowy, wtedy analizowane jest całe słowo naraz. Jednym z bardziej znanych przedstawicieli metody bezkierunkowej jest algorytm CYK. Do metod kierunkowych zalicza się między innymi parsery shift-reduce czyli LR, LALR, SLR, BC, pierwszeństwa.
+\end{itemize}
+
+
+
 \subsection{Co to typy?}
 \section{Inferencja typów w teori}
 \subsection{System typów Hindley–Milner}
@@ -170,6 +189,17 @@ Kolejnym dość ważnym elementem języka jest brak wyrażenia `return', które 
 
 % \cite{texbook}
 % \bibitem{texbook}
+\begin{thebibliography}{9}
+
+\bibitem{Hopcroft__Motwani__Ullman__2005}
+J.E. Hopcroft, R. Motwani, J.D. Ullman: Wprowadzenie do Teorii automatów, języków i obliczń. Warszawa: Wydawnictwo Naukowe PWN, 2005. ISBN 83-01-14502-1.
+\bibitem{Aho__Sethi__Ullman__2002}
+Alfred V. Aho, Ravi Sethi, Jeffrey D. Ullman: Kompilatory. Wydawnictwo Naukowe PWN SA, 2002. ISBN 83-204-2656-1.
+\bibitem{Aho__Sethi__Ullman__1986}
+Aho, A.V., Sethi, R. and Ullman, J.D. (1986) " Compilers: principles, techniques, and tools." Addison-Wesley Longman Publishing Co., Inc. Boston, MA, USA.
+\bibitem{Sikkel_Klaas__1954-1997}
+Sikkel, Klaas, 1954- (1997). Parsing schemata : a framework for specification and analysis of parsing algorithms. Berlin: Springer. ISBN 9783642605413. OCLC 606012644.
+\end{thebibliography}
 
 \end{document}
 

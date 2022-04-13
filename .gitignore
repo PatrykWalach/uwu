@@ -8,4 +8,5 @@ node_modules
 *.fdb_latexmk
 *.aux
 *.fls
+*.toc
 /_minted-README
