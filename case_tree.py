@@ -6,31 +6,33 @@ import terms
 
 @dataclasses.dataclass(frozen=True)
 class Clause:
-    patterns: dict[str, terms.Pattern]
+    patterns: dict[str, terms.EPattern]
     body: terms.EDo = dataclasses.field(default_factory=terms.EDo)
 
 
 def subst_var_eqs(clause: Clause):
     substitutions = {
-        pattern.identifier: id
+        pattern.pattern.identifier: id
         for id, pattern in clause.patterns.items()
-        if isinstance(pattern, terms.EMatchAs)
+        if isinstance(pattern.pattern, terms.EMatchAs)
     }
 
     patterns = {
-        id: pattern
+        id: pattern.pattern
         for id, pattern in clause.patterns.items()
-        if not isinstance(pattern, terms.EMatchAs)
+        if not isinstance(pattern.pattern, terms.EMatchAs)
     }
 
-    return patterns, dataclasses.replace(
-        clause.body,
-        body=[]
-        + [
-            terms.ELet(id, terms.EIdentifier(value))
-            for id, value in substitutions.items()
-        ]
-        + clause.body.body,
+    return patterns, terms.EDo(
+        block=terms.EBlock(
+            list[terms.EExpr]()
+            + [
+                terms.EExpr << terms.ELet(id, terms.EExpr << terms.EIdentifier(value))
+                for id, value in substitutions.items()
+            ]
+            + clause.body.block.body
+        ),
+        hint=clause.body.hint,
     )
 
 
@@ -88,7 +90,15 @@ def gen_match2(clauses1: typing.Sequence[Clause]) -> CaseTree:
             vars = [f"{branch_var}._{i}" for i in range(len(branch_pattern.patterns))]
 
             for patterns, body in clauses:
-                clause = Clause(dict[str, terms.Pattern](patterns), body)
+                clause = Clause(
+                    dict[str, terms.EPattern](
+                        {
+                            key: terms.EPattern(pattern)
+                            for key, pattern in patterns.items()
+                        }
+                    ),
+                    body,
+                )
                 match patterns.get(branch_var, None):
                     case None:
                         yes.append(clause)

@@ -25,21 +25,32 @@ class AstEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
-BUILTINS: list[terms.Expr | terms.EEnumDeclaration] = [
-    terms.EEnumDeclaration(
-        "Option",
-        [
-            terms.EVariant("Some", [terms.EHint("VALUE", [])]),
-            terms.EVariant("None", []),
-        ],
-        [terms.EIdentifier("VALUE")],
-    ),
-    terms.EEnumDeclaration(
-        "Bool",
-        [terms.EVariant("True", []), terms.EVariant("False", [])],
-    ),
-    terms.EDef("id", [terms.EParam("id")], terms.EDo([terms.EIdentifier("id")])),
-    terms.ELet("unit", terms.EExternal("undefined"), terms.EHint("Unit")),
+BUILTINS: list[terms.EExpr] = [
+    terms.EExpr << expr
+    for expr in [
+        terms.EEnumDeclaration(
+            "Option",
+            [
+                terms.EVariant("Some", [terms.EHint("VALUE")]),
+                terms.EVariant("None"),
+            ],
+            [terms.EIdentifier("VALUE")],
+        ),
+        terms.EEnumDeclaration(
+            "Bool",
+            [terms.EVariant("True"), terms.EVariant("False")],
+        ),
+        terms.EDef(
+            "id",
+            [terms.EParam("id")],
+            terms.EDo << terms.EBlock([terms.EExpr << terms.EIdentifier("id")]),
+        ),
+        terms.ELet(
+            "unit",
+            terms.EExpr << terms.EExternal("undefined"),
+            terms.MaybeEHint << terms.EHint("Unit"),
+        ),
+    ]
 ]
 
 DEFAULT_CTX: Context = {
@@ -50,8 +61,8 @@ DEFAULT_CTX: Context = {
     "Array": Scheme([], typed.TArrayCon()),
 }
 
-for builitin in BUILTINS:
-    type_infer(DEFAULT_CTX, builitin)
+# for builitin in BUILTINS:
+#     type_infer(DEFAULT_CTX, builitin)
 
 
 def main():
@@ -92,7 +103,9 @@ def main():
 
         logging.info(f"Inferred {src_path}")
 
+        ast = ast.fold_with(compile.Hoist())
         js = compile.compile(ast)
+
         logging.info(f"Compiled {src_path}")
 
         path = src_path + ".js"
