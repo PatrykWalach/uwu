@@ -11,7 +11,10 @@ class TCon:
     kind: Kind
     alts: list[str] = dataclasses.field(default_factory=list)
 
-    def __repr__(self):
+    def w(self) -> Type:
+        return self
+
+    def __repr__(self) -> str:
         return f"{self.id}"
 
 
@@ -20,7 +23,7 @@ class TVar:
     id: int
     kind: Kind
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"@{self.id}"
 
 
@@ -29,7 +32,7 @@ class TAp:
     con: Type
     arg: Type
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         match self.con:
             case TCon("Array"):
                 return f"[{self.arg}]"
@@ -48,6 +51,9 @@ Type: TypeAlias = TVar | TCon | TAp
 class KStar:
     pass
 
+    def w(self) -> Kind:
+        return self
+
 
 @dataclasses.dataclass
 class KFun:
@@ -58,51 +64,51 @@ class KFun:
 Kind: TypeAlias = KStar | KFun
 
 
-def TUnit():
+def TUnit() -> TCon:
     return TCon("Unit", KStar())
 
 
-def TStr():
+def TStr() -> TCon:
     return TCon("Str", KStar())
 
 
-def TNum():
+def TNum() -> TCon:
     return TCon("Num", KStar())
 
 
-def TTupleCon():
+def TTupleCon() -> TCon:
     return TCon("Tuple", KFun(KStar(), KFun(KStar(), KStar())))
 
 
-def pair(a: Type, b: Type):
+def pair(a: Type, b: Type) -> TAp:
     return TAp(TAp(TTupleCon(), a), b)
 
 
-def TCallableCon():
+def TCallableCon() -> TCon:
     return TCon("Callable", KFun(KStar(), KFun(KStar(), KStar())))
 
 
-def TDef(arg: Type, ret: Type):
+def TDef(arg: Type, ret: Type) -> TAp:
     return TAp(TAp(TCallableCon(), arg), ret)
 
 
-def TArrayCon():
+def TArrayCon() -> TCon:
     return TCon("Array", KFun(KStar(), KStar()))
 
 
-def TArray(t: Type):
+def TArray(t: Type) -> TAp:
     return TAp(TArrayCon(), t)
 
 
-def TOptionCon():
+def TOptionCon() -> TCon:
     return TCon("Option", KFun(KStar(), KStar()), ["Some", "None"])
 
 
-def TOption(t: Type):
+def TOption(t: Type) -> TAp:
     return TAp(TOptionCon(), t)
 
 
-def TBool():
+def TBool() -> TCon:
     return TCon("Bool", KStar(), ["True", "False"])
 
 
