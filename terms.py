@@ -31,11 +31,12 @@ class FoldWith(typing.Protocol):
         )
 
     def fold_with(self: TFoldWith, v: FoldAll) -> TFoldWith:
-        result = re.sub("([A-Z])", r"_\1", self.__class__.__name__).lower()
-        result2 = f"fold{result}"
+        # result = re.sub("([A-Z])", r"_\1", self.__class__.__name__).lower()
+        # result2 = f"fold{result}"
+        result2 = self.__class__.__name__
         if not hasattr(v, result2):
             raise ValueError(f"{v.__class__.__name__} does not have a {result2} method")
-        return getattr(v, result2)(self)
+        return typing.cast(TFoldWith, getattr(v, result2)(self))
 
 
 TPipable = typing.TypeVar("TPipable", bound="Pipable")
@@ -265,94 +266,53 @@ class EExpr(Node):
 K = typing.TypeVar("K", bound=terms.FoldWith)
 
 
-class Fold:
-    def default_fold(self, n: K) -> K:
+class FoldMeta(type):
+    def __new__(cls, name, bases, namespace, **kwargs):
+        nodes = namespace.get("_nodes_", [])
+        for node in nodes:
+            exec(f"def {node}(self, n): return self.fold(n)", globals(), namespace)
+
+        return super().__new__(cls, name, bases, namespace, **kwargs)
+
+
+class NodeFold(metaclass=FoldMeta):
+
+    _nodes_ = [
+        "EExpr",
+        "EBlock",
+        "EProgram",
+        "EBinaryExpr",
+        "EDo",
+        "ELiteral",
+        "EDef",
+        "EIf",
+        "ECall",
+        "EVariant",
+        "EVariantCall",
+        "ECaseOf",
+        "ELet",
+        "EIdentifier",
+        "EArray",
+        "EVariantCall",
+        "EExternal",
+        "EUnaryExpr",
+        "EPattern",
+        "EEnumDeclaration",
+        "EHint",
+        "EParam",
+        "MaybeEHint",
+        "ECase",
+        "EMatchVariant",
+        "EMatchAs",
+        "MaybeOrElse",
+    ]
+
+
+class Fold(NodeFold):
+    def fold(self, n: K) -> K:
         return n
 
-    def fold_e_expr(self, n: terms.EExpr) -> terms.EExpr:
-        return self.default_fold(n)
 
-    def fold_e_block(self, n: terms.EBlock) -> terms.EBlock:
-        return self.default_fold(n)
-
-    def fold_e_program(self, n: terms.EProgram) -> terms.EProgram:
-        return self.default_fold(n)
-
-    def fold_e_binary_expr(self, n: terms.EBinaryExpr) -> terms.EBinaryExpr:
-        return self.default_fold(n)
-
-    def fold_e_do(self, n: terms.EDo) -> terms.EDo:
-        return self.default_fold(n)
-
-    def fold_e_literal(self, n: terms.ELiteral) -> terms.ELiteral:
-        return self.default_fold(n)
-
-    def fold_e_def(self, n: terms.EDef) -> terms.EDef:
-        return self.default_fold(n)
-
-    def fold_e_if(self, n: terms.EIf) -> terms.EIf:
-        return self.default_fold(n)
-
-    def fold_e_call(self, n: terms.ECall) -> terms.ECall:
-        return self.default_fold(n)
-
-    def fold_e_variant(self, n: terms.EVariant) -> terms.EVariant:
-        return self.default_fold(n)
-
-    def fold_e_variant_call(self, n: terms.EVariantCall) -> terms.EVariantCall:
-        return self.default_fold(n)
-
-    def fold_e_case_of(self, n: terms.ECaseOf) -> terms.ECaseOf:
-        return self.default_fold(n)
-
-    def fold_e_let(self, n: terms.ELet) -> terms.ELet:
-        return self.default_fold(n)
-
-    def fold_e_identifier(self, n: terms.EIdentifier) -> terms.EIdentifier:
-        return self.default_fold(n)
-
-    def fold_e_array(self, n: terms.EArray) -> terms.EArray:
-        return self.default_fold(n)
-
-    def fold_e_variantcall(self, n: terms.EVariantCall) -> terms.EVariantCall:
-        return self.default_fold(n)
-
-    def fold_e_external(self, n: terms.EExternal) -> terms.EExternal:
-        return self.default_fold(n)
-
-    def fold_e_unary_expr(self, n: terms.EUnaryExpr) -> terms.EUnaryExpr:
-        return self.default_fold(n)
-
-    def fold_e_pattern(self, n: terms.EPattern) -> terms.EPattern:
-        return self.default_fold(n)
-
-    def fold_e_enum_declaration(
-        self, n: terms.EEnumDeclaration
-    ) -> terms.EEnumDeclaration:
-        return self.default_fold(n)
-
-    def fold_e_hint(self, n: terms.EHint) -> terms.EHint:
-        return self.default_fold(n)
-
-    def fold_e_param(self, n: terms.EParam) -> terms.EParam:
-        return self.default_fold(n)
-
-    def fold_maybe_e_hint(self, n: terms.MaybeEHint) -> terms.MaybeEHint:
-        return self.default_fold(n)
-
-    def fold_e_case(self, n: terms.ECase) -> terms.ECase:
-        return self.default_fold(n)
-
-    def fold_e_match_variant(self, n: terms.EMatchVariant) -> terms.EMatchVariant:
-        return self.default_fold(n)
-
-    def fold_e_match_as(self, n: terms.EMatchAs) -> terms.EMatchAs:
-        return self.default_fold(n)
-
-    def fold_maybe_or_else(self, n: terms.MaybeOrElse) -> terms.MaybeOrElse:
-        return self.default_fold(n)
-
-
-class FoldAll(Fold):
-    def default_fold(self, n: K) -> K:
+class FoldAll(NodeFold):
+    def fold(self, n: K) -> K:
         return n.fold_children_with(self)

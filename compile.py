@@ -15,7 +15,7 @@ class Hoist(terms.FoldAll):
         super().__init__()
         self.to_hoist = list[terms.EExpr]()
 
-    def fold_e_expr(self, n: terms.EExpr):
+    def EExpr(self, n: terms.EExpr):
         n = n.fold_children_with(self)
         match n.expr:
             case terms.ELet(id) | terms.EDef(id):
@@ -24,7 +24,7 @@ class Hoist(terms.FoldAll):
 
         return n
 
-    def fold_e_program(self, n: terms.EProgram):
+    def EProgram(self, n: terms.EProgram):
         body2 = self.hoist_expr_list(n.body)
         return terms.EProgram(filter_identifiers(body2))
 
@@ -39,7 +39,7 @@ class Hoist(terms.FoldAll):
 
         return body2
 
-    def fold_e_block(self, n: terms.EBlock) -> terms.EBlock:
+    def EBlock(self, n: terms.EBlock) -> terms.EBlock:
         body2 = self.hoist_expr_list(n.body)
         return terms.EBlock(filter_identifiers(body2[:-1:]) + body2[-1::])
 
