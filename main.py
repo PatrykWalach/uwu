@@ -26,31 +26,32 @@ class AstEncoder(json.JSONEncoder):
 
 
 BUILTINS: list[terms.EExpr] = [
-    terms.EExpr << expr
-    for expr in [
-        terms.EEnumDeclaration(
-            "Option",
-            [
-                terms.EVariant("Some", [terms.EHint("VALUE")]),
-                terms.EVariant("None"),
-            ],
-            [terms.EIdentifier("VALUE")],
-        ),
-        terms.EEnumDeclaration(
-            "Bool",
-            [terms.EVariant("True"), terms.EVariant("False")],
-        ),
-        terms.EDef(
-            "id",
-            [terms.EParam("id")],
-            terms.EDo << terms.EBlock([terms.EExpr << terms.EIdentifier("id")]),
-        ),
-        terms.ELet(
-            "unit",
-            terms.EExpr << terms.EExternal("undefined"),
-            terms.MaybeEHint << terms.EHint("Unit"),
-        ),
-    ]
+    terms.EExpr
+    ** terms.EEnumDeclaration(
+        "Option",
+        variants=[
+            terms.EVariant("Some", [terms.EHint("VALUE")]),
+            terms.EVariant("None"),
+        ],
+        generics=[terms.EIdentifier("VALUE")],
+    ),
+    terms.EExpr
+    ** terms.EEnumDeclaration(
+        "Bool",
+        variants=[terms.EVariant("True"), terms.EVariant("False")],
+    ),
+    terms.EExpr
+    ** terms.EDef(
+        "id",
+        [terms.EParam("id")],
+        terms.EDo ** terms.EBlock([terms.EExpr ** terms.EIdentifier("id")]),
+    ),
+    terms.EExpr
+    ** terms.ELet(
+        "unit",
+        terms.EExpr ** terms.EExternal("undefined"),
+        terms.MaybeEHint ** terms.EHint("Unit"),
+    ),
 ]
 
 DEFAULT_CTX: Context = {
@@ -60,6 +61,7 @@ DEFAULT_CTX: Context = {
     "Callable": Scheme([], typed.TCallableCon()),
     "Array": Scheme([], typed.TArrayCon()),
 }
+
 
 for builitin in BUILTINS:
     type_infer(DEFAULT_CTX, builitin)

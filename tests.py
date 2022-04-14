@@ -5,7 +5,6 @@ from subprocess import check_output
 from typing import Generic
 
 import pytest
-from sly import lex
 
 import algorithm_j
 import typed
@@ -28,16 +27,16 @@ def lexer():
     "program, ast",
     (
         [
-            ("1", [EExpr << ELiteral(1)]),
-            ("'abc'", [EExpr << ELiteral("abc")]),
+            ("1", [EExpr ** ENumLiteral(1)]),
+            ("'abc'", [EExpr ** EStrLiteral("abc")]),
             (
                 "-2+2",
                 [
                     EExpr
-                    << EBinaryExpr(
+                    ** EBinaryExpr(
                         "+",
-                        EExpr << EUnaryExpr("-", EExpr << ELiteral(2)),
-                        EExpr << ELiteral(2),
+                        EExpr ** EUnaryExpr("-", EExpr ** ENumLiteral(2)),
+                        EExpr ** ENumLiteral(2),
                     )
                 ],
             ),
@@ -45,60 +44,71 @@ def lexer():
                 "-(2+2)",
                 [
                     EExpr
-                    << EUnaryExpr(
+                    ** EUnaryExpr(
                         "-",
                         EExpr
-                        << EBinaryExpr("+", EExpr << ELiteral(2), EExpr << ELiteral(2)),
+                        ** EBinaryExpr(
+                            "+",
+                            EExpr ** ENumLiteral(2),
+                            EExpr ** ENumLiteral(2),
+                        ),
                     )
                 ],
             ),
             (
                 "x=2\n-1",
                 [
-                    EExpr << ELet("x", EExpr << ELiteral(2)),
-                    EExpr << EUnaryExpr("-", EExpr << ELiteral(1)),
+                    EExpr ** ELet("x", EExpr ** ENumLiteral(2)),
+                    EExpr ** EUnaryExpr("-", EExpr ** ENumLiteral(1)),
                 ],
             ),
             (
                 "x=2-1",
                 [
                     EExpr
-                    << ELet(
+                    ** ELet(
                         "x",
                         EExpr
-                        << EBinaryExpr("-", EExpr << ELiteral(2), EExpr << ELiteral(1)),
+                        ** EBinaryExpr(
+                            "-",
+                            EExpr ** ENumLiteral(2),
+                            EExpr ** ENumLiteral(1),
+                        ),
                     )
                 ],
             ),
             (
                 "Some(2)",
-                [EExpr << EVariantCall("Some", [EExpr << ELiteral(2)])],
+                [EExpr ** EVariantCall("Some", [EExpr ** ENumLiteral(2)])],
             ),
             (
                 "Some(2)(2)",
                 [
                     EExpr
-                    << ECall(
-                        EExpr << EVariantCall("Some", [EExpr << ELiteral(2)]),
-                        [EExpr << ELiteral(2)],
+                    ** ECall(
+                        EExpr ** EVariantCall("Some", [EExpr ** ENumLiteral(2)]),
+                        [EExpr ** ENumLiteral(2)],
                     )
                 ],
             ),
             (
                 "Some(2)\n(2)",
                 [
-                    EExpr << EVariantCall("Some", [EExpr << ELiteral(2)]),
-                    EExpr << ELiteral(2),
+                    EExpr ** EVariantCall("Some", [EExpr ** ENumLiteral(2)]),
+                    EExpr ** ENumLiteral(2),
                 ],
             ),
             (
                 "x=id(2)",
                 [
                     EExpr
-                    << ELet(
+                    ** ELet(
                         "x",
                         EExpr
-                        << ECall(EExpr << EIdentifier("id"), [EExpr << ELiteral(2)]),
+                        ** ECall(
+                            EExpr ** EIdentifier("id"),
+                            [EExpr ** ENumLiteral(2)],
+                        ),
                     )
                 ],
             ),
@@ -106,25 +116,32 @@ def lexer():
                 "(x=id)(2)",
                 [
                     EExpr
-                    << ECall(
-                        EExpr << ELet("x", EExpr << EIdentifier("id")),
-                        [EExpr << ELiteral(2)],
+                    ** ECall(
+                        EExpr ** ELet("x", EExpr ** EIdentifier("id")),
+                        [EExpr ** ENumLiteral(2)],
                     )
                 ],
             ),
             (
                 "x=id\n(2)",
-                [EExpr << ELet("x", EExpr << EIdentifier("id")), EExpr << ELiteral(2)],
+                [
+                    EExpr ** ELet("x", EExpr ** EIdentifier("id")),
+                    EExpr ** ENumLiteral(2),
+                ],
             ),
             (
                 "1+2*3",
                 [
                     EExpr
-                    << EBinaryExpr(
+                    ** EBinaryExpr(
                         "+",
-                        EExpr << ELiteral(1),
+                        EExpr ** ENumLiteral(1),
                         EExpr
-                        << EBinaryExpr("*", EExpr << ELiteral(2), EExpr << ELiteral(3)),
+                        ** EBinaryExpr(
+                            "*",
+                            EExpr ** ENumLiteral(2),
+                            EExpr ** ENumLiteral(3),
+                        ),
                     )
                 ],
             ),
@@ -132,16 +149,18 @@ def lexer():
                 "x=(2+3)*4",
                 [
                     EExpr
-                    << ELet(
+                    ** ELet(
                         "x",
                         EExpr
-                        << EBinaryExpr(
+                        ** EBinaryExpr(
                             "*",
                             EExpr
-                            << EBinaryExpr(
-                                "+", EExpr << ELiteral(2), EExpr << ELiteral(3)
+                            ** EBinaryExpr(
+                                "+",
+                                EExpr ** ENumLiteral(2),
+                                EExpr ** ENumLiteral(3),
                             ),
-                            EExpr << ELiteral(4),
+                            EExpr ** ENumLiteral(4),
                         ),
                     )
                 ],
@@ -150,7 +169,7 @@ def lexer():
                 "enum StrOrNum{String(Str)\nNumber(Num)}\nx=Number(1)\nx=String('12')",
                 [
                     EExpr
-                    << EEnumDeclaration(
+                    ** EEnumDeclaration(
                         id="StrOrNum",
                         variants=[
                             EVariant(id="String", fields=[EHint(id="Str")]),
@@ -158,19 +177,19 @@ def lexer():
                         ],
                     ),
                     EExpr
-                    << ELet(
+                    ** ELet(
                         id="x",
                         init=EExpr
-                        << EVariantCall(
-                            callee="Number", args=[EExpr << ELiteral(value=1.0)]
+                        ** EVariantCall(
+                            callee="Number", args=[EExpr ** ENumLiteral(value=1.0)]
                         ),
                     ),
                     EExpr
-                    << ELet(
+                    ** ELet(
                         id="x",
                         init=EExpr
-                        << EVariantCall(
-                            callee="String", args=[EExpr << ELiteral(value="12")]
+                        ** EVariantCall(
+                            callee="String", args=[EExpr ** EStrLiteral(value="12")]
                         ),
                     ),
                 ],
@@ -179,22 +198,22 @@ def lexer():
                 "def x(k) do k() end\ndef n() do 12 end\ny:Num=x(n)\nx",
                 [
                     EExpr
-                    << EDef(
+                    ** EDef(
                         "x",
                         [EParam("k")],
-                        EDo(EBlock([EExpr << ECall(EExpr << EIdentifier("k"))])),
+                        EDo(EBlock([EExpr ** ECall(EExpr ** EIdentifier("k"))])),
                     ),
-                    EExpr << EDef("n", [], EDo(EBlock([EExpr << ELiteral(12)]))),
+                    EExpr ** EDef("n", [], EDo(EBlock([EExpr ** ENumLiteral(12)]))),
                     EExpr
-                    << ELet(
+                    ** ELet(
                         "y",
                         EExpr
-                        << ECall(
-                            EExpr << EIdentifier("x"), [EExpr << EIdentifier("n")]
+                        ** ECall(
+                            EExpr ** EIdentifier("x"), [EExpr ** EIdentifier("n")]
                         ),
                         hint=MaybeEHint(EHint("Num")),
                     ),
-                    EExpr << EIdentifier("x"),
+                    EExpr ** EIdentifier("x"),
                 ],
             ),
             # (
@@ -225,14 +244,16 @@ def lexer():
                 "x=y=2+3",
                 [
                     EExpr
-                    << ELet(
+                    ** ELet(
                         "x",
                         EExpr
-                        << ELet(
+                        ** ELet(
                             "y",
                             EExpr
-                            << EBinaryExpr(
-                                "+", EExpr << ELiteral(2), EExpr << ELiteral(3)
+                            ** EBinaryExpr(
+                                "+",
+                                EExpr ** ENumLiteral(2),
+                                EExpr ** ENumLiteral(3),
                             ),
                         ),
                     )
@@ -242,9 +263,9 @@ def lexer():
                 "do x = 1 end",
                 [
                     EExpr
-                    << EDo(
+                    ** EDo(
                         EBlock(
-                            [EExpr << ELet("x", EExpr << ELiteral(1))],
+                            [EExpr ** ELet("x", EExpr ** ENumLiteral(1))],
                         )
                     )
                 ],
@@ -253,31 +274,49 @@ def lexer():
                 "id('abc')",
                 [
                     EExpr
-                    << ECall(EExpr << EIdentifier("id"), [EExpr << ELiteral("abc")])
+                    ** ECall(
+                        EExpr ** EIdentifier("id"),
+                        [EExpr ** EStrLiteral("abc")],
+                    )
                 ],
             ),
             (
                 "id(1)",
-                [EExpr << ECall(EExpr << EIdentifier("id"), [EExpr << ELiteral(1)])],
+                [
+                    EExpr
+                    ** ECall(
+                        EExpr ** EIdentifier("id"),
+                        [EExpr ** ENumLiteral(1)],
+                    )
+                ],
             ),
             (
                 "id('12')\nid(1)",
                 [
                     EExpr
-                    << ECall(EExpr << EIdentifier("id"), [EExpr << ELiteral("12")]),
-                    EExpr << ECall(EExpr << EIdentifier("id"), [EExpr << ELiteral(1)]),
+                    ** ECall(
+                        EExpr ** EIdentifier("id"),
+                        [EExpr ** EStrLiteral("12")],
+                    ),
+                    EExpr
+                    ** ECall(
+                        EExpr ** EIdentifier("id"),
+                        [EExpr ** ENumLiteral(1)],
+                    ),
                 ],
             ),
             (
                 "id(1+2)",
                 [
                     EExpr
-                    << ECall(
-                        EExpr << EIdentifier("id"),
+                    ** ECall(
+                        EExpr ** EIdentifier("id"),
                         [
                             EExpr
-                            << EBinaryExpr(
-                                "+", EExpr << ELiteral(1), EExpr << ELiteral(2)
+                            ** EBinaryExpr(
+                                "+",
+                                EExpr ** ENumLiteral(1),
+                                EExpr ** ENumLiteral(2),
                             )
                         ],
                     )
@@ -287,12 +326,10 @@ def lexer():
                 "x:Option<Num>=None()",
                 [
                     EExpr
-                    << ELet(
+                    ** ELet(
                         "x",
-                        EExpr << EVariantCall("None"),
-                        hint=MaybeEHint(
-                            EHint("Option", [EHint("Num")]),
-                        ),
+                        EExpr ** EVariantCall("None"),
+                        MaybeEHint ** EHint("Option", [EHint("Num")]),
                     )
                 ],
             ),
@@ -300,17 +337,17 @@ def lexer():
                 "def add(a, b) do a + b end",
                 [
                     EExpr
-                    << EDef(
+                    ** EDef(
                         identifier="add",
                         params=[EParam("a"), EParam("b")],
                         body=EDo(
                             block=EBlock(
                                 [
                                     EExpr
-                                    << EBinaryExpr(
+                                    ** EBinaryExpr(
                                         op="+",
-                                        left=EExpr << EIdentifier(name="a"),
-                                        right=EExpr << EIdentifier(name="b"),
+                                        left=EExpr ** EIdentifier(name="a"),
+                                        right=EExpr ** EIdentifier(name="b"),
                                     )
                                 ],
                             )
@@ -322,7 +359,7 @@ def lexer():
                 "enum AOrB {A B}",
                 [
                     EExpr
-                    << EEnumDeclaration(
+                    ** EEnumDeclaration(
                         id="AOrB",
                         variants=[
                             EVariant(id="A"),
@@ -335,38 +372,38 @@ def lexer():
                 "case x of Some(value) do 2 end None() do 3 end end",
                 [
                     EExpr
-                    << ECaseOf(
-                        EExpr << EIdentifier(name="x"),
+                    ** ECaseOf(
+                        EExpr ** EIdentifier(name="x"),
                         [
                             ECase(
                                 EPattern
-                                << EMatchVariant(
+                                ** EMatchVariant(
                                     id="Some",
-                                    patterns=[EPattern << EMatchAs("value")],
+                                    patterns=[EPattern ** EMatchAs("value")],
                                 ),
-                                EDo(EBlock([EExpr << ELiteral(value=2.0)])),
+                                EDo(EBlock([EExpr ** ENumLiteral(value=2.0)])),
                             ),
                             ECase(
-                                EPattern << EMatchVariant("None"),
-                                EDo(EBlock([EExpr << ELiteral(value=3.0)])),
+                                EPattern ** EMatchVariant("None"),
+                                EDo(EBlock([EExpr ** ENumLiteral(value=3.0)])),
                             ),
                         ],
                     )
                 ],
             ),
             ("\n\n", []),
-            ("\nid\n", [EExpr << EIdentifier("id")]),
+            ("\nid\n", [EExpr ** EIdentifier("id")]),
             (
                 "case x of\n\nend",
-                [EExpr << ECaseOf(EExpr << EIdentifier("x"), [])],
+                [EExpr ** ECaseOf(EExpr ** EIdentifier("x"), [])],
             ),
             (
                 "case x of\nSome() do end\nend",
                 [
                     EExpr
-                    << ECaseOf(
-                        EExpr << EIdentifier("x"),
-                        [ECase(EPattern << EMatchVariant("Some"))],
+                    ** ECaseOf(
+                        EExpr ** EIdentifier("x"),
+                        [ECase(EPattern ** EMatchVariant("Some"))],
                     )
                 ],
             ),
@@ -374,17 +411,17 @@ def lexer():
                 "case x of Some(a,\nb,\nc\n) do end end",
                 [
                     EExpr
-                    << ECaseOf(
-                        EExpr << EIdentifier("x"),
+                    ** ECaseOf(
+                        EExpr ** EIdentifier("x"),
                         [
                             ECase(
                                 EPattern
-                                << EMatchVariant(
+                                ** EMatchVariant(
                                     "Some",
                                     [
-                                        EPattern << EMatchAs("a"),
-                                        EPattern << EMatchAs("b"),
-                                        EPattern << EMatchAs("c"),
+                                        EPattern ** EMatchAs("a"),
+                                        EPattern ** EMatchAs("b"),
+                                        EPattern ** EMatchAs("c"),
                                     ],
                                 )
                             )
@@ -396,17 +433,17 @@ def lexer():
                 "case x of Some(a\n,b\n,c\n) do end end",
                 [
                     EExpr
-                    << ECaseOf(
-                        EExpr << EIdentifier("x"),
+                    ** ECaseOf(
+                        EExpr ** EIdentifier("x"),
                         [
                             ECase(
                                 EPattern
-                                << EMatchVariant(
+                                ** EMatchVariant(
                                     "Some",
                                     [
-                                        EPattern << EMatchAs("a"),
-                                        EPattern << EMatchAs("b"),
-                                        EPattern << EMatchAs("c"),
+                                        EPattern ** EMatchAs("a"),
+                                        EPattern ** EMatchAs("b"),
+                                        EPattern ** EMatchAs("c"),
                                     ],
                                 )
                             )
@@ -414,18 +451,18 @@ def lexer():
                     )
                 ],
             ),
-            ("do\n\nend", [EExpr << EDo()]),
-            ("do\nid\nend", [EExpr << EDo(EBlock([EExpr << EIdentifier("id")]))]),
+            ("do\n\nend", [EExpr ** EDo()]),
+            ("do\nid\nend", [EExpr ** EDo(EBlock([EExpr ** EIdentifier("id")]))]),
             (
                 "f(a\n,b\n,c\n)",
                 [
                     EExpr
-                    << ECall(
-                        EExpr << EIdentifier("f"),
+                    ** ECall(
+                        EExpr ** EIdentifier("f"),
                         [
-                            EExpr << EIdentifier("a"),
-                            EExpr << EIdentifier("b"),
-                            EExpr << EIdentifier("c"),
+                            EExpr ** EIdentifier("a"),
+                            EExpr ** EIdentifier("b"),
+                            EExpr ** EIdentifier("c"),
                         ],
                     )
                 ],
@@ -434,12 +471,12 @@ def lexer():
                 "f(a,\nb,\nc\n)",
                 [
                     EExpr
-                    << ECall(
-                        EExpr << EIdentifier("f"),
+                    ** ECall(
+                        EExpr ** EIdentifier("f"),
                         [
-                            EExpr << EIdentifier("a"),
-                            EExpr << EIdentifier("b"),
-                            EExpr << EIdentifier("c"),
+                            EExpr ** EIdentifier("a"),
+                            EExpr ** EIdentifier("b"),
+                            EExpr ** EIdentifier("c"),
                         ],
                     )
                 ],
@@ -448,12 +485,12 @@ def lexer():
                 "F(a\n,b\n,c\n)",
                 [
                     EExpr
-                    << EVariantCall(
+                    ** EVariantCall(
                         "F",
                         [
-                            EExpr << EIdentifier("a"),
-                            EExpr << EIdentifier("b"),
-                            EExpr << EIdentifier("c"),
+                            EExpr ** EIdentifier("a"),
+                            EExpr ** EIdentifier("b"),
+                            EExpr ** EIdentifier("c"),
                         ],
                     )
                 ],
@@ -462,12 +499,12 @@ def lexer():
                 "F(a,\nb,\nc\n)",
                 [
                     EExpr
-                    << EVariantCall(
+                    ** EVariantCall(
                         "F",
                         [
-                            EExpr << EIdentifier("a"),
-                            EExpr << EIdentifier("b"),
-                            EExpr << EIdentifier("c"),
+                            EExpr ** EIdentifier("a"),
+                            EExpr ** EIdentifier("b"),
+                            EExpr ** EIdentifier("c"),
                         ],
                     )
                 ],
@@ -476,11 +513,11 @@ def lexer():
                 "[a\n,b\n,c\n]",
                 [
                     EExpr
-                    << EArray(
+                    ** EArray(
                         [
-                            EExpr << EIdentifier("a"),
-                            EExpr << EIdentifier("b"),
-                            EExpr << EIdentifier("c"),
+                            EExpr ** EIdentifier("a"),
+                            EExpr ** EIdentifier("b"),
+                            EExpr ** EIdentifier("c"),
                         ]
                     )
                 ],
@@ -489,28 +526,28 @@ def lexer():
                 "[a,\nb,\nc\n]",
                 [
                     EExpr
-                    << EArray(
+                    ** EArray(
                         [
-                            EExpr << EIdentifier("a"),
-                            EExpr << EIdentifier("b"),
-                            EExpr << EIdentifier("c"),
+                            EExpr ** EIdentifier("a"),
+                            EExpr ** EIdentifier("b"),
+                            EExpr ** EIdentifier("c"),
                         ]
                     )
                 ],
             ),
-            ("None()", [EExpr << EVariantCall("None")]),
+            ("None()", [EExpr ** EVariantCall("None")]),
             (
                 "def x() do\ny\n\n#comment\n\nend",
-                [EExpr << EDef("x", [], EDo(EBlock([EExpr << EIdentifier("y")])))],
+                [EExpr ** EDef("x", [], EDo(EBlock([EExpr ** EIdentifier("y")])))],
             ),
             # (
             #     "case [Some(1), None()] of [Some(value), None()] do value end end",
             #     [
-            #         EExpr<<ECaseOf(
+            #         EExpr**ECaseOf(
             #             EArray(
             #                 [
-            #                     EExpr<<ECall(EExpr<<EIdentifier("Some"), [EExpr<<ELiteral("1", 1.0)]),
-            #                     EExpr<<ECall(EExpr<<EIdentifier("None"), []),
+            #                     EExpr**ECall(EExpr**EIdentifier("Some"), [EExpr**EStrLiteral("1", 1.0)]),
+            #                     EExpr**ECall(EExpr**EIdentifier("None"), []),
             #                 ]
             #             ),
             #             cases=[
@@ -518,19 +555,19 @@ def lexer():
             #                     pattern=EMatchArray(
             #                         patterns=[
             #                             EEnumPattern(
-            #                                 id=EExpr<<EIdentifier(name="Some"),
+            #                                 id=EExpr**EIdentifier(name="Some"),
             #                                 patterns=[
-            #                                     EPattern<<EMatchAs(
-            #                                         identifier=EExpr<<EIdentifier(name="value")
+            #                                     EPattern**EMatchAs(
+            #                                         identifier=EExpr**EIdentifier(name="value")
             #                                     )
             #                                 ],
             #                             ),
             #                             EEnumPattern(
-            #                                 id=EExpr<<EIdentifier(name="None"), patterns=[]
+            #                                 id=EExpr**EIdentifier(name="None"), patterns=[]
             #                             ),
             #                         ],
             #                     ),
-            #                     body=EExpr<<EDo(body=[EExpr<<EIdentifier(name="value")]),
+            #                     body=EExpr**EDo(body=[EExpr**EIdentifier(name="value")]),
             #                 )
             #             ],
             #         )
@@ -539,17 +576,17 @@ def lexer():
             # (
             #     "case [Some(1), None()] of [] do 4 end end",
             #     [
-            #         EExpr<<ECaseOf(
+            #         EExpr**ECaseOf(
             #             EArray(
             #                 [
-            #                     EExpr<<ECall(EExpr<<EIdentifier("Some"), [EExpr<<ELiteral("1", 1)]),
-            #                     EExpr<<ECall(EExpr<<EIdentifier("None"), []),
+            #                     EExpr**ECall(EExpr**EIdentifier("Some"), [EExpr**EStrLiteral("1", 1)]),
+            #                     EExpr**ECall(EExpr**EIdentifier("None"), []),
             #                 ]
             #             ),
             #             [
             #                 ECase(
             #                     pattern=EMatchArray(patterns=[]),
-            #                     body=EExpr<<EDo(body=[EExpr<<ELiteral(raw="4", value=4.0)]),
+            #                     body=EExpr**EDo(body=[EExpr(raw="4", value=4.0)]),
             #                 )
             #             ],
             #         )
@@ -558,17 +595,17 @@ def lexer():
             # (
             #     "case [Some(1), None()] of arr do 5 end end",
             #     [
-            #         EExpr<<ECaseOf(
+            #         EExpr**ECaseOf(
             #             EArray(
             #                 [
-            #                     EExpr<<ECall(EExpr<<EIdentifier("Some"), [EExpr<<ELiteral("1", 1.0)]),
-            #                     EExpr<<ECall(EExpr<<EIdentifier("None")),
+            #                     EExpr**ECall(EExpr**EIdentifier("Some"), [EExpr**EStrLiteral("1", 1.0)]),
+            #                     EExpr**ECall(EExpr**EIdentifier("None")),
             #                 ]
             #             ),
             #             [
             #                 ECase(
-            #                     patterns={"$": EPattern<<EMatchAs(identifier="arr")},
-            #                     body=EExpr<<EDo(body=[EExpr<<ELiteral(raw="5", value=5.0)]),
+            #                     patterns={"$": EPattern**EMatchAs(identifier="arr")},
+            #                     body=EExpr**EDo(body=[EExpr(raw="5", value=5.0)]),
             #                 )
             #             ],
             #         )

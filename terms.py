@@ -48,7 +48,7 @@ class Pipable:
     def __rshift__(self: TPipable, other: typing.Callable[[TPipable], R]) -> R:
         return other(self)
 
-    def __rlshift__(self: TPipable, other: typing.Callable[[TPipable], R]) -> R:
+    def __rpow__(self: TPipable, other: typing.Callable[[TPipable], R]) -> R:
         return other(self)
 
 
@@ -68,13 +68,13 @@ class EHint(Node):
 
 
 @dataclasses.dataclass(frozen=True)
-class Maybe(Node, typing.Generic[T]):
-    value: typing.Optional[T] = None
+class MaybeEHintNothing(Node):
+    pass
 
 
 @dataclasses.dataclass(frozen=True)
-class MaybeEHint(Maybe[EHint]):
-    pass
+class MaybeEHint(Node):
+    value: MaybeEHintNothing | EHint = MaybeEHintNothing()
 
 
 @dataclasses.dataclass(frozen=True)
@@ -108,8 +108,13 @@ class EIdentifier(Node):
 
 
 @dataclasses.dataclass(frozen=True)
-class ELiteral(Node):
-    value: float | str
+class ENumLiteral(Node):
+    value: float
+
+
+@dataclasses.dataclass(frozen=True)
+class EStrLiteral(Node):
+    value: str
 
 
 @dataclasses.dataclass(frozen=True)
@@ -179,24 +184,28 @@ class EArray(Node):
 
 
 @dataclasses.dataclass(frozen=True)
-class MaybeOrElse(Maybe["OrElse"]):
+class EIf(Node):
+    test: EExpr
+    then: EBlock
+    or_else: MaybeOrElse = dataclasses.field(default_factory=lambda: MaybeOrElse())
+    hint: MaybeEHint = MaybeEHint()
+
+
+@dataclasses.dataclass(frozen=True)
+class MaybeOrElseNothing(Node):
     pass
 
 
 @dataclasses.dataclass(frozen=True)
-class EIf(Node):
-    test: EExpr
-    then: EBlock
-    or_else: MaybeOrElse = MaybeOrElse()
-    hint: MaybeEHint = MaybeEHint()
+class MaybeOrElse(Node):
 
-
-OrElse: typing.TypeAlias = EBlock | EIf
+    value: EBlock | EIf | MaybeOrElseNothing = MaybeOrElseNothing()
 
 
 @dataclasses.dataclass(frozen=True)
 class EEnumDeclaration(Node):
     id: str
+    _: dataclasses.KW_ONLY
     variants: list[EVariant] = dataclasses.field(default_factory=list)
     generics: list[EIdentifier] = dataclasses.field(default_factory=list)
 
@@ -205,18 +214,6 @@ class EEnumDeclaration(Node):
 class EVariant(Node):
     id: str
     fields: list[EHint] = dataclasses.field(default_factory=list)
-
-
-@dataclasses.dataclass(frozen=True)
-class EMatchArray:
-    patterns: list[EPattern]
-    rest: EIdentifier | None = None
-
-
-@dataclasses.dataclass(frozen=True)
-class EMatchTuple:
-    patterns: list[EPattern]
-    rest: EIdentifier | None = None
 
 
 @dataclasses.dataclass(frozen=True)
@@ -247,7 +244,8 @@ def compose(
 class EExpr(Node):
     expr: (
         EDo
-        | ELiteral
+        | ENumLiteral
+        | EStrLiteral
         | EDef
         | EIf
         | ECall
@@ -283,7 +281,8 @@ class NodeFold(metaclass=FoldMeta):
         "EProgram",
         "EBinaryExpr",
         "EDo",
-        "ELiteral",
+        "ENumLiteral",
+        "EStrLiteral",
         "EDef",
         "EIf",
         "ECall",
@@ -305,6 +304,9 @@ class NodeFold(metaclass=FoldMeta):
         "EMatchVariant",
         "EMatchAs",
         "MaybeOrElse",
+        "MaybeEHintNothing",
+        "EStrLiteral",
+        "ENumLiteral",
     ]
 
 

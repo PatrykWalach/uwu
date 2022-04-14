@@ -53,29 +53,52 @@ def filter_identifiers(body: list[terms.EExpr]):
 #     return _compile(ast)
 
 
-def compile(exp: terms.AstTree) -> str:
+def compile(
+    exp: terms.EIdentifier
+    | terms.EExpr
+    | terms.EProgram
+    | terms.EParam
+    | terms.EUnaryExpr
+    | terms.MaybeOrElse
+    | terms.EVariantCall
+    | terms.ELet
+    | terms.EArray
+    | terms.EBinaryExpr
+    | terms.EBlock
+    | terms.ECall
+    | terms.ECaseOf
+    | terms.EDef
+    | terms.EDo
+    | terms.EEnumDeclaration
+    | terms.EExpr
+    | terms.EExternal
+    | terms.EIf
+    | terms.ENumLiteral
+    | terms.EStrLiteral
+    | terms.MaybeOrElseNothing,
+) -> str:
     match exp:
-        case terms.Maybe(value) if value != None:
+        case terms.MaybeOrElse(value):
             return compile(value)
         case terms.EExternal(value=value):
             return f"{value}"
-        case terms.ELiteral(value=str()):
+        case terms.EStrLiteral(value):
             return f'"{exp.value}"'
-        case terms.ELiteral(value=float()):
+        case terms.ENumLiteral(value):
             return f"{exp.value}"
         case terms.ELet(id, init):
             return f"const {id}={compile( init)}"
         case terms.EBlock(body):
-            body = [compile(expr) for expr in body]
-            if body:
-                body[-1] = "return " + body[-1]
-            return ";".join(body)
+            js_body = [compile(expr) for expr in body]
+            if js_body:
+                js_body[-1] = "return " + js_body[-1]
+            return ";".join(js_body)
         case terms.EDo(block):
             return "(()=>{" + compile(block) + "})()"
         case terms.EProgram(body):
-            body = [compile(expr) for expr in body]
-            return ";".join(body)
-        case terms.MaybeOrElse(None):
+            js_body = [compile(expr) for expr in body]
+            return ";".join(js_body)
+        case terms.MaybeOrElseNothing():
             return f"return"
         case terms.EIf(test, then, or_else):
             return f"(()=>{{if({compile(test)}){{{compile(then)}}}else{{{compile(or_else)}}}}})()"
@@ -94,32 +117,37 @@ def compile(exp: terms.AstTree) -> str:
         case terms.EVariantCall(id, []):
             return f"'{id}'"
 
-        case terms.EVariantCall(id, args) if args:
-            args = [f"_{i}:{compile(arg)}" for i, arg in enumerate(args)]
+        case terms.EVariantCall(id, args):
+            js_var_args = [f"_{i}:{compile(arg)}" for i, arg in enumerate(args)]
 
-            return f"{{TAG:'{id}',{','.join(args)}}}"
+            return f"{{TAG:'{id}',{','.join(js_var_args)}}}"
 
         case terms.EDef(id, args, terms.EDo(block)):
 
-            args = functools.reduce(
-                lambda acc, arg: f"{acc}({arg})=>",
+            js_args = functools.reduce(
+                lambda acc, js_arg: f"{acc}({js_arg})=>",
                 [compile(arg) for arg in args] or [""],
                 "",
             )
 
-            return f"const {id}={args}{{{compile(block)}}}"
-        case terms.EBinaryExpr("|", left, right):
-            return f"{compile( left)}.concat({compile( right)})"
-        case terms.EBinaryExpr("++", left, right):
-            return f"({compile( left)}+{compile( right)})"
-        case terms.EBinaryExpr("//", left, right):
-            return f"Math.floor({compile( left)}/{compile( right)})"
-        case terms.EBinaryExpr("!=" | "==" as op, left, right):
-            return f"({compile( left)}{op}={compile( right)})"
-        case terms.EBinaryExpr(
-            ">" | "<" | "+" | "-" | "/" | "*" | "%" as op, left, right
-        ):
-            return f"({compile( left)}{op}{compile( right)})"
+            return f"const {id}={js_args}{{{compile(block)}}}"
+        case terms.EBinaryExpr(op, left, right):
+            js_left = compile(left)
+            js_right = compile(right)
+            match op:
+                case "|":
+                    return f"{js_left}.concat({js_right})"
+                case "++":
+                    return f"({js_left}+{js_right})"
+                case "//":
+                    return f"Math.floor({js_left}/{js_right})"
+                case "!=" | "==":
+                    return f"({js_left}{op}={js_right})"
+                case ">" | "<" | "+" | "-" | "/" | "*" | "%":
+                    return f"({js_left}{op}{js_right})"
+                case op:
+                    typed.assert_never(op)
+
         case terms.EIdentifier(id):
             return id
         case terms.EEnumDeclaration():
@@ -154,24 +182,11 @@ def compile(exp: terms.AstTree) -> str:
             return f"[{','.join(map(compile, args))}]"
         case terms.EUnaryExpr(op, expr):
             return f"{op}({compile(expr)})"
-        case terms.EMatchTuple(patterns) | terms.EMatchArray(patterns):
-
-            patterns = [
-                f"{compile(pattern)}(__[{i}])" for i, pattern in enumerate(patterns)
-            ]
-            patterns = [
-                f"__.length=={len(patterns)}",
-                *patterns,
-            ]
-
-            patterns = "&&".join(patterns)
-
-            return f"((__)=>{{return {patterns}}})"
-        case _:
-            raise Exception(f"Unsupported expression: {exp}")
+        case exp:
+            typed.assert_never(exp)
 
 
-def _compile_case_tree(tree: case_tree.CaseTree):
+def _compile_case_tree(tree: case_tree.CaseTree) -> str:
     match tree:
         case case_tree.Leaf(body):
             return compile(body.block)
@@ -194,5 +209,6 @@ def _compile_case_tree(tree: case_tree.CaseTree):
             #     return _compile_case_tree(yes)
 
             return f"if({'&&'.join(conditions)}){{{_compile_case_tree(yes)}}}{_compile_case_tree(no)}"
+
         case _:
-            raise TypeError("Unsupported case")
+            typed.assert_never(tree)
