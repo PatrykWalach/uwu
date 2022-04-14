@@ -1,6 +1,6 @@
 /.mypy_cache
 /.pytest_cache
-/__pycache__
+__pycache__
 /.vscode
 node_modules
 *.log
@@ -10,3 +10,4 @@ node_modules
 *.fls
 *.toc
 /_minted-README
+
