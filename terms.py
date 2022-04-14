@@ -1,205 +1,221 @@
 from __future__ import annotations
 
 import dataclasses
+import re
 import typing
 
-import typed
+import terms
 
-A = typing.TypeVar("A")
-B = typing.TypeVar("B")
-C = typing.TypeVar("C")
-D = typing.TypeVar("D")
-E = typing.TypeVar("E")
-F = typing.TypeVar("F")
-G = typing.TypeVar("G")
-H = typing.TypeVar("H")
-I = typing.TypeVar("I")
-J = typing.TypeVar("J")
-K = typing.TypeVar("K")
-L = typing.TypeVar("L")
-M = typing.TypeVar("M")
-N = typing.TypeVar("N")
-O = typing.TypeVar("O")
-P = typing.TypeVar("P")
-R = typing.TypeVar("R")
-S = typing.TypeVar("S")
 T = typing.TypeVar("T")
-U = typing.TypeVar("U")
-W = typing.TypeVar("W")
-X = typing.TypeVar("X")
-Y = typing.TypeVar("Y")
-Z = typing.TypeVar("Z")
 
 
-@dataclasses.dataclass(frozen=True)
-class EHintNone:
+TFoldWith = typing.TypeVar("TFoldWith", bound="FoldWith")
+
+
+class FoldWith(typing.Protocol):
+    def fold_children_with(self: TFoldWith, v: FoldAll) -> TFoldWith:
+        self_items = (
+            (field.name, getattr(self, field.name))
+            for field in dataclasses.fields(self)
+        )
+
+        return dataclasses.replace(
+            self,
+            **{
+                key: [value2.fold_with(v) for value2 in value]
+                if isinstance(value, list)
+                else value.fold_with(v)
+                for key, value in self_items
+                if dataclasses.is_dataclass(value) or isinstance(value, list)
+            },
+        )
+
+    def fold_with(self: TFoldWith, v: FoldAll) -> TFoldWith:
+        # result = re.sub("([A-Z])", r"_\1", self.__class__.__name__).lower()
+        # result2 = f"fold{result}"
+        result2 = self.__class__.__name__
+        if not hasattr(v, result2):
+            raise ValueError(f"{v.__class__.__name__} does not have a {result2} method")
+        return typing.cast(TFoldWith, getattr(v, result2)(self))
+
+
+TPipable = typing.TypeVar("TPipable", bound="Pipable")
+
+R = typing.TypeVar("R")
+
+
+class Pipable:
+    def __rshift__(self: TPipable, other: typing.Callable[[TPipable], R]) -> R:
+        return other(self)
+
+    def __rlshift__(self: TPipable, other: typing.Callable[[TPipable], R]) -> R:
+        return other(self)
+
+
+class Node(Pipable, FoldWith):
     pass
 
 
 @dataclasses.dataclass(frozen=True)
-class ELet:
+class EBlock(Node):
+    body: list[EExpr] = dataclasses.field(default_factory=list)
+
+
+@dataclasses.dataclass(frozen=True)
+class EHint(Node):
     id: str
-    init: Expr
-    hint: EHint | EHintNone = EHintNone()
+    args: list[EHint] = dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass(frozen=True)
-class EDo:
-    body: list[Expr] = dataclasses.field(default_factory=list)
-    hint: EHint | EHintNone = EHintNone()
+class Maybe(Node, typing.Generic[T]):
+    value: typing.Optional[T] = None
 
 
 @dataclasses.dataclass(frozen=True)
-class EProgram:
-    body: list[Expr] = dataclasses.field(default_factory=list)
+class MaybeEHint(Maybe[EHint]):
+    pass
 
 
 @dataclasses.dataclass(frozen=True)
-class EBinaryExpr:
+class ELet(Node):
+    id: str
+    init: EExpr
+    hint: MaybeEHint = MaybeEHint()
+
+
+@dataclasses.dataclass(frozen=True)
+class EDo(Node):
+    block: EBlock = EBlock()
+    hint: MaybeEHint = MaybeEHint()
+
+
+@dataclasses.dataclass(frozen=True)
+class EProgram(Node):
+    body: list[EExpr] = dataclasses.field(default_factory=list)
+
+
+@dataclasses.dataclass(frozen=True)
+class EBinaryExpr(Node):
     op: typing.Literal["++", "+", "-", "/", "*", "%", "//", ">", "<", "|", "!=", "=="]
-    left: Expr
-    right: Expr
+    left: EExpr
+    right: EExpr
 
 
 @dataclasses.dataclass(frozen=True)
-class EIdentifier:
+class EIdentifier(Node):
     name: str
 
 
 @dataclasses.dataclass(frozen=True)
-class ELiteral:
+class ELiteral(Node):
     value: float | str
 
 
 @dataclasses.dataclass(frozen=True)
-class EExternal:
+class EExternal(Node):
     value: str
 
 
 @dataclasses.dataclass(frozen=True)
-class EDef:
+class EDef(Node):
     identifier: str
     params: list[EParam]
     body: EDo
-    hint: EHint | EHintNone = EHintNone()
+    hint: MaybeEHint = MaybeEHint()
     generics: list[EIdentifier] = dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass(frozen=True)
-class EParam:
+class EParam(Node):
     identifier: str
-    hint: EHint | EHintNone = EHintNone()
+    hint: MaybeEHint = MaybeEHint()
 
 
 @dataclasses.dataclass(frozen=True)
-class EUnaryExpr:
+class EUnaryExpr(Node):
     op: typing.Literal["-"]
-    expr: Expr
+    expr: EExpr
 
 
 @dataclasses.dataclass(frozen=True)
-class EMatchAs:
+class EMatchAs(Node):
     identifier: str
 
 
 @dataclasses.dataclass(frozen=True)
-class ECaseOf:
-    expr: Expr
+class ECaseOf(Node):
+    expr: EExpr
     cases: list[ECase] = dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass(frozen=True)
-class ECase:
-    pattern: Pattern
+class ECase(Node):
+    pattern: EPattern
     body: EDo = dataclasses.field(default_factory=EDo)
 
 
 @dataclasses.dataclass(frozen=True)
-class EMatchVariant:
+class EMatchVariant(Node):
     id: str
-    patterns: list[Pattern] = dataclasses.field(default_factory=list)
+    patterns: list[EPattern] = dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass(frozen=True)
-class ECall:
-    callee: Expr
-    args: list[Expr] = dataclasses.field(default_factory=list)
+class ECall(Node):
+    callee: EExpr
+    args: list[EExpr] = dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass(frozen=True)
-class EVariantCall:
+class EVariantCall(Node):
     callee: str
-    args: list[Expr] = dataclasses.field(default_factory=list)
+    args: list[EExpr] = dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass(frozen=True)
-class EArray:
-    args: list[Expr] = dataclasses.field(default_factory=list)
+class EArray(Node):
+    args: list[EExpr] = dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass(frozen=True)
-class ETuple:
-    args: list[Expr] = dataclasses.field(default_factory=list)
-
-
-@dataclasses.dataclass(frozen=True)
-class EIfNone:
+class MaybeOrElse(Maybe["OrElse"]):
     pass
 
 
 @dataclasses.dataclass(frozen=True)
-class EIf:
-    test: Expr
+class EIf(Node):
+    test: EExpr
     then: EBlock
-    or_else: EBlock | EIf | EIfNone = EIfNone()
-    hint: EHint | EHintNone = EHintNone()
+    or_else: MaybeOrElse = MaybeOrElse()
+    hint: MaybeEHint = MaybeEHint()
 
-    @staticmethod
-    def from_option(hint):
-        if hint == None:
-            return EIfNone()
-        return hint
+
+OrElse: typing.TypeAlias = EBlock | EIf
 
 
 @dataclasses.dataclass(frozen=True)
-class EBlock:
-    body: list[Expr] = dataclasses.field(default_factory=list)
-
-
-@dataclasses.dataclass(frozen=True)
-class EHint:
-    id: str
-    args: list[Type] = dataclasses.field(default_factory=list)
-
-    @staticmethod
-    def from_option(hint):
-        if hint == None:
-            return EHintNone()
-        return hint
-
-
-@dataclasses.dataclass(frozen=True)
-class EEnumDeclaration:
+class EEnumDeclaration(Node):
     id: str
     variants: list[EVariant] = dataclasses.field(default_factory=list)
     generics: list[EIdentifier] = dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass(frozen=True)
-class EVariant:
+class EVariant(Node):
     id: str
     fields: list[EHint] = dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass(frozen=True)
 class EMatchArray:
-    patterns: list[Pattern]
+    patterns: list[EPattern]
     rest: EIdentifier | None = None
 
 
 @dataclasses.dataclass(frozen=True)
 class EMatchTuple:
-    patterns: list[Pattern]
+    patterns: list[EPattern]
     rest: EIdentifier | None = None
 
 
@@ -208,41 +224,95 @@ class EFieldsUnnamed:
     unnamed: list[EIdentifier]
 
 
-Pattern: typing.TypeAlias = EMatchAs | EMatchVariant
+@dataclasses.dataclass(frozen=True)
+class EPattern(Node):
+    pattern: EMatchAs | EMatchVariant
 
-Expr: typing.TypeAlias = (
-    EDo
-    | ELiteral
-    | EDef
-    | EIf
-    | EIfNone
-    | ECall
-    | ECaseOf
-    | ELet
-    | EIdentifier
-    | EBinaryExpr
-    | EArray
-    | ETuple
-    | EVariantCall
-    | EExternal
-    | EUnaryExpr
-    | EEnumDeclaration
-)
 
-# 'type_identifier',  "array", "tuple",
-Type: typing.TypeAlias = EHint | EHintNone
+P = typing.ParamSpec("P")
+S = typing.TypeVar("S")
+D = typing.TypeVar("D")
 
-AstTree: typing.TypeAlias = (
-    EProgram
-    | EParam
-    | ECaseOf
-    | ECase
-    | EBlock
-    | EEnumDeclaration
-    | EFieldsUnnamed
-    | Type
-    | EVariant
-    | EIfNone
-    | Expr
-    | Pattern
-)
+
+def compose(
+    f: typing.Callable[[D], S], g: typing.Callable[P, D], /
+) -> typing.Callable[P, S]:
+    def h(*args: P.args, **kwargs: P.kwargs) -> S:
+        return f(g(*args, **kwargs))
+
+    return h
+
+
+@dataclasses.dataclass(frozen=True)
+class EExpr(Node):
+    expr: (
+        EDo
+        | ELiteral
+        | EDef
+        | EIf
+        | ECall
+        | ECaseOf
+        | ELet
+        | EIdentifier
+        | EBinaryExpr
+        | EArray
+        | EVariantCall
+        | EExternal
+        | EUnaryExpr
+        | EEnumDeclaration
+    )
+
+
+K = typing.TypeVar("K", bound=terms.FoldWith)
+
+
+class FoldMeta(type):
+    def __new__(cls, name, bases, namespace, **kwargs):
+        nodes = namespace.get("_nodes_", [])
+        for node in nodes:
+            exec(f"def {node}(self, n): return self.fold(n)", globals(), namespace)
+
+        return super().__new__(cls, name, bases, namespace, **kwargs)
+
+
+class NodeFold(metaclass=FoldMeta):
+
+    _nodes_ = [
+        "EExpr",
+        "EBlock",
+        "EProgram",
+        "EBinaryExpr",
+        "EDo",
+        "ELiteral",
+        "EDef",
+        "EIf",
+        "ECall",
+        "EVariant",
+        "EVariantCall",
+        "ECaseOf",
+        "ELet",
+        "EIdentifier",
+        "EArray",
+        "EVariantCall",
+        "EExternal",
+        "EUnaryExpr",
+        "EPattern",
+        "EEnumDeclaration",
+        "EHint",
+        "EParam",
+        "MaybeEHint",
+        "ECase",
+        "EMatchVariant",
+        "EMatchAs",
+        "MaybeOrElse",
+    ]
+
+
+class Fold(NodeFold):
+    def fold(self, n: K) -> K:
+        return n
+
+
+class FoldAll(NodeFold):
+    def fold(self, n: K) -> K:
+        return n.fold_children_with(self)

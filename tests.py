@@ -9,7 +9,7 @@ from sly import lex
 
 import algorithm_j
 import typed
-from compile import compile
+from compile import Hoist, compile
 from main import BUILTINS, DEFAULT_CTX, AstEncoder, UwuLexer, UwuParser
 from terms import *
 
@@ -26,366 +26,556 @@ def lexer():
 
 @pytest.mark.parametrize(
     "program, ast",
-    [
-        ("1", [ELiteral(1)]),
-        ("'abc'", [ELiteral("abc")]),
-        ("-2+2", [EBinaryExpr("+", EUnaryExpr("-", ELiteral(2)), ELiteral(2))]),
-        ("-(2+2)", [EUnaryExpr("-", EBinaryExpr("+", ELiteral(2), ELiteral(2)))]),
-        ("x=2\n-1", [ELet("x", ELiteral(2)), EUnaryExpr("-", ELiteral(1))]),
-        ("x=2-1", [ELet("x", EBinaryExpr("-", ELiteral(2), ELiteral(1)))]),
-        (
-            "Some(2)",
-            [EVariantCall("Some", [ELiteral(2)])],
-        ),
-        (
-            "Some(2)(2)",
-            [ECall(EVariantCall("Some", [ELiteral(2)]), [ELiteral(2)])],
-        ),
-        (
-            "Some(2)\n(2)",
-            [EVariantCall("Some", [ELiteral(2)]), ELiteral(2)],
-        ),
-        (
-            "x=id(2)",
-            [ELet("x", ECall(EIdentifier("id"), [ELiteral(2)]))],
-        ),
-        (
-            "(x=id)(2)",
-            [ECall(ELet("x", EIdentifier("id")), [ELiteral(2)])],
-        ),
-        (
-            "x=id\n(2)",
-            [ELet("x", EIdentifier("id")), ELiteral(2)],
-        ),
-        (
-            "1+2*3",
-            [
-                EBinaryExpr(
-                    "+",
-                    ELiteral(1),
-                    EBinaryExpr("*", ELiteral(2), ELiteral(3)),
-                )
-            ],
-        ),
-        (
-            "x=(2+3)*4",
-            [
-                ELet(
-                    "x",
-                    EBinaryExpr(
-                        "*",
-                        EBinaryExpr("+", ELiteral(2), ELiteral(3)),
-                        ELiteral(4),
-                    ),
-                )
-            ],
-        ),
-        (
-            "enum StrOrNum{String(Str)\nNumber(Num)}\nx=Number(1)\nx=String('12')",
-            [
-                EEnumDeclaration(
-                    id="StrOrNum",
-                    variants=[
-                        EVariant(id="String", fields=[EHint(id="Str")]),
-                        EVariant(id="Number", fields=[EHint(id="Num")]),
-                    ],
-                ),
-                ELet(
-                    id="x",
-                    init=EVariantCall(callee="Number", args=[ELiteral(value=1.0)]),
-                ),
-                ELet(
-                    id="x",
-                    init=EVariantCall(callee="String", args=[ELiteral(value="12")]),
-                ),
-            ],
-        ),
-        (
-            "def x(k) do k() end\ndef n() do 12 end\ny:Num=x(n)\nx",
-            [
-                EDef("x", [EParam("k")], EDo([ECall(EIdentifier("k"))])),
-                EDef("n", [], EDo([ELiteral(12)])),
-                ELet(
-                    "y",
-                    ECall(EIdentifier("x"), [EIdentifier("n")]),
-                    hint=EHint("Num"),
-                ),
-                EIdentifier("x"),
-            ],
-        ),
-        # (
-        #     "def flatMap(v, fn) do case v of None do None end Some(value) do fn(value) end end end",
-        #     [
-        #         Def(
-        #             Identifier("flatMap"),
-        #             [
-        #                 Param(Identifier("v")),
-        #                 Param(Identifier("fn")),
-        #             ],
-        #             Do(
-        #                 [
-        #                     CaseOf(
-        #                         Identifier("v"),
-        #                         [
-        #                             Case(EnumPattern(Identifier("None"), []), Do([])),
-        #                             Case(EnumPattern(Identifier("Some"), [
-        #                                 EnumPattern(Identifier("value"), [])
-        #                             ]), Do([])),
-        #                         ],
-        #                     )
-        #                 ]
-        #             ),
-        #         )
-        #     ],
-        (
-            "x=y=2+3",
-            [ELet("x", ELet("y", EBinaryExpr("+", ELiteral(2), ELiteral(3))))],
-        ),
-        (
-            "do x = 1 end",
-            [
-                EDo(
-                    [ELet("x", ELiteral(1))],
-                )
-            ],
-        ),
-        (
-            "id('abc')",
-            [ECall(EIdentifier("id"), [ELiteral("abc")])],
-        ),
-        (
-            "id(1)",
-            [ECall(EIdentifier("id"), [ELiteral(1)])],
-        ),
-        (
-            "id('12')\nid(1)",
-            [
-                ECall(EIdentifier("id"), [ELiteral("12")]),
-                ECall(EIdentifier("id"), [ELiteral(1)]),
-            ],
-        ),
-        (
-            "id(1+2)",
-            [
-                ECall(
-                    EIdentifier("id"),
-                    [EBinaryExpr("+", ELiteral(1), ELiteral(2))],
-                )
-            ],
-        ),
-        (
-            "x:Option<Num>=None()",
-            [
-                ELet(
-                    "x",
-                    EVariantCall("None"),
-                    hint=EHint("Option", [EHint("Num")]),
-                )
-            ],
-        ),
-        (
-            "def add(a, b) do a + b end",
-            [
-                EDef(
-                    identifier="add",
-                    params=[EParam("a"), EParam("b")],
-                    body=EDo(
-                        body=[
-                            EBinaryExpr(
-                                op="+",
-                                left=EIdentifier(name="a"),
-                                right=EIdentifier(name="b"),
-                            )
+    (
+        [
+            ("1", [EExpr << ELiteral(1)]),
+            ("'abc'", [EExpr << ELiteral("abc")]),
+            (
+                "-2+2",
+                [
+                    EExpr
+                    << EBinaryExpr(
+                        "+",
+                        EExpr << EUnaryExpr("-", EExpr << ELiteral(2)),
+                        EExpr << ELiteral(2),
+                    )
+                ],
+            ),
+            (
+                "-(2+2)",
+                [
+                    EExpr
+                    << EUnaryExpr(
+                        "-",
+                        EExpr
+                        << EBinaryExpr("+", EExpr << ELiteral(2), EExpr << ELiteral(2)),
+                    )
+                ],
+            ),
+            (
+                "x=2\n-1",
+                [
+                    EExpr << ELet("x", EExpr << ELiteral(2)),
+                    EExpr << EUnaryExpr("-", EExpr << ELiteral(1)),
+                ],
+            ),
+            (
+                "x=2-1",
+                [
+                    EExpr
+                    << ELet(
+                        "x",
+                        EExpr
+                        << EBinaryExpr("-", EExpr << ELiteral(2), EExpr << ELiteral(1)),
+                    )
+                ],
+            ),
+            (
+                "Some(2)",
+                [EExpr << EVariantCall("Some", [EExpr << ELiteral(2)])],
+            ),
+            (
+                "Some(2)(2)",
+                [
+                    EExpr
+                    << ECall(
+                        EExpr << EVariantCall("Some", [EExpr << ELiteral(2)]),
+                        [EExpr << ELiteral(2)],
+                    )
+                ],
+            ),
+            (
+                "Some(2)\n(2)",
+                [
+                    EExpr << EVariantCall("Some", [EExpr << ELiteral(2)]),
+                    EExpr << ELiteral(2),
+                ],
+            ),
+            (
+                "x=id(2)",
+                [
+                    EExpr
+                    << ELet(
+                        "x",
+                        EExpr
+                        << ECall(EExpr << EIdentifier("id"), [EExpr << ELiteral(2)]),
+                    )
+                ],
+            ),
+            (
+                "(x=id)(2)",
+                [
+                    EExpr
+                    << ECall(
+                        EExpr << ELet("x", EExpr << EIdentifier("id")),
+                        [EExpr << ELiteral(2)],
+                    )
+                ],
+            ),
+            (
+                "x=id\n(2)",
+                [EExpr << ELet("x", EExpr << EIdentifier("id")), EExpr << ELiteral(2)],
+            ),
+            (
+                "1+2*3",
+                [
+                    EExpr
+                    << EBinaryExpr(
+                        "+",
+                        EExpr << ELiteral(1),
+                        EExpr
+                        << EBinaryExpr("*", EExpr << ELiteral(2), EExpr << ELiteral(3)),
+                    )
+                ],
+            ),
+            (
+                "x=(2+3)*4",
+                [
+                    EExpr
+                    << ELet(
+                        "x",
+                        EExpr
+                        << EBinaryExpr(
+                            "*",
+                            EExpr
+                            << EBinaryExpr(
+                                "+", EExpr << ELiteral(2), EExpr << ELiteral(3)
+                            ),
+                            EExpr << ELiteral(4),
+                        ),
+                    )
+                ],
+            ),
+            (
+                "enum StrOrNum{String(Str)\nNumber(Num)}\nx=Number(1)\nx=String('12')",
+                [
+                    EExpr
+                    << EEnumDeclaration(
+                        id="StrOrNum",
+                        variants=[
+                            EVariant(id="String", fields=[EHint(id="Str")]),
+                            EVariant(id="Number", fields=[EHint(id="Num")]),
                         ],
                     ),
-                ),
-            ],
-        ),
-        (
-            "enum AOrB {A B}",
-            [
-                EEnumDeclaration(
-                    id="AOrB",
-                    variants=[
-                        EVariant(id="A"),
-                        EVariant(id="B"),
-                    ],
-                )
-            ],
-        ),
-        (
-            "case x of Some(value) do 2 end None() do 3 end end",
-            [
-                ECaseOf(
-                    EIdentifier(name="x"),
-                    [
-                        ECase(
-                            EMatchVariant(
-                                id="Some",
-                                patterns=[EMatchAs("value")],
+                    EExpr
+                    << ELet(
+                        id="x",
+                        init=EExpr
+                        << EVariantCall(
+                            callee="Number", args=[EExpr << ELiteral(value=1.0)]
+                        ),
+                    ),
+                    EExpr
+                    << ELet(
+                        id="x",
+                        init=EExpr
+                        << EVariantCall(
+                            callee="String", args=[EExpr << ELiteral(value="12")]
+                        ),
+                    ),
+                ],
+            ),
+            (
+                "def x(k) do k() end\ndef n() do 12 end\ny:Num=x(n)\nx",
+                [
+                    EExpr
+                    << EDef(
+                        "x",
+                        [EParam("k")],
+                        EDo(EBlock([EExpr << ECall(EExpr << EIdentifier("k"))])),
+                    ),
+                    EExpr << EDef("n", [], EDo(EBlock([EExpr << ELiteral(12)]))),
+                    EExpr
+                    << ELet(
+                        "y",
+                        EExpr
+                        << ECall(
+                            EExpr << EIdentifier("x"), [EExpr << EIdentifier("n")]
+                        ),
+                        hint=MaybeEHint(EHint("Num")),
+                    ),
+                    EExpr << EIdentifier("x"),
+                ],
+            ),
+            # (
+            #     "def flatMap(v, fn) do case v of None do None end Some(value) do fn(value) end end end",
+            #     [
+            #         Def(
+            #             Identifier("flatMap"),
+            #             [
+            #                 Param(Identifier("v")),
+            #                 Param(Identifier("fn")),
+            #             ],
+            #             Do(
+            #                 [
+            #                     CaseOf(
+            #                         Identifier("v"),
+            #                         [
+            #                             Case(EnumPattern(Identifier("None"), []), Do([])),
+            #                             Case(EnumPattern(Identifier("Some"), [
+            #                                 EnumPattern(Identifier("value"), [])
+            #                             ]), Do([])),
+            #                         ],
+            #                     )
+            #                 ]
+            #             ),
+            #         )
+            #     ],
+            (
+                "x=y=2+3",
+                [
+                    EExpr
+                    << ELet(
+                        "x",
+                        EExpr
+                        << ELet(
+                            "y",
+                            EExpr
+                            << EBinaryExpr(
+                                "+", EExpr << ELiteral(2), EExpr << ELiteral(3)
                             ),
-                            EDo([ELiteral(value=2.0)]),
                         ),
-                        ECase(
-                            EMatchVariant("None"),
-                            EDo([ELiteral(value=3.0)]),
+                    )
+                ],
+            ),
+            (
+                "do x = 1 end",
+                [
+                    EExpr
+                    << EDo(
+                        EBlock(
+                            [EExpr << ELet("x", EExpr << ELiteral(1))],
+                        )
+                    )
+                ],
+            ),
+            (
+                "id('abc')",
+                [
+                    EExpr
+                    << ECall(EExpr << EIdentifier("id"), [EExpr << ELiteral("abc")])
+                ],
+            ),
+            (
+                "id(1)",
+                [EExpr << ECall(EExpr << EIdentifier("id"), [EExpr << ELiteral(1)])],
+            ),
+            (
+                "id('12')\nid(1)",
+                [
+                    EExpr
+                    << ECall(EExpr << EIdentifier("id"), [EExpr << ELiteral("12")]),
+                    EExpr << ECall(EExpr << EIdentifier("id"), [EExpr << ELiteral(1)]),
+                ],
+            ),
+            (
+                "id(1+2)",
+                [
+                    EExpr
+                    << ECall(
+                        EExpr << EIdentifier("id"),
+                        [
+                            EExpr
+                            << EBinaryExpr(
+                                "+", EExpr << ELiteral(1), EExpr << ELiteral(2)
+                            )
+                        ],
+                    )
+                ],
+            ),
+            (
+                "x:Option<Num>=None()",
+                [
+                    EExpr
+                    << ELet(
+                        "x",
+                        EExpr << EVariantCall("None"),
+                        hint=MaybeEHint(
+                            EHint("Option", [EHint("Num")]),
                         ),
-                    ],
-                )
-            ],
-        ),
-        ("\n\n", []),
-        ("\nid\n", [EIdentifier("id")]),
-        (
-            "case x of\n\nend",
-            [ECaseOf(EIdentifier("x"), [])],
-        ),
-        (
-            "case x of\nSome() do end\nend",
-            [ECaseOf(EIdentifier("x"), [ECase(EMatchVariant("Some"))])],
-        ),
-        (
-            "case x of Some(a,\nb,\nc\n) do end end",
-            [
-                ECaseOf(
-                    EIdentifier("x"),
-                    [
-                        ECase(
-                            EMatchVariant(
-                                "Some",
-                                [EMatchAs("a"), EMatchAs("b"), EMatchAs("c")],
+                    )
+                ],
+            ),
+            (
+                "def add(a, b) do a + b end",
+                [
+                    EExpr
+                    << EDef(
+                        identifier="add",
+                        params=[EParam("a"), EParam("b")],
+                        body=EDo(
+                            block=EBlock(
+                                [
+                                    EExpr
+                                    << EBinaryExpr(
+                                        op="+",
+                                        left=EExpr << EIdentifier(name="a"),
+                                        right=EExpr << EIdentifier(name="b"),
+                                    )
+                                ],
                             )
-                        )
-                    ],
-                )
-            ],
-        ),
-        (
-            "case x of Some(a\n,b\n,c\n) do end end",
-            [
-                ECaseOf(
-                    EIdentifier("x"),
-                    [
-                        ECase(
-                            EMatchVariant(
-                                "Some",
-                                [EMatchAs("a"), EMatchAs("b"), EMatchAs("c")],
+                        ),
+                    ),
+                ],
+            ),
+            (
+                "enum AOrB {A B}",
+                [
+                    EExpr
+                    << EEnumDeclaration(
+                        id="AOrB",
+                        variants=[
+                            EVariant(id="A"),
+                            EVariant(id="B"),
+                        ],
+                    )
+                ],
+            ),
+            (
+                "case x of Some(value) do 2 end None() do 3 end end",
+                [
+                    EExpr
+                    << ECaseOf(
+                        EExpr << EIdentifier(name="x"),
+                        [
+                            ECase(
+                                EPattern
+                                << EMatchVariant(
+                                    id="Some",
+                                    patterns=[EPattern << EMatchAs("value")],
+                                ),
+                                EDo(EBlock([EExpr << ELiteral(value=2.0)])),
+                            ),
+                            ECase(
+                                EPattern << EMatchVariant("None"),
+                                EDo(EBlock([EExpr << ELiteral(value=3.0)])),
+                            ),
+                        ],
+                    )
+                ],
+            ),
+            ("\n\n", []),
+            ("\nid\n", [EExpr << EIdentifier("id")]),
+            (
+                "case x of\n\nend",
+                [EExpr << ECaseOf(EExpr << EIdentifier("x"), [])],
+            ),
+            (
+                "case x of\nSome() do end\nend",
+                [
+                    EExpr
+                    << ECaseOf(
+                        EExpr << EIdentifier("x"),
+                        [ECase(EPattern << EMatchVariant("Some"))],
+                    )
+                ],
+            ),
+            (
+                "case x of Some(a,\nb,\nc\n) do end end",
+                [
+                    EExpr
+                    << ECaseOf(
+                        EExpr << EIdentifier("x"),
+                        [
+                            ECase(
+                                EPattern
+                                << EMatchVariant(
+                                    "Some",
+                                    [
+                                        EPattern << EMatchAs("a"),
+                                        EPattern << EMatchAs("b"),
+                                        EPattern << EMatchAs("c"),
+                                    ],
+                                )
                             )
-                        )
-                    ],
-                )
-            ],
-        ),
-        ("do\n\nend", [EDo()]),
-        ("do\nid\nend", [EDo([EIdentifier("id")])]),
-        (
-            "f(a\n,b\n,c\n)",
-            [
-                ECall(
-                    EIdentifier("f"),
-                    [EIdentifier("a"), EIdentifier("b"), EIdentifier("c")],
-                )
-            ],
-        ),
-        (
-            "f(a,\nb,\nc\n)",
-            [
-                ECall(
-                    EIdentifier("f"),
-                    [EIdentifier("a"), EIdentifier("b"), EIdentifier("c")],
-                )
-            ],
-        ),
-        (
-            "F(a\n,b\n,c\n)",
-            [EVariantCall("F", [EIdentifier("a"), EIdentifier("b"), EIdentifier("c")])],
-        ),
-        (
-            "F(a,\nb,\nc\n)",
-            [EVariantCall("F", [EIdentifier("a"), EIdentifier("b"), EIdentifier("c")])],
-        ),
-        (
-            "[a\n,b\n,c\n]",
-            [EArray([EIdentifier("a"), EIdentifier("b"), EIdentifier("c")])],
-        ),
-        (
-            "[a,\nb,\nc\n]",
-            [EArray([EIdentifier("a"), EIdentifier("b"), EIdentifier("c")])],
-        ),
-        ("None()", [EVariantCall("None")]),
-        ("def x() do\ny\n\n#comment\n\nend", [EDef("x", [], EDo([EIdentifier("y")]))]),
-        # (
-        #     "case [Some(1), None()] of [Some(value), None()] do value end end",
-        #     [
-        #         ECaseOf(
-        #             EArray(
-        #                 [
-        #                     ECall(EIdentifier("Some"), [ELiteral("1", 1.0)]),
-        #                     ECall(EIdentifier("None"), []),
-        #                 ]
-        #             ),
-        #             cases=[
-        #                 ECase(
-        #                     pattern=EMatchArray(
-        #                         patterns=[
-        #                             EEnumPattern(
-        #                                 id=EIdentifier(name="Some"),
-        #                                 patterns=[
-        #                                     EMatchAs(
-        #                                         identifier=EIdentifier(name="value")
-        #                                     )
-        #                                 ],
-        #                             ),
-        #                             EEnumPattern(
-        #                                 id=EIdentifier(name="None"), patterns=[]
-        #                             ),
-        #                         ],
-        #                     ),
-        #                     body=EDo(body=[EIdentifier(name="value")]),
-        #                 )
-        #             ],
-        #         )
-        #     ],
-        # ),
-        # (
-        #     "case [Some(1), None()] of [] do 4 end end",
-        #     [
-        #         ECaseOf(
-        #             EArray(
-        #                 [
-        #                     ECall(EIdentifier("Some"), [ELiteral("1", 1)]),
-        #                     ECall(EIdentifier("None"), []),
-        #                 ]
-        #             ),
-        #             [
-        #                 ECase(
-        #                     pattern=EMatchArray(patterns=[]),
-        #                     body=EDo(body=[ELiteral(raw="4", value=4.0)]),
-        #                 )
-        #             ],
-        #         )
-        #     ],
-        # ),
-        # (
-        #     "case [Some(1), None()] of arr do 5 end end",
-        #     [
-        #         ECaseOf(
-        #             EArray(
-        #                 [
-        #                     ECall(EIdentifier("Some"), [ELiteral("1", 1.0)]),
-        #                     ECall(EIdentifier("None")),
-        #                 ]
-        #             ),
-        #             [
-        #                 ECase(
-        #                     patterns={"$": EMatchAs(identifier="arr")},
-        #                     body=EDo(body=[ELiteral(raw="5", value=5.0)]),
-        #                 )
-        #             ],
-        #         )
-        #     ],
-        # ),
-    ],
+                        ],
+                    )
+                ],
+            ),
+            (
+                "case x of Some(a\n,b\n,c\n) do end end",
+                [
+                    EExpr
+                    << ECaseOf(
+                        EExpr << EIdentifier("x"),
+                        [
+                            ECase(
+                                EPattern
+                                << EMatchVariant(
+                                    "Some",
+                                    [
+                                        EPattern << EMatchAs("a"),
+                                        EPattern << EMatchAs("b"),
+                                        EPattern << EMatchAs("c"),
+                                    ],
+                                )
+                            )
+                        ],
+                    )
+                ],
+            ),
+            ("do\n\nend", [EExpr << EDo()]),
+            ("do\nid\nend", [EExpr << EDo(EBlock([EExpr << EIdentifier("id")]))]),
+            (
+                "f(a\n,b\n,c\n)",
+                [
+                    EExpr
+                    << ECall(
+                        EExpr << EIdentifier("f"),
+                        [
+                            EExpr << EIdentifier("a"),
+                            EExpr << EIdentifier("b"),
+                            EExpr << EIdentifier("c"),
+                        ],
+                    )
+                ],
+            ),
+            (
+                "f(a,\nb,\nc\n)",
+                [
+                    EExpr
+                    << ECall(
+                        EExpr << EIdentifier("f"),
+                        [
+                            EExpr << EIdentifier("a"),
+                            EExpr << EIdentifier("b"),
+                            EExpr << EIdentifier("c"),
+                        ],
+                    )
+                ],
+            ),
+            (
+                "F(a\n,b\n,c\n)",
+                [
+                    EExpr
+                    << EVariantCall(
+                        "F",
+                        [
+                            EExpr << EIdentifier("a"),
+                            EExpr << EIdentifier("b"),
+                            EExpr << EIdentifier("c"),
+                        ],
+                    )
+                ],
+            ),
+            (
+                "F(a,\nb,\nc\n)",
+                [
+                    EExpr
+                    << EVariantCall(
+                        "F",
+                        [
+                            EExpr << EIdentifier("a"),
+                            EExpr << EIdentifier("b"),
+                            EExpr << EIdentifier("c"),
+                        ],
+                    )
+                ],
+            ),
+            (
+                "[a\n,b\n,c\n]",
+                [
+                    EExpr
+                    << EArray(
+                        [
+                            EExpr << EIdentifier("a"),
+                            EExpr << EIdentifier("b"),
+                            EExpr << EIdentifier("c"),
+                        ]
+                    )
+                ],
+            ),
+            (
+                "[a,\nb,\nc\n]",
+                [
+                    EExpr
+                    << EArray(
+                        [
+                            EExpr << EIdentifier("a"),
+                            EExpr << EIdentifier("b"),
+                            EExpr << EIdentifier("c"),
+                        ]
+                    )
+                ],
+            ),
+            ("None()", [EExpr << EVariantCall("None")]),
+            (
+                "def x() do\ny\n\n#comment\n\nend",
+                [EExpr << EDef("x", [], EDo(EBlock([EExpr << EIdentifier("y")])))],
+            ),
+            # (
+            #     "case [Some(1), None()] of [Some(value), None()] do value end end",
+            #     [
+            #         EExpr<<ECaseOf(
+            #             EArray(
+            #                 [
+            #                     EExpr<<ECall(EExpr<<EIdentifier("Some"), [EExpr<<ELiteral("1", 1.0)]),
+            #                     EExpr<<ECall(EExpr<<EIdentifier("None"), []),
+            #                 ]
+            #             ),
+            #             cases=[
+            #                 ECase(
+            #                     pattern=EMatchArray(
+            #                         patterns=[
+            #                             EEnumPattern(
+            #                                 id=EExpr<<EIdentifier(name="Some"),
+            #                                 patterns=[
+            #                                     EPattern<<EMatchAs(
+            #                                         identifier=EExpr<<EIdentifier(name="value")
+            #                                     )
+            #                                 ],
+            #                             ),
+            #                             EEnumPattern(
+            #                                 id=EExpr<<EIdentifier(name="None"), patterns=[]
+            #                             ),
+            #                         ],
+            #                     ),
+            #                     body=EExpr<<EDo(body=[EExpr<<EIdentifier(name="value")]),
+            #                 )
+            #             ],
+            #         )
+            #     ],
+            # ),
+            # (
+            #     "case [Some(1), None()] of [] do 4 end end",
+            #     [
+            #         EExpr<<ECaseOf(
+            #             EArray(
+            #                 [
+            #                     EExpr<<ECall(EExpr<<EIdentifier("Some"), [EExpr<<ELiteral("1", 1)]),
+            #                     EExpr<<ECall(EExpr<<EIdentifier("None"), []),
+            #                 ]
+            #             ),
+            #             [
+            #                 ECase(
+            #                     pattern=EMatchArray(patterns=[]),
+            #                     body=EExpr<<EDo(body=[EExpr<<ELiteral(raw="4", value=4.0)]),
+            #                 )
+            #             ],
+            #         )
+            #     ],
+            # ),
+            # (
+            #     "case [Some(1), None()] of arr do 5 end end",
+            #     [
+            #         EExpr<<ECaseOf(
+            #             EArray(
+            #                 [
+            #                     EExpr<<ECall(EExpr<<EIdentifier("Some"), [EExpr<<ELiteral("1", 1.0)]),
+            #                     EExpr<<ECall(EExpr<<EIdentifier("None")),
+            #                 ]
+            #             ),
+            #             [
+            #                 ECase(
+            #                     patterns={"$": EPattern<<EMatchAs(identifier="arr")},
+            #                     body=EExpr<<EDo(body=[EExpr<<ELiteral(raw="5", value=5.0)]),
+            #                 )
+            #             ],
+            #         )
+            #     ],
+            # ),
+        ]
+    ),
 )
 def test_parser(program, ast, parser, lexer):
     program = parser.parse(lexer.tokenize(program))
@@ -663,7 +853,8 @@ def test_compile_with_snapshot(id, program, expected_output, snapshot, parser, l
     id = id + ".js"
     program = parser.parse(lexer.tokenize(program))
     snapshot.snapshot_dir = "snapshots"
-    snapshot.assert_match(compile(EProgram([*BUILTINS, *program.body])), id)
+    ast = EProgram([*BUILTINS, *program.body])
+    snapshot.assert_match(compile(ast.fold_with(Hoist())), id)
     # path: WindowsPath = snapshot.snapshot_dir
     assert check_output(
         ["node", snapshot.snapshot_dir / id]

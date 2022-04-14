@@ -31,26 +31,26 @@ R = TypeVar("R")
 
 class UwuLexer(Lexer):
     tokens = {
-        NUMBER,
-        STRING,
-        IDENTIFIER,
-        DEF,
-        DO,
-        END,
-        IF,
-        ELSE,
-        CASE,
-        OF,
-        CONCAT,
-        ELIF,
-        INT_DIV,
-        ENUM,
-        THEN,
-        TYPE_IDENTIFIER,
-        EXTERNAL,
-        NOT_EQUAL,
-        EQUAL,
-        NEWLINE,
+        "NUMBER",
+        "STRING",
+        "IDENTIFIER",
+        "DEF",
+        "DO",
+        "END",
+        "IF",
+        "ELSE",
+        "CASE",
+        "OF",
+        "CONCAT",
+        "ELIF",
+        "INT_DIV",
+        "ENUM",
+        "THEN",
+        "TYPE_IDENTIFIER",
+        "EXTERNAL",
+        "NOT_EQUAL",
+        "EQUAL",
+        "NEWLINE",
     }
     literals = {
         "=",
@@ -113,15 +113,15 @@ class UwuParser(Parser):
     debugfile = "parser.out"
 
     @_("[ NEWLINE ] [ do_exprs ]")
-    def program(self, p):
+    def program(self, p) -> terms.EProgram:
         return terms.EProgram(p.do_exprs or [])
 
     @_("expr NEWLINE do_exprs")
-    def do_exprs(self, p):
+    def do_exprs(self, p) -> list[terms.EExpr]:
         return [p.expr] + p.do_exprs
 
     @_("expr [ NEWLINE ]")
-    def do_exprs(self, p):
+    def do_exprs(self, p) -> list[terms.EExpr]:
         return [p.expr]
 
     precedence = (
@@ -152,23 +152,23 @@ class UwuParser(Parser):
         "array",
         # "tuple",
     )
-    def expr(self, p):
-        return p[0]
+    def expr(self, p) -> terms.EExpr:
+        return terms.EExpr(p[0])
 
     @_(
         "'(' expr ')'",
     )
-    def expr(self, p):
+    def expr(self, p) -> terms.EExpr:
         return p[1]
 
     @_(
         "'-' expr %prec UMINUS",
     )
-    def expr(self, p):
-        return terms.EUnaryExpr(p[0], p.expr)
+    def expr(self, p) -> terms.EExpr:
+        return terms.EExpr(terms.EUnaryExpr(p[0], p.expr))
 
     @_("EXTERNAL")
-    def external(self, p):
+    def external(self, p) -> terms.EExternal:
         return terms.EExternal(p.EXTERNAL[1:-1])
 
     @_(
@@ -189,10 +189,10 @@ class UwuParser(Parser):
         return terms.EBinaryExpr(p[1], p[0], p[2])
 
     @_(
-        "DO [ ':' type ] [ NEWLINE ] [ do_exprs ] END",
+        "DO [ ':' type ] block_statement END",
     )
     def do(self, p):
-        return terms.EDo(p.do_exprs or [], hint=terms.EHint.from_option(p.type))
+        return terms.EDo(p.block_statement, hint=terms.MaybeEHint(p.type))
 
     @_(
         "[ NEWLINE ] [ do_exprs ]",
@@ -208,7 +208,7 @@ class UwuParser(Parser):
             p.identifier.name,
             p.params or [],
             body=p.do,
-            hint=terms.EHint.from_option(p.type),
+            hint=terms.MaybeEHint(p.type),
             generics=concat(p.type_identifier0, p.type_identifier1),
         )
 
@@ -218,7 +218,7 @@ class UwuParser(Parser):
             p.identifier.name,
             p.params or [],
             body=p.do,
-            hint=terms.EHint.from_option(p.type),
+            hint=terms.MaybeEHint(p.type),
         )
 
     @_("params ',' [ NEWLINE ] param [ NEWLINE ]")
@@ -273,15 +273,15 @@ class UwuParser(Parser):
 
     @_("identifier [ ':' type ]")
     def param(self, p):
-        return terms.EParam(p.identifier.name, terms.EHint.from_option(p.type))
+        return terms.EParam(p.identifier.name, terms.MaybeEHint(p.type))
 
     @_("IF expr THEN [ ':' type ] block_statement [ or_else ] END")
     def if_expr(self, p):
         return terms.EIf(
             p.expr,
             then=p.block_statement,
-            or_else=terms.EIf.from_option(p.or_else),
-            hint=terms.EHint.from_option(p.type),
+            or_else=terms.MaybeOrElse(p.or_else),
+            hint=terms.MaybeEHint(p.type),
         )
 
     @_("ELSE block_statement")
@@ -291,7 +291,7 @@ class UwuParser(Parser):
     @_("ELIF expr THEN block_statement [ or_else ]")
     def or_else(self, p):
         return terms.EIf(
-            p.expr, then=p.block_statement, or_else=terms.EIf.from_option(p.or_else)
+            p.expr, then=p.block_statement, or_else=terms.MaybeOrElse(p.or_else)
         )
 
     @_("CASE expr OF [ NEWLINE ] [ cases ] END")
@@ -320,7 +320,7 @@ class UwuParser(Parser):
 
     @_("match_as", "match_variant")  # , "tuple_pattern", "array_pattern"
     def pattern(self, p):
-        return p[0]
+        return terms.EPattern(p[0])
 
     @_("identifier")
     def match_as(self, p):
@@ -385,7 +385,7 @@ class UwuParser(Parser):
     @_("identifier [ ':' type ] '=' expr")
     def variable_declaration(self, p):
         return terms.ELet(
-            id=p.identifier.name, init=p.expr, hint=terms.EHint.from_option(p.type)
+            id=p.identifier.name, init=p.expr, hint=terms.MaybeEHint(p.type)
         )
 
     @_("NUMBER")
