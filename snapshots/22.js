@@ -1,1 +1,1 @@
-;;id=(id)=>(()=>{return id})();unit=undefined;add=(a)=>(b)=>(()=>{return (a+b)})();addTwo=add(2.0);console.log(addTwo(3.0))
+;;const id=(id)=>{return id};const unit=undefined;const add=(a)=>(b)=>{return (a+b)};const addTwo=add(2.0);console.log(addTwo(3.0))

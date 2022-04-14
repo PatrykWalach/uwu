@@ -51,7 +51,7 @@ class EDo:
 
 @dataclasses.dataclass(frozen=True)
 class EProgram:
-    body: list[Expr | EEnumDeclaration] = dataclasses.field(default_factory=list)
+    body: list[Expr] = dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -215,6 +215,7 @@ Expr: typing.TypeAlias = (
     | ELiteral
     | EDef
     | EIf
+    | EIfNone
     | ECall
     | ECaseOf
     | ELet
@@ -225,6 +226,7 @@ Expr: typing.TypeAlias = (
     | EVariantCall
     | EExternal
     | EUnaryExpr
+    | EEnumDeclaration
 )
 
 # 'type_identifier',  "array", "tuple",

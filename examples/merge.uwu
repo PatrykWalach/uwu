@@ -1,0 +1,39 @@
+enum TupleType<A, B> {
+    Tuple(A, B)
+}
+
+def len<A>(arr: Array<A>): Num do
+    `arr.length`
+end
+
+enum GetHead<A, B> {
+    Empty
+    Head(A, B)
+}
+
+def get_head<A>(arr: Array<A>) do
+    if len(arr) < 1 then
+        Empty()
+    else
+        `const [_head, ..._rest] = arr`
+        list_head: Num = `_head` 
+        rest: Array<Num> = `_rest` 
+        Head(list_head, rest)
+    end
+end
+
+def merge<A>(a, b) do
+    merge2: Callable<Array<A>, Callable<Array<A>, Array<A>>> = `merge`
+
+    case Tuple(get_head(a), get_head(b)) of
+        Tuple(Empty(), _) do b end
+        Tuple(_, Empty()) do a end
+        Tuple(Head(head_a, rest_a), Head(head_b, rest_b)) do
+            if head_a < head_b then
+                [head_a] | merge2(rest_a, b)
+            else
+                [head_b] | merge2(a, rest_b)
+            end
+        end
+    end
+end

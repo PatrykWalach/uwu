@@ -11,7 +11,7 @@ import algorithm_j
 import compile
 import terms
 import typed
-from algorithm_j import Context, Scheme, type_infer
+from algorithm_j import Context, NonExhaustiveMatchException, Scheme, type_infer
 
 
 class AstEncoder(json.JSONEncoder):
@@ -65,41 +65,41 @@ def main():
             pattern = "**/*.uwu"
 
     for src_path in glob.glob(pattern):
+
+        with open(src_path, "r") as f:
+            data = f.read()
+
+        ast = parser.parse(lexer.tokenize(data))
+
+        if not isinstance(ast, terms.EProgram):
+            logging.error(f"Failed {src_path} to parse")
+            return
+
+        ast = terms.EProgram([*BUILTINS, *ast.body])
+
+        logging.info(f"Parsed {src_path}")
+
         try:
-            with open(src_path, "r") as f:
-                data = f.read()
-
-            ast = parser.parse(lexer.tokenize(data))
-
-            if ast == None:
-                logging.error(f"Failed {src_path} to parse")
-                return
-
-            ast = terms.EProgram([*BUILTINS, ast])
-
-            logging.info(f"Parsed {src_path}")
-
             type_infer(
                 DEFAULT_CTX,
                 ast,
             )
-
-            algorithm_j.is_exhaustive({}, ast)
-
-            logging.info(f"Inferred {src_path}")
-
-            js = compile.compile(ast)
-            logging.info(f"Compiled {src_path}")
-
-            path = src_path + ".js"
-            with open(path, "w") as f:
-                f.write(js)
-
-            logging.info(f"Written {src_path}")
-
+        except NonExhaustiveMatchException as e:
+            logging.warning(e)
         except Exception as e:
             logging.exception(e)
             return
+
+        logging.info(f"Inferred {src_path}")
+
+        js = compile.compile(ast)
+        logging.info(f"Compiled {src_path}")
+
+        path = src_path + ".js"
+        with open(path, "w") as f:
+            f.write(js)
+
+        logging.info(f"Written {src_path}")
 
 
 if __name__ == "__main__":

@@ -7,8 +7,8 @@ from typing import Generic
 import pytest
 from sly import lex
 
+import algorithm_j
 import typed
-from algorithm_j import Scheme, UnifyException, type_infer
 from compile import compile
 from main import BUILTINS, DEFAULT_CTX, AstEncoder, UwuLexer, UwuParser
 from terms import *
@@ -22,90 +22,6 @@ def parser():
 @pytest.fixture
 def lexer():
     return UwuLexer()
-
-
-# @dataclass
-# class Token:
-#     type: str
-#     value: str
-
-#     @classmethod
-#     def from_token(cls, t: lex.Token):
-#         return cls(t.type, t.value)
-
-
-# @pytest.mark.parametrize(
-#     'program, expected_tokens', [
-
-# ("x:Option<Num>=None", [
-#  token('IDENTIFIER', value='x', lineno=1, indelet x=0),
-#  token(type=':', value=':', lineno=1, indelet x=1),
-#  token(type='IDENTIFIER', value='Option', lineno=1, indelet x=2),
-#     token(type='<', value='<', lineno=1, indelet x=8),
-#     token(type='IDENTIFIER', value='Num', lineno=1, indelet x=9),
-#     token(type='>', value='>', lineno=1, indelet x=15),
-#     token(type='=', value='=', lineno=1, indelet x=16),
-#     token(type='IDENTIFIER', value='None', lineno=1, indelet x=17),
-
-#  ])
-
-#         ('case [Some(1), None()] of [Some(value), None()] do value end [None(), Some(value)] do 3 end [] do 4 end [...arr] do 5 end end', [
-#             Token(type='CASE', value='case'),
-#             Token(type='[', value='['),
-#             Token(type='TYPE_IDENTIFIER', value='Some'),
-#             Token(type='(', value='('),
-#             Token(type='NUMBER', value='1'),
-#             Token(type=')', value=')'),
-#             Token(type=',', value=','),
-#             Token(type='TYPE_IDENTIFIER', value='None'),
-#             Token(type='(', value='('),
-#             Token(type=')', value=')'),
-#             Token(type=']', value=']'),
-#             Token(type='OF', value='of'),
-#             Token(type='[', value='['),
-#             Token(type='TYPE_IDENTIFIER', value='Some'),
-#             Token(type='(', value='('),
-#             Token(type='IDENTIFIER', value='value'),
-#             Token(type=')', value=')'),
-#             Token(type=',', value=','),
-#             Token(type='TYPE_IDENTIFIER', value='None'),
-#             Token(type='(', value='('),
-#             Token(type=')', value=')'),
-#             Token(type=']', value=']'),
-#             Token(type='DO', value='do'),
-#             Token(type='IDENTIFIER', value='value'),
-#             Token(type='END', value='end'),
-#             Token(type='[', value='['),
-#             Token(type='TYPE_IDENTIFIER', value='None'),
-#             Token(type='(', value='('),
-#             Token(type=')', value=')'),
-#             Token(type=',', value=','),
-#             Token(type='TYPE_IDENTIFIER', value='Some'),
-#             Token(type='(', value='('),
-#             Token(type='IDENTIFIER', value='value'),
-#             Token(type=')', value=')'),
-#             Token(type=']', value=']'),
-#             Token(type='DO', value='do'),
-#             Token(type='NUMBER', value='3'),
-#             Token(type='END', value='end'),
-#             Token(type='[', value='['),
-#             Token(type=']', value=']'),
-#             Token(type='DO', value='do'),
-#             Token(type='NUMBER', value='4'),
-#             Token(type='END', value='end'),
-#             Token(type='[', value='['),
-#             Token(type='SPREAD', value='...'),
-#             Token(type='IDENTIFIER', value='arr'),
-#             Token(type=']', value=']'),
-#             Token(type='DO', value='do'),
-#             Token(type='NUMBER', value='5'),
-#             Token(type='END', value='end'),
-#             Token(type='END', value='end'),
-#         ])
-#     ])
-# def test_tokenizer(program, expected_tokens, lexer):
-#     tokens = map(Token.from_token, lexer.tokenize(program))
-#     assert [*tokens] == expected_tokens
 
 
 @pytest.mark.parametrize(
@@ -538,7 +454,7 @@ def test_parser(program, ast, parser, lexer):
             "if 2 > 0 then Some(1) elif 2 > 0 then None() else None() end",
             typed.TOption(typed.TNum()),
         ),
-        ("enum AB{A B}\nx:AB=A()", typed.TCon("AB", typed.KStar())),
+        ("enum AB{A B}\nx:AB=A()", typed.TCon("AB", typed.KStar(), ["A", "B"])),
         (
             "enum ABC<X,Y,Z> {A(X)B(Y)C(Z)}\nx:ABC<Num,Num,Num>=A(1)",
             typed.TAp(
@@ -553,6 +469,7 @@ def test_parser(program, ast, parser, lexer):
                                     typed.KFun(typed.KStar(), typed.KStar()),
                                 ),
                             ),
+                            ["A", "B", "C"],
                         ),
                         typed.TNum(),
                     ),
@@ -592,6 +509,7 @@ def test_parser(program, ast, parser, lexer):
                                     typed.KFun(typed.KStar(), typed.KStar()),
                                 ),
                             ),
+                            ["Point2D", "Point3D"],
                         ),
                         typed.TNum(),
                     ),
@@ -603,7 +521,15 @@ def test_parser(program, ast, parser, lexer):
         ("do end", typed.TUnit()),
         (
             "enum StrOrNum{String(Str)\nNumber(Num)}\nx=Number(1)\nx=String('12')",
-            typed.TCon("StrOrNum", typed.KStar()),
+            typed.TCon("StrOrNum", typed.KStar(), ["String", "Number"]),
+        ),
+        (
+            "enum TupleType<A, B>{Tuple(A, B)}\ncase Tuple(Some(1), Some(2)) of Tuple(None(), _) do 2 end Tuple(_, None()) do 3 end Tuple(Some(a), Some(b)) do a + b end end",
+            typed.TNum(),
+        ),
+        (
+            "enum TupleType<A, B>{Tuple(A, B)}\ncase Tuple(Some(1), Some(2)) of Tuple(None(), Some(a)) do a end Tuple(None(), None()) do 3 end Tuple(_, None()) do 3 end Tuple(Some(a), Some(b)) do a + b end end",
+            typed.TNum(),
         ),
         # ("{1,'2'}", typed.TTuple([typed.TNum(), typed.TStr()])),
     ],
@@ -611,7 +537,7 @@ def test_parser(program, ast, parser, lexer):
 def test_infer(program, expected_type, parser, lexer):
     program = parser.parse(lexer.tokenize(program))
 
-    assert type_infer(DEFAULT_CTX, program) == expected_type
+    assert algorithm_j.type_infer(DEFAULT_CTX, program) == expected_type
 
 
 @pytest.mark.parametrize(
@@ -737,7 +663,7 @@ def test_compile_with_snapshot(id, program, expected_output, snapshot, parser, l
     id = id + ".js"
     program = parser.parse(lexer.tokenize(program))
     snapshot.snapshot_dir = "snapshots"
-    snapshot.assert_match(compile(EProgram([*BUILTINS, program])), id)
+    snapshot.assert_match(compile(EProgram([*BUILTINS, *program.body])), id)
     # path: WindowsPath = snapshot.snapshot_dir
     assert check_output(
         ["node", snapshot.snapshot_dir / id]
@@ -745,19 +671,42 @@ def test_compile_with_snapshot(id, program, expected_output, snapshot, parser, l
 
 
 @pytest.mark.parametrize(
-    "program",
+    "program, exception",
     [
-        "x: Str = 134",
-        "do: Str 1 end",
-        "def fun(): Str do 1 end",
-        "if 2 > 0 then: Num 1 else '12' end",
-        "if 2 > 0 then: Num '12' else 1 end",
-        "if 2 > 0 then: Num 1 elif 2 > 0 then '12' else 1 end",
-        "if 1+1 then 1 else 1 end",
-        "if 2 > 0 then: Str 1 else 2 end",
+        ("x: Str = 134", algorithm_j.UnifyException),
+        ("do: Str 1 end", algorithm_j.UnifyException),
+        ("def fun(): Str do 1 end", algorithm_j.UnifyException),
+        ("if 2 > 0 then: Num 1 else '12' end", algorithm_j.UnifyException),
+        ("if 2 > 0 then: Num '12' else 1 end", algorithm_j.UnifyException),
+        (
+            "if 2 > 0 then: Num 1 elif 2 > 0 then '12' else 1 end",
+            algorithm_j.UnifyException,
+        ),
+        ("if 1+1 then 1 else 1 end", algorithm_j.UnifyException),
+        ("if 2 > 0 then: Str 1 else 2 end", algorithm_j.UnifyException),
+        (
+            "enum TupleType<A,B>{Tuple(A,B)}\ncase Tuple(None(), Some(32)) of\nTuple(_, None()) do 5 end\nTuple(Some(a), Some(b)) do\na+b\nend\nend",
+            algorithm_j.NonExhaustiveMatchException,
+        ),
+        (
+            "enum TupleType<A,B>{Tuple(A,B)}\ncase Tuple(None(), Some(32)) of\nTuple(None(), None()) do 5 end\nTuple(Some(a), Some(b)) do\na+b\nend\nend",
+            algorithm_j.NonExhaustiveMatchException,
+        ),
+        (
+            "case Some(None()) of\nSome(None()) do 5 end\nNone() do\n6\nend\nend",
+            algorithm_j.NonExhaustiveMatchException,
+        ),
+        (
+            "case Some(None()) of\nSome(Some(a)) do a end\nNone() do\n6\nend\nend",
+            algorithm_j.NonExhaustiveMatchException,
+        ),
+        (
+            "case Some(None()) of\nSome(Some(a)) do a end\nSome(None()) do\n6\nend\nend",
+            algorithm_j.NonExhaustiveMatchException,
+        ),
     ],
 )
-def test_do_expection(program, parser, lexer):
+def test_do_expection(program, parser, lexer, exception):
     program = parser.parse(lexer.tokenize(program))
-    with pytest.raises(UnifyException):
-        type_infer(DEFAULT_CTX, program)
+    with pytest.raises(exception):
+        algorithm_j.type_infer(DEFAULT_CTX, program)

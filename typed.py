@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
+import typing
 from typing import TypeAlias
 
 
@@ -8,6 +9,7 @@ from typing import TypeAlias
 class TCon:
     id: str
     kind: Kind
+    alts: list[str] = dataclasses.field(default_factory=list)
 
     def __repr__(self):
         return f"{self.id}"
@@ -93,7 +95,7 @@ def TArray(t: Type):
 
 
 def TOptionCon():
-    return TCon("Option", KFun(KStar(), KStar()))
+    return TCon("Option", KFun(KStar(), KStar()), ["Some", "None"])
 
 
 def TOption(t: Type):
@@ -101,7 +103,7 @@ def TOption(t: Type):
 
 
 def TBool():
-    return TCon("Bool", KStar())
+    return TCon("Bool", KStar(), ["True", "False"])
 
 
 def kind(t: Type) -> Kind:
@@ -116,3 +118,8 @@ def kind(t: Type) -> Kind:
                     return k
 
     raise TypeError(f"kind of {t}")
+
+
+def assert_never(value: typing.NoReturn) -> typing.NoReturn:
+    # This also works at runtime as well
+    assert False, f"This code should never be reached, got: {value}"

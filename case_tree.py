@@ -127,8 +127,8 @@ def branching_heuristic(
     return max(
         patterns.keys(),
         key=lambda v: [
-            patterns
-            for patterns, _ in cases
-            if v in patterns  # isinstance(case, terms.EMatchVariant) and
+            len(patterns2)
+            for patterns2, _ in cases
+            if v in patterns2  # isinstance(case, terms.EMatchVariant) and
         ],
     )
