@@ -112,7 +112,20 @@ Zadanie parsera sprowadza się do sprawdzenia czy i jak dane wejściowe mogą zo
 
 
 
-\subsection{Co to typy?}
+\subsection{System typów}
+System typów – system klasyfikacji wyrażeń w zależności od rodzajów wartości, jakie one generują[1]. Każdej obliczonej wartości przypisywany jest pewien typ, który jednoznacznie definiuje, jakie operacje można na niej wykonać. Śledząc przepływ wartości, system typów stara się udowodnić, że w programie występuje poprawne typowanie, tzn. nie dochodzi do sytuacji, w której na wartości określonego typu próbujemy wykonać niedozwoloną operację.
+\subsection{System typów ML} – silny system typów stosowany w językach rodziny ML (Ocaml, Standard ML) oparty na inferencji.
+
+Podstawowy system typów jest następujący: istnieją typy proste, takie jak string, int, bool, unit (typ pusty) itd. Z dowolnych typów można też generować typy złożone – przez krotki (typ1 * typ2, typ1 * typ2 * typ3 itd.), konstruktory typów (typ list, typ tree itd.) i funkcje (typ1 → typ2).
+
+System próbuje nadać typy każdemu wyrażeniu języka, i nie licząc kilku rzadkich przypadków, udaje mu się to całkiem dobrze.
+
+Generalnie system taki wyklucza polimorfizm (nie licząc typów polimorficznych), jednak w Standard ML stworzono specjalne reguły umożliwiające polimorfizm dla wyrażeń arytmetycznych.
+
+System typów ML jest interesujący z teoretycznego punktu widzenia – wiele problemów ma bardzo wysoką złożoność, jednak w praktyce inferencja zachodzi bardzo szybko – typy, które są rzeczywiście używane, są zwykle bardzo proste – rzadko używa się funkcji rzędów wyższych niż trzeci-czwarty, oraz liczby argumentów większej niż kilkanaście.
+
+W rzeczywistych implementacjach dochodzą do tego bardziej złożone problemy typizacji obiektów, modułów itd.
+
 \section{Inferencja typów w teori}
 \subsection{System typów Hindley–Milner}
 \subsection{Algorytm W}
