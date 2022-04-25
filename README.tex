@@ -85,7 +85,7 @@ morestring=[b]"
 \subsection{Analiza leksykalna}
 Analiza leksykalna w informatyce jest to proces rozbijania program źródłowych na jednostki logiczne (zwane leksemami) złożone z jednego lub więcej znaków, które łącznie mają jakieś znaczenie\cite{Hopcroft__Motwani__Ullman__2005}. Przykładami leksemów mogą być słowa kluczowe (np. while), identyfikator lub liczba składająca się z cyfr. Rozdzielaniem programu źródłowego, na leksemy, zajmuje się lekser. 
 
-Token jest strukturą reprezentującą leksem i wprost go kategoryzującą\cite{ Aho__Sethi__Ullman__1986}, co ułatwia późniejszą pracę parserowi. Tokeny kategoryzuje się na komputerowy odpowiednik tego, co lingwiści określiliby mianem części mowy. Biorąc jako przykład poniższy kod w języku C:
+Token jest strukturą reprezentującą leksem i wprost go kategoryzującą\cite{ Aho__Sethi__Ullman__1985}, co ułatwia późniejszą pracę parserowi. Tokeny kategoryzuje się na komputerowy odpowiednik tego, co lingwiści określiliby mianem części mowy. Biorąc jako przykład poniższy kod w języku C:
 \begin{lstlisting}[language=c]
   x = a + b * 2;
 \end{lstlisting}
@@ -96,7 +96,7 @@ analiza leksykalna, zwraca tokeny:
 Dwoma ważnymi przypadkami są znaki białe i komentarze. One również muszą być uwzględnione w gramatyce i przeanalizowane przez lexer, lecz mogą być odrzucone (nie produkować żadnych tokenów) i traktowane jako spełniające mało znaczące zadanie, rozdzielania dwóch tokenów (np. w \lstinline{if x} zamiast \lstinline{ifx}).
 
 \subsection{Parser}
-Analizator składniowy, parser – program dokonujący analizy składniowej danych wejściowych w celu określenia ich struktury gramatycznej w związku z określoną gramatyką formalną. Analizator składniowy umożliwia przetworzenie tekstu czytelnego dla człowieka w strukturę danych przydatną dla oprogramowania komputera. Wynikiem analizy składni, dokonywanej przez parser, najczęściej jest drzewo składniowe nazywane czasami drzewem wyprowadzenia\cite{Aho__Sethi__Ullman__2002}.
+Analizator składniowy, parser – program dokonujący analizy składniowej danych wejściowych w celu określenia ich struktury gramatycznej w związku z określoną gramatyką formalną. Analizator składniowy umożliwia przetworzenie tekstu czytelnego dla człowieka w strukturę danych przydatną dla oprogramowania komputera. Wynikiem analizy składni, dokonywanej przez parser, najczęściej jest drzewo składniowe nazywane czasami drzewem wyprowadzenia\cite{Aho__Sethi__Ullman__1985}.
 
 
 \newpage
@@ -113,8 +113,8 @@ Zadanie parsera sprowadza się do sprawdzenia czy i jak dane wejściowe mogą zo
 
 
 \subsection{System typów}
-System typów – system klasyfikacji wyrażeń w zależności od rodzajów wartości, jakie one generują[1]. Każdej obliczonej wartości przypisywany jest pewien typ, który jednoznacznie definiuje, jakie operacje można na niej wykonać. Śledząc przepływ wartości, system typów stara się udowodnić, że w programie występuje poprawne typowanie, tzn. nie dochodzi do sytuacji, w której na wartości określonego typu próbujemy wykonać niedozwoloną operację.
-\subsection{System typów ML} – silny system typów stosowany w językach rodziny ML (Ocaml, Standard ML) oparty na inferencji.
+System typów jest to system klasyfikacji wyrażeń w zależności od rodzajów wartości, jakie one generują\cite{Pierce__Benjamin__C__2002}. Każdej obliczonej wartości przypisywany jest pewien typ, który jednoznacznie definiuje, jakie operacje można na niej wykonać. Śledząc przepływ wartości, system typów stara się udowodnić, że w programie występuje poprawne typowanie, tzn. nie dochodzi do sytuacji, w której na wartości określonego typu próbujemy wykonać niedozwoloną operację.
+\subsection{System typów ML} System typów ML jest to silny system typów stosowany w językach rodziny ML (Ocaml, Standard ML) oparty na inferencji.
 
 Podstawowy system typów jest następujący: istnieją typy proste, takie jak string, int, bool, unit (typ pusty) itd. Z dowolnych typów można też generować typy złożone – przez krotki (typ1 * typ2, typ1 * typ2 * typ3 itd.), konstruktory typów (typ list, typ tree itd.) i funkcje (typ1 → typ2).
 
@@ -126,6 +126,17 @@ System typów ML jest interesujący z teoretycznego punktu widzenia – wiele pr
 
 W rzeczywistych implementacjach dochodzą do tego bardziej złożone problemy typizacji obiektów, modułów itd.
 
+\subsection{Rekord z wariantami} Rekord z wariantami jest to rodzaj rekordu, posiadającego tę właściwość, że zbiór rekordów posiada wspólny typ, lecz różną postać, określoną aktualną wartością specjalnego pola znacznikowego.
+
+Przykład - Zakładając, że checmy stworzyć drzewo binarne intów. W języku ML, zrobilibyśmy to tworząc nowy typ danych w ten sposób:
+\begin{lstlisting}[language=ML]
+datatype tree = Leaf
+  | Node of (int * tree * tree)
+\end{lstlisting}
+\lstinline{Leaf} i \lstinline{Node} są konstruktorami, które pozwalają nam na stworzenie konretnego drzewa, np.
+\begin{lstlisting}[language=ML]
+  Node(5, Node(1, Leaf, Leaf), Node(3, Leaf, Node(4, Leaf, Leaf)))
+\end{lstlisting}
 \section{Inferencja typów w teori}
 \subsection{System typów Hindley–Milner}
 \subsection{Algorytm W}
@@ -199,20 +210,9 @@ Kolejnym dość ważnym elementem języka jest brak wyrażenia `return', które 
 \section{[Podsumowanie]}
 \section{[spisy -- rysunków, tabel, listingów ipt.]}
 
+\bibliographystyle{plainnat}
+\bibliography{README}
 
-% \cite{texbook}
-% \bibitem{texbook}
-\begin{thebibliography}{9}
-
-\bibitem{Hopcroft__Motwani__Ullman__2005}
-J.E. Hopcroft, R. Motwani, J.D. Ullman: Wprowadzenie do Teorii automatów, języków i obliczń. Warszawa: Wydawnictwo Naukowe PWN, 2005. ISBN 83-01-14502-1.
-\bibitem{Aho__Sethi__Ullman__2002}
-Alfred V. Aho, Ravi Sethi, Jeffrey D. Ullman: Kompilatory. Wydawnictwo Naukowe PWN SA, 2002. ISBN 83-204-2656-1.
-\bibitem{Aho__Sethi__Ullman__1986}
-Aho, A.V., Sethi, R. and Ullman, J.D. (1986) " Compilers: principles, techniques, and tools." Addison-Wesley Longman Publishing Co., Inc. Boston, MA, USA.
-\bibitem{Sikkel_Klaas__1954-1997}
-Sikkel, Klaas, 1954- (1997). Parsing schemata : a framework for specification and analysis of parsing algorithms. Berlin: Springer. ISBN 9783642605413. OCLC 606012644.
-\end{thebibliography}
 
 \end{document}
 
