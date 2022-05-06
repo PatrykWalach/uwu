@@ -3,7 +3,7 @@
 /__pycache__
 /.vscode
 node_modules
-README.*
-!README.pdf
-!README.tex
-!README.bib
+doc.*
+!doc.pdf
+!doc.tex
+!doc.bib

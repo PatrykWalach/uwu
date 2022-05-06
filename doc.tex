@@ -1,8 +1,8 @@
-% !TeX root = README.tex
+% !TeX root = doc.tex
 \documentclass{article}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-
+\usepackage{amsmath}
 \usepackage{listings}
 \usepackage{color} %use color
 \definecolor{mygreen}{rgb}{0,0.6,0}
@@ -83,7 +83,7 @@ morestring=[b]"
 
 \section{Ogólne wprowadzenie}
 \subsection{Analiza leksykalna}
-Analiza leksykalna w informatyce jest to proces rozbijania program źródłowych na jednostki logiczne (zwane leksemami) złożone z jednego lub więcej znaków, które łącznie mają jakieś znaczenie\cite{Hopcroft__Motwani__Ullman__2005}. Przykładami leksemów mogą być słowa kluczowe (np. while), identyfikator lub liczba składająca się z cyfr. Rozdzielaniem programu źródłowego, na leksemy, zajmuje się lekser. 
+Analiza leksykalna w informatyce jest to proces rozbijania program źródłowych na jednostki logiczne (zwane leksemami) złożone z jednego lub więcej znaków, które łącznie mają jakieś znaczenie\cite{Hopcroft__Motwani__Ullman__2005}. Przykładami leksemów mogą być słowa kluczowe (np. while), identyfikator lub liczba składająca się z cyfr. Rozdzielaniem programu źródłowego, na leksemy, zajmuje się lekser.
 
 Token jest strukturą reprezentującą leksem i wprost go kategoryzującą\cite{ Aho__Sethi__Ullman__1985}, co ułatwia późniejszą pracę parserowi. Tokeny kategoryzuje się na komputerowy odpowiednik tego, co lingwiści określiliby mianem części mowy. Biorąc jako przykład poniższy kod w języku C:
 \begin{lstlisting}[language=c]
@@ -107,7 +107,7 @@ Zadanie parsera sprowadza się do sprawdzenia czy i jak dane wejściowe mogą zo
   \item Analiza zstępująca (ang. top-down parsing) to strategia znajdowania powiązań między danymi przez stawianie hipotez dotyczących drzewa rozbioru składniowego i sprawdzanie, czy zależności między danymi są zgodne z tymi hipotezami.
   \item Analiza wstępująca (ang. bottom-up parsing) – ogólna metoda analizy składniowej, w której zaczyna się od słowa wejściowego i próbuje się zredukować je do symbolu startowego. Drzewo wyprowadzenia jest konstruowane od liści do korzenia (stąd nazwa). W każdym momencie w trakcie tego procesu mamy formę zdaniową, która zawiera segment, powstały w ostatnim kroku wyprowadzenia. Segment ten (nazywany uchwytem (ang. handle) jest prawą stroną produkcji i powinien zostać w tym kroku zredukowany do jej lewej strony, w wyniku czego powstanie poprzednia forma zdaniowa z wyprowadzenia. Główna trudność w analizie wstępującej polega właśnie na odpowiednim znajdywaniu uchwytów.
 
-  Analiza wstępująca może przebiegać w określonym kierunku (np. od lewej do prawej), lub w sposób bezkierunkowy, wtedy analizowane jest całe słowo naraz. Jednym z bardziej znanych przedstawicieli metody bezkierunkowej jest algorytm CYK. Do metod kierunkowych zalicza się między innymi parsery shift-reduce czyli LR, LALR, SLR, BC, pierwszeństwa.
+        Analiza wstępująca może przebiegać w określonym kierunku (np. od lewej do prawej), lub w sposób bezkierunkowy, wtedy analizowane jest całe słowo naraz. Jednym z bardziej znanych przedstawicieli metody bezkierunkowej jest algorytm CYK. Do metod kierunkowych zalicza się między innymi parsery shift-reduce czyli LR, LALR, SLR, BC, pierwszeństwa.
 \end{itemize}
 
 
@@ -139,7 +139,38 @@ datatype tree = Leaf
 \end{lstlisting}
 \section{Inferencja typów w teori}
 \subsection{System typów Hindley–Milner}
-\subsection{Algorytm W}
+\newpage
+\subsection{Algorytm J}
+Algorytm W nie ma żadnych side-effectów, i świetnie zajmuje się aplikowanie i komponowaniem substytucji w odpowiedniej kolejności. Te powtórne apikacje substytucji na wyrażeniach mogą znacznie zmniejszyć wydajność algorytmu rekomntrującegom dlatego też, Milner zaprezentował bardziej efektywną impereatywną wariacją W nazwaną algorytmem J w \cite{Milner__1978}. 
+
+Algorytm J jest funkcją, która dla dokonanych do tej pory substytucji $S$, środowiska - zbioru przechowywującego pary identyfikator wraz z typem $\Gamma$ i wyrażnia $e$, zwraca kolejne substytucje $S$, oraz typ wyrażenia $\tau$.
+\begin{equation}
+\begin{split}
+J :& S\times\Gamma\times e \rightarrow S\times\tau \\
+\\
+J(S,\Gamma,x) =& (S,[\beta_i/\alpha_i]\tau') \\
+&\text{where } \Gamma(x) = \bigwedge\alpha_i,...,\alpha_n.\tau' \\
+&\text{and } \beta_i \text{ are fresh} \\
+\\
+J(S,\Gamma,e_1e_2) =& (V,\beta) \\
+&\text{where } \Gamma(S_1,\tau_1) = J(S,\Gamma,e_1) \\
+&\text{and } (S_2,\tau_2)=J(S_1,\Gamma,e_2) \\
+&\text{and } V = unify'(\tau_1,\tau_2\rightarrow\beta,S_2) \\
+&\text{and } \beta \text{ is fresh} \\
+\\
+J(S,\Gamma,\lambda x.e) =& (S_1,\beta\rightarrow\tau) \\
+&\text{where } (S_1,\tau)=J(S,(\Gamma,x:\beta),e) \\
+&\text{and } \beta \text{ is fresh} \\
+\\
+J(S,\Gamma,\text{let }x=e_1\text{ in }e_2) =& (S_2,\tau_w) \\
+&\text{where } (S_1,\tau_1)=J(S,\Gamma,e_1) \\
+&\text{and } (S_2,\tau_2)=J(S_1,(\Gamma,x:(\bigwedge\alpha_1,...,\alpha_n.\tau_1)),e_2) \\
+&\text{and } \{\alpha_1,...,\alpha_n\}=ftv(S_2\tau_1)\backslash ftv(S_2\Gamma) \\
+\end{split}
+\end{equation}
+Funkcja pomocnicza $unify'(\tau,\tau',S)$ rozszerza zbiór substytucji S o substytucje wynikające z unifikacji $\tau$ z $\tau'$ pod kontekstem $S$.
+
+
 \section{Rescript/ReasonML jako języki realizujące podobne zadania}
 \newpage
 \section{Założenia i priorytety opracowanej aplikacji}
@@ -152,17 +183,17 @@ Język poza zmiennymi, potrzebuje możliwości wykonywania operacji na danych, d
 Prymitywne typy danych:
 \begin{itemize}
   \item string
-  \lstinputlisting{examples/string.uwu}
-  Do konkatenacji stringów służy operator \lstinline!++!
+        \lstinputlisting{examples/string.uwu}
+        Do konkatenacji stringów służy operator \lstinline!++!
   \item Wartość logiczna ma typ \lstinline!Bool! i wartość \lstinline!True! lub \lstinline!False!.
-  Powiązane operacje:
-    \begin{itemize}
-      \item \lstinline!<>!, równość pomiędzy dwiema liczbami
-      \item \lstinline!>!, \lstinline!<!
-      \item \lstinline|!=| równość
-    \end{itemize}
-    \item liczby
-    Powiązane operacje: \lstinline!+!, \lstinline!-!, \lstinline!*!, \lstinline!/!, \lstinline!*!, \lstinline!%!, \lstinline!//!
+        Powiązane operacje:
+        \begin{itemize}
+          \item \lstinline!<>!, równość pomiędzy dwiema liczbami
+          \item \lstinline!>!, \lstinline!<!
+          \item \lstinline|!=| równość
+        \end{itemize}
+  \item liczby
+        Powiązane operacje: \lstinline!+!, \lstinline!-!, \lstinline!*!, \lstinline!/!, \lstinline!*!, \lstinline!%!, \lstinline!//!
 \end{itemize}
 
 % typing.Literal["|", "!=", "=="]
@@ -189,9 +220,9 @@ Kolejnym dość ważnym elementem języka jest brak wyrażenia `return', które 
 
 \begin{itemize}
   \item Przykład
-  % \begin{minted}{pygments.py:UwUPygments -x}
-    \lstinputlisting[firstline=15]{examples/return.uwu}
-    \lstinputlisting[firstline=15]{examples/return.uwu.js}
+        % \begin{minted}{pygments.py:UwUPygments -x}
+        \lstinputlisting[firstline=15]{examples/return.uwu}
+        \lstinputlisting[firstline=15]{examples/return.uwu.js}
 \end{itemize}
 \subsection{Opis formaly składni języka}
 %  notacja wirta
@@ -211,7 +242,7 @@ Kolejnym dość ważnym elementem języka jest brak wyrażenia `return', które 
 \section{[spisy -- rysunków, tabel, listingów ipt.]}
 
 \bibliographystyle{plainnat}
-\bibliography{README}
+\bibliography{doc}
 
 
 \end{document}
