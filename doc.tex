@@ -105,8 +105,7 @@ Zadanie parsera sprowadza się do sprawdzenia czy i jak dane wejściowe mogą zo
 
 \begin{itemize}
   \item Analiza zstępująca (ang. top-down parsing) to strategia znajdowania powiązań między danymi przez stawianie hipotez dotyczących drzewa rozbioru składniowego i sprawdzanie, czy zależności między danymi są zgodne z tymi hipotezami.
-  \item Analiza wstępująca (ang. bottom-up parsing) – ogólna metoda analizy składniowej, w której zaczyna się od słowa wejściowego i próbuje się zredukować je do symbolu startowego. Drzewo wyprowadzenia jest konstruowane od liści do korzenia (stąd nazwa). W każdym momencie w trakcie tego procesu mamy formę zdaniową, która zawiera segment, powstały w ostatnim kroku wyprowadzenia. Segment ten (nazywany uchwytem (ang. handle) jest prawą stroną produkcji i powinien zostać w tym kroku zredukowany do jej lewej strony, w wyniku czego powstanie poprzednia forma zdaniowa z wyprowadzenia. Główna trudność w analizie wstępującej polega właśnie na odpowiednim znajdywaniu uchwytów.
-
+  \item Analiza wstępująca (ang. bottom-up parsing) – ogólna metoda analizy składniowej, w której zaczyna się od słowa wejściowego i próbuje się zredukować je do symbolu startowego. Drzewo wyprowadzenia jest konstruowane od liści do korzenia (stąd nazwa). W każdym momencie w trakcie tego procesu mamy formę zdaniową, która zawiera segment, powstały w ostatnim kroku wyprowadzenia. Segment ten nazywany uchwytem (ang. handle) jest prawą stroną produkcji i powinien zostać w tym kroku zredukowany do jej lewej strony, w wyniku czego powstanie poprzednia forma zdaniowa z wyprowadzenia. Główna trudność w analizie wstępującej polega właśnie na odpowiednim znajdywaniu uchwytów.
         Analiza wstępująca może przebiegać w określonym kierunku (np. od lewej do prawej), lub w sposób bezkierunkowy, wtedy analizowane jest całe słowo naraz. Jednym z bardziej znanych przedstawicieli metody bezkierunkowej jest algorytm CYK. Do metod kierunkowych zalicza się między innymi parsery shift-reduce czyli LR, LALR, SLR, BC, pierwszeństwa.
 \end{itemize}
 
@@ -138,35 +137,78 @@ datatype tree = Leaf
   Node(5, Node(1, Leaf, Leaf), Node(3, Leaf, Node(4, Leaf, Leaf)))
 \end{lstlisting}
 \section{Inferencja typów w teori}
+\subsection{Problem inferencji typów}
+Język ML przyjmuje wiele form, najpopularniejszymi wariantami są Standard ML (SML), OCaml,
+i F\#. Na potrzeby będziemy wzorować się na \cite{Damas__Milner__1982}, i posługiwać się ML-the-calculus, drastycznie uproszczoną wersją języka co pozwoli na dojście do sedna w problemie rekonstrukcji typów.
+
+Termy w języku ML-the-calculus są następujące:
+\begin{equation}
+  \begin{split}
+    e\ ::&=x\\
+    &|\ \ \ c\qquad(\text{stałe})\\
+    &|\ \ \ \lambda x.e\\
+    &|\ \ \ e\ e\\
+    &|\ \ \ \text{let }x=e\text{ in }e
+  \end{split}
+\end{equation}
+Typy które będziemy przypisywali do termów są następujące:
+\begin{equation}
+  \begin{split}
+    \tau\ ::&=\alpha\qquad(\text{typ zmienny})\\
+    &|\ \ \ B\qquad(\text{typ podstawowy})\\
+    &|\ \ \ \tau\rightarrow\tau
+  \end{split}
+\end{equation}
+\subsection{Udowadnianie typów dla ML-the-calculus}
+
+\begin{equation}
+  \begin{split}
+    \frac{}{\Gamma\vdash c:B} \\
+    \\
+    \frac{\Gamma,x:\tau'\vdash e:\tau}{\Gamma\vdash\lambda x.e:\tau'\rightarrow\tau} \\
+    \\
+    \frac{\Gamma\vdash e_1:\tau_2\rightarrow\tau\qquad\Gamma\vdash e_2:\tau_2}{\Gamma\vdash e_1\ e_2:\tau} \\
+    \\
+    \frac{\Gamma(x)=\bigwedge\alpha_1,...,\alpha_n.\tau'\qquad\tau=[\beta_i/\alpha_i]\tau'}{\Gamma\vdash x:\tau}(\beta_1\text{ fresh}) \\
+    \\
+    \frac{\Gamma\vdash e_1:\tau'\qquad\Gamma,x:(\bigwedge\alpha_1,...,\alpha_n.\tau')\vdash e_2:\tau}{\Gamma\vdash \text{let }x=e_1\text{ in }e_2:\tau:B}(\{\alpha_1,...,\alpha_n\}=ftv(\tau')\backslash ftv(\Gamma)) \\
+  \end{split}
+\end{equation}
+Powyższe dowody nie mogą jednak być w prosty sposób przedstawione jako algorytm. Fakt, że typ $\tau'$ jest dowolnie wybierany w dowodzie dla $\lambda$ prowadzi do nieskończonej ilość dowodów, nawet dla prostego wyrażenia $\lambda x.x$.
+\subsection{Infernencja typów bazująca na ograniczeniach}
+Algorytmy infernencji typów bazujące na ograniczeniach generują dużą liczbę zmiennych typów i zbiór ograniczeń dla tych zmiennych. W drugim kroku algorytmu dla każdej zmiennej, szuka typu, który spełnia wszystkie ograniczenia.
 \subsection{System typów Hindley–Milner}
+Algorytm inferencji typów przedstwiony w \cite{Milner__1978}, oraz innych wcześniejszych publikacjach, opiera się na generowaniu ograniczeń i rozwiązywaniu ich w trakcie wykonywania prostego rekursywnego przejścia przez termy.
+
+Warto zauważyć, że w ten sposób: dostajemy, prostą strukturalnie rekursywną definicjię rekonstrukcji typów, ale tracimy modularność algorytmu. Rozszerzenie takiego algorytmu o dodatkowe funkcjie jest o wiele trudniejsze, niż algorytmu, który oddziela kroki generowania ograniczeń i ich rozwiązywania.
 \newpage
 \subsection{Algorytm J}
-Algorytm W nie ma żadnych side-effectów, i świetnie zajmuje się aplikowanie i komponowaniem substytucji w odpowiedniej kolejności. Te powtórne apikacje substytucji na wyrażeniach mogą znacznie zmniejszyć wydajność algorytmu rekomntrującegom dlatego też, Milner zaprezentował bardziej efektywną impereatywną wariacją W nazwaną algorytmem J w \cite{Milner__1978}. 
+Algorytm W nie ma żadnych side-effectów, i świetnie zajmuje się aplikowanie i komponowaniem substytucji w odpowiedniej kolejności. Częste apikacje substytucji na wyrażeniach mogą znacznie zmniejszyć wydajność algorytmu rekonstruującegom dlatego też, Milner zaprezentował bardziej efektywną impereatywną wariacją W nazwaną algorytmem J w \cite{Milner__1978}.
 
-Algorytm J jest funkcją, która dla dokonanych do tej pory substytucji $S$, środowiska - zbioru przechowywującego pary identyfikator wraz z typem $\Gamma$ i wyrażnia $e$, zwraca kolejne substytucje $S$, oraz typ wyrażenia $\tau$.
+Algorytm J jest funkcją, która dla dokonanych do tej pory substytucji $S$, środowiska $\Gamma$ - zbioru przechowywującego pary identyfikator wraz z typem, i wyrażnia $e$, zwraca kolejne substytucje $S$, oraz typ wyrażenia $\tau$.
 \begin{equation}
-\begin{split}
-J :& S\times\Gamma\times e \rightarrow S\times\tau \\
-\\
-J(S,\Gamma,x) =& (S,[\beta_i/\alpha_i]\tau') \\
-&\text{where } \Gamma(x) = \bigwedge\alpha_i,...,\alpha_n.\tau' \\
-&\text{and } \beta_i \text{ are fresh} \\
-\\
-J(S,\Gamma,e_1e_2) =& (V,\beta) \\
-&\text{where } \Gamma(S_1,\tau_1) = J(S,\Gamma,e_1) \\
-&\text{and } (S_2,\tau_2)=J(S_1,\Gamma,e_2) \\
-&\text{and } V = unify'(\tau_1,\tau_2\rightarrow\beta,S_2) \\
-&\text{and } \beta \text{ is fresh} \\
-\\
-J(S,\Gamma,\lambda x.e) =& (S_1,\beta\rightarrow\tau) \\
-&\text{where } (S_1,\tau)=J(S,(\Gamma,x:\beta),e) \\
-&\text{and } \beta \text{ is fresh} \\
-\\
-J(S,\Gamma,\text{let }x=e_1\text{ in }e_2) =& (S_2,\tau_w) \\
-&\text{where } (S_1,\tau_1)=J(S,\Gamma,e_1) \\
-&\text{and } (S_2,\tau_2)=J(S_1,(\Gamma,x:(\bigwedge\alpha_1,...,\alpha_n.\tau_1)),e_2) \\
-&\text{and } \{\alpha_1,...,\alpha_n\}=ftv(S_2\tau_1)\backslash ftv(S_2\Gamma) \\
-\end{split}
+  \begin{split}
+    J :& S\times\Gamma\times e \rightarrow S\times\tau \\
+    \\
+    J(S,\Gamma,x) =& (S,[\beta_i/\alpha_i]\tau') \\
+    &\text{where } \Gamma(x) = \bigwedge\alpha_i,...,\alpha_n.\tau' \\
+    &\text{and } \beta_i \text{ are fresh} \\
+    \\
+    J(S,\Gamma,e_1\ e_2) =& (V,\beta) \\
+    &\text{where } \Gamma(S_1,\tau_1) = J(S,\Gamma,e_1) \\
+    &\text{and } (S_2,\tau_2)=J(S_1,\Gamma,e_2) \\
+    &\text{and } V = unify'(\tau_1,\tau_2\rightarrow\beta,S_2) \\
+    &\text{and } \beta \text{ is fresh} \\
+    \\
+    J(S,\Gamma,\lambda x.e) =& (S_1,\beta\rightarrow\tau) \\
+    &\text{where } (S_1,\tau)=J(S,(\Gamma,x:\beta),e) \\
+    &\text{and } \beta \text{ is fresh} \\
+    \\
+    J(S,\Gamma,\text{let }x=e_1\text{ in }e_2) =& (S_2,\tau_w) \\
+    &\text{where } (S_1,\tau_1)=J(S,\Gamma,e_1) \\
+    &\text{and } (S_2,\tau_2)=J(S_1,(\Gamma,x:(\bigwedge\alpha_1,...,\alpha_n.\tau_1)),e_2) \\
+    &\text{and } \{\alpha_1,...,\alpha_n\}=ftv(S_2\tau_1)\backslash ftv(S_2\Gamma) \\
+  \end{split}
 \end{equation}
 Funkcja pomocnicza $unify'(\tau,\tau',S)$ rozszerza zbiór substytucji S o substytucje wynikające z unifikacji $\tau$ z $\tau'$ pod kontekstem $S$.
 
@@ -228,12 +270,41 @@ Kolejnym dość ważnym elementem języka jest brak wyrażenia `return', które 
 %  notacja wirta
 \section{Narzędzia}
 \subsection{Język python}
+Do implementacji programu postanowiliśmy wykorzystać język python w wersji 3.10, ze względu na jego dynamiczność.
+W tej wersji języka pojawił się również pattern-matching, który znacząco ułatwia pracę z ast.
 \subsection{Parsowanie i tokenizowanie przy użyciu biblioteki sly}
+Biblioteka sly, jest pythonową implementacją narzędzi lex i yacc, wykorzystywanych do tworzenia parserów i kompilatorów.
 \subsection{Środowisko nodejs do uruchomienia skompilowanego kodu}
 \section{Implementacja}
 \subsection{lexer}
 \subsection{parser}
+% \lstinputlisting[firstline=111]{parser.py}r
 \subsection{inferencja typów}
+Zmienny typ reprezentuję jako unikalną liczbę
+\lstinputlisting[firstline=28, lastline=34]{algorithm_j.py}
+Substytucje to pary zmiennych i typów
+\lstinputlisting[firstline=25, lastline=25]{algorithm_j.py}
+Każda zmienna w programie reprezentowana jest przez Scheme zawierający listę generycznych typów
+\lstinputlisting[firstline=26, lastline=26]{algorithm_j.py}
+Context to mapa identyfikatorów i schem
+\lstinputlisting[firstline=12, lastline=22]{algorithm_j.py}
+Tworzymy funkcję, aplikującą substytucje na typie
+\lstinputlisting[firstline=37, lastline=46]{algorithm_j.py}
+Tworzymy funkcję, unifikującą dwa typy
+\lstinputlisting[firstline=95, lastline=112]{algorithm_j.py}
+wraz z funkcją aplikującą substytucje na zmiennym typie
+\lstinputlisting[firstline=115, lastline=124]{algorithm_j.py}
+Inferencja termóm dla literałów jest trywialna
+\lstinputlisting[firstline=164, lastline=171]{algorithm_j.py}
+W przypadku identyfikatorów, musimy zastąpić ich generyczne typy nowymi zmiennymi typami
+\lstinputlisting[firstline=172, lastline=173]{algorithm_j.py}
+W przypadku bloku wyrażeń inferujemy typ każdego z nich i zwracamy ostatni z nich
+\lstinputlisting[firstline=185, lastline=192]{algorithm_j.py}
+Binarny pperator konkatenacji list, sprawdzamy czy obie listy są tego samego typu
+\lstinputlisting[firstline=257, lastline=263]{algorithm_j.py}
+Wywołując funkcję aplikujemy argumenty na nowy zmiennym typie po czym unifikujemy rezultat z typem wywoływanego wyrażenia
+\lstinputlisting[firstline=323, lastline=335]{algorithm_j.py}
+
 \subsection{kompilacja}
 \section{Opis działania}
 \subsection{Co działa}
