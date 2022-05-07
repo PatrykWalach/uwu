@@ -38,7 +38,7 @@ class UwuLexer:
         for token in lexer.tokenize(text):
             match token.type:
                 case "COMMENT" | "WHITESPACE":
-                    pass
+                    continue
             yield token
 
 
