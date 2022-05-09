@@ -14,10 +14,11 @@ from functools import partial, reduce, wraps
 from itertools import product
 from typing import Any, Callable, Generic, Protocol, TypeAlias, TypeVar, Union, overload
 
-from sly import Lexer, Parser
+from sly import Parser
 
 import terms
 import typed
+import uwu
 from algorithm_j import Context, Scheme, fresh_ty_var, type_infer
 
 
@@ -29,77 +30,16 @@ A = TypeVar("A")
 R = TypeVar("R")
 
 
-class UwuLexer(Lexer):
-    tokens = {
-        NUMBER,
-        STRING,
-        IDENTIFIER,
-        DEF,
-        DO,
-        END,
-        IF,
-        ELSE,
-        CASE,
-        OF,
-        CONCAT,
-        ELIF,
-        INT_DIV,
-        ENUM,
-        THEN,
-        TYPE_IDENTIFIER,
-        EXTERNAL,
-        NOT_EQUAL,
-        EQUAL,
-        NEWLINE,
-    }
-    literals = {
-        "=",
-        ".",
-        "[",
-        "]",
-        ",",
-        "{",
-        "}",
-        "(",
-        ")",
-        ":",
-        "+",
-        "-",
-        ">",
-        "<",
-        "*",
-        "/",
-        "|",
-        "%",
-    }
-    NOT_EQUAL = r"!="
-    EQUAL = r"=="
-    STRING = r"'[^']*'"
-    NUMBER = r"\d+"
-    CONCAT = r"\+{2}"
-    INT_DIV = r"/{2}"
-    TYPE_IDENTIFIER = r"[A-Z\d][\w\d]*"
-    IDENTIFIER = r"[a-z_][\w\d]*"
-    IDENTIFIER["def"] = DEF
-    IDENTIFIER["do"] = DO
-    IDENTIFIER["end"] = END
-    IDENTIFIER["if"] = IF
-    IDENTIFIER["else"] = ELSE
-    IDENTIFIER["elif"] = ELIF
-    IDENTIFIER["case"] = CASE
-    IDENTIFIER["enum"] = ENUM
-    IDENTIFIER["then"] = THEN
+class UwuLexer:
+    tokens = uwu.UwuLexerFull.tokens
 
-    IDENTIFIER["of"] = OF
-    EXTERNAL = r"`[^`]*`"
-
-    ignore_comment = r"\#.*"
-    ignore = " \t"
-
-    @_(r"\n([\s\t\n]|\#.*)*")
-    def NEWLINE(self, t):
-        self.lineno += t.value.count("\n")
-        return t
+    def tokenize(self, text: str):
+        lexer = uwu.UwuLexerFull()
+        for token in lexer.tokenize(text):
+            match token.type:
+                case "COMMENT" | "WHITESPACE":
+                    continue
+            yield token
 
 
 def concat(v: A | None, l1: list[A] | None) -> list[A]:

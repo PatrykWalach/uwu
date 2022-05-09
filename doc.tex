@@ -3,73 +3,9 @@
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{amsmath}
-\usepackage{listings}
-\usepackage{color} %use color
-\definecolor{mygreen}{rgb}{0,0.6,0}
-\definecolor{mygray}{rgb}{0.5,0.5,0.5}
-\definecolor{mymauve}{rgb}{0.58,0,0.82}
- 
-%Customize a bit the look
-\lstset{ %
-backgroundcolor=\color{white}, % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
-basicstyle=\footnotesize, % the size of the fonts that are used for the code
-breakatwhitespace=false, % sets if automatic breaks should only happen at whitespace
-breaklines=true, % sets automatic line breaking
-captionpos=b, % sets the caption-position to bottom
-commentstyle=\color{mygreen}, % comment style
-deletekeywords={...}, % if you want to delete keywords from the given language
-escapeinside={\%*}{*)}, % if you want to add LaTeX within your code
-extendedchars=true, % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
-frame=single, % adds a frame around the code
-keepspaces=true, % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
-keywordstyle=\color{blue}, % keyword style
-% language=Octave, % the language of the code
-morekeywords={*,...}, % if you want to add more keywords to the set
-numbers=left, % where to put the line-numbers; possible values are (none, left, right)
-numbersep=5pt, % how far the line-numbers are from the code
-numberstyle=\tiny\color{mygray}, % the style that is used for the line-numbers
-rulecolor=\color{black}, % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
-showspaces=false, % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
-showstringspaces=false, % underline spaces within strings only
-showtabs=false, % show tabs within strings adding particular underscores
-stepnumber=1, % the step between two line-numbers. If it's 1, each line will be numbered
-stringstyle=\color{mymauve}, % string literal style
-tabsize=2, % sets default tabsize to 2 spaces
-title=\lstname % show the filename of files included with \lstinputlisting; also try caption instead of title
-}
-%END of listing package%
- 
-\definecolor{darkgray}{rgb}{.4,.4,.4}
-\definecolor{purple}{rgb}{0.65, 0.12, 0.82}
-\lstdefinelanguage{JavaScript}{
-keywords={typeof, new, true, false, catch, function, return, null, catch, switch, var, if, in, while, do, else, case, break},
-keywordstyle=\color{blue}\bfseries,
-ndkeywords={class, export, boolean, throw, implements, import, this},
-ndkeywordstyle=\color{darkgray}\bfseries,
-identifierstyle=\color{black},
-sensitive=false,
-comment=[l]{//},
-morecomment=[s]{/*}{*/},
-commentstyle=\color{purple}\ttfamily,
-stringstyle=\color{red}\ttfamily,
-morestring=[b]',
-morestring=[b]"
-}
-\lstset{
-  language=JavaScript,
-  extendedchars=true,
-  basicstyle=\footnotesize\ttfamily,
-  showstringspaces=false,
-  showspaces=false,
-  numbers=left,
-  numberstyle=\footnotesize,
-  numbersep=9pt,
-  tabsize=2,
-  breaklines=true,
-  showtabs=false,
-  captionpos=b
-  }
+\usepackage{minted}[cache=False]
 
+\setminted{linenos=true}
 \title{Tytuł}
 \author{Patryk Wałach}
 \date{January 2022}
@@ -86,14 +22,14 @@ morestring=[b]"
 Analiza leksykalna w informatyce jest to proces rozbijania program źródłowych na jednostki logiczne (zwane leksemami) złożone z jednego lub więcej znaków, które łącznie mają jakieś znaczenie\cite{Hopcroft__Motwani__Ullman__2005}. Przykładami leksemów mogą być słowa kluczowe (np. while), identyfikator lub liczba składająca się z cyfr. Rozdzielaniem programu źródłowego, na leksemy, zajmuje się lekser.
 
 Token jest strukturą reprezentującą leksem i wprost go kategoryzującą\cite{ Aho__Sethi__Ullman__1985}, co ułatwia późniejszą pracę parserowi. Tokeny kategoryzuje się na komputerowy odpowiednik tego, co lingwiści określiliby mianem części mowy. Biorąc jako przykład poniższy kod w języku C:
-\begin{lstlisting}[language=c]
+\begin{minted}{c}
   x = a + b * 2;
-\end{lstlisting}
+\end{minted}
 analiza leksykalna, zwraca tokeny:
-\begin{lstlisting}
+\begin{minted}{python}
   [(identifier, x), (operator, =), (identifier, a), (operator, +), (identifier, b), (operator, *), (literal, 2), (separator, ;)]
-\end{lstlisting}
-Dwoma ważnymi przypadkami są znaki białe i komentarze. One również muszą być uwzględnione w gramatyce i przeanalizowane przez lexer, lecz mogą być odrzucone (nie produkować żadnych tokenów) i traktowane jako spełniające mało znaczące zadanie, rozdzielania dwóch tokenów (np. w \lstinline{if x} zamiast \lstinline{ifx}).
+\end{minted}
+Dwoma ważnymi przypadkami są znaki białe i komentarze. One również muszą być uwzględnione w gramatyce i przeanalizowane przez lexer, lecz mogą być odrzucone (nie produkować żadnych tokenów) i traktowane jako spełniające mało znaczące zadanie, rozdzielania dwóch tokenów (np. w \mintinline{uwu.py -x}{if x} zamiast \mintinline{uwu.py -x}{ifx}).
 
 \subsection{Parser}
 Analizator składniowy, parser – program dokonujący analizy składniowej danych wejściowych w celu określenia ich struktury gramatycznej w związku z określoną gramatyką formalną. Analizator składniowy umożliwia przetworzenie tekstu czytelnego dla człowieka w strukturę danych przydatną dla oprogramowania komputera. Wynikiem analizy składni, dokonywanej przez parser, najczęściej jest drzewo składniowe nazywane czasami drzewem wyprowadzenia\cite{Aho__Sethi__Ullman__1985}.
@@ -128,14 +64,14 @@ W rzeczywistych implementacjach dochodzą do tego bardziej złożone problemy ty
 \subsection{Rekord z wariantami} Rekord z wariantami jest to rodzaj rekordu, posiadającego tę właściwość, że zbiór rekordów posiada wspólny typ, lecz różną postać, określoną aktualną wartością specjalnego pola znacznikowego.
 
 Przykład - Zakładając, że checmy stworzyć drzewo binarne intów. W języku ML, zrobilibyśmy to tworząc nowy typ danych w ten sposób:
-\begin{lstlisting}[language=ML]
+\begin{minted}{ocaml}
 datatype tree = Leaf
   | Node of (int * tree * tree)
-\end{lstlisting}
-\lstinline{Leaf} i \lstinline{Node} są konstruktorami, które pozwalają nam na stworzenie konretnego drzewa, np.
-\begin{lstlisting}[language=ML]
+\end{minted}
+\mintinline{uwu.py -x}{Leaf} i \mintinline{uwu.py -x}{Node} są konstruktorami, które pozwalają nam na stworzenie konretnego drzewa, np.
+\begin{minted}{ocaml}
   Node(5, Node(1, Leaf, Leaf), Node(3, Leaf, Node(4, Leaf, Leaf)))
-\end{lstlisting}
+\end{minted}
 \section{Inferencja typów w teori}
 \subsection{Problem inferencji typów}
 Język ML przyjmuje wiele form, najpopularniejszymi wariantami są Standard ML (SML), OCaml,
@@ -225,17 +161,17 @@ Język poza zmiennymi, potrzebuje możliwości wykonywania operacji na danych, d
 Prymitywne typy danych:
 \begin{itemize}
   \item string
-        \lstinputlisting{examples/string.uwu}
-        Do konkatenacji stringów służy operator \lstinline!++!
-  \item Wartość logiczna ma typ \lstinline!Bool! i wartość \lstinline!True! lub \lstinline!False!.
+        \inputminted{uwu.py -x}{examples/string.uwu}
+        % Do konkatenacji stringów służy operator \mintinline{uwu.py -x}{++}
+  \item Wartość logiczna ma typ \mintinline{uwu.py -x}{Bool} i wartość \mintinline{uwu.py -x}{True} lub \mintinline{uwu.py -x}{False}.
         Powiązane operacje:
         \begin{itemize}
-          \item \lstinline!<>!, równość pomiędzy dwiema liczbami
-          \item \lstinline!>!, \lstinline!<!
-          \item \lstinline|!=| równość
+          \item \mintinline{uwu.py -x}{<>}, równość pomiędzy dwiema liczbami
+          \item \mintinline{uwu.py -x}{>}, \mintinline{uwu.py -x}{<}
+          \item \mintinline{uwu.py -x}{!=} równość
         \end{itemize}
   \item liczby
-        Powiązane operacje: \lstinline!+!, \lstinline!-!, \lstinline!*!, \lstinline!/!, \lstinline!*!, \lstinline!%!, \lstinline!//!
+        % Powiązane operacje: \mintinline{uwu.py -x}{+}, \mintinline{uwu.py -x}{-}, \mintinline{uwu.py -x}{*}, \mintinline{uwu.py -x}{/}, \mintinline{uwu.py -x}{*}, \mintinline{uwu.py -x}{\%}, \mintinline{uwu.py -x}{//}
 \end{itemize}
 
 % typing.Literal["|", "!=", "=="]
@@ -243,8 +179,8 @@ Prymitywne typy danych:
 \newpage
 Chciałem również by funkcje wieloargumentowe kompilowane były jako funkcje jednoargumentowe zwracające kolejne funkcje, co pozwala na wywoływanie funkcji bez wszystkich argumentów w celu zwrócenia funkcji przyjmującej resztę argumentów tzw. currying.
 
-\lstinputlisting[firstline=15]{examples/currying.uwu}
-\lstinputlisting[firstline=15]{examples/currying.uwu.js}
+% \inputminted[firstline=15]{uwu.py -x}{examples/currying.uwu}
+\inputminted[firstline=15]{javascript}{examples/currying.uwu.js}
 
 
 Jednym z ważniejszych elemenów każdego języka jest możliwość wykonywania różnego zbioru instrukcji, warunkowo. W tym celu planowałem zaimplementowanie instrukcji `if', oraz `case'. Instrukcja `case' wykonywać ma dopasowanie do wzorca (tzw. pattern-matching), wykonywać, odpowiedni zbiór instrukcji zależnie od wprowadzonych danych. Kompilator, powinien ostrzegać, jeżeli ścieżka dla jednego z typów danych nie została zaimplementowana.
@@ -252,19 +188,19 @@ Jednym z ważniejszych elemenów każdego języka jest możliwość wykonywania 
 \begin{itemize}
   \newpage
   \item Przykład - funkcja łącząca dwie posortowane tablice
-        \lstinputlisting[firstline=25]{examples/merge.uwu}
-        \lstinputlisting[firstline=20]{examples/merge.uwu.js}
+        \inputminted[firstline=25]{uwu.py -x}{examples/merge.uwu}
+        \inputminted[firstline=20]{javascript}{examples/merge.uwu.js}
 \end{itemize}
 
 \newpage
 Kolejnym dość ważnym elementem języka jest brak wyrażenia `return', które jest wykorzystywane do zwrócenia wartości z funkcji. Zamiast tego każdy bloku instrukcji powinien zwracać ostatnie wyrażenie. Pozwoli to na łatwiejsze inicjowanie zmiennych, w przypadku gdy inicializacja wymaga więcej niż jedenej linii kodu.
 
 
+
 \begin{itemize}
   \item Przykład
-        % \begin{minted}{pygments.py:UwUPygments -x}
-        \lstinputlisting[firstline=15]{examples/return.uwu}
-        \lstinputlisting[firstline=15]{examples/return.uwu.js}
+        % \inputminted[firstline=15]{uwu.py -x}{examples/return.uwu}
+        \inputminted[firstline=15]{javascript}{examples/return.uwu.js}
 \end{itemize}
 \subsection{Opis formaly składni języka}
 %  notacja wirta
@@ -278,32 +214,32 @@ Biblioteka sly, jest pythonową implementacją narzędzi lex i yacc, wykorzystyw
 \section{Implementacja}
 \subsection{lexer}
 \subsection{parser}
-% \lstinputlisting[firstline=111]{parser.py}r
+% \inputminted[firstline=111]{python}{parser.py}
 \subsection{inferencja typów}
 Zmienny typ reprezentuję jako unikalną liczbę
-\lstinputlisting[firstline=28, lastline=34]{algorithm_j.py}
+\inputminted[firstline=28, lastline=34]{python}{algorithm_j.py}
 Substytucje to pary zmiennych i typów
-\lstinputlisting[firstline=25, lastline=25]{algorithm_j.py}
+\inputminted[firstline=25, lastline=25]{python}{algorithm_j.py}
 Każda zmienna w programie reprezentowana jest przez Scheme zawierający listę generycznych typów
-\lstinputlisting[firstline=26, lastline=26]{algorithm_j.py}
+\inputminted[firstline=26, lastline=26]{python}{algorithm_j.py}
 Context to mapa identyfikatorów i schem
-\lstinputlisting[firstline=12, lastline=22]{algorithm_j.py}
+\inputminted[firstline=12, lastline=22]{python}{algorithm_j.py}
 Tworzymy funkcję, aplikującą substytucje na typie
-\lstinputlisting[firstline=37, lastline=46]{algorithm_j.py}
+\inputminted[firstline=37, lastline=46]{python}{algorithm_j.py}
 Tworzymy funkcję, unifikującą dwa typy
-\lstinputlisting[firstline=95, lastline=112]{algorithm_j.py}
+\inputminted[firstline=95, lastline=112]{python}{algorithm_j.py}
 wraz z funkcją aplikującą substytucje na zmiennym typie
-\lstinputlisting[firstline=115, lastline=124]{algorithm_j.py}
+\inputminted[firstline=115, lastline=124]{python}{algorithm_j.py}
 Inferencja termóm dla literałów jest trywialna
-\lstinputlisting[firstline=164, lastline=171]{algorithm_j.py}
+\inputminted[firstline=164, lastline=171]{python}{algorithm_j.py}
 W przypadku identyfikatorów, musimy zastąpić ich generyczne typy nowymi zmiennymi typami
-\lstinputlisting[firstline=172, lastline=173]{algorithm_j.py}
+\inputminted[firstline=172, lastline=173]{python}{algorithm_j.py}
 W przypadku bloku wyrażeń inferujemy typ każdego z nich i zwracamy ostatni z nich
-\lstinputlisting[firstline=185, lastline=192]{algorithm_j.py}
+\inputminted[firstline=185, lastline=192]{python}{algorithm_j.py}
 Binarny pperator konkatenacji list, sprawdzamy czy obie listy są tego samego typu
-\lstinputlisting[firstline=257, lastline=263]{algorithm_j.py}
+\inputminted[firstline=257, lastline=263]{python}{algorithm_j.py}
 Wywołując funkcję aplikujemy argumenty na nowy zmiennym typie po czym unifikujemy rezultat z typem wywoływanego wyrażenia
-\lstinputlisting[firstline=323, lastline=335]{algorithm_j.py}
+\inputminted[firstline=323, lastline=335]{python}{algorithm_j.py}
 
 \subsection{kompilacja}
 \section{Opis działania}
