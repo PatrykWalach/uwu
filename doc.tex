@@ -1,0 +1,257 @@
+% !TeX root = doc.tex
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{minted}[cache=False]
+
+\setminted{linenos=true}
+\title{Tytuł}
+\author{Patryk Wałach}
+\date{January 2022}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+\section{[Wstęp]}
+
+\section{Ogólne wprowadzenie}
+\subsection{Analiza leksykalna}
+Analiza leksykalna w informatyce jest to proces rozbijania program źródłowych na jednostki logiczne (zwane leksemami) złożone z jednego lub więcej znaków, które łącznie mają jakieś znaczenie\cite{Hopcroft__Motwani__Ullman__2005}. Przykładami leksemów mogą być słowa kluczowe (np. while), identyfikator lub liczba składająca się z cyfr. Rozdzielaniem programu źródłowego, na leksemy, zajmuje się lekser.
+
+Token jest strukturą reprezentującą leksem i wprost go kategoryzującą\cite{ Aho__Sethi__Ullman__1985}, co ułatwia późniejszą pracę parserowi. Tokeny kategoryzuje się na komputerowy odpowiednik tego, co lingwiści określiliby mianem części mowy. Biorąc jako przykład poniższy kod w języku C:
+\begin{minted}{c}
+  x = a + b * 2;
+\end{minted}
+analiza leksykalna, zwraca tokeny:
+\begin{minted}{python}
+  [(identifier, x), (operator, =), (identifier, a), (operator, +), (identifier, b), (operator, *), (literal, 2), (separator, ;)]
+\end{minted}
+Dwoma ważnymi przypadkami są znaki białe i komentarze. One również muszą być uwzględnione w gramatyce i przeanalizowane przez lexer, lecz mogą być odrzucone (nie produkować żadnych tokenów) i traktowane jako spełniające mało znaczące zadanie, rozdzielania dwóch tokenów (np. w \mintinline{uwu.py -x}{if x} zamiast \mintinline{uwu.py -x}{ifx}).
+
+\subsection{Parser}
+Analizator składniowy, parser – program dokonujący analizy składniowej danych wejściowych w celu określenia ich struktury gramatycznej w związku z określoną gramatyką formalną. Analizator składniowy umożliwia przetworzenie tekstu czytelnego dla człowieka w strukturę danych przydatną dla oprogramowania komputera. Wynikiem analizy składni, dokonywanej przez parser, najczęściej jest drzewo składniowe nazywane czasami drzewem wyprowadzenia\cite{Aho__Sethi__Ullman__1985}.
+
+
+\newpage
+Zadanie parsera sprowadza się do sprawdzenia czy i jak dane wejściowe mogą zostać wyprowadzone z symbolu startowego. To zadanie można zrealizować na dwa sposoby:
+
+
+\begin{itemize}
+  \item Analiza zstępująca (ang. top-down parsing) to strategia znajdowania powiązań między danymi przez stawianie hipotez dotyczących drzewa rozbioru składniowego i sprawdzanie, czy zależności między danymi są zgodne z tymi hipotezami.
+  \item Analiza wstępująca (ang. bottom-up parsing) – ogólna metoda analizy składniowej, w której zaczyna się od słowa wejściowego i próbuje się zredukować je do symbolu startowego. Drzewo wyprowadzenia jest konstruowane od liści do korzenia (stąd nazwa). W każdym momencie w trakcie tego procesu mamy formę zdaniową, która zawiera segment, powstały w ostatnim kroku wyprowadzenia. Segment ten nazywany uchwytem (ang. handle) jest prawą stroną produkcji i powinien zostać w tym kroku zredukowany do jej lewej strony, w wyniku czego powstanie poprzednia forma zdaniowa z wyprowadzenia. Główna trudność w analizie wstępującej polega właśnie na odpowiednim znajdywaniu uchwytów.
+        Analiza wstępująca może przebiegać w określonym kierunku (np. od lewej do prawej), lub w sposób bezkierunkowy, wtedy analizowane jest całe słowo naraz. Jednym z bardziej znanych przedstawicieli metody bezkierunkowej jest algorytm CYK. Do metod kierunkowych zalicza się między innymi parsery shift-reduce czyli LR, LALR, SLR, BC, pierwszeństwa.
+\end{itemize}
+
+
+
+\subsection{System typów}
+System typów jest to system klasyfikacji wyrażeń w zależności od rodzajów wartości, jakie one generują\cite{Pierce__Benjamin__C__2002}. Każdej obliczonej wartości przypisywany jest pewien typ, który jednoznacznie definiuje, jakie operacje można na niej wykonać. Śledząc przepływ wartości, system typów stara się udowodnić, że w programie występuje poprawne typowanie, tzn. nie dochodzi do sytuacji, w której na wartości określonego typu próbujemy wykonać niedozwoloną operację.
+\subsection{System typów ML} System typów ML jest to silny system typów stosowany w językach rodziny ML (Ocaml, Standard ML) oparty na inferencji.
+
+Podstawowy system typów jest następujący: istnieją typy proste, takie jak string, int, bool, unit (typ pusty) itd. Z dowolnych typów można też generować typy złożone – przez krotki (typ1 * typ2, typ1 * typ2 * typ3 itd.), konstruktory typów (typ list, typ tree itd.) i funkcje (typ1 → typ2).
+
+System próbuje nadać typy każdemu wyrażeniu języka, i nie licząc kilku rzadkich przypadków, udaje mu się to całkiem dobrze.
+
+Generalnie system taki wyklucza polimorfizm (nie licząc typów polimorficznych), jednak w Standard ML stworzono specjalne reguły umożliwiające polimorfizm dla wyrażeń arytmetycznych.
+
+System typów ML jest interesujący z teoretycznego punktu widzenia – wiele problemów ma bardzo wysoką złożoność, jednak w praktyce inferencja zachodzi bardzo szybko – typy, które są rzeczywiście używane, są zwykle bardzo proste – rzadko używa się funkcji rzędów wyższych niż trzeci-czwarty, oraz liczby argumentów większej niż kilkanaście.
+
+W rzeczywistych implementacjach dochodzą do tego bardziej złożone problemy typizacji obiektów, modułów itd.
+
+\subsection{Rekord z wariantami} Rekord z wariantami jest to rodzaj rekordu, posiadającego tę właściwość, że zbiór rekordów posiada wspólny typ, lecz różną postać, określoną aktualną wartością specjalnego pola znacznikowego.
+
+Przykład - Zakładając, że checmy stworzyć drzewo binarne intów. W języku ML, zrobilibyśmy to tworząc nowy typ danych w ten sposób:
+\begin{minted}{ocaml}
+datatype tree = Leaf
+  | Node of (int * tree * tree)
+\end{minted}
+\mintinline{uwu.py -x}{Leaf} i \mintinline{uwu.py -x}{Node} są konstruktorami, które pozwalają nam na stworzenie konretnego drzewa, np.
+\begin{minted}{ocaml}
+  Node(5, Node(1, Leaf, Leaf), Node(3, Leaf, Node(4, Leaf, Leaf)))
+\end{minted}
+\section{Inferencja typów w teori}
+\subsection{Problem inferencji typów}
+Język ML przyjmuje wiele form, najpopularniejszymi wariantami są Standard ML (SML), OCaml,
+i F\#. Na potrzeby będziemy wzorować się na \cite{Damas__Milner__1982}, i posługiwać się ML-the-calculus, drastycznie uproszczoną wersją języka co pozwoli na dojście do sedna w problemie rekonstrukcji typów.
+
+Termy w języku ML-the-calculus są następujące:
+\begin{equation}
+  \begin{split}
+    e\ ::&=x\\
+    &|\ \ \ c\qquad(\text{stałe})\\
+    &|\ \ \ \lambda x.e\\
+    &|\ \ \ e\ e\\
+    &|\ \ \ \text{let }x=e\text{ in }e
+  \end{split}
+\end{equation}
+Typy które będziemy przypisywali do termów są następujące:
+\begin{equation}
+  \begin{split}
+    \tau\ ::&=\alpha\qquad(\text{typ zmienny})\\
+    &|\ \ \ B\qquad(\text{typ podstawowy})\\
+    &|\ \ \ \tau\rightarrow\tau
+  \end{split}
+\end{equation}
+\subsection{Udowadnianie typów dla ML-the-calculus}
+
+\begin{equation}
+  \begin{split}
+    \frac{}{\Gamma\vdash c:B} \\
+    \\
+    \frac{\Gamma,x:\tau'\vdash e:\tau}{\Gamma\vdash\lambda x.e:\tau'\rightarrow\tau} \\
+    \\
+    \frac{\Gamma\vdash e_1:\tau_2\rightarrow\tau\qquad\Gamma\vdash e_2:\tau_2}{\Gamma\vdash e_1\ e_2:\tau} \\
+    \\
+    \frac{\Gamma(x)=\bigwedge\alpha_1,...,\alpha_n.\tau'\qquad\tau=[\beta_i/\alpha_i]\tau'}{\Gamma\vdash x:\tau}(\beta_1\text{ fresh}) \\
+    \\
+    \frac{\Gamma\vdash e_1:\tau'\qquad\Gamma,x:(\bigwedge\alpha_1,...,\alpha_n.\tau')\vdash e_2:\tau}{\Gamma\vdash \text{let }x=e_1\text{ in }e_2:\tau:B}(\{\alpha_1,...,\alpha_n\}=ftv(\tau')\backslash ftv(\Gamma)) \\
+  \end{split}
+\end{equation}
+Powyższe dowody nie mogą jednak być w prosty sposób przedstawione jako algorytm. Fakt, że typ $\tau'$ jest dowolnie wybierany w dowodzie dla $\lambda$ prowadzi do nieskończonej ilość dowodów, nawet dla prostego wyrażenia $\lambda x.x$.
+\subsection{Infernencja typów bazująca na ograniczeniach}
+Algorytmy infernencji typów bazujące na ograniczeniach generują dużą liczbę zmiennych typów i zbiór ograniczeń dla tych zmiennych. W drugim kroku algorytmu dla każdej zmiennej, szuka typu, który spełnia wszystkie ograniczenia.
+\subsection{System typów Hindley–Milner}
+Algorytm inferencji typów przedstwiony w \cite{Milner__1978}, oraz innych wcześniejszych publikacjach, opiera się na generowaniu ograniczeń i rozwiązywaniu ich w trakcie wykonywania prostego rekursywnego przejścia przez termy.
+
+Warto zauważyć, że w ten sposób: dostajemy, prostą strukturalnie rekursywną definicjię rekonstrukcji typów, ale tracimy modularność algorytmu. Rozszerzenie takiego algorytmu o dodatkowe funkcjie jest o wiele trudniejsze, niż algorytmu, który oddziela kroki generowania ograniczeń i ich rozwiązywania.
+\newpage
+\subsection{Algorytm J}
+Algorytm W nie ma żadnych side-effectów, i świetnie zajmuje się aplikowanie i komponowaniem substytucji w odpowiedniej kolejności. Częste apikacje substytucji na wyrażeniach mogą znacznie zmniejszyć wydajność algorytmu rekonstruującegom dlatego też, Milner zaprezentował bardziej efektywną impereatywną wariacją W nazwaną algorytmem J w \cite{Milner__1978}.
+
+Algorytm J jest funkcją, która dla dokonanych do tej pory substytucji $S$, środowiska $\Gamma$ - zbioru przechowywującego pary identyfikator wraz z typem, i wyrażnia $e$, zwraca kolejne substytucje $S$, oraz typ wyrażenia $\tau$.
+\begin{equation}
+  \begin{split}
+    J :& S\times\Gamma\times e \rightarrow S\times\tau \\
+    \\
+    J(S,\Gamma,x) =& (S,[\beta_i/\alpha_i]\tau') \\
+    &\text{where } \Gamma(x) = \bigwedge\alpha_i,...,\alpha_n.\tau' \\
+    &\text{and } \beta_i \text{ are fresh} \\
+    \\
+    J(S,\Gamma,e_1\ e_2) =& (V,\beta) \\
+    &\text{where } \Gamma(S_1,\tau_1) = J(S,\Gamma,e_1) \\
+    &\text{and } (S_2,\tau_2)=J(S_1,\Gamma,e_2) \\
+    &\text{and } V = unify'(\tau_1,\tau_2\rightarrow\beta,S_2) \\
+    &\text{and } \beta \text{ is fresh} \\
+    \\
+    J(S,\Gamma,\lambda x.e) =& (S_1,\beta\rightarrow\tau) \\
+    &\text{where } (S_1,\tau)=J(S,(\Gamma,x:\beta),e) \\
+    &\text{and } \beta \text{ is fresh} \\
+    \\
+    J(S,\Gamma,\text{let }x=e_1\text{ in }e_2) =& (S_2,\tau_w) \\
+    &\text{where } (S_1,\tau_1)=J(S,\Gamma,e_1) \\
+    &\text{and } (S_2,\tau_2)=J(S_1,(\Gamma,x:(\bigwedge\alpha_1,...,\alpha_n.\tau_1)),e_2) \\
+    &\text{and } \{\alpha_1,...,\alpha_n\}=ftv(S_2\tau_1)\backslash ftv(S_2\Gamma) \\
+  \end{split}
+\end{equation}
+Funkcja pomocnicza $unify'(\tau,\tau',S)$ rozszerza zbiór substytucji S o substytucje wynikające z unifikacji $\tau$ z $\tau'$ pod kontekstem $S$.
+
+
+\section{Rescript/ReasonML jako języki realizujące podobne zadania}
+\newpage
+\section{Założenia i priorytety opracowanej aplikacji}
+Tworząc aplikację, chciałem, by język posiadał podstawowe typy danych (liczby, stringi, wartość logiczna), kilka typów generycznych (funkcje, tablice), typ `Option', oraz możliwość tworzenia własnych typów.
+Dodatkowo nie powinno być potrzeby podawania typów zmiennych w większości przypadków, kompilator sam powinien wykrywać typy zmiennych na podstawie ich użycia.
+
+
+Język poza zmiennymi, potrzebuje możliwości wykonywania operacji na danych, dlatego ważne było dla mnie, by zaimplementować operatory binarane, oraz unarne. Operatory te miały też spełniać ważną rolą w trakcie inferencji typów. W języku javascript operator `+' może być wykorzystywany do dodawania liczb jak i konkatenacji stringów, ważne więc było by stworzyć dwa oddzielne operatory.
+
+Prymitywne typy danych:
+\begin{itemize}
+  \item string
+        \inputminted{uwu.py -x}{examples/string.uwu}
+        % Do konkatenacji stringów służy operator \mintinline{uwu.py -x}{++}
+  \item Wartość logiczna ma typ \mintinline{uwu.py -x}{Bool} i wartość \mintinline{uwu.py -x}{True} lub \mintinline{uwu.py -x}{False}.
+        Powiązane operacje:
+        \begin{itemize}
+          \item \mintinline{uwu.py -x}{<>}, równość pomiędzy dwiema liczbami
+          \item \mintinline{uwu.py -x}{>}, \mintinline{uwu.py -x}{<}
+          \item \mintinline{uwu.py -x}{!=} równość
+        \end{itemize}
+  \item liczby
+        % Powiązane operacje: \mintinline{uwu.py -x}{+}, \mintinline{uwu.py -x}{-}, \mintinline{uwu.py -x}{*}, \mintinline{uwu.py -x}{/}, \mintinline{uwu.py -x}{*}, \mintinline{uwu.py -x}{\%}, \mintinline{uwu.py -x}{//}
+\end{itemize}
+
+% typing.Literal["|", "!=", "=="]
+
+\newpage
+Chciałem również by funkcje wieloargumentowe kompilowane były jako funkcje jednoargumentowe zwracające kolejne funkcje, co pozwala na wywoływanie funkcji bez wszystkich argumentów w celu zwrócenia funkcji przyjmującej resztę argumentów tzw. currying.
+
+% \inputminted[firstline=15]{uwu.py -x}{examples/currying.uwu}
+\inputminted[firstline=15]{javascript}{examples/currying.uwu.js}
+
+
+Jednym z ważniejszych elemenów każdego języka jest możliwość wykonywania różnego zbioru instrukcji, warunkowo. W tym celu planowałem zaimplementowanie instrukcji `if', oraz `case'. Instrukcja `case' wykonywać ma dopasowanie do wzorca (tzw. pattern-matching), wykonywać, odpowiedni zbiór instrukcji zależnie od wprowadzonych danych. Kompilator, powinien ostrzegać, jeżeli ścieżka dla jednego z typów danych nie została zaimplementowana.
+
+\begin{itemize}
+  \newpage
+  \item Przykład - funkcja łącząca dwie posortowane tablice
+        \inputminted[firstline=25]{uwu.py -x}{examples/merge.uwu}
+        \inputminted[firstline=20]{javascript}{examples/merge.uwu.js}
+\end{itemize}
+
+\newpage
+Kolejnym dość ważnym elementem języka jest brak wyrażenia `return', które jest wykorzystywane do zwrócenia wartości z funkcji. Zamiast tego każdy bloku instrukcji powinien zwracać ostatnie wyrażenie. Pozwoli to na łatwiejsze inicjowanie zmiennych, w przypadku gdy inicializacja wymaga więcej niż jedenej linii kodu.
+
+
+
+\begin{itemize}
+  \item Przykład
+        % \inputminted[firstline=15]{uwu.py -x}{examples/return.uwu}
+        \inputminted[firstline=15]{javascript}{examples/return.uwu.js}
+\end{itemize}
+\subsection{Opis formaly składni języka}
+%  notacja wirta
+\section{Narzędzia}
+\subsection{Język python}
+Do implementacji programu postanowiliśmy wykorzystać język python w wersji 3.10, ze względu na jego dynamiczność.
+W tej wersji języka pojawił się również pattern-matching, który znacząco ułatwia pracę z ast.
+\subsection{Parsowanie i tokenizowanie przy użyciu biblioteki sly}
+Biblioteka sly, jest pythonową implementacją narzędzi lex i yacc, wykorzystywanych do tworzenia parserów i kompilatorów.
+\subsection{Środowisko nodejs do uruchomienia skompilowanego kodu}
+\section{Implementacja}
+\subsection{lexer}
+\subsection{parser}
+% \inputminted[firstline=111]{python}{parser.py}
+\subsection{inferencja typów}
+Zmienny typ reprezentuję jako unikalną liczbę
+\inputminted[firstline=28, lastline=34]{python}{algorithm_j.py}
+Substytucje to pary zmiennych i typów
+\inputminted[firstline=25, lastline=25]{python}{algorithm_j.py}
+Każda zmienna w programie reprezentowana jest przez Scheme zawierający listę generycznych typów
+\inputminted[firstline=26, lastline=26]{python}{algorithm_j.py}
+Context to mapa identyfikatorów i schem
+\inputminted[firstline=12, lastline=22]{python}{algorithm_j.py}
+Tworzymy funkcję, aplikującą substytucje na typie
+\inputminted[firstline=37, lastline=46]{python}{algorithm_j.py}
+Tworzymy funkcję, unifikującą dwa typy
+\inputminted[firstline=95, lastline=112]{python}{algorithm_j.py}
+wraz z funkcją aplikującą substytucje na zmiennym typie
+\inputminted[firstline=115, lastline=124]{python}{algorithm_j.py}
+Inferencja termóm dla literałów jest trywialna
+\inputminted[firstline=164, lastline=171]{python}{algorithm_j.py}
+W przypadku identyfikatorów, musimy zastąpić ich generyczne typy nowymi zmiennymi typami
+\inputminted[firstline=172, lastline=173]{python}{algorithm_j.py}
+W przypadku bloku wyrażeń inferujemy typ każdego z nich i zwracamy ostatni z nich
+\inputminted[firstline=185, lastline=192]{python}{algorithm_j.py}
+Binarny pperator konkatenacji list, sprawdzamy czy obie listy są tego samego typu
+\inputminted[firstline=257, lastline=263]{python}{algorithm_j.py}
+Wywołując funkcję aplikujemy argumenty na nowy zmiennym typie po czym unifikujemy rezultat z typem wywoływanego wyrażenia
+\inputminted[firstline=323, lastline=335]{python}{algorithm_j.py}
+
+\subsection{kompilacja}
+\section{Opis działania}
+\subsection{Co działa}
+\subsection{Uwagi co do obsługi błędów}
+\section{[Podsumowanie]}
+\section{[spisy -- rysunków, tabel, listingów ipt.]}
+
+\bibliographystyle{plainnat}
+\bibliography{doc}
+
+
+\end{document}
+
+

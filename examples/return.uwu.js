@@ -25,5 +25,5 @@ const result = (() => {
   const is_even = (x) => {
     return x % 2.0 === 0.0;
   };
-  return filter(arr1)(is_even);
+  return filter(arr2)(is_even);
 })();

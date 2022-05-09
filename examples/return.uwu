@@ -23,7 +23,7 @@ result = do
     arr1 = [1, 2, 3]
     arr2 = map(arr1, add_one)
 
-    filter(arr1, def is_even(x) do
+    filter(arr2, def is_even(x) do
         x % 2 == 0
     end)
 end
