@@ -255,12 +255,12 @@ def infer(
             subst = unify_subst(ty_expr, typed.TNum(), subst)
             return subst, typed.TNum()
         case terms.EBinaryExpr("|", left, right):
-            ty = fresh_ty_var()
+            ty = typed.TArray(fresh_ty_var())
             subst, ty_left = infer(subst, ctx, left)
-            subst = unify_subst(ty_left, typed.TArray(ty), subst)
+            subst = unify_subst(ty_left, ty, subst)
             subst, ty_right = infer(subst, ctx, right)
-            subst = unify_subst(ty_right, typed.TArray(ty), subst)
-            return subst, typed.TArray(ty)
+            subst = unify_subst(ty_right, ty, subst)
+            return subst, ty
         case terms.EBinaryExpr("++", left, right):
             subst, ty_left = infer(subst, ctx, left)
             subst = unify_subst(ty_left, typed.TStr(), subst)
@@ -320,8 +320,8 @@ def infer(
             subst = unify_subst(ty_con, typed.TDef(ty_variant, ty), subst)
 
             return subst, ty
-        case terms.ECall(id, args):
-            subst, ty_fn = infer(subst, ctx, id)
+        case terms.ECall(fn, args):
+            subst, ty_fn = infer(subst, ctx, fn)
 
             ty_args = list[typed.Type]()
 
@@ -350,7 +350,7 @@ def infer(
 
             ty = reduce_args(ty_params, hint)
 
-            # t_ctx[id] = Scheme.from_subst(subst, t_ctx, ty)
+            #
             subst, ty_body = infer(subst, t_ctx, body)
 
             subst = unify_subst(ty_body, hint, subst)

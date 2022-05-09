@@ -17,8 +17,6 @@ breakatwhitespace=false, % sets if automatic breaks should only happen at whites
 breaklines=true, % sets automatic line breaking
 captionpos=b, % sets the caption-position to bottom
 commentstyle=\color{mygreen}, % comment style
-deletekeywords={...}, % if you want to delete keywords from the given language
-escapeinside={\%*}{*)}, % if you want to add LaTeX within your code
 extendedchars=true, % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
 frame=single, % adds a frame around the code
 keepspaces=true, % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
@@ -34,40 +32,15 @@ showstringspaces=false, % underline spaces within strings only
 showtabs=false, % show tabs within strings adding particular underscores
 stepnumber=1, % the step between two line-numbers. If it's 1, each line will be numbered
 stringstyle=\color{mymauve}, % string literal style
-tabsize=2, % sets default tabsize to 2 spaces
+tabsize=2, % sets default tabsize to 2 spaces,
 title=\lstname % show the filename of files included with \lstinputlisting; also try caption instead of title
 }
 %END of listing package%
- 
-\definecolor{darkgray}{rgb}{.4,.4,.4}
-\definecolor{purple}{rgb}{0.65, 0.12, 0.82}
-\lstdefinelanguage{JavaScript}{
-keywords={typeof, new, true, false, catch, function, return, null, catch, switch, var, if, in, while, do, else, case, break},
-keywordstyle=\color{blue}\bfseries,
-ndkeywords={class, export, boolean, throw, implements, import, this},
-ndkeywordstyle=\color{darkgray}\bfseries,
-identifierstyle=\color{black},
-sensitive=false,
-comment=[l]{//},
-morecomment=[s]{/*}{*/},
-commentstyle=\color{purple}\ttfamily,
-stringstyle=\color{red}\ttfamily,
-morestring=[b]',
-morestring=[b]"
-}
+
+
+
 \lstset{
-  language=JavaScript,
-  extendedchars=true,
-  basicstyle=\footnotesize\ttfamily,
-  showstringspaces=false,
-  showspaces=false,
-  numbers=left,
-  numberstyle=\footnotesize,
-  numbersep=9pt,
-  tabsize=2,
-  breaklines=true,
-  showtabs=false,
-  captionpos=b
+  language=Python
   }
 
 \title{Tytuł}
@@ -99,7 +72,7 @@ Dwoma ważnymi przypadkami są znaki białe i komentarze. One również muszą b
 Analizator składniowy, parser – program dokonujący analizy składniowej danych wejściowych w celu określenia ich struktury gramatycznej w związku z określoną gramatyką formalną. Analizator składniowy umożliwia przetworzenie tekstu czytelnego dla człowieka w strukturę danych przydatną dla oprogramowania komputera. Wynikiem analizy składni, dokonywanej przez parser, najczęściej jest drzewo składniowe nazywane czasami drzewem wyprowadzenia\cite{Aho__Sethi__Ullman__1985}.
 
 
-\newpage
+
 Zadanie parsera sprowadza się do sprawdzenia czy i jak dane wejściowe mogą zostać wyprowadzone z symbolu startowego. To zadanie można zrealizować na dwa sposoby:
 
 
@@ -181,7 +154,7 @@ Algorytmy infernencji typów bazujące na ograniczeniach generują dużą liczb�
 Algorytm inferencji typów przedstwiony w \cite{Milner__1978}, oraz innych wcześniejszych publikacjach, opiera się na generowaniu ograniczeń i rozwiązywaniu ich w trakcie wykonywania prostego rekursywnego przejścia przez termy.
 
 Warto zauważyć, że w ten sposób: dostajemy, prostą strukturalnie rekursywną definicjię rekonstrukcji typów, ale tracimy modularność algorytmu. Rozszerzenie takiego algorytmu o dodatkowe funkcjie jest o wiele trudniejsze, niż algorytmu, który oddziela kroki generowania ograniczeń i ich rozwiązywania.
-\newpage
+
 \subsection{Algorytm J}
 Algorytm W nie ma żadnych side-effectów, i świetnie zajmuje się aplikowanie i komponowaniem substytucji w odpowiedniej kolejności. Częste apikacje substytucji na wyrażeniach mogą znacznie zmniejszyć wydajność algorytmu rekonstruującegom dlatego też, Milner zaprezentował bardziej efektywną impereatywną wariacją W nazwaną algorytmem J w \cite{Milner__1978}.
 
@@ -214,7 +187,7 @@ Funkcja pomocnicza $unify'(\tau,\tau',S)$ rozszerza zbiór substytucji S o subst
 
 
 \section{Rescript/ReasonML jako języki realizujące podobne zadania}
-\newpage
+
 \section{Założenia i priorytety opracowanej aplikacji}
 Tworząc aplikację, chciałem, by język posiadał podstawowe typy danych (liczby, stringi, wartość logiczna), kilka typów generycznych (funkcje, tablice), typ `Option', oraz możliwość tworzenia własnych typów.
 Dodatkowo nie powinno być potrzeby podawania typów zmiennych w większości przypadków, kompilator sam powinien wykrywać typy zmiennych na podstawie ich użycia.
@@ -240,32 +213,31 @@ Prymitywne typy danych:
 
 % typing.Literal["|", "!=", "=="]
 
-\newpage
+
 Chciałem również by funkcje wieloargumentowe kompilowane były jako funkcje jednoargumentowe zwracające kolejne funkcje, co pozwala na wywoływanie funkcji bez wszystkich argumentów w celu zwrócenia funkcji przyjmującej resztę argumentów tzw. currying.
 
 \lstinputlisting[firstline=15]{examples/currying.uwu}
+\newpage
 \lstinputlisting[firstline=15]{examples/currying.uwu.js}
 
 
 Jednym z ważniejszych elemenów każdego języka jest możliwość wykonywania różnego zbioru instrukcji, warunkowo. W tym celu planowałem zaimplementowanie instrukcji `if', oraz `case'. Instrukcja `case' wykonywać ma dopasowanie do wzorca (tzw. pattern-matching), wykonywać, odpowiedni zbiór instrukcji zależnie od wprowadzonych danych. Kompilator, powinien ostrzegać, jeżeli ścieżka dla jednego z typów danych nie została zaimplementowana.
 
 \begin{itemize}
-  \newpage
+
   \item Przykład - funkcja łącząca dwie posortowane tablice
-        \lstinputlisting[firstline=25]{examples/merge.uwu}
-        \lstinputlisting[firstline=20]{examples/merge.uwu.js}
+        \lstinputlisting[firstline=25]{examples/merge.uwu}\newpage
+        \lstinputlisting[firstline=19]{examples/merge.uwu.js}
 \end{itemize}
 
-\newpage
+
 Kolejnym dość ważnym elementem języka jest brak wyrażenia `return', które jest wykorzystywane do zwrócenia wartości z funkcji. Zamiast tego każdy bloku instrukcji powinien zwracać ostatnie wyrażenie. Pozwoli to na łatwiejsze inicjowanie zmiennych, w przypadku gdy inicializacja wymaga więcej niż jedenej linii kodu.
 
+\newpage
+Przykład
+\lstinputlisting[firstline=15]{examples/return.uwu}
+\lstinputlisting[firstline=15]{examples/return.uwu.js}
 
-\begin{itemize}
-  \item Przykład
-        % \begin{minted}{pygments.py:UwUPygments -x}
-        \lstinputlisting[firstline=15]{examples/return.uwu}
-        \lstinputlisting[firstline=15]{examples/return.uwu.js}
-\end{itemize}
 \subsection{Opis formaly składni języka}
 %  notacja wirta
 \section{Narzędzia}
@@ -273,46 +245,231 @@ Kolejnym dość ważnym elementem języka jest brak wyrażenia `return', które 
 Do implementacji programu postanowiliśmy wykorzystać język python w wersji 3.10, ze względu na jego dynamiczność.
 W tej wersji języka pojawił się również pattern-matching, który znacząco ułatwia pracę z ast.
 \subsection{Parsowanie i tokenizowanie przy użyciu biblioteki sly}
-Biblioteka sly, jest pythonową implementacją narzędzi lex i yacc, wykorzystywanych do tworzenia parserów i kompilatorów.
+Biblioteka sly, jest pythonową implementacją narzędzi lex i yacc, wykorzystywanych do tworzenia parserów i kompilatorów. Tworzenie leksera i parsera jest bardzo proste.
+
+
+\subsubsection{Lexer}
+Tokeny są tworzone przy pomocy wyrażeń regularnych.
+\begin{lstlisting}
+import sly
+class Lex(sly.Lexer):
+  ID = r"\w+"
+  NUM = r"\d+"
+\end{lstlisting}
+Biblioteka udostępnia specjalny syntax do tworznia tokenów, które są już opisane jako inny token.
+\begin{lstlisting}
+  ID["and"] = AND
+\end{lstlisting}
+Pojedyńcze znaki mogą być ignorowane, poprzez ustawienie zmiennej `ignore'.
+Dodatkowo ignorowane są też tokeny zaczynające się od `ignore'.
+\begin{lstlisting}
+  ignore = " \t"
+  ignore_comm = r"\#.*"
+\end{lstlisting}
+Istnieje również możliwość tworzenia tokenów o typie równym ich wartości, tak długo jak składają się tylko z jedngo znaku.
+\begin{lstlisting}
+  literals = {"(", ")"}
+\end{lstlisting}
+
+\subsubsection{Parser}
+W przypadku parsera każda reguła jest implementowana jako metoda, pod której argumentem mamy dostęp do tokenów i wartości zwróconych z innych metod.
+\begin{lstlisting}
+  import sly
+  class Parser(sly.Parser):
+  tokens = Lex.tokens
+  
+  @_("NUM")
+  def expr(self, p):
+  return p[0] # Lub p.ID
+  
+  @_("'(' expr AND expr ')'")
+  def expr(self, p):
+  return p.expr0 and p.expr1
+\end{lstlisting}
+Powyższy parser pozwala na opisanie wyrażeń logicznych typu: \lstinline{(1 and 0) and 4}.
 \subsection{Środowisko nodejs do uruchomienia skompilowanego kodu}
+Javascript jest językiem programowanie wykorzystywanym w przeglądarkach internetowych. W uruchomienia skompilowanego kodu używali będziemy jednak środowiska nodejs. Pozwoli to na szybkie i wygodne testowanie wygenerowanego kodu. Po zainstalowaniu środowiska i skompilowaniu pliku `index.uwu' otrzymamy plik `index.uwu.js', który możemy uruchomić w terminalu komendą `node index.uwu.js'.
+
 \section{Implementacja}
 \subsection{lexer}
+Nasz lexer implementował będzie poniższy zbiór tokenów, warto zauważyć, że identyfikatory zaczynające się z dużej litery są identyfikatorami typów.
+\lstinputlisting[firstline=75, lastline=94]{parser.py}
+Nasz lexer zaimował się również będzie zwracaniem tokena dla znaku nowej linii
+\lstinputlisting[firstline=99, lastline=102]{parser.py}
+Lexer ignorował będzie tokeny komentarza, które zaczynają się od znaku `\#'. Oraz znaki tabulacji i spacji.
+\newpage
+\lstinputlisting[firstline=96, lastline=97]{parser.py}
+
+Pozatym Nasz lexer zwracał będzie poniższy zbiór tokenów
+\lstinputlisting[firstline=55, lastline=74]{parser.py}
+
 \subsection{parser}
-% \lstinputlisting[firstline=111]{parser.py}r
+Implementacja parsera jest bardzo prosta, każda z metod zajmuje jedynie linijkę, gdzie zwracane jest odpowiedne wyrażenie drzewa ast.
+\lstinputlisting[firstline=188, lastline=195]{parser.py}
+W przypadku zbiorów wyrażeń, zwracane są listy.\newpage
+\lstinputlisting[firstline=369, lastline=375]{parser.py}
+
+\subsection{Drzewo decyzyjne}
+Wykorzystywany algorytm jest odbrobinę inny od algorytmów opisanych w literaturze. Bierzemy pod uwagę następujące obserwacje. Część algorytmów w literaturze w celu uniknięcia wykładniczego wzrostu generowanego kodu, generuje zbędne testy \cite{Augustsson__1985}. Wykładniczy wzrostu generowanego jednak praktycznie nie wsystępuje w praktyce \cite{Scott__Ramsey__2000}. Najlepszą praktyką wieć wydało nam się by nigdy nie generować niepotrzebnych sprawdzeń, i spróbować uninkąć duplikacji kodu używając heurystyki tak jak \cite{Maranget__2008}. Literatura udowadnia, że w przypadku praktycznie napisanego kodu, różne algorytmy generują prawie identycny kod  \cite{Scott__Ramsey__2000, Maranget__2008}. Naszą metodą więc jest, aby: (1) zawsze skupiać się na przypasowaniu pierszego przypadku, by uniknąć niepotrzebnych testów i (2) zachłannie spróbować zminimalizować duplikację przy użyciu heurystyki.
+
+
+
+Pattern matching zamieniany jest w drzewo decyzyjne przy pomocy rekurencyjnej funkcji.
+Rekursja ma dwa podstawowe przypadki:
+\begin{itemize}
+  \item lista przypadków jest pusta, więc generujemy pustą gałąź końcową
+  \item pierwszy przpadek, nie ma już więcej wzorów, więc zwracamy gałąź końcową z blokiem.
+\end{itemize}
+\lstinputlisting[firstline=72, lastline=80]{case_tree.py}
+W innym przypadku wybieramy wzorzec przy pomocy heurystyki\newpage
+\lstinputlisting[firstline=81, lastline=88]{case_tree.py}
+
+Następnie tworzymy dwa podproblemy \lstinline{yes} i \lstinline{no} iterując przez wszsytki przypadki. Dla każdego z nich robimy jedną z trzech rzeczy:
+\begin{itemize}
+  \item Przypadek nie zawiera wzorca, więc dodajemy go do \lstinline{yes} i \lstinline{no}
+        \lstinputlisting[firstline=90, lastline=95]{case_tree.py}
+  \item Przpadek zawiera szukany wzorzec, więc dodajemy go do \lstinline{yes}
+        \lstinputlisting[firstline=97, lastline=108]{case_tree.py}
+  \item Przypadek zawiera wzorzec, więc dodajemy go do \lstinline{no}
+        \lstinputlisting[firstline=110, lastline=111]{case_tree.py}
+\end{itemize}
+
+Rekursywnie generujemy kod dla \lstinline{yes} i \lstinline{no} i zwracamy gałąź decyzyjną
+\lstinputlisting[firstline=116, lastline=118]{case_tree.py}
 \subsection{inferencja typów}
-Zmienny typ reprezentuję jako unikalną liczbę
+\subsubsection{Context}
+Implementację inferencji typów zaczynamy przez stworzenie zmiennego typu, który będzie reprezentowanty przez unikalny identyfikator.
 \lstinputlisting[firstline=28, lastline=34]{algorithm_j.py}
 Substytucje to pary zmiennych i typów
 \lstinputlisting[firstline=25, lastline=25]{algorithm_j.py}
-Każda zmienna w programie reprezentowana jest przez Scheme zawierający listę generycznych typów
+Jednym z argumentów algorytmu J jest środowiko, w naszej implementacji reprezentowane jest one przez Context, będący mapą identyfikatorów i schem
 \lstinputlisting[firstline=26, lastline=26]{algorithm_j.py}
-Context to mapa identyfikatorów i schem
-\lstinputlisting[firstline=12, lastline=22]{algorithm_j.py}
-Tworzymy funkcję, aplikującą substytucje na typie
+Gdzie Schema to zawieraja informację o typie, oraz listę występujących w nim zmiennych typów
+\lstinputlisting[firstline=12, lastline=16]{algorithm_j.py}
+
+\subsubsection{Aplikowanie substytucji}
+Tworzymy funkcję, aplikującą substytucje na typie.
+
+Przykład: dla subt=\{a:Num\} i ty=a->b funkcja zwraca Num -> b
 \lstinputlisting[firstline=37, lastline=46]{algorithm_j.py}
 Tworzymy funkcję, unifikującą dwa typy
 \lstinputlisting[firstline=95, lastline=112]{algorithm_j.py}
-wraz z funkcją aplikującą substytucje na zmiennym typie
+wraz z funkcją generującą substytucje w przypadku unifikacji zmiennego typu
 \lstinputlisting[firstline=115, lastline=124]{algorithm_j.py}
-Inferencja termóm dla literałów jest trywialna
+Teraz zaczynamy implementację algorytmu J.
+
+\subsubsection{Literały}
+W przypadku literałów typ, jest oczywisty.
 \lstinputlisting[firstline=164, lastline=171]{algorithm_j.py}
-W przypadku identyfikatorów, musimy zastąpić ich generyczne typy nowymi zmiennymi typami
+\subsubsection{Identyfikatory}
+W przypadku identyfikatorów, musimy zastąpić występujące w nich zmienne typy nowymi zmiennymi typami.
 \lstinputlisting[firstline=172, lastline=173]{algorithm_j.py}
-W przypadku bloku wyrażeń inferujemy typ każdego z nich i zwracamy ostatni z nich
+\subsubsection{Bloki wyrażeń}
+W przypadku bloku wyrażeń inferujemy typ każdego z nich i zwracamy ostatni typ.
 \lstinputlisting[firstline=185, lastline=192]{algorithm_j.py}
-Binarny pperator konkatenacji list, sprawdzamy czy obie listy są tego samego typu
+
+\subsubsection{Operatory binarne}
+Implementacja operatorów binarnych są bardzo podobne.
+
+Na przykład operator \lstinline{|} służącey do kontkatenacji dwóch list, oczekuje by wyrażenie z lewej i prawej strony były listami tego samego typu i zwraca nową listę tego właśnie typu.\newpage
 \lstinputlisting[firstline=257, lastline=263]{algorithm_j.py}
-Wywołując funkcję aplikujemy argumenty na nowy zmiennym typie po czym unifikujemy rezultat z typem wywoływanego wyrażenia
+\subsubsection{Wywowałnia funkcji}
+W przypadku wywołania funkcji musimy zaimplementować currying.
+
+Przykład: $J(fn)=Num\rightarrow Str\rightarrow Unit\rightarrow Arr<Str>\\ J(args)=[Num,Str]$
+\begin{itemize}
+  \item typy argumentów zbieramy w odwrotnej kolejności \lstinline{ty_args=[Str,Num]}
+  \item Tworzymy nowy zmienny typ $ty=\alpha$
+  \item Następnie przy użyciu funkcji \lstinline{reduce_args} aplikujemy \lstinline{ty_args} na typie $\alpha$ co tworzy typ $tmp=Num\rightarrow Str\rightarrow \alpha$
+  \item Unifikujemy typy $tmp$ i $J(fn)$ co tworzy substytucję $\{\alpha: Unit\rightarrow Arr<Str>\}$
+  \item I zwracamy $\alpha$
+\end{itemize}
 \lstinputlisting[firstline=323, lastline=335]{algorithm_j.py}
 
-\subsection{kompilacja}
+\subsubsection{Wyrażenia warunkowe}
+W przypadku wyrażeń warunkowaych musimy, sprawdzić, czy warunek jest typu \lstinline{Bool} i czy, typy zwracane z każdej gałęzi są takie same, po czym zwracamy tą typ.
+\lstinputlisting[firstline=361, lastline=373]{algorithm_j.py}
+
+\subsubsection{Definicje funkcji}
+W przypadku definicje funkcji musimy upenić się, że typy generyczne, są przypiswywane od contextu. Musimy sprawdzić, czy typ zwracany z funkcji jest przypisywalny do zadeklarowanego typu, oraz zapisać funkcję do contextu.
+\lstinputlisting[firstline=336, lastline=360]{algorithm_j.py}
+
+\subsection{Pattern mathing}
+W trakcie pattern matching, musimy upewnić się, że konstruktory, posiadają odpowiednią ilość argumentów, oraz, przeprowadzą będziey exhaustivness checking. W tym celu funkcja przyjmuję argument \lstinline{o_alts} będący bazą, zmiennych i ich kontruktorów.
+
+W przypadku pustej gałęzi końcowej, sprawdzamy, czy każda z list jest pusta i wyrzucamy błąd, jeżeli jest.
+\lstinputlisting[firstline=508, lastline=520]{algorithm_j.py}
+
+W przypadku gałęzi decyzyjnej inferujemy typ zmiennej i sprawdzanego konstruktora
+\lstinputlisting[firstline=521, lastline=527]{algorithm_j.py}
+Następne dwa kroki dopełniają nasz exhaustivness checking. Wpierw uzupełniamy naszą bazę konstruktorów przy użyciu funkcji \lstinline{alternatives} zwracjącej listę wszystkich konstruktorów dla danego typu.
+Następnie usuwamy z bazy kontruktorów konstruktor do którego odnosi się nasza gałąź decyzjna.
+\lstinputlisting[firstline=530, lastline=534]{algorithm_j.py}
+
+Kolejna część inferuje typy zmiennych dla każdego z argumentów konstruktora.
+Oraz, tworzy dla nich zmienne na kontekście.\newpage
+\lstinputlisting[firstline=536, lastline=561]{algorithm_j.py}
+Reszta funkcji to sprawdzenie, czy typy zwracane z bloków są takie same.
+\lstinputlisting[firstline=564, lastline=578]{algorithm_j.py}
+
+
+\subsection{Hoisting}
+Ze względu, na to, że deklaracje zmiennych w javascript \lstinline{const x = 1} w przeciwieństwie do naszego języka nie zwracają przypisywanej do indentyfikatora wartości, wyrażenia typy \lstinline{f(a = b = c)} muszą być przekonwertowane do
+\begin{lstlisting}
+  b=c
+  a=b
+  f(a)
+\end{lstlisting}
+W tym celu zaimplementowalismy funkcję, przyjmuje wyrażenie i zwraca, listę wyrażeń do zhoistowania, oraz zmodyfikowane wyrażenie.
+
+W przypadku bloków wyrażeń, listy z wyrażeniami do zhoistowane są łączone z listą wyrażeń danego bloku.
+\lstinputlisting[firstline=46, lastline=56]{compile.py}
+\lstinputlisting[firstline=13, lastline=21]{compile.py}
+
+W przypadku deklaracji zmiennych i funkcji, dodajemy elementy do listy wyrażeń do zhoistowania.\newpage
+\lstinputlisting[firstline=62, lastline=72]{compile.py}
+W każdym innym przypadku lista wyrażeń do zhoistowania jest po prostu przepuszczana dalej.
+\lstinputlisting[firstline=81, lastline=89]{compile.py}
+
+
+\subsection{Kompilacja}
+Kompilacja opiera się na jednej funkcji zamieniającej, ast na kod javascript w postaci stringa.
+
+\subsection{Literały}
+Jak widać, dla literałów jest to dość trywialne.
+\lstinputlisting[firstline=145, lastline=152]{compile.py}
+
+\subsubsection{Wyrażenia warunkowe}
+Wyrażenia warunkowe, wymagają kompilacji, do postaci funkcji, gdyż w odróznieniu do javascript w naszym języku, zwracają one wartość.
+\lstinputlisting[firstline=170, lastline=171]{compile.py}
+
+\subsubsection{Warianty}
+Warianty, przyjmują postać obiektów z dyskryminatorem
+\lstinputlisting[firstline=187, lastline=190]{compile.py}
+
+\subsubsection{Pattern matching}
+W przypaku pustej gałęzi z blokiem kompilujemy blok.
+W przypaku pustej gałęzi końcowej generujemy wyjątek.
+\lstinputlisting[firstline=262, lastline=267]{compile.py}
+
+W przypadku gałęzi decyzyjnej generowany jest blok if sprawdzający zawartość zmiennej. Można też uniknąć generowania bloku else, w przypadku, gdy wygenerowany byłby wyjątek.\newpage
+\lstinputlisting[firstline=268, lastline=284]{compile.py}
+
 \section{Opis działania}
+Po uruchomieniu komendą \lstinline{python3 main.py **/*.uwu} programu, program skompiluje wszystkie pliki kończące się rozszerzeniem `.uwu' i wygeneruje dla każdego z nich korespondujący plik z roszerzeniem `.js'.
+
 \subsection{Co działa}
-\subsection{Uwagi co do obsługi błędów}
+W programie udało się zaimplementować dużą część funkcjonalności potrzebnych do pisania faktycznych programów. Zabrakło jednak kilku początkowo planowanych funkcji: między innymi: rekursji, krotek, rekordów.
+\subsection{Uwagi do działania}
+\subsubsection{Obsługa błędów}
+Błędy zwracane przez program nie są optymalne, nie zaimplementowaliśmy żadnej obsługi błędów w parserze. Błędy wynikające z inferencji typów, zwracają jedynie informacje o błędnych typach, nie o miejscu wystąpienia błędu. Wynika to z braku propagacji numerów linii i kolumn z parsera do drzewa ast.
+\subsubsection{Pattern matching}
+Pattern matching mógłby wyświetlać warning w momencie, gdy jedna ze ścieżek jest nieosiągalna.
 \section{[Podsumowanie]}
 \section{[spisy -- rysunków, tabel, listingów ipt.]}
 
 \bibliographystyle{plainnat}
+
 \bibliography{doc}
 
 

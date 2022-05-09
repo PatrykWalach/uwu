@@ -168,7 +168,7 @@ def _compile(exp: terms.AstTree) -> str:
         case terms.EIfNone():
             return f"return"
         case terms.EIf(test, then, or_else):
-            return f"(()=>{{if({_compile(test)}){{{_compile(then)}}}else{{{_compile(or_else)}}}}})()"
+            return f"(()=>{{if({_compile(test)}){{{_compile(then)}}}{_compile(or_else)}}})()"
         case terms.ECall(id, args):
             return functools.reduce(
                 lambda acc, arg: f"{acc}({arg})",

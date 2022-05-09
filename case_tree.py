@@ -34,13 +34,13 @@ def subst_var_eqs(clause: Clause):
     )
 
 
-k = 0
+# k = 0
 
 
-def fresh():
-    global k
-    k += 1
-    return f"x{k}"
+# def fresh():
+#     global k
+#     k += 1
+#     return f"x{k}"
 
 
 @dataclasses.dataclass
@@ -84,7 +84,7 @@ def gen_match2(clauses1: typing.Sequence[Clause]) -> CaseTree:
             yes = list[Clause]()
             no = list[Clause]()
 
-            # vars = [fresh() for _ in branch_pattern.patterns]
+            #
             vars = [f"{branch_var}._{i}" for i in range(len(branch_pattern.patterns))]
 
             for patterns, body in clauses:

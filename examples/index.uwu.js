@@ -38,18 +38,16 @@ const min = (a) => (b) => {
   return (() => {
     if (a < b) {
       return a;
-    } else {
-      return b;
     }
+    return b;
   })();
 };
 const max = (a) => (b) => {
   return (() => {
     if (a > b) {
       return a;
-    } else {
-      return b;
     }
+    return b;
   })();
 };
 const len = (arr) => {
@@ -59,12 +57,11 @@ const head = (arr) => {
   return (() => {
     if (len(arr) < 1.0) {
       return "Empty";
-    } else {
-      const [_head, ..._rest] = arr;
-      const list_head = _head;
-      const rest = _rest;
-      return { TAG: "Head", _0: list_head, _1: rest };
     }
+    const [_head, ..._rest] = arr;
+    const list_head = _head;
+    const rest = _rest;
+    return { TAG: "Head", _0: list_head, _1: rest };
   })();
 };
 const bubble_sort = (cmp) => (arr) => {
@@ -81,9 +78,8 @@ const bubble_sort = (cmp) => (arr) => {
         return (() => {
           if (cmp(value)(arr_head) < 0.0) {
             return [value].concat(swap_till2(rest)(arr_head));
-          } else {
-            return [arr_head].concat(swap_till2(rest)(value));
           }
+          return [arr_head].concat(swap_till2(rest)(value));
         })();
       }
       throw new Error("Non-exhaustive pattern match");
@@ -113,9 +109,8 @@ const merge = (a) => (b) => {
           return (() => {
             if (head_a < head_b) {
               return [head_a].concat(merge2(rest_a)(b));
-            } else {
-              return [head_b].concat(merge2(a)(rest_b));
             }
+            return [head_b].concat(merge2(a)(rest_b));
           })();
         }
         throw new Error("Non-exhaustive pattern match");
@@ -136,11 +131,10 @@ const merge_sort = (arr) => {
   return (() => {
     if (len(arr) < 2.0) {
       return arr;
-    } else {
-      const right = merge_sort2(take(arr)(Math.floor(len(arr) / 2.0)));
-      const left = merge_sort2(drop(arr)(Math.floor(len(arr) / 2.0)));
-      return merge(right)(left);
     }
+    const right = merge_sort2(take(arr)(Math.floor(len(arr) / 2.0)));
+    const left = merge_sort2(drop(arr)(Math.floor(len(arr) / 2.0)));
+    return merge(right)(left);
   })();
 };
 const number__cmp = (a) => (b) => {
