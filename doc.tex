@@ -156,7 +156,7 @@ Algorytm inferencji typów przedstwiony w \cite{Milner__1978}, oraz innych wcze�
 Warto zauważyć, że w ten sposób: dostajemy, prostą strukturalnie rekursywną definicjię rekonstrukcji typów, ale tracimy modularność algorytmu. Rozszerzenie takiego algorytmu o dodatkowe funkcjie jest o wiele trudniejsze, niż algorytmu, który oddziela kroki generowania ograniczeń i ich rozwiązywania.
 
 \subsection{Algorytm J}
-Algorytm W nie ma żadnych side-effectów, i świetnie zajmuje się aplikowanie i komponowaniem substytucji w odpowiedniej kolejności. Częste apikacje substytucji na wyrażeniach mogą znacznie zmniejszyć wydajność algorytmu rekonstruującegom dlatego też, Milner zaprezentował bardziej efektywną impereatywną wariacją W nazwaną algorytmem J w \cite{Milner__1978}.
+Algorytm W nie ma żadnych efektów ubocznych, i świetnie zajmuje się aplikowanie i komponowaniem substytucji w odpowiedniej kolejności. Częste apikacje substytucji na wyrażeniach mogą znacznie zmniejszyć wydajność algorytmu rekonstruującegom dlatego też, Milner zaprezentował bardziej efektywną impereatywną wariacją W nazwaną algorytmem J w \cite{Milner__1978}.
 
 Algorytm J jest funkcją, która dla dokonanych do tej pory substytucji $S$, środowiska $\Gamma$ - zbioru przechowywującego pary identyfikator wraz z typem, i wyrażnia $e$, zwraca kolejne substytucje $S$, oraz typ wyrażenia $\tau$.
 \begin{equation}
@@ -395,14 +395,14 @@ W przypadku definicje funkcji musimy upenić się, że typy generyczne, są przy
 \lstinputlisting[firstline=336, lastline=360]{algorithm_j.py}
 
 \subsection{Pattern mathing}
-W trakcie pattern matching, musimy upewnić się, że konstruktory, posiadają odpowiednią ilość argumentów, oraz, przeprowadzą będziey exhaustivness checking. W tym celu funkcja przyjmuję argument \lstinline{o_alts} będący bazą, zmiennych i ich kontruktorów.
+W trakcie pattern matching, musimy upewnić się, że konstruktory, posiadają odpowiednią ilość argumentów. Dodatkowo przeprowadzać będziemy sprawdzanie czy wyrażenie case jest wyczerpujące - przewiduje wszystkie przypadki. W tym celu funkcja przyjmuję argument \lstinline{o_alts} będący bazą, zmiennych i ich kontruktorów.
 
 W przypadku pustej gałęzi końcowej, sprawdzamy, czy każda z list jest pusta i wyrzucamy błąd, jeżeli jest.
 \lstinputlisting[firstline=508, lastline=520]{algorithm_j.py}
 
 W przypadku gałęzi decyzyjnej inferujemy typ zmiennej i sprawdzanego konstruktora
 \lstinputlisting[firstline=521, lastline=527]{algorithm_j.py}
-Następne dwa kroki dopełniają nasz exhaustivness checking. Wpierw uzupełniamy naszą bazę konstruktorów przy użyciu funkcji \lstinline{alternatives} zwracjącej listę wszystkich konstruktorów dla danego typu.
+Następne dwa kroki dopełniają nasze sprawdzenie czy wyrażenie jest wyczerpujące. Wpierw uzupełniamy naszą bazę konstruktorów przy użyciu funkcji \lstinline{alternatives} zwracjącej listę wszystkich konstruktorów dla danego typu.
 Następnie usuwamy z bazy kontruktorów konstruktor do którego odnosi się nasza gałąź decyzjna.
 \lstinputlisting[firstline=530, lastline=534]{algorithm_j.py}
 
@@ -413,22 +413,22 @@ Reszta funkcji to sprawdzenie, czy typy zwracane z bloków są takie same.
 \lstinputlisting[firstline=564, lastline=578]{algorithm_j.py}
 
 
-\subsection{Hoisting}
+\subsection{Windowanie (Hoisting)}
 Ze względu, na to, że deklaracje zmiennych w javascript \lstinline{const x = 1} w przeciwieństwie do naszego języka nie zwracają przypisywanej do indentyfikatora wartości, wyrażenia typy \lstinline{f(a = b = c)} muszą być przekonwertowane do
 \begin{lstlisting}
   b=c
   a=b
   f(a)
 \end{lstlisting}
-W tym celu zaimplementowalismy funkcję, przyjmuje wyrażenie i zwraca, listę wyrażeń do zhoistowania, oraz zmodyfikowane wyrażenie.
+W tym celu zaimplementowalismy funkcję, która przyjmuje wyrażenie i zwraca, listę wyrażeń do przeniesienia wyżej, oraz zmodyfikowane wyrażenie.
 
-W przypadku bloków wyrażeń, listy z wyrażeniami do zhoistowane są łączone z listą wyrażeń danego bloku.
+W przypadku bloków wyrażeń, listy z wyrażeniami do przeniesienia wyżej są łączone z listą wyrażeń danego bloku.
 \lstinputlisting[firstline=46, lastline=56]{compile.py}
 \lstinputlisting[firstline=13, lastline=21]{compile.py}
 
-W przypadku deklaracji zmiennych i funkcji, dodajemy elementy do listy wyrażeń do zhoistowania.\newpage
+W przypadku deklaracji zmiennych i funkcji, dodajemy elementy do listy wyrażeń do przeniesienia wyżej.\newpage
 \lstinputlisting[firstline=62, lastline=72]{compile.py}
-W każdym innym przypadku lista wyrażeń do zhoistowania jest po prostu przepuszczana dalej.
+W każdym innym przypadku lista wyrażeń do przeniesienia wyżej jest po prostu przepuszczana dalej.
 \lstinputlisting[firstline=81, lastline=89]{compile.py}
 
 
@@ -456,7 +456,7 @@ W przypadku gałęzi decyzyjnej generowany jest blok if sprawdzający zawartoś�
 \lstinputlisting[firstline=268, lastline=284]{compile.py}
 
 \section{Opis działania}
-Po uruchomieniu komendą \lstinline{python3 main.py **/*.uwu} programu, program skompiluje wszystkie pliki kończące się rozszerzeniem `.uwu' i wygeneruje dla każdego z nich korespondujący plik z roszerzeniem `.js'.
+Po uruchomieniu komendą \lstinline{python3 main.py **/*.uwu} programu, program skompiluje wszystkie pliki kończące się rozszerzeniem `.uwu' i wygeneruje dla każdego z nich odpowiedni plik z roszerzeniem `.js'.
 
 \subsection{Co działa}
 W programie udało się zaimplementować dużą część funkcjonalności potrzebnych do pisania faktycznych programów. Zabrakło jednak kilku początkowo planowanych funkcji: między innymi: rekursji, krotek, rekordów.
