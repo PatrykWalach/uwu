@@ -5,6 +5,8 @@
 \usepackage{amsmath}
 \usepackage{listings}
 \usepackage{color} %use color
+
+
 \definecolor{mygreen}{rgb}{0,0.6,0}
 \definecolor{mygray}{rgb}{0.5,0.5,0.5}
 \definecolor{mymauve}{rgb}{0.58,0,0.82}
@@ -117,7 +119,7 @@ i F\#. Na potrzeby będziemy wzorować się na \cite{Damas__Milner__1982}, i pos
 Termy w języku ML-the-calculus są następujące:
 \begin{equation}
   \begin{split}
-    e\ ::&=x\\
+    e\ ::&=x\qquad(\text{identyfikatory})\\
     &|\ \ \ c\qquad(\text{stałe})\\
     &|\ \ \ \lambda x.e\\
     &|\ \ \ e\ e\\
@@ -147,6 +149,8 @@ Typy które będziemy przypisywali do termów są następujące:
     \frac{\Gamma\vdash e_1:\tau'\qquad\Gamma,x:(\bigwedge\alpha_1,...,\alpha_n.\tau')\vdash e_2:\tau}{\Gamma\vdash \text{let }x=e_1\text{ in }e_2:\tau:B}(\{\alpha_1,...,\alpha_n\}=ftv(\tau')\backslash ftv(\Gamma)) \\
   \end{split}
 \end{equation}
+Funkcja $ftv(\tau)$ oblicza zbiór zmiennych typów występujących w $\tau$.
+
 Powyższe dowody nie mogą jednak być w prosty sposób przedstawione jako algorytm. Fakt, że typ $\tau'$ jest dowolnie wybierany w dowodzie dla $\lambda$ prowadzi do nieskończonej ilość dowodów, nawet dla prostego wyrażenia $\lambda x.x$.
 \subsection{Infernencja typów bazująca na ograniczeniach}
 Algorytmy infernencji typów bazujące na ograniczeniach generują dużą liczbę zmiennych typów i zbiór ograniczeń dla tych zmiennych. W drugim kroku algorytmu dla każdej zmiennej, szuka typu, który spełnia wszystkie ograniczenia.
@@ -183,45 +187,61 @@ Algorytm J jest funkcją, która dla dokonanych do tej pory substytucji $S$, śr
     &\text{and } \{\alpha_1,...,\alpha_n\}=ftv(S_2\tau_1)\backslash ftv(S_2\Gamma) \\
   \end{split}
 \end{equation}
-Funkcja pomocnicza $unify'(\tau,\tau',S)$ rozszerza zbiór substytucji S o substytucje wynikające z unifikacji $\tau$ z $\tau'$ pod kontekstem $S$.
+Funkcja pomocnicza $unify'(\tau,\tau',S)$ rozszerza zbiór substytucji S o substytucje wynikające z unifikacji $\tau$ z $\tau'$ pod kontekstem $S$. Np. $unify'(\alpha_1\rightarrow\alpha_2,B\rightarrow\alpha_3,S) = \{(\alpha_1,B), (\alpha_2,\alpha_3)\}$
 
 
 \section{Rescript/ReasonML jako języki realizujące podobne zadania}
 
 \section{Założenia i priorytety opracowanej aplikacji}
-Tworząc aplikację, chciałem, by język posiadał podstawowe typy danych (liczby, stringi, wartość logiczna), kilka typów generycznych (funkcje, tablice), typ `Option', oraz możliwość tworzenia własnych typów.
+Tworząc aplikację, chcieliśmy, by język posiadał podstawowe typy danych (liczby, stringi, wartość logiczna), kilka typów generycznych (funkcje, tablice), typ `Option', oraz możliwość tworzenia własnych typów.
 Dodatkowo nie powinno być potrzeby podawania typów zmiennych w większości przypadków, kompilator sam powinien wykrywać typy zmiennych na podstawie ich użycia.
 
 
 Język poza zmiennymi, potrzebuje możliwości wykonywania operacji na danych, dlatego ważne było dla mnie, by zaimplementować operatory binarane, oraz unarne. Operatory te miały też spełniać ważną rolą w trakcie inferencji typów. W języku javascript operator `+' może być wykorzystywany do dodawania liczb jak i konkatenacji stringów, ważne więc było by stworzyć dwa oddzielne operatory.
 
-Prymitywne typy danych:
-\begin{itemize}
-  \item string
-        \lstinputlisting{examples/string.uwu}
-        Do konkatenacji stringów służy operator \lstinline!++!
-  \item Wartość logiczna ma typ \lstinline!Bool! i wartość \lstinline!True! lub \lstinline!False!.
-        Powiązane operacje:
-        \begin{itemize}
-          \item \lstinline!<>!, równość pomiędzy dwiema liczbami
-          \item \lstinline!>!, \lstinline!<!
-          \item \lstinline|!=| równość
-        \end{itemize}
-  \item liczby
-        Powiązane operacje: \lstinline!+!, \lstinline!-!, \lstinline!*!, \lstinline!/!, \lstinline!*!, \lstinline!%!, \lstinline!//!
-\end{itemize}
-
-% typing.Literal["|", "!=", "=="]
 
 
-Chciałem również by funkcje wieloargumentowe kompilowane były jako funkcje jednoargumentowe zwracające kolejne funkcje, co pozwala na wywoływanie funkcji bez wszystkich argumentów w celu zwrócenia funkcji przyjmującej resztę argumentów tzw. currying.
+Prymitywne typy danych i często wykonywane operacje:
+
+\begin{center}
+  \begin{tabular}{c c c}
+    Co                    & Przykład                                                & wyjście javascript                  \\ 
+    \hline
+    Ciąg znaków           & \lstinline$'Hello'$                                     & \lstinline$"Hello"$                 \\ 
+    \hline
+    Konkatenacja          & \lstinline$'Hello '++ 'World'$                          & \lstinline$"Hello " + "World"$      \\
+    \hline
+    Liczby                & \lstinline$23$, \lstinline$-23.0$                       & \lstinline$23$, \lstinline$-23.0$   \\
+    \hline
+    Dodawanie/Odejmowanie & \lstinline$6 + 2.0 - 4$                                 & \lstinline$6 + 2.0 - 4$             \\
+    \hline
+    Dzielenie/Mnożenie    & \lstinline$2 / 23 * 1$                                  & \lstinline$2 / 23 * 1$              \\
+    \hline
+    Modulo & \lstinline$12 % 3$         & \lstinline$12 % 3$                                                                                             \\
+    \hline
+    Dzielenie całkowite        & \lstinline$5 // 2$ & \lstinline$Math.floor(5 / 2)$                                                                                             \\
+    \hline
+    Konkatenacja tablic         & \lstinline$[1] | [3, 4]$                                & \lstinline$[1].concat([3, 4]) $     \\
+
+    \hline
+    Porównywanie liczb    & \lstinline$>$,\lstinline$<$,\lstinline$<>$ & \lstinline$>$,\lstinline$<$,\lstinline$!==$                     \\
+    \hline
+    Równość/Nierówność               & \lstinline$==$, \lstinline$!=$                                            & \lstinline$===$, \lstinline$!==$                         \\
+    \hline
+    Zmienne logiczne      & \lstinline$True$, \lstinline$False$                     & \lstinline$true$, \lstinline$false$ \\
+    \hline
+  \end{tabular}
+\end{center}
+
+
+Chcieliśmy również by funkcje wieloargumentowe kompilowane były jako funkcje jednoargumentowe zwracające kolejne funkcje, co pozwala na wywoływanie funkcji bez wszystkich argumentów w celu zwrócenia funkcji przyjmującej resztę argumentów tzw. currying.
 
 \lstinputlisting[firstline=15]{examples/currying.uwu}
 \newpage
 \lstinputlisting[firstline=15]{examples/currying.uwu.js}
 
 
-Jednym z ważniejszych elemenów każdego języka jest możliwość wykonywania różnego zbioru instrukcji, warunkowo. W tym celu planowałem zaimplementowanie instrukcji `if', oraz `case'. Instrukcja `case' wykonywać ma dopasowanie do wzorca (tzw. pattern-matching), wykonywać, odpowiedni zbiór instrukcji zależnie od wprowadzonych danych. Kompilator, powinien ostrzegać, jeżeli ścieżka dla jednego z typów danych nie została zaimplementowana.
+Jednym z ważniejszych elemenów każdego języka jest możliwość wykonywania różnego zbioru instrukcji, warunkowo. W tym celu planowałem zaimplementowanie instrukcji `if', oraz `case'. Instrukcja `case' wykonywać ma dopasowanie do wzorca (tzw. pattern matching), wykonywać, odpowiedni zbiór instrukcji zależnie od wprowadzonych danych. Kompilator, powinien ostrzegać, jeżeli ścieżka dla jednego z typów danych nie została zaimplementowana.
 
 \begin{itemize}
 
@@ -243,7 +263,7 @@ Przykład
 \section{Narzędzia}
 \subsection{Język python}
 Do implementacji programu postanowiliśmy wykorzystać język python w wersji 3.10, ze względu na jego dynamiczność.
-W tej wersji języka pojawił się również pattern-matching, który znacząco ułatwia pracę z ast.
+W tej wersji języka pojawił się również pattern matching, który znacząco ułatwia pracę z ast.
 \subsection{Parsowanie i tokenizowanie przy użyciu biblioteki sly}
 Biblioteka sly, jest pythonową implementacją narzędzi lex i yacc, wykorzystywanych do tworzenia parserów i kompilatorów. Tworzenie leksera i parsera jest bardzo proste.
 
@@ -464,7 +484,7 @@ W programie udało się zaimplementować dużą część funkcjonalności potrze
 \subsubsection{Obsługa błędów}
 Błędy zwracane przez program nie są optymalne, nie zaimplementowaliśmy żadnej obsługi błędów w parserze. Błędy wynikające z inferencji typów, zwracają jedynie informacje o błędnych typach, nie o miejscu wystąpienia błędu. Wynika to z braku propagacji numerów linii i kolumn z parsera do drzewa ast.
 \subsubsection{Pattern matching}
-Pattern matching mógłby wyświetlać warning w momencie, gdy jedna ze ścieżek jest nieosiągalna.
+Pattern matching mógłby wyświetlać ostrzeżenie w momencie, gdy jedna ze ścieżek jest nieosiągalna.
 \section{[Podsumowanie]}
 \section{[spisy -- rysunków, tabel, listingów ipt.]}
 
