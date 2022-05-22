@@ -7,6 +7,7 @@
 \usepackage{color} %use color
 
 
+
 \definecolor{mygreen}{rgb}{0,0.6,0}
 \definecolor{mygray}{rgb}{0.5,0.5,0.5}
 \definecolor{mymauve}{rgb}{0.58,0,0.82}
@@ -201,7 +202,7 @@ Język poza zmiennymi, potrzebuje możliwości wykonywania operacji na danych, d
 
 
 
-Prymitywne typy danych i często wykonywane operacje:
+Porównanie prymitywne typy danych i często wykonywanych operacji z ich odpowiednikami w języku javascript:
 
 \begin{center}
   \begin{tabular}{c c c}
@@ -258,15 +259,117 @@ Przykład
 \lstinputlisting[firstline=15]{examples/return.uwu}
 \lstinputlisting[firstline=15]{examples/return.uwu.js}
 
+\newpage
 \subsection{Opis formaly składni języka}
-%  notacja wirta
+
+\allowdisplaybreaks
+\begin{align*}
+  S'\ ::&= \text{program}\\
+  \text{program}\ ::&= \text{NEWLINE\_optional}\ \text{do\_exprs\_optional}\\
+  \text{NEWLINE\_optional}\ ::&= \text{NEWLINE}\\
+    &|\ \ \ \text{<empty>}\\
+  \text{do\_exprs\_optional}\ ::&= \text{do\_exprs}\\
+    &|\ \ \ \text{<empty>}\\
+  \text{do\_exprs}\ ::&= \text{expr}\ \text{NEWLINE}\ \text{do\_exprs}\\
+    &|\ \ \ \text{expr}\ \text{NEWLINE\_optional}\\
+  \text{expr}\ ::&= \text{let}\\
+    &|\ \ \ (\ \text{expr}\ )\ \ [precedence=left,\ level=7]\\
+    &|\ \ \ \text{enum}\\
+    &|\ \ \ \text{variant\_call}\\
+    &|\ \ \ \text{case\_of}\\
+    &|\ \ \ \text{def\_expr}\\
+    &|\ \ \ \text{binary\_expr}\\
+    &|\ \ \ \text{call}\\
+    &|\ \ \ \text{literal}\\
+    &|\ \ \ \text{do}\\
+    &|\ \ \ \text{array}\\
+    &|\ \ \ \text{identifier}\\
+    &|\ \ \ -\ \text{expr}\ \ [precedence=right,\ level=6]\\
+    &|\ \ \ \text{if\_expr}\\
+    &|\ \ \ \text{external}\\
+  \text{external}\ ::&= \text{EXTERNAL}\\
+  \text{binary\_expr}\ ::&= \text{expr}\ >\ \text{expr}\ \ [precedence=left,\ level=3]\\
+    &|\ \ \ \text{expr}\ \text{INT\_DIV}\ \text{expr}\ \ [precedence=left,\ level=5]\\
+    &|\ \ \ \text{expr}\ /\ \text{expr}\ \ [precedence=left,\ level=5]\\
+    &|\ \ \ \text{expr}\ \%\ \text{expr}\ \ [precedence=left,\ level=5]\\
+    &|\ \ \ \text{expr}\ -\ \text{expr}\ \ [precedence=left,\ level=4]\\
+    &|\ \ \ \text{expr}\ \text{EQUAL}\ \text{expr}\ \ [precedence=left,\ level=2]\\
+    &|\ \ \ \text{expr}\ \text{CONCAT}\ \text{expr}\ \ [precedence=left,\ level=4]\\
+    &|\ \ \ \text{expr}\ +\ \text{expr}\ \ [precedence=left,\ level=4]\\
+    &|\ \ \ \text{expr}\ \text{NOT\_EQUAL}\ \text{expr}\ \ [precedence=left,\ level=2]\\
+    &|\ \ \ \text{expr}\ <\ \text{expr}\ \ [precedence=left,\ level=3]\\
+    &|\ \ \ \text{expr}\ |\ \text{expr}\ \ [precedence=left,\ level=4]\\
+    &|\ \ \ \text{expr}\ *\ \text{expr}\ \ [precedence=left,\ level=5]\\
+  \text{do}\ ::&= \text{DO}\ \text{type\_optional}\ \text{NEWLINE\_optional}\ \text{do\_exprs\_optional}\ \text{END}\\
+  \text{type\_optional}\ ::&= :\ \text{type}\\
+    &|\ \ \ \text{<empty>}\\
+  \text{block\_statement}\ ::&= \text{NEWLINE\_optional}\ \text{do\_exprs\_optional}\\
+  \text{def\_expr}\ ::&= \text{DEF}\ \text{identifier}\ <\ \text{type\_identifier}\ \text{type\_identifier\_repeat}\ >\ (\ \text{NEWLINE\_optional}\ \text{params\_optional}\ )\ \text{type\_optional}\ \text{do}\ \ [precedence=left,\ level=7]\\
+    &|\ \ \ \text{DEF}\ \text{identifier}\ (\ \text{NEWLINE\_optional}\ \text{params\_optional}\ )\ \text{type\_optional}\ \text{do}\ \ [precedence=left,\ level=7]\\
+  \text{params\_optional}\ ::&= \text{<empty>}\\
+    &|\ \ \ \text{params}\\
+  \text{type\_identifier\_repeat}\ ::&= \text{type\_identifier\_items}\\
+    &|\ \ \ \text{<empty>}\\
+  \text{type\_identifier\_items}\ ::&= \text{type\_identifier\_item}\\
+    &|\ \ \ \text{type\_identifier\_items}\ \text{type\_identifier\_item}\\
+  \text{type\_identifier\_item}\ ::&= ,\ \text{type\_identifier}\\
+  \text{params}\ ::&= \text{params}\ ,\ \text{NEWLINE\_optional}\ \text{param}\ \text{NEWLINE\_optional}\\
+    &|\ \ \ \text{param}\ \text{NEWLINE\_optional}\\
+  \text{type}\ ::&= \text{type\_identifier}\\
+    &|\ \ \ \text{type\_identifier}\ <\ \text{type}\ \text{type\_repeat}\ >\ \ [precedence=left,\ level=3]\\
+  \text{type\_repeat}\ ::&= \text{type\_items}\\
+    &|\ \ \ \text{<empty>}\\
+  \text{type\_items}\ ::&= \text{type\_items}\ \text{type\_item}\\
+    &|\ \ \ \text{type\_item}\\
+  \text{type\_item}\ ::&= ,\ \text{type}\\
+  \text{enum}\ ::&= \text{ENUM}\ \text{type\_identifier}\ <\ \text{type\_identifier}\ \text{type\_identifier\_repeat}\ >\ {\ \text{NEWLINE\_optional}\ \text{variants\_optional}\ }\\
+    &|\ \ \ \text{ENUM}\ \text{type\_identifier}\ {\ \text{NEWLINE\_optional}\ \text{variants\_optional}\ }\\
+  \text{variants\_optional}\ ::&= \text{variants}\\
+    &|\ \ \ \text{<empty>}\\
+  \text{variants}\ ::&= \text{variant}\ \text{NEWLINE\_optional}\\
+    &|\ \ \ \text{variants}\ \text{variant}\ \text{NEWLINE\_optional}\\
+  \text{variant}\ ::&= \text{type\_identifier}\\
+    &|\ \ \ \text{type\_identifier}\ (\ \text{type}\ \text{type\_repeat}\ )\ \ [precedence=left,\ level=7]\\
+  \text{param}\ ::&= \text{identifier}\ \text{type\_optional}\\
+  \text{if\_expr}\ ::&= \text{IF}\ \text{expr}\ \text{THEN}\ \text{type\_optional}\ \text{block\_statement}\ \text{or\_else\_optional}\ \text{END}\\
+  \text{or\_else\_optional}\ ::&= \text{or\_else}\\
+    &|\ \ \ \text{<empty>}\\
+  \text{or\_else}\ ::&= \text{ELSE}\ \text{block\_statement}\\
+    &|\ \ \ \text{ELIF}\ \text{expr}\ \text{THEN}\ \text{block\_statement}\ \text{or\_else\_optional}\\
+  \text{case\_of}\ ::&= \text{CASE}\ \text{expr}\ \text{OF}\ \text{NEWLINE\_optional}\ \text{cases\_optional}\ \text{END}\\
+  \text{cases\_optional}\ ::&= \text{cases}\\
+    &|\ \ \ \text{<empty>}\\
+  \text{cases}\ ::&= \text{pattern}\ \text{do}\ \text{NEWLINE\_optional}\\
+    &|\ \ \ \text{cases}\ \text{pattern}\ \text{do}\ \text{NEWLINE\_optional}\\
+  \text{pattern}\ ::&= \text{match\_as}\\
+    &|\ \ \ \text{match\_variant}\\
+  \text{match\_as}\ ::&= \text{identifier}\\
+  \text{match\_variant}\ ::&= \text{type\_identifier}\\
+    &|\ \ \ \text{type\_identifier}\ (\ \text{NEWLINE\_optional}\ \text{patterns\_optional}\ )\ \ [precedence=left,\ level=7]\\
+  \text{patterns\_optional}\ ::&= \text{<empty>}\\
+    &|\ \ \ \text{patterns}\\
+  \text{patterns}\ ::&= \text{patterns}\ ,\ \text{NEWLINE\_optional}\ \text{pattern}\ \text{NEWLINE\_optional}\\
+    &|\ \ \ \text{pattern}\ \text{NEWLINE\_optional}\\
+  \text{array}\ ::&= [\ \text{NEWLINE\_optional}\ \text{exprs\_optional}\ ]\\
+  \text{exprs\_optional}\ ::&= \text{exprs}\\
+    &|\ \ \ \text{<empty>}\\
+  \text{call}\ ::&= \text{expr}\ (\ \text{NEWLINE\_optional}\ \text{exprs\_optional}\ )\ \ [precedence=left,\ level=7]\\
+  \text{variant\_call}\ ::&= \text{type\_identifier}\ (\ \text{NEWLINE\_optional}\ \text{exprs\_optional}\ )\ \ [precedence=left,\ level=7]\\
+  \text{exprs}\ ::&= \text{exprs}\ ,\ \text{NEWLINE\_optional}\ \text{expr}\ \text{NEWLINE\_optional}\\
+    &|\ \ \ \text{expr}\ \text{NEWLINE\_optional}\\
+  \text{identifier}\ ::&= \text{IDENTIFIER}\\
+  \text{type\_identifier}\ ::&= \text{TYPE\_IDENTIFIER}\\
+  \text{let}\ ::&= \text{identifier}\ \text{type\_optional}\ =\ \text{expr}\ \ [precedence=left,\ level=1]\\
+  \text{literal}\ ::&= \text{NUMBER}\\
+    &|\ \ \ \text{STRING}
+  \end{align*}
 \section{Narzędzia}
 \subsection{Język python}
 Do implementacji programu postanowiliśmy wykorzystać język python w wersji 3.10, ze względu na jego dynamiczność.
 W tej wersji języka pojawił się również pattern matching, który znacząco ułatwia pracę z ast.
 \subsection{Parsowanie i tokenizowanie przy użyciu biblioteki sly}
 Biblioteka sly, jest pythonową implementacją narzędzi lex i yacc, wykorzystywanych do tworzenia parserów i kompilatorów. Tworzenie leksera i parsera jest bardzo proste.
-
+W naszym języku korzystaliśmy z wersji 0.4.
 
 \subsubsection{Lexer}
 Tokeny są tworzone przy pomocy wyrażeń regularnych.
