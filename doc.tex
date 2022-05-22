@@ -69,7 +69,7 @@ analiza leksykalna, zwraca tokeny:
 \begin{lstlisting}
   [(identifier, x), (operator, =), (identifier, a), (operator, +), (identifier, b), (operator, *), (literal, 2), (separator, ;)]
 \end{lstlisting}
-Dwoma ważnymi przypadkami są znaki białe i komentarze. One również muszą być uwzględnione w gramatyce i przeanalizowane przez lexer, lecz mogą być odrzucone (nie produkować żadnych tokenów) i traktowane jako spełniające mało znaczące zadanie, rozdzielania dwóch tokenów (np. w \lstinline{if x} zamiast \lstinline{ifx}).
+Dwoma ważnymi przypadkami są znaki białe i komentarze. One również muszą być uwzględnione w gramatyce i przeanalizowane przez lexer, lecz mogą być odrzucone (nie produkować żadnych tokenów) i traktowane jako spełniające drobne zadanie, rozdzielania dwóch tokenów (np. w \lstinline{if x} zamiast \lstinline{ifx}).
 
 \subsection{Parser}
 Analizator składniowy, parser – program dokonujący analizy składniowej danych wejściowych w celu określenia ich struktury gramatycznej w związku z określoną gramatyką formalną. Analizator składniowy umożliwia przetworzenie tekstu czytelnego dla człowieka w strukturę danych przydatną dla oprogramowania komputera. Wynikiem analizy składni, dokonywanej przez parser, najczęściej jest drzewo składniowe nazywane czasami drzewem wyprowadzenia\cite{Aho__Sethi__Ullman__1985}.
@@ -155,10 +155,35 @@ Funkcja $ftv(\tau)$ oblicza zbiór zmiennych typów występujących w $\tau$.
 Powyższe dowody nie mogą jednak być w prosty sposób przedstawione jako algorytm. Fakt, że typ $\tau'$ jest dowolnie wybierany w dowodzie dla $\lambda$ prowadzi do nieskończonej ilość dowodów, nawet dla prostego wyrażenia $\lambda x.x$.
 \subsection{Infernencja typów bazująca na ograniczeniach}
 Algorytmy infernencji typów bazujące na ograniczeniach generują dużą liczbę zmiennych typów i zbiór ograniczeń dla tych zmiennych. W drugim kroku algorytmu dla każdej zmiennej, szuka typu, który spełnia wszystkie ograniczenia.
-\subsection{System typów Hindley–Milner}
+\subsection{Algorytm W}
 Algorytm inferencji typów przedstwiony w \cite{Milner__1978}, oraz innych wcześniejszych publikacjach, opiera się na generowaniu ograniczeń i rozwiązywaniu ich w trakcie wykonywania prostego rekursywnego przejścia przez termy.
 
 Warto zauważyć, że w ten sposób: dostajemy, prostą strukturalnie rekursywną definicjię rekonstrukcji typów, ale tracimy modularność algorytmu. Rozszerzenie takiego algorytmu o dodatkowe funkcjie jest o wiele trudniejsze, niż algorytmu, który oddziela kroki generowania ograniczeń i ich rozwiązywania.
+
+\begin{equation}
+  \begin{split}
+    W :&\ \Gamma\times e \rightarrow S\times\tau \\
+    \\
+    W(\Gamma,x) =&\  ([],[\beta_i/\alpha_i]\tau') \\
+    &\ \text{where } \Gamma(x) = \bigwedge\alpha_i,...,\alpha_n.\tau' \\
+    &\ \text{and } \beta_i \text{ are fresh} \\
+    \\
+    W(\Gamma,e_1\ e_2) =&\  (V\circ S_2\circ S_1,V\beta) \\
+    &\ \text{where } (S_1,\tau_1) = W(\Gamma,e_1) \\
+    &\ \text{and } (S_2,\tau_2)=J(S_1,\Gamma,e_2) \\
+    &\ \text{and } V = unify(\{S_2\tau_1=\tau_2\rightarrow\beta\}) \\
+    &\ \text{and } \beta \text{ is fresh} \\
+    \\
+    W(\Gamma,\lambda x.e) =&\  (S,S\beta\rightarrow\tau) \\
+    &\ \text{where } (S,\tau)=W((\Gamma,x:\beta),e) \\
+    &\ \text{and } \beta \text{ is fresh} \\
+    \\
+    W(\Gamma,\text{let }x=e_1\text{ in }e_2) =&\  (S_2\circ S_1,\tau_2) \\
+    &\ \text{where } (S_1,\tau_1)=W(\Gamma,e_1) \\
+    &\ \text{and } (S_2,\tau_2)=W((S_1\Gamma,x:(\bigwedge\alpha_1,...,\alpha_n.\tau_1)),e_2) \\
+    &\ \text{and } \{\alpha_1,...,\alpha_n\}=ftv(\tau_1)\backslash ftv(S_1\Gamma) \\
+  \end{split}
+\end{equation}
 
 \subsection{Algorytm J}
 Algorytm W nie ma żadnych efektów ubocznych, i świetnie zajmuje się aplikowanie i komponowaniem substytucji w odpowiedniej kolejności. Częste apikacje substytucji na wyrażeniach mogą znacznie zmniejszyć wydajność algorytmu rekonstruującegom dlatego też, Milner zaprezentował bardziej efektywną impereatywną wariacją W nazwaną algorytmem J w \cite{Milner__1978}.
@@ -173,7 +198,7 @@ Algorytm J jest funkcją, która dla dokonanych do tej pory substytucji $S$, śr
     &\text{and } \beta_i \text{ are fresh} \\
     \\
     J(S,\Gamma,e_1\ e_2) =& (V,\beta) \\
-    &\text{where } \Gamma(S_1,\tau_1) = J(S,\Gamma,e_1) \\
+    &\text{where } (S_1,\tau_1) = J(S,\Gamma,e_1) \\
     &\text{and } (S_2,\tau_2)=J(S_1,\Gamma,e_2) \\
     &\text{and } V = unify'(\tau_1,\tau_2\rightarrow\beta,S_2) \\
     &\text{and } \beta \text{ is fresh} \\
@@ -182,7 +207,7 @@ Algorytm J jest funkcją, która dla dokonanych do tej pory substytucji $S$, śr
     &\text{where } (S_1,\tau)=J(S,(\Gamma,x:\beta),e) \\
     &\text{and } \beta \text{ is fresh} \\
     \\
-    J(S,\Gamma,\text{let }x=e_1\text{ in }e_2) =& (S_2,\tau_w) \\
+    J(S,\Gamma,\text{let }x=e_1\text{ in }e_2) =& (S_2,\tau_2) \\
     &\text{where } (S_1,\tau_1)=J(S,\Gamma,e_1) \\
     &\text{and } (S_2,\tau_2)=J(S_1,(\Gamma,x:(\bigwedge\alpha_1,...,\alpha_n.\tau_1)),e_2) \\
     &\text{and } \{\alpha_1,...,\alpha_n\}=ftv(S_2\tau_1)\backslash ftv(S_2\Gamma) \\
