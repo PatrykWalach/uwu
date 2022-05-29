@@ -318,8 +318,28 @@ Rekursja kończy się kiedy:
 \end{itemize}
 
 
-\section{Rescript/ReasonML jako języki realizujące podobne zadania}
+\section{Rescript - język realizujące podobne zadania}
+OCaml jest funckcyjnym językiem programowania kompilowanym na kod maszynowy.
+Rescript jest to fork OCaml generujący kod javascript, skupiający się na łatwej możliwości wdrożenia i adaptacji przez deweloperów korzystających javascript.
 
+Język ten posiada wiele funkcji, które pojawiają się w naszym języku między innymi: generyczne typy danych, unie z dyskryminatorem, dopasowania do wzorca.
+\newpage
+Przykład kodu w rescript:
+\begin{lstlisting}
+module Button = {
+  @react.component
+  let make = (~count: int) => {
+    let times = switch count {
+    | 1 => "once"
+    | 2 => "twice"
+    | n => Belt.Int.toString(n) ++ " times"
+    }
+    let msg = "Click me " ++ times
+
+    <button> {msg->React.string} </button>
+  }
+}
+\end{lstlisting}
 \section{Założenia i priorytety opracowanej aplikacji}
 Tworząc aplikację, chcieliśmy, by język posiadał podstawowe typy danych (liczby, stringi, wartość logiczna), kilka typów generycznych (funkcje, tablice), typ `Option', oraz możliwość tworzenia własnych typów.
 Dodatkowo nie powinno być potrzeby podawania typów zmiennych w większości przypadków, kompilator sam powinien wykrywać typy zmiennych na podstawie ich użycia.
