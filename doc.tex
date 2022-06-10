@@ -59,7 +59,7 @@ title=\lstname % show the filename of files included with \lstinputlisting; also
 
 \section{Ogólne wprowadzenie}
 \subsection{Analiza leksykalna}
-Analiza leksykalna w informatyce jest to proces rozbijania program źródłowych na jednostki logiczne (zwane leksemami) złożone z jednego lub więcej znaków, które łącznie mają jakieś znaczenie\cite{Hopcroft__Motwani__Ullman__2005}. Przykładami leksemów mogą być słowa kluczowe (np. while), identyfikator lub liczba składająca się z cyfr. Rozdzielaniem programu źródłowego, na leksemy, zajmuje się lekser.
+Analiza leksykalna w informatyce jest to proces rozbijania sekwencji znaków (np. takich jak kod źródłowych) na jednostki logiczne (zwane leksemami) złożone z jednego lub więcej znaków, które łącznie mają jakieś znaczenie\cite{Hopcroft__Motwani__Ullman__2005}. Przykładami leksemów mogą być słowa kluczowe (np. while), identyfikator lub liczba składająca się z cyfr. Rozdzielaniem programu źródłowego, na leksemy, zajmuje się lekser.
 
 Token jest strukturą reprezentującą leksem i wprost go kategoryzującą\cite{ Aho__Sethi__Ullman__1985}, co ułatwia późniejszą pracę parserowi. Tokeny kategoryzuje się na komputerowy odpowiednik tego, co lingwiści określiliby mianem części mowy. Biorąc jako przykład poniższy kod w języku C:
 \begin{lstlisting}[language=c]
@@ -69,7 +69,7 @@ analiza leksykalna, zwraca tokeny:
 \begin{lstlisting}
   [(identifier, x), (operator, =), (identifier, a), (operator, +), (identifier, b), (operator, *), (literal, 2), (separator, ;)]
 \end{lstlisting}
-Dwoma ważnymi przypadkami są znaki białe i komentarze. One również muszą być uwzględnione w gramatyce i przeanalizowane przez lexer, lecz mogą być odrzucone (nie produkować żadnych tokenów) i traktowane jako spełniające drobne zadanie, rozdzielania dwóch tokenów (np. w \lstinline{if x} zamiast \lstinline{ifx}).
+Dwoma ważnymi przypadkami znaków są znaki białe i komentarze. One również muszą być uwzględnione w gramatyce i przeanalizowane przez lexer, lecz mogą być odrzucone (nie produkować żadnych tokenów). Spełniają one wtedy zadanie, rozdzielenia dwóch tokenów (np. w \lstinline{if x} zamiast \lstinline{ifx}).
 
 \subsection{Parser}
 Analizator składniowy, parser – program dokonujący analizy składniowej danych wejściowych w celu określenia ich struktury gramatycznej w związku z określoną gramatyką formalną. Analizator składniowy umożliwia przetworzenie tekstu czytelnego dla człowieka w strukturę danych przydatną dla oprogramowania komputera. Wynikiem analizy składni, dokonywanej przez parser, najczęściej jest drzewo składniowe nazywane czasami drzewem wyprowadzenia\cite{Aho__Sethi__Ullman__1985}.
@@ -154,9 +154,9 @@ Funkcja $ftv(\tau)$ oblicza zbiór zmiennych typów występujących w $\tau$.
 
 Powyższe dowody nie mogą jednak być w prosty sposób przedstawione jako algorytm. Fakt, że typ $\tau'$ jest dowolnie wybierany w dowodzie dla $\lambda$ prowadzi do nieskończonej ilość dowodów, nawet dla prostego wyrażenia $\lambda x.x$.
 \subsection{Infernencja typów bazująca na ograniczeniach}
-Algorytmy infernencji typów bazujące na ograniczeniach generują dużą liczbę zmiennych typów i zbiór ograniczeń dla tych zmiennych. W drugim kroku algorytmu dla każdej zmiennej, szuka typu, który spełnia wszystkie ograniczenia.
+Algorytmy infernencji typów bazujące na ograniczeniach generują dużą liczbę zmiennych typów, oraz zbiór ograniczeń dla tych zmiennych. W drugim kroku algorytm dla każdej zmiennej, szuka typu, który spełnia wszystkie ograniczenia.
 \subsection{Algorytm W}
-Algorytm inferencji typów przedstwiony w \cite{Milner__1978}, oraz innych wcześniejszych publikacjach, opiera się na generowaniu ograniczeń i rozwiązywaniu ich w trakcie wykonywania prostego rekursywnego przejścia przez termy.
+Algorytm inferencji typów przedstwiony w \cite{Milner__1978}, oraz innych wcześniejszych publikacjach, opiera się na generowaniu ograniczeń i rozwiązywaniu ich w trakcie wykonywania rekursywnego przechodzenia przez termy.
 
 Warto zauważyć, że w ten sposób: dostajemy, prostą strukturalnie rekursywną definicjię rekonstrukcji typów, ale tracimy modularność algorytmu. Rozszerzenie takiego algorytmu o dodatkowe funkcjie jest o wiele trudniejsze, niż algorytmu, który oddziela kroki generowania ograniczeń i ich rozwiązywania.
 
@@ -217,7 +217,7 @@ Funkcja pomocnicza $unify'(\tau,\tau',S)$ rozszerza zbiór substytucji S o subst
 
 \section{Kompilacja pattern matchingu}
 \subsection{Motywacja}
-Wykorzystywany algorytm jest odbrobinę inny od algorytmów opisanych w literaturze. Bierzemy pod uwagę następujące obserwacje. Część algorytmów w literaturze w celu uniknięcia wykładniczego wzrostu generowanego kodu, generuje zbędne testy \cite{Augustsson__1985}. Wykładniczy wzrostu generowanego jednak praktycznie nie wsystępuje w praktyce \cite{Scott__Ramsey__2000}. Najlepszą praktyką wieć wydało nam się by nigdy nie generować niepotrzebnych sprawdzeń, i spróbować uninkąć duplikacji kodu używając heurystyki tak jak \cite{Maranget__2008}. Literatura udowadnia, że w przypadku praktycznie napisanego kodu, różne algorytmy generują prawie identycny kod  \cite{Scott__Ramsey__2000, Maranget__2008}. Naszą metodą więc jest, aby: (1) zawsze skupiać się na przypasowaniu pierszego przypadku, by uniknąć niepotrzebnych testów i (2) zachłannie spróbować zminimalizować duplikację przy użyciu heurystyki.
+Wykorzystywany algorytm jest odbrobinę inny od algorytmów opisanych w literaturze. Bierzemy pod uwagę następujące obserwacje. Część algorytmów w literaturze w celu uniknięcia wykładniczego wzrostu ilości wygenerowanego kodu, generuje zbędne testy \cite{Augustsson__1985}. Wykładniczy wzrost jednak praktycznie nie wsystępuje w praktyce \cite{Scott__Ramsey__2000}. Najlepszą praktyką więc wydało nam się by nigdy nie generować niepotrzebnych sprawdzeń, i spróbować uninkąć duplikacji kodu używając heurystyki tak jak \cite{Maranget__2008}. Literatura udowadnia, że w przypadku kodu napisanego w praktyce, różne algorytmy generują prawie identyczny kod  \cite{Scott__Ramsey__2000, Maranget__2008}. Naszą metodą więc jest, aby: (1) zawsze skupiać się na przypasowaniu pierszego przypadku, by uniknąć niepotrzebnych testów i (2) zachłannie spróbować zminimalizować duplikację przy użyciu heurystyki.
 
 \subsection{Kompilacja na przykładzie}
 Naszym celem jest kompilacja poniższego pattern matchingu w języku ML na drzewo decyzyjne.
@@ -248,7 +248,7 @@ Nasz algorytm będzie otrzymywał taką listę równań i zwracał drzewo w któ
    & |\  \text{C}(a_1,..., a_n)          & \rightarrow A \\
    & |\ \_                               & \rightarrow B \\
 \end{align*}
-Zaczniemy od pierwszego równanie i porównania z konstruktorem Add.
+Zaczniemy od pierwszego równania i porównania z konstruktorem Add.
 \begin{align*}
    & \ \text{match}\ \alpha\ \text{with}                 \\
    & |\  \text{Add}(a_1, a_2)            & \rightarrow A \\
@@ -321,7 +321,6 @@ Rekursja kończy się kiedy:
 \section{Rescript - język realizujące podobne zadania}
 OCaml jest funckcyjnym językiem programowania kompilowanym na kod maszynowy.
 Rescript jest to fork OCaml generujący kod javascript, skupiający się na łatwej możliwości wdrożenia i adaptacji przez deweloperów korzystających javascript.
-
 Język ten posiada wiele funkcji, które pojawiają się w naszym języku między innymi: generyczne typy danych, unie z dyskryminatorem, dopasowania do wzorca.
 \newpage
 Przykład kodu w rescript:
@@ -389,7 +388,7 @@ Chcieliśmy również by funkcje wieloargumentowe kompilowane były jako funkcje
 \lstinputlisting[firstline=15]{examples/currying.uwu.js}
 
 
-Jednym z ważniejszych elemenów każdego języka jest możliwość wykonywania różnego zbioru instrukcji, warunkowo. W tym celu planowałem zaimplementowanie instrukcji `if', oraz `case'. Instrukcja `case' wykonywać ma dopasowanie do wzorca (tzw. pattern matching), wykonywać, odpowiedni zbiór instrukcji zależnie od wprowadzonych danych. Kompilator, powinien ostrzegać, jeżeli ścieżka dla jednego z typów danych nie została zaimplementowana.
+Jednym z ważniejszych elemenów każdego języka jest możliwość wykonywania różnego zbioru instrukcji, warunkowo. W tym celu język powinien posiadać instrukcję `if', oraz `case'. Instrukcja `case' wykonywać, ma odpowiedni zbiór instrukcji zależnie do którego wzorca dopasowane zostaną wprowadzone dane. Kompilator, powinien ostrzegać, jeżeli istnieje możliwość niedopasowania danych do żadnego z wzorców.
 
 \begin{itemize}
 
@@ -399,7 +398,7 @@ Jednym z ważniejszych elemenów każdego języka jest możliwość wykonywania 
 \end{itemize}
 
 
-Kolejnym dość ważnym elementem języka jest brak wyrażenia `return', które jest wykorzystywane do zwrócenia wartości z funkcji. Zamiast tego każdy bloku instrukcji powinien zwracać ostatnie wyrażenie. Pozwoli to na łatwiejsze inicjowanie zmiennych, w przypadku gdy inicializacja wymaga więcej niż jedenej linii kodu.
+Kolejnym dość ważnym elementem języka jest brak wyrażenia `return', które jest wykorzystywane do zwrócenia wartości z funkcji. Zamiast tego każdy bloku instrukcji powinien zwracać ostatnie wyrażenie.
 
 \newpage
 Przykład
@@ -526,23 +525,23 @@ class Lex(sly.Lexer):
   ID = r"\w+"
   NUM = r"\d+"
 \end{lstlisting}
-Biblioteka udostępnia specjalny syntax do tworznia tokenów, które są już opisane jako inny token.
+Biblioteka udostępnia specjalną składnie do tworznia tokenów, w przypadku gdy są już one opisane przez inny token.
 \begin{lstlisting}
   ID["and"] = AND
 \end{lstlisting}
-Pojedyńcze znaki mogą być ignorowane, poprzez ustawienie zmiennej `ignore'.
+Pojedyńcze znaki można ignorować, poprzez ustawienie pola `ignore'.
 Dodatkowo ignorowane są też tokeny zaczynające się od `ignore'.
 \begin{lstlisting}
   ignore = " \t"
   ignore_comm = r"\#.*"
 \end{lstlisting}
-Istnieje również możliwość tworzenia tokenów o typie równym ich wartości, tak długo jak składają się tylko z jedngo znaku.
+Możemy też stworzyć tokeny o typie równym ich wartości, tak długo jak składają się tylko z jedngo znaku.
 \begin{lstlisting}
   literals = {"(", ")"}
 \end{lstlisting}
 
 \subsubsection{Parser}
-W przypadku parsera każda reguła jest implementowana jako metoda, pod której argumentem mamy dostęp do tokenów i wartości zwróconych z innych metod.
+W przypadku parsera każda reguła jest implementowana jako metoda, pod której argumentem mamy dostęp do tokenów i wartości zwróconych z innych metod występujących w składni danej reguły.
 \begin{lstlisting}
   import sly
   class Parser(sly.Parser):
