@@ -15,7 +15,7 @@
 %Customize a bit the look
 \lstset{ %
 backgroundcolor=\color{white}, % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
-basicstyle=\footnotesize, % the size of the fonts that are used for the code
+basicstyle=\ttfamily\footnotesize, % the size of the fonts that are used for the code
 breakatwhitespace=false, % sets if automatic breaks should only happen at whitespace
 breaklines=true, % sets automatic line breaking
 captionpos=b, % sets the caption-position to bottom
@@ -59,9 +59,9 @@ title=\lstname % show the filename of files included with \lstinputlisting; also
 
 \section{Ogólne wprowadzenie}
 \subsection{Analiza leksykalna}
-Analiza leksykalna w informatyce jest to proces rozbijania sekwencji znaków (np. takich jak kod źródłowych) na jednostki logiczne (zwane leksemami) złożone z jednego lub więcej znaków, które łącznie mają jakieś znaczenie\cite{Hopcroft__Motwani__Ullman__2005}. Przykładami leksemów mogą być słowa kluczowe (np. while), identyfikator lub liczba składająca się z cyfr. Rozdzielaniem programu źródłowego, na leksemy, zajmuje się lekser.
+Analiza leksykalna w informatyce jest to proces rozbijania sekwencji znaków (np. takich jak kod źródłowy) na jednostki logiczne (zwane leksemami) złożone z jednego lub więcej znaków, które łącznie mają jakieś znaczenie \cite{Hopcroft__Motwani__Ullman__2005}. Przykładami leksemów mogą być słowa kluczowe (np. \lstinline$while$), identyfikator lub liczba składająca się z cyfr. Rozdzielaniem programu źródłowego na leksemy zajmuje się lekser.
 
-Token jest strukturą reprezentującą leksem i wprost go kategoryzującą\cite{ Aho__Sethi__Ullman__1985}, co ułatwia późniejszą pracę parserowi. Tokeny kategoryzuje się na komputerowy odpowiednik tego, co lingwiści określiliby mianem części mowy. Biorąc jako przykład poniższy kod w języku C:
+Token jest strukturą reprezentującą leksem i wprost go kategoryzującą \cite{ Aho__Sethi__Ullman__1985}, co ułatwia późniejszą pracę parserowi. Tokeny kategoryzuje się na komputerowy odpowiednik tego, co lingwiści określiliby mianem części mowy. Biorąc jako przykład poniższy kod w języku C:
 \begin{lstlisting}[language=c]
   x = a + b * 2;
 \end{lstlisting}
@@ -69,10 +69,10 @@ analiza leksykalna, zwraca tokeny:
 \begin{lstlisting}
   [(identifier, x), (operator, =), (identifier, a), (operator, +), (identifier, b), (operator, *), (literal, 2), (separator, ;)]
 \end{lstlisting}
-Dwoma ważnymi przypadkami znaków są znaki białe i komentarze. One również muszą być uwzględnione w gramatyce i przeanalizowane przez lexer, lecz mogą być odrzucone (nie produkować żadnych tokenów). Spełniają one wtedy zadanie, rozdzielenia dwóch tokenów (np. w \lstinline{if x} zamiast \lstinline{ifx}).
+Dwoma ważnymi przypadkami znaków są znaki białe i komentarze. One również muszą być uwzględnione w gramatyce i przeanalizowane przez lekser, lecz mogą być odrzucone (nie produkować żadnych tokenów). Spełniają one wtedy zadanie, rozdzielenia dwóch tokenów (np. w \lstinline{if x} zamiast \lstinline{ifx}).
 
 \subsection{Parser}
-Analizator składniowy, parser – program dokonujący analizy składniowej danych wejściowych w celu określenia ich struktury gramatycznej w związku z określoną gramatyką formalną. Analizator składniowy umożliwia przetworzenie tekstu czytelnego dla człowieka w strukturę danych przydatną dla oprogramowania komputera. Wynikiem analizy składni, dokonywanej przez parser, najczęściej jest drzewo składniowe nazywane czasami drzewem wyprowadzenia\cite{Aho__Sethi__Ullman__1985}.
+Analizator składniowy, parser – program dokonujący analizy składniowej danych wejściowych w celu określenia ich struktury gramatycznej w związku z określoną gramatyką formalną. Analizator składniowy umożliwia przetworzenie tekstu czytelnego dla człowieka w strukturę danych przydatną dla oprogramowania komputera. Wynikiem analizy składni, dokonywanej przez parser, najczęściej jest drzewo składniowe nazywane czasami drzewem wyprowadzenia \cite{Aho__Sethi__Ullman__1985}.
 
 
 
@@ -80,42 +80,42 @@ Zadanie parsera sprowadza się do sprawdzenia czy i jak dane wejściowe mogą zo
 
 
 \begin{itemize}
-  \item Analiza zstępująca (ang. top-down parsing) to strategia znajdowania powiązań między danymi przez stawianie hipotez dotyczących drzewa rozbioru składniowego i sprawdzanie, czy zależności między danymi są zgodne z tymi hipotezami.
-  \item Analiza wstępująca (ang. bottom-up parsing) – ogólna metoda analizy składniowej, w której zaczyna się od słowa wejściowego i próbuje się zredukować je do symbolu startowego. Drzewo wyprowadzenia jest konstruowane od liści do korzenia (stąd nazwa). W każdym momencie w trakcie tego procesu mamy formę zdaniową, która zawiera segment, powstały w ostatnim kroku wyprowadzenia. Segment ten nazywany uchwytem (ang. handle) jest prawą stroną produkcji i powinien zostać w tym kroku zredukowany do jej lewej strony, w wyniku czego powstanie poprzednia forma zdaniowa z wyprowadzenia. Główna trudność w analizie wstępującej polega właśnie na odpowiednim znajdywaniu uchwytów.
+  \item Analiza zstępująca (ang. \emph{top-down parsing}) to strategia znajdowania powiązań między danymi przez stawianie hipotez dotyczących drzewa rozbioru składniowego i sprawdzanie, czy zależności między danymi są zgodne z tymi hipotezami.
+  \item Analiza wstępująca (ang. \emph{bottom-up parsing}) – ogólna metoda analizy składniowej, w której zaczyna się od słowa wejściowego i próbuje się zredukować je do symbolu startowego. Drzewo wyprowadzenia jest konstruowane od liści do korzenia (stąd nazwa). W każdym momencie w trakcie tego procesu mamy formę zdaniową, która zawiera segment, powstały w ostatnim kroku wyprowadzenia. Segment ten nazywany uchwytem (ang. \emph{handle}) jest prawą stroną produkcji i powinien zostać w tym kroku zredukowany do jej lewej strony, w wyniku czego powstanie poprzednia forma zdaniowa z wyprowadzenia. Główna trudność w analizie wstępującej polega właśnie na odpowiednim znajdywaniu uchwytów.
         Analiza wstępująca może przebiegać w określonym kierunku (np. od lewej do prawej), lub w sposób bezkierunkowy, wtedy analizowane jest całe słowo naraz. Jednym z bardziej znanych przedstawicieli metody bezkierunkowej jest algorytm CYK. Do metod kierunkowych zalicza się między innymi parsery shift-reduce czyli LR, LALR, SLR, BC, pierwszeństwa.
 \end{itemize}
 
 
 
 \subsection{System typów}
-System typów jest to system klasyfikacji wyrażeń w zależności od rodzajów wartości, jakie one generują\cite{Pierce__Benjamin__C__2002}. Każdej obliczonej wartości przypisywany jest pewien typ, który jednoznacznie definiuje, jakie operacje można na niej wykonać. Śledząc przepływ wartości, system typów stara się udowodnić, że w programie występuje poprawne typowanie, tzn. nie dochodzi do sytuacji, w której na wartości określonego typu próbujemy wykonać niedozwoloną operację.
+System typów jest to system klasyfikacji wyrażeń w zależności od rodzajów wartości, jakie one generują \cite{Pierce__Benjamin__C__2002}. Każdej obliczonej wartości przypisywany jest pewien typ, który jednoznacznie definiuje, jakie operacje można na niej wykonać. Śledząc przepływ wartości, system typów stara się udowodnić, że w programie występuje poprawne typowanie, tzn. nie dochodzi do sytuacji, w której na wartości określonego typu próbujemy wykonać niedozwoloną operację.
 \subsection{System typów ML} System typów ML jest to silny system typów stosowany w językach rodziny ML (Ocaml, Standard ML) oparty na inferencji.
 
-Podstawowy system typów jest następujący: istnieją typy proste, takie jak string, int, bool, unit (typ pusty) itd. Z dowolnych typów można też generować typy złożone – przez krotki (typ1 * typ2, typ1 * typ2 * typ3 itd.), konstruktory typów (typ list, typ tree itd.) i funkcje (typ1 → typ2).
+Podstawowy system typów jest następujący: istnieją typy proste, takie jak \lstinline$string$, \lstinline$int$, \lstinline$bool$, \lstinline$unit$ (typ pusty) itd. Z dowolnych typów można też generować typy złożone –-- przez krotki (\lstinline$typ1 * typ2$, \lstinline$typ1 * typ2 * typ3$ itd.), konstruktory typów (typ \lstinline$list$, typ \lstinline$tree$ itd.) i funkcje (\lstinline$typ1 -> typ2$).
 
-System próbuje nadać typy każdemu wyrażeniu języka, i nie licząc kilku rzadkich przypadków, udaje mu się to całkiem dobrze.
+System próbuje nadać typy każdemu wyrażeniu języka i nie licząc kilku rzadkich przypadków, udaje mu się to całkiem dobrze.
 
-Generalnie system taki wyklucza polimorfizm (nie licząc typów polimorficznych), jednak w Standard ML stworzono specjalne reguły umożliwiające polimorfizm dla wyrażeń arytmetycznych.
+Generalnie system taki wyklucza polimorfizm, jednak w Standard ML stworzono specjalne reguły umożliwiające polimorfizm dla wyrażeń arytmetycznych.
 
-System typów ML jest interesujący z teoretycznego punktu widzenia – wiele problemów ma bardzo wysoką złożoność, jednak w praktyce inferencja zachodzi bardzo szybko – typy, które są rzeczywiście używane, są zwykle bardzo proste – rzadko używa się funkcji rzędów wyższych niż trzeci-czwarty, oraz liczby argumentów większej niż kilkanaście.
+System typów w języku Standard ML jest interesujący z teoretycznego punktu widzenia – wiele problemów ma bardzo wysoką złożoność, jednak w praktyce inferencja zachodzi bardzo szybko – typy, które są rzeczywiście używane, są zwykle bardzo proste – rzadko używa się funkcji rzędów wyższych niż trzeci-czwarty oraz liczby argumentów większej niż kilkanaście.
 
 W rzeczywistych implementacjach dochodzą do tego bardziej złożone problemy typizacji obiektów, modułów itd.
 
 \subsection{Rekord z wariantami} Rekord z wariantami jest to rodzaj rekordu, posiadającego tę właściwość, że zbiór rekordów posiada wspólny typ, lecz różną postać, określoną aktualną wartością specjalnego pola znacznikowego.
 
-Przykład - Zakładając, że checmy stworzyć drzewo binarne intów. W języku ML, zrobilibyśmy to tworząc nowy typ danych w ten sposób:
+Na przykład, zakładając, że chcemy stworzyć drzewo binarne typu \lstinline$int$. W języku Standard ML zrobilibyśmy to tworząc nowy typ danych w ten sposób:
 \begin{lstlisting}[language=ML]
 datatype tree = Leaf
   | Node of (int * tree * tree)
 \end{lstlisting}
-\lstinline{Leaf} i \lstinline{Node} są konstruktorami, które pozwalają nam na stworzenie konretnego drzewa, np.
+\lstinline{Leaf} i \lstinline{Node} są konstruktorami, które pozwalają nam na stworzenie konkretnego drzewa, np.
 \begin{lstlisting}[language=ML]
   Node(5, Node(1, Leaf, Leaf), Node(3, Leaf, Node(4, Leaf, Leaf)))
 \end{lstlisting}
-\section{Inferencja typów w teori}
+\section{Inferencja typów w teorii}
 \subsection{Problem inferencji typów}
-Język ML przyjmuje wiele form, najpopularniejszymi wariantami są Standard ML (SML), OCaml,
-i F\#. Na potrzeby będziemy wzorować się na \cite{Damas__Milner__1982}, i posługiwać się ML-the-calculus, drastycznie uproszczoną wersją języka co pozwoli na dojście do sedna w problemie rekonstrukcji typów.
+Język ML przyjmuje wiele form, najpopularniejszymi wariantami są język Standard ML, język OCaml
+i język F\#. Na potrzeby przykładu będziemy wzorować się na \cite{Damas__Milner__1982} i posługiwać się ML-the-calculus, drastycznie uproszczoną wersją języka ML co pozwoli na dojście do sedna w problemie rekonstrukcji typów.
 
 Termy w języku ML-the-calculus są następujące:
 \begin{equation}
@@ -137,8 +137,8 @@ Typy które będziemy przypisywali do termów są następujące:
 \end{equation}
 \subsection{Udowadnianie typów dla ML-the-calculus}
 
-\begin{equation}
-  \begin{split}
+\begin{gather*}
+  % \begin{split}
     \frac{}{\Gamma\vdash c:B} \\
     \\
     \frac{\Gamma,x:\tau'\vdash e:\tau}{\Gamma\vdash\lambda x.e:\tau'\rightarrow\tau} \\
@@ -148,17 +148,17 @@ Typy które będziemy przypisywali do termów są następujące:
     \frac{\Gamma(x)=\bigwedge\alpha_1,...,\alpha_n.\tau'\qquad\tau=[\beta_i/\alpha_i]\tau'}{\Gamma\vdash x:\tau}(\beta_1\text{ fresh}) \\
     \\
     \frac{\Gamma\vdash e_1:\tau'\qquad\Gamma,x:(\bigwedge\alpha_1,...,\alpha_n.\tau')\vdash e_2:\tau}{\Gamma\vdash \text{let }x=e_1\text{ in }e_2:\tau:B}(\{\alpha_1,...,\alpha_n\}=ftv(\tau')\backslash ftv(\Gamma)) \\
-  \end{split}
-\end{equation}
+  % \end{split}
+\end{gather*}
 Funkcja $ftv(\tau)$ oblicza zbiór zmiennych typów występujących w $\tau$.
 
 Powyższe dowody nie mogą jednak być w prosty sposób przedstawione jako algorytm. Fakt, że typ $\tau'$ jest dowolnie wybierany w dowodzie dla $\lambda$ prowadzi do nieskończonej ilość dowodów, nawet dla prostego wyrażenia $\lambda x.x$.
-\subsection{Infernencja typów bazująca na ograniczeniach}
-Algorytmy infernencji typów bazujące na ograniczeniach generują dużą liczbę zmiennych typów, oraz zbiór ograniczeń dla tych zmiennych. W drugim kroku algorytm dla każdej zmiennej, szuka typu, który spełnia wszystkie ograniczenia.
+\subsection{Inferencja typów bazująca na ograniczeniach}
+Algorytmy inferencji typów bazujące na ograniczeniach generują dużą liczbę zmiennych typów oraz zbiór ograniczeń dla tych zmiennych. W drugim kroku algorytm dla każdej zmiennej, szuka typu, który spełnia wszystkie ograniczenia.
 \subsection{Algorytm W}
-Algorytm inferencji typów przedstwiony w \cite{Milner__1978}, oraz innych wcześniejszych publikacjach, opiera się na generowaniu ograniczeń i rozwiązywaniu ich w trakcie wykonywania rekursywnego przechodzenia przez termy.
+Algorytm W inferencji typów przedstawiony w \cite{Milner__1978} oraz innych wcześniejszych publikacjach, opiera się na generowaniu ograniczeń i rozwiązywaniu ich w trakcie wykonywania rekursywnego przechodzenia przez termy.
 
-Warto zauważyć, że w ten sposób: dostajemy, prostą strukturalnie rekursywną definicjię rekonstrukcji typów, ale tracimy modularność algorytmu. Rozszerzenie takiego algorytmu o dodatkowe funkcjie jest o wiele trudniejsze, niż algorytmu, który oddziela kroki generowania ograniczeń i ich rozwiązywania.
+Warto zauważyć, że w ten sposób: dostajemy, prostą strukturalnie rekursywną definicję rekonstrukcji typów, ale tracimy modularność algorytmu: rozszerzenie algorytmu W o dodatkowe funkcje jest o wiele trudniejsze niż algorytmu, który oddziela kroki generowania ograniczeń i ich rozwiązywania.
 
 \begin{equation}
   \begin{split}
@@ -186,9 +186,9 @@ Warto zauważyć, że w ten sposób: dostajemy, prostą strukturalnie rekursywn�
 \end{equation}
 
 \subsection{Algorytm J}
-Algorytm W nie ma żadnych efektów ubocznych, i świetnie zajmuje się aplikowanie i komponowaniem substytucji w odpowiedniej kolejności. Częste apikacje substytucji na wyrażeniach mogą znacznie zmniejszyć wydajność algorytmu rekonstruującegom dlatego też, Milner zaprezentował bardziej efektywną impereatywną wariacją W nazwaną algorytmem J w \cite{Milner__1978}.
+Algorytm W nie ma żadnych efektów ubocznych i świetnie zajmuje się aplikowaniem i komponowaniem substytucji w odpowiedniej kolejności. Częste aplikacje substytucji na wyrażeniach mogą znacznie zmniejszyć wydajność algorytmu rekonstruującego, dlatego też Milner zaprezentował bardziej efektywną imperatywną wariację algorytmu W nazwaną algorytmem J w \cite{Milner__1978}.
 
-Algorytm J jest funkcją, która dla dokonanych do tej pory substytucji $S$, środowiska $\Gamma$ - zbioru przechowywującego pary identyfikator wraz z typem, i wyrażnia $e$, zwraca kolejne substytucje $S$, oraz typ wyrażenia $\tau$.
+Algorytm J jest funkcją, która dla dokonanych do tej pory substytucji $S$, środowiska $\Gamma$ (ang. \emph{context}) (zbioru przechowywującego pary identyfikator wraz z typem) i wyrażenia $e$, zwraca kolejne substytucje $S$oraz typ wyrażenia $\tau$.
 \begin{equation}
   \begin{split}
     J :& S\times\Gamma\times e \rightarrow S\times\tau \\
@@ -215,12 +215,19 @@ Algorytm J jest funkcją, która dla dokonanych do tej pory substytucji $S$, śr
 \end{equation}
 Funkcja pomocnicza $unify'(\tau,\tau',S)$ rozszerza zbiór substytucji S o substytucje wynikające z unifikacji $\tau$ z $\tau'$ pod kontekstem $S$. Np. $unify'(\alpha_1\rightarrow\alpha_2,B\rightarrow\alpha_3,S) = \{(\alpha_1,B), (\alpha_2,\alpha_3)\}$
 
-\section{Kompilacja pattern matchingu}
+\section{Kompilacja dopasowania do wzorca (ang. \emph{pattern matching})}
 \subsection{Motywacja}
-Wykorzystywany algorytm jest odbrobinę inny od algorytmów opisanych w literaturze. Bierzemy pod uwagę następujące obserwacje. Część algorytmów w literaturze w celu uniknięcia wykładniczego wzrostu ilości wygenerowanego kodu, generuje zbędne testy \cite{Augustsson__1985}. Wykładniczy wzrost jednak praktycznie nie wsystępuje w praktyce \cite{Scott__Ramsey__2000}. Najlepszą praktyką więc wydało nam się by nigdy nie generować niepotrzebnych sprawdzeń, i spróbować uninkąć duplikacji kodu używając heurystyki tak jak \cite{Maranget__2008}. Literatura udowadnia, że w przypadku kodu napisanego w praktyce, różne algorytmy generują prawie identyczny kod  \cite{Scott__Ramsey__2000, Maranget__2008}. Naszą metodą więc jest, aby: (1) zawsze skupiać się na przypasowaniu pierszego przypadku, by uniknąć niepotrzebnych testów i (2) zachłannie spróbować zminimalizować duplikację przy użyciu heurystyki.
+Wykorzystywany algorytm jest odrobinę inny od algorytmów opisanych w literaturze. Bierzemy pod uwagę następujące obserwacje:
+\begin{itemize}
+  \item Część algorytmów w literaturze w celu uniknięcia wykładniczego wzrostu ilości wygenerowanego kodu, generuje zbędne testy \cite{Augustsson__1985}.
+  \item Wykładniczy wzrost jednak nie występuje w praktyce \cite{Scott__Ramsey__2000}.
+  \item Najlepszą praktyką więc wydało nam się by nigdy nie generować niepotrzebnych sprawdzeń i spróbować uniknąć duplikacji kodu używając heurystyki tak jak \cite{Maranget__2008}.
+  \item Literatura udowadnia, że w przypadku kodu napisanego w praktyce, różne algorytmy generują prawie identyczny kod \cite{Scott__Ramsey__2000, Maranget__2008}.
+\end{itemize}
+  Naszą metodą więc jest, aby: (1) zawsze skupiać się na przypasowaniu pierwszego przypadku, by uniknąć niepotrzebnych testów i (2) zachłannie spróbować zminimalizować duplikację przy użyciu heurystyki.
 
 \subsection{Kompilacja na przykładzie}
-Naszym celem jest kompilacja poniższego pattern matchingu w języku ML na drzewo decyzyjne.
+Naszym celem jest kompilacja poniższego dopasowania do wzorca w języku ML na drzewo decyzyjne.
 
 \begin{align*}
    & \ \text{match}\ \alpha\ \text{with}                       \\
@@ -248,29 +255,29 @@ Nasz algorytm będzie otrzymywał taką listę równań i zwracał drzewo w któ
    & |\  \text{C}(a_1,..., a_n)          & \rightarrow A \\
    & |\ \_                               & \rightarrow B \\
 \end{align*}
-Zaczniemy od pierwszego równania i porównania z konstruktorem Add.
+Zaczniemy od pierwszego równania i porównania z konstruktorem \lstinline$Add$.
 \begin{align*}
    & \ \text{match}\ \alpha\ \text{with}                 \\
    & |\  \text{Add}(a_1, a_2)            & \rightarrow A \\
    & |\ \_                               & \rightarrow B \\
 \end{align*}
-Porównanie to rozbija cały problem na podproblemy:
+Porównanie to rozbija cały problem na pod problemy:
 
-Następujący podproblemem dla A:
+Następujący pod problemem dla A:
 \begin{align*}
    & |\ \alpha_1 = \text{Zero}, \alpha_2 = \text{Zero} & \rightarrow e_1 \\
    & |\ \alpha_1 = \text{Succ}(x), \alpha_2 = y        & \rightarrow e_3 \\
    & |\ \alpha_1 = x, \alpha_2 = \text{Zero}           & \rightarrow e_6 \\
    & |\ \alpha = x                                     & \rightarrow e_7
 \end{align*}
-Oraz podproblemem dla B:
+Oraz pod problemem dla B:
 \begin{align*}
    & |\ \alpha = \text{Mul}(\text{Zero}, x)     & \rightarrow e_2 \\
    & |\ \alpha = \text{Mul}(x, \text{Zero})     & \rightarrow e_4 \\
    & |\ \alpha = \text{Mul}(\text{Add}(x,y), z) & \rightarrow e_5 \\
    & |\ \alpha = x                              & \rightarrow e_7
 \end{align*}
-Wyrażenia takie jak $\alpha_2=y$ to przypisanie do zmiennej, które odbywa się dopiero po przypasowaniu do wzorca, dlatego, możemy przenieść je na prawą stronę. Podproblem A po tym uproszeczeniu wygląda następująco:
+Wyrażenia takie jak $\alpha_2=y$ to przypisanie do zmiennej, które odbywa się dopiero po dopasowaniu do wzorca, dlatego, możemy przenieść je na prawą stronę. Pod problem A po tym uproszczeniu wygląda następująco:
 
 \begin{align*}
    & |\ \alpha_1 = \text{Zero}, \alpha_2 = \text{Zero} &  & \rightarrow e_1                                     \\
@@ -289,23 +296,23 @@ I kontynuować rekursywnie dla C i D.
 Mając listę równań, wykonujemy następującą listę kroków:
 \begin{itemize}
   \item Równania $\alpha=y$ przenosimy na prawą stronę, aby pozostać z listą równań testujących konstruktory.
-  \item Wybieramy któreś z równań $\alpha=C(\delta_1,...,\delta_2)$
+  \item Wybieramy któreś z równań $\alpha=\text{C}(\delta_1,...,\delta_2)$
   \item Generujemy następujące wyrażenie:
         \begin{align*}
            & \ \text{match}\ \alpha\ \text{with}                 \\
            & |\  \text{C}(a_1,..., a_n)          & \rightarrow A \\
            & |\ \_                               & \rightarrow B
         \end{align*}
-  \item Tworzy dwa podproblemy, iterując przez równania w następujący sposób:
+  \item Tworzymy dwa pod problemy, iterując przez równania w następujący sposób:
         \begin{itemize}
-          \item Wyrażenie zawiera równanie $\alpha=\text{C}(\delta_1,..., \delta_n),...,\Gamma$.
+          \item Jeżeli wyrażenie zawiera równanie $\alpha=\text{C}(\delta_1,..., \delta_n),...,\Gamma$.
 
                 Rozszerzamy wyrażenie tworząc nowe zmienne $\alpha_1=\delta_1,...,\alpha_n=\delta_n,...,\Gamma$ i dodajemy je do A.
-          \item Wyrażenie zawiera równanie $\alpha=\text{D}(a_1,..., a_n),...,\Gamma$ gdzie $\text{D}\ne\text{C}$.
+          \item Jeżeli wyrażenie zawiera równanie $\alpha=\text{D}(a_1,..., a_n),...,\Gamma$ gdzie $\text{D}\ne\text{C}$.
 
                 Dodajemy równanie do B.
 
-          \item Wyrażenie zawiera równanie $\alpha$.
+          \item Jeżeli wyrażenie zawiera równanie $\alpha$.
 
                 Dodajemy je do A i B.
         \end{itemize}
@@ -313,17 +320,17 @@ Mając listę równań, wykonujemy następującą listę kroków:
 \end{itemize}
 Rekursja kończy się kiedy: 
 \begin{itemize}
-  \item lista jest pusta - generujemy wyjątek "Non-exhaustive pattern match",
-  \item pierwsze z wyrażeń nie ma żadnych równań (udało nam się dokonać dopasowania) - po prostu zwracamy $e_1$.
+  \item lista jest pusta --- generujemy błąd braku pełnego dopasowania,
+  \item pierwsze z wyrażeń nie ma żadnych równań (udało nam się dokonać dopasowania) --- po prostu zwracamy $e_1$.
 \end{itemize}
 
 
-\section{Rescript - język realizujące podobne zadania}
-OCaml jest funckcyjnym językiem programowania kompilowanym na kod maszynowy.
-Rescript jest to fork OCaml generujący kod javascript, skupiający się na łatwej możliwości wdrożenia i adaptacji przez deweloperów korzystających javascript.
-Język ten posiada wiele funkcji, które pojawiają się w naszym języku między innymi: generyczne typy danych, unie z dyskryminatorem, dopasowania do wzorca.
+\section{ReScript --- język realizujący podobne zadania}
+OCaml jest funkcyjnym językiem programowania kompilowanym na kod maszynowy.
+ReScript jest to fork OCaml generujący kod w języku JavaScript, skupiający się na łatwej możliwości wdrożenia i adaptacji przez deweloperów korzystających z języka JavaScript.
+Język ten posiada wiele funkcji, które pojawiają się w naszym języku --- między innymi generyczne typy danych, unie z dyskryminatorem, dopasowania do wzorca.
 \newpage
-Przykład kodu w rescript:
+Przykład kodu w języku ReScript:
 \begin{lstlisting}
 module Button = {
   @react.component
@@ -340,19 +347,19 @@ module Button = {
 }
 \end{lstlisting}
 \section{Założenia i priorytety opracowanej aplikacji}
-Tworząc aplikację, chcieliśmy, by język posiadał podstawowe typy danych (liczby, stringi, wartość logiczna), kilka typów generycznych (funkcje, tablice), typ `Option', oraz możliwość tworzenia własnych typów.
+Tworząc aplikację, chcieliśmy, by kompilator posiadał podstawowe typy danych (liczba, napis, wartość logiczna), kilka typów generycznych (funkcja, tablica), typ \lstinline$Option$ oraz możliwość tworzenia własnych typów.
 Dodatkowo nie powinno być potrzeby podawania typów zmiennych w większości przypadków, kompilator sam powinien wykrywać typy zmiennych na podstawie ich użycia.
 
 
-Język poza zmiennymi, potrzebuje możliwości wykonywania operacji na danych, dlatego ważne było dla mnie, by zaimplementować operatory binarane, oraz unarne. Operatory te miały też spełniać ważną rolą w trakcie inferencji typów. W języku javascript operator `+' może być wykorzystywany do dodawania liczb jak i konkatenacji stringów, ważne więc było by stworzyć dwa oddzielne operatory.
+Język poza zmiennymi, potrzebuje możliwości wykonywania operacji na danych, dlatego ważne było dla nas, by zaimplementować operatory binarne oraz unarne. Operatory te miały też spełniać ważną rolą w trakcie inferencji typów. W języku JavaScript operator `+' może być wykorzystywany do dodawania liczb jak i konkatenacji napisów, ważne więc było by stworzyć dwa oddzielne operatory.
 
 
 
-Porównanie prymitywne typy danych i często wykonywanych operacji z ich odpowiednikami w języku javascript:
+Porównanie prymitywnych typów danych i często wykonywanych operacji z ich odpowiednikami w języku JavaScript pokazane jest w tabeli \ref{tab1}.
 
-\begin{center}
+\begin{table}[h!]
   \begin{tabular}{c c c}
-    Co                    & Przykład                                   & wyjście javascript                          \\
+    Co                    & Przykład                                   & wyjście w języku JavaScript                          \\
     \hline
     Ciąg znaków           & \lstinline$'Hello'$                        & \lstinline$"Hello"$                         \\
     \hline
@@ -378,27 +385,29 @@ Porównanie prymitywne typy danych i często wykonywanych operacji z ich odpowie
     Zmienne logiczne      & \lstinline$True$, \lstinline$False$        & \lstinline$true$, \lstinline$false$         \\
     \hline
   \end{tabular}
-\end{center}
+  \caption{Porównanie}
+  \label{tab1}
+\end{table}
 
 
-Chcieliśmy również by funkcje wieloargumentowe kompilowane były jako funkcje jednoargumentowe zwracające kolejne funkcje, co pozwala na wywoływanie funkcji bez wszystkich argumentów w celu zwrócenia funkcji przyjmującej resztę argumentów tzw. currying.
+Chcieliśmy również, by funkcje wieloargumentowe kompilowane były jako funkcje jednoargumentowe zwracające kolejne funkcje, co pozwala na wywoływanie funkcji z niepełną liczbą argumentów w celu zwrócenia funkcji przyjmującej resztę argumentów (ang. \emph{currying}).
 
 \lstinputlisting[firstline=15]{examples/currying.uwu}
 \newpage
 \lstinputlisting[firstline=15]{examples/currying.uwu.js}
 
 
-Jednym z ważniejszych elemenów każdego języka jest możliwość wykonywania różnego zbioru instrukcji, warunkowo. W tym celu język powinien posiadać instrukcję `if', oraz `case'. Instrukcja `case' wykonywać, ma odpowiedni zbiór instrukcji zależnie do którego wzorca dopasowane zostaną wprowadzone dane. Kompilator, powinien ostrzegać, jeżeli istnieje możliwość niedopasowania danych do żadnego z wzorców.
+Jednym z ważniejszych elementów każdego języka jest możliwość wykonywania różnego zbioru instrukcji warunkowo. W tym celu język powinien posiadać instrukcję \lstinline$if$ oraz \lstinline$case$. Instrukcja \lstinline$case$ wykonywać ma odpowiedni zbiór instrukcji, zależnie do którego wzorca dopasowane zostaną wprowadzone dane. Kompilator, powinien ostrzegać, jeżeli istnieje możliwość niedopasowania danych do żadnego z wzorców.
 
 \begin{itemize}
 
-  \item Przykład - funkcja łącząca dwie posortowane tablice
+  \item Przykład --- funkcja łącząca dwie posortowane tablice
         \lstinputlisting[firstline=25]{examples/merge.uwu}\newpage
         \lstinputlisting[firstline=19]{examples/merge.uwu.js}
 \end{itemize}
 
 
-Kolejnym dość ważnym elementem języka jest brak wyrażenia `return', które jest wykorzystywane do zwrócenia wartości z funkcji. Zamiast tego każdy bloku instrukcji powinien zwracać ostatnie wyrażenie.
+Kolejnym dość ważnym elementem języka jest brak wyrażenia `return', które jest wykorzystywane do zwrócenia wartości z funkcji. Zamiast tego każdy blok instrukcji powinien zwracać ostatnie wyrażenie.
 
 \newpage
 Przykład
@@ -406,7 +415,7 @@ Przykład
 \lstinputlisting[firstline=15]{examples/return.uwu.js}
 
 \newpage
-\subsection{Opis formaly składni języka}
+\subsection{Opis formalny składni języka}
 
 \allowdisplaybreaks
 \begin{align*}
@@ -510,14 +519,14 @@ Przykład
                                       & |\ \ \ \text{STRING}
 \end{align*}
 \section{Narzędzia}
-\subsection{Język python}
-Do implementacji programu postanowiliśmy wykorzystać język python w wersji 3.10, ze względu na jego dynamiczność.
-W tej wersji języka pojawił się również pattern matching, który znacząco ułatwia pracę z ast.
+\subsection{Język Python}
+Do implementacji naszego kompilatora postanowiliśmy wykorzystać język Python w wersji 3.10, ze względu na jego dynamiczność.
+W tej wersji języka pojawił się również pattern matching, który znacząco ułatwia pracę z drzewem syntaktycznym.
 \subsection{Parsowanie i tokenizowanie przy użyciu biblioteki sly}
-Biblioteka sly, jest pythonową implementacją narzędzi lex i yacc, wykorzystywanych do tworzenia parserów i kompilatorów. Tworzenie leksera i parsera jest bardzo proste.
+Biblioteka sly, jest implementacją narzędzi lex i yacc w języku Python, wykorzystywanych do tworzenia parserów i kompilatorów. Tworzenie leksera i parsera jest bardzo proste.
 W naszym języku korzystaliśmy z wersji 0.4.
 
-\subsubsection{Lexer}
+\subsubsection{Lekser}
 Tokeny są tworzone przy pomocy wyrażeń regularnych.
 \begin{lstlisting}
 import sly
@@ -525,17 +534,17 @@ class Lex(sly.Lexer):
   ID = r"\w+"
   NUM = r"\d+"
 \end{lstlisting}
-Biblioteka udostępnia specjalną składnie do tworznia tokenów, w przypadku gdy są już one opisane przez inny token.
+Biblioteka udostępnia specjalną składnie do tworzenia tokenów, w przypadku gdy są już one opisane przez inny token.
 \begin{lstlisting}
   ID["and"] = AND
 \end{lstlisting}
-Pojedyńcze znaki można ignorować, poprzez ustawienie pola `ignore'.
+Pojedyncze znaki można ignorować, poprzez ustawienie pola `ignore'.
 Dodatkowo ignorowane są też tokeny zaczynające się od `ignore'.
 \begin{lstlisting}
   ignore = " \t"
   ignore_comm = r"\#.*"
 \end{lstlisting}
-Możemy też stworzyć tokeny o typie równym ich wartości, tak długo jak składają się tylko z jedngo znaku.
+Możemy też stworzyć tokeny o typie równym ich wartości, o ile składają się tylko z jednego znaku.
 \begin{lstlisting}
   literals = {"(", ")"}
 \end{lstlisting}
@@ -557,46 +566,46 @@ W przypadku parsera każda reguła jest implementowana jako metoda, pod której 
 \end{lstlisting}
 Powyższy parser pozwala na opisanie wyrażeń logicznych typu: \lstinline{(1 and 0) and 4}.
 \subsection{Środowisko nodejs do uruchomienia skompilowanego kodu}
-Javascript jest językiem programowanie wykorzystywanym w przeglądarkach internetowych. W uruchomienia skompilowanego kodu używali będziemy jednak środowiska nodejs. Pozwoli to na szybkie i wygodne testowanie wygenerowanego kodu. Po zainstalowaniu środowiska i skompilowaniu pliku `index.uwu' otrzymamy plik `index.uwu.js', który możemy uruchomić w terminalu komendą `node index.uwu.js'.
+JavaScript jest językiem programowania wykorzystywanym w przeglądarkach internetowych. Do uruchomienia skompilowanego kodu używali będziemy jednak środowiska nodejs. Pozwoli to na szybkie i wygodne testowanie wygenerowanego kodu. Po zainstalowaniu środowiska i skompilowaniu pliku `index.uwu' otrzymamy plik `index.uwu.js', który możemy uruchomić w terminalu komendą `node index.uwu.js'.
 
 \section{Implementacja}
-\subsection{lexer}
-Nasz lexer implementował będzie poniższy zbiór tokenów, warto zauważyć, że identyfikatory zaczynające się z dużej litery są identyfikatorami typów.
+\subsection{Lekser}
+Nasz lekser implementował będzie poniższy zbiór tokenów, warto zauważyć, że identyfikatory zaczynające się z dużej litery są identyfikatorami typów.
 \lstinputlisting[firstline=75, lastline=94]{parser.py}
-Nasz lexer zaimował się również będzie zwracaniem tokena dla znaku nowej linii
+Nasz lekser zajmował się również będzie zwracaniem tokena dla znaku nowej linii
 \lstinputlisting[firstline=99, lastline=102]{parser.py}
-Lexer ignorował będzie tokeny komentarza, które zaczynają się od znaku `\#'. Oraz znaki tabulacji i spacji.
+Lekser ignorował będzie tokeny komentarza, które zaczynają się od znaku `\#'. Oraz znaki tabulacji i spacji.
 \newpage
 \lstinputlisting[firstline=96, lastline=97]{parser.py}
 
-Pozatym Nasz lexer zwracał będzie poniższy zbiór tokenów
+Poza tym nasz lekser zwracał będzie poniższy zbiór tokenów
 \lstinputlisting[firstline=55, lastline=74]{parser.py}
 
-\subsection{parser}
-Implementacja parsera jest bardzo prosta, każda z metod zajmuje jedynie linijkę, gdzie zwracane jest odpowiedne wyrażenie drzewa ast.
+\subsection{Parser}
+Implementacja parsera jest bardzo prosta, każda z metod zajmuje jedynie linijkę, gdzie zwracane jest odpowiedne wyrażenie drzewa syntaktycznego.
 \lstinputlisting[firstline=188, lastline=195]{parser.py}
-W przypadku zbiorów wyrażeń, zwracane są listy.\newpage
+W przypadku zbiorów wyrażeń zwracane są listy.\newpage
 \lstinputlisting[firstline=369, lastline=375]{parser.py}
 
 \subsection{Drzewo decyzyjne}
 
 
 
-Pattern matching zamieniany jest w drzewo decyzyjne przy pomocy rekurencyjnej funkcji.
+Dopasowanie do wzorca zamieniane jest w drzewo decyzyjne przy pomocy rekurencyjnej funkcji.
 Rekursja ma dwa podstawowe przypadki:
 \begin{itemize}
   \item lista przypadków jest pusta, więc generujemy pustą gałąź końcową
-  \item pierwszy przpadek, nie ma już więcej wzorów, więc zwracamy gałąź końcową z blokiem.
+  \item pierwszy przypadek, nie ma już więcej wzorów, więc zwracamy gałąź końcową z blokiem.
 \end{itemize}
 \lstinputlisting[firstline=72, lastline=80]{case_tree.py}
 W innym przypadku wybieramy wzorzec przy pomocy heurystyki\newpage
 \lstinputlisting[firstline=81, lastline=88]{case_tree.py}
 
-Następnie tworzymy dwa podproblemy \lstinline{yes} i \lstinline{no} iterując przez wszsytki przypadki. Dla każdego z nich robimy jedną z trzech rzeczy:
+Następnie tworzymy dwa pod problemy \lstinline{yes} i \lstinline{no} iterując przez wszystkie przypadki. Dla każdego z nich robimy jedną z trzech rzeczy:
 \begin{itemize}
   \item Przypadek nie zawiera wzorca, więc dodajemy go do \lstinline{yes} i \lstinline{no}
         \lstinputlisting[firstline=90, lastline=95]{case_tree.py}
-  \item Przpadek zawiera szukany wzorzec, więc dodajemy go do \lstinline{yes}
+  \item Przypadek zawiera szukany wzorzec, więc dodajemy go do \lstinline{yes}
         \lstinputlisting[firstline=97, lastline=108]{case_tree.py}
   \item Przypadek zawiera wzorzec, więc dodajemy go do \lstinline{no}
         \lstinputlisting[firstline=110, lastline=111]{case_tree.py}
@@ -604,21 +613,21 @@ Następnie tworzymy dwa podproblemy \lstinline{yes} i \lstinline{no} iterując p
 
 Rekursywnie generujemy kod dla \lstinline{yes} i \lstinline{no} i zwracamy gałąź decyzyjną
 \lstinputlisting[firstline=116, lastline=118]{case_tree.py}
-\subsection{inferencja typów}
-\subsubsection{Context}
-Implementację inferencji typów zaczynamy przez stworzenie zmiennego typu, który będzie reprezentowanty przez unikalny identyfikator.
+\subsection{Inferencja typów}
+\subsubsection{Reprezentacja środowiska}
+Implementację inferencji typów zaczynamy przez stworzenie zmiennego typu, który będzie reprezentowany przez unikalny identyfikator.
 \lstinputlisting[firstline=28, lastline=34]{algorithm_j.py}
 Substytucje to pary zmiennych i typów
 \lstinputlisting[firstline=25, lastline=25]{algorithm_j.py}
-Jednym z argumentów algorytmu J jest środowiko, w naszej implementacji reprezentowane jest one przez Context, będący mapą identyfikatorów i schem
+Jednym z argumentów algorytmu J jest środowisko, w naszej implementacji reprezentowane jest one przez zmienną \lstinline$Context$, będący słownikiem identyfikatorów i schematów,
 \lstinputlisting[firstline=26, lastline=26]{algorithm_j.py}
-Gdzie Schema to zawieraja informację o typie, oraz listę występujących w nim zmiennych typów
+gdzie schemat zawiera informację o typie oraz listę występujących w nim zmiennych typów
 \lstinputlisting[firstline=12, lastline=16]{algorithm_j.py}
 
 \subsubsection{Aplikowanie substytucji}
-Tworzymy funkcję, aplikującą substytucje na typie.
+Tworzymy funkcję aplikującą substytucje na typie.
 
-Przykład: dla subt=\{a:Num\} i ty=a->b funkcja zwraca Num -> b
+Przykład: dla $subt=\{a:Num\}$ i $ty=a\rightarrow b$ funkcja zwraca $Num\rightarrow b$
 \lstinputlisting[firstline=37, lastline=46]{algorithm_j.py}
 Tworzymy funkcję, unifikującą dwa typy
 \lstinputlisting[firstline=95, lastline=112]{algorithm_j.py}
@@ -627,21 +636,21 @@ wraz z funkcją generującą substytucje w przypadku unifikacji zmiennego typu
 Teraz zaczynamy implementację algorytmu J.
 
 \subsubsection{Literały}
-W przypadku literałów typ, jest oczywisty.
+W przypadku literałów typ jest oczywisty.
 \lstinputlisting[firstline=164, lastline=171]{algorithm_j.py}
 \subsubsection{Identyfikatory}
-W przypadku identyfikatorów, musimy zastąpić występujące w nich zmienne typy nowymi zmiennymi typami.
+W przypadku identyfikatorów musimy zastąpić występujące w nich zmienne typy nowymi zmiennymi typami.
 \lstinputlisting[firstline=172, lastline=173]{algorithm_j.py}
 \subsubsection{Bloki wyrażeń}
 W przypadku bloku wyrażeń inferujemy typ każdego z nich i zwracamy ostatni typ.
 \lstinputlisting[firstline=185, lastline=192]{algorithm_j.py}
 
 \subsubsection{Operatory binarne}
-Implementacja operatorów binarnych są bardzo podobne.
+Implementacje operatorów binarnych są bardzo podobne.
 
-Na przykład operator \lstinline{|} służącey do kontkatenacji dwóch list, oczekuje by wyrażenie z lewej i prawej strony były listami tego samego typu i zwraca nową listę tego właśnie typu.\newpage
+Na przykład operator \lstinline{|} służący do konkatenacji dwóch list, oczekuje by wyrażenie z lewej i prawej strony były listami tego samego typu i zwraca nową listę tego właśnie typu.\newpage
 \lstinputlisting[firstline=257, lastline=263]{algorithm_j.py}
-\subsubsection{Wywowałnia funkcji}
+\subsubsection{Wywołania funkcji}
 W przypadku wywołania funkcji musimy zaimplementować currying.
 
 Przykład: $J(fn)=Num\rightarrow Str\rightarrow Unit\rightarrow Arr<Str>\\ J(args)=[Num,Str]$
@@ -655,88 +664,88 @@ Przykład: $J(fn)=Num\rightarrow Str\rightarrow Unit\rightarrow Arr<Str>\\ J(arg
 \lstinputlisting[firstline=323, lastline=335]{algorithm_j.py}
 
 \subsubsection{Wyrażenia warunkowe}
-W przypadku wyrażeń warunkowaych musimy, sprawdzić, czy warunek jest typu \lstinline{Bool} i czy, typy zwracane z każdej gałęzi są takie same, po czym zwracamy tą typ.
+W przypadku wyrażeń warunkowych musimy, sprawdzić, czy warunek jest typu \lstinline{Bool} i czy, typy zwracane z każdej gałęzi są takie same, po czym zwracamy ten typ.
 \lstinputlisting[firstline=361, lastline=373]{algorithm_j.py}
 
 \subsubsection{Definicje funkcji}
-W przypadku definicje funkcji musimy upenić się, że typy generyczne, są przypiswywane od contextu. Musimy sprawdzić, czy typ zwracany z funkcji jest przypisywalny do zadeklarowanego typu, oraz zapisać funkcję do contextu.
+W przypadku definicji funkcji musimy upewnić się że typy generyczne, są przypisywane do środowiska. Musimy sprawdzić, czy typ zwracany z funkcji jest przypisywalny do zadeklarowanego typu oraz zapisać funkcję do środowiska.
 \lstinputlisting[firstline=336, lastline=360]{algorithm_j.py}
 
-\subsection{Pattern mathing}
-W trakcie pattern matching, musimy upewnić się, że konstruktory, posiadają odpowiednią ilość argumentów. Dodatkowo przeprowadzać będziemy sprawdzanie czy wyrażenie case jest wyczerpujące - przewiduje wszystkie przypadki. W tym celu funkcja przyjmuję argument \lstinline{o_alts} będący bazą, zmiennych i ich kontruktorów.
+\subsection{Dopasowanie do wzorca}
+W trakcie dopasowania do wzorca, musimy upewnić się, że konstruktory, posiadają odpowiednią liczbę argumentów. Dodatkowo przeprowadzać będziemy sprawdzanie czy wyrażenie \lstinline$case$ jest wyczerpujące --- czy przewiduje wszystkie przypadki. W tym celu funkcja przyjmuje argument \lstinline$o_alts$ będący bazą zmiennych i ich konstruktorów.
 
 W przypadku pustej gałęzi końcowej, sprawdzamy, czy każda z list jest pusta i wyrzucamy błąd, jeżeli jest.
 \lstinputlisting[firstline=508, lastline=520]{algorithm_j.py}
 
 W przypadku gałęzi decyzyjnej inferujemy typ zmiennej i sprawdzanego konstruktora
 \lstinputlisting[firstline=521, lastline=527]{algorithm_j.py}
-Następne dwa kroki dopełniają nasze sprawdzenie czy wyrażenie jest wyczerpujące. Wpierw uzupełniamy naszą bazę konstruktorów przy użyciu funkcji \lstinline{alternatives} zwracjącej listę wszystkich konstruktorów dla danego typu.
-Następnie usuwamy z bazy kontruktorów konstruktor do którego odnosi się nasza gałąź decyzjna.
+Następne dwa kroki dopełniają nasze sprawdzenie czy wyrażenie jest wyczerpujące. Wpierw uzupełniamy naszą bazę konstruktorów przy użyciu funkcji \lstinline{alternatives} zwracającej listę wszystkich konstruktorów dla danego typu.
+Następnie usuwamy z bazy konstruktorów konstruktor do którego odnosi się nasza gałąź decyzyjna.
 \lstinputlisting[firstline=530, lastline=534]{algorithm_j.py}
 
 Kolejna część inferuje typy zmiennych dla każdego z argumentów konstruktora.
-Oraz, tworzy dla nich zmienne na kontekście.\newpage
+Oraz tworzy dla nich zmienne w środowisku.\newpage
 \lstinputlisting[firstline=536, lastline=561]{algorithm_j.py}
 Reszta funkcji to sprawdzenie, czy typy zwracane z bloków są takie same.
 \lstinputlisting[firstline=564, lastline=578]{algorithm_j.py}
 
 
-\subsection{Windowanie (Hoisting)}
-Ze względu, na to, że deklaracje zmiennych w javascript \lstinline{const x = 1} w przeciwieństwie do naszego języka nie zwracają przypisywanej do indentyfikatora wartości, wyrażenia typy \lstinline{f(a = b = c)} muszą być przekonwertowane do
+\subsection{Windowanie (ang. \emph{Hoisting})}
+Ze względu, na to, że deklaracje zmiennych w języku JavaScript, np. \lstinline{const x = 1} w przeciwieństwie do naszego języka nie zwracają przypisywanej do identyfikatora wartości, wyrażenia typu \lstinline{f(a = b = c)} muszą być przekonwertowane do
 \begin{lstlisting}
   b=c
   a=b
   f(a)
 \end{lstlisting}
-W tym celu zaimplementowalismy funkcję, która przyjmuje wyrażenie i zwraca, listę wyrażeń do przeniesienia wyżej, oraz zmodyfikowane wyrażenie.
+W tym celu zaimplementowaliśmy funkcję, która przyjmuje wyrażenie i zwraca, listę wyrażeń do przeniesienia wyżej oraz zmodyfikowane wyrażenie.
 
-W przypadku bloków wyrażeń, listy z wyrażeniami do przeniesienia wyżej są łączone z listą wyrażeń danego bloku.
+W przypadku bloków wyrażeń, listy z wyrażeniami do windowania są łączone z listą wyrażeń danego bloku.
 \lstinputlisting[firstline=46, lastline=56]{compile.py}
 \lstinputlisting[firstline=13, lastline=21]{compile.py}
 
-W przypadku deklaracji zmiennych i funkcji, dodajemy elementy do listy wyrażeń do przeniesienia wyżej.\newpage
+W przypadku deklaracji zmiennych i funkcji, dodajemy elementy do listy wyrażeń do windowania.\newpage
 \lstinputlisting[firstline=62, lastline=72]{compile.py}
-W każdym innym przypadku lista wyrażeń do przeniesienia wyżej jest po prostu przepuszczana dalej.
+W każdym innym przypadku lista wyrażeń do windowania jest po prostu przepuszczana dalej.
 \lstinputlisting[firstline=81, lastline=89]{compile.py}
 
 
 \subsection{Kompilacja}
-Kompilacja opiera się na jednej funkcji zamieniającej, ast na kod javascript w postaci stringa.
+Kompilacja opiera się na jednej funkcji zamieniającej drzewo syntaktyczne na kod języka JavaScript w postaci napis.
 
 \subsection{Literały}
 Jak widać, dla literałów jest to dość trywialne.
 \lstinputlisting[firstline=145, lastline=152]{compile.py}
 
 \subsubsection{Wyrażenia warunkowe}
-Wyrażenia warunkowe, wymagają kompilacji, do postaci funkcji, gdyż w odróznieniu do javascript w naszym języku, zwracają one wartość.
+Wyrażenia warunkowe wymagają kompilacji do postaci funkcji, gdyż w odróżnieniu od języka JavaScript, w naszym języku zwracają one wartość.
 \lstinputlisting[firstline=170, lastline=171]{compile.py}
 
 \subsubsection{Warianty}
-Warianty, przyjmują postać obiektów z dyskryminatorem
+Warianty przyjmują postać obiektów z dyskryminatorem
 \lstinputlisting[firstline=187, lastline=190]{compile.py}
 
-\subsubsection{Pattern matching}
-W przypaku pustej gałęzi z blokiem kompilujemy blok.
-W przypaku pustej gałęzi końcowej generujemy wyjątek.
+\subsubsection{Dopasowanie do wzorca}
+W przypadku pustej gałęzi z blokiem kompilujemy blok.
+W przypadku pustej gałęzi końcowej generujemy wyjątek.
 \lstinputlisting[firstline=262, lastline=267]{compile.py}
 
 W przypadku gałęzi decyzyjnej generowany jest blok if sprawdzający zawartość zmiennej. Można też uniknąć generowania bloku else, w przypadku, gdy wygenerowany byłby wyjątek.\newpage
 \lstinputlisting[firstline=268, lastline=284]{compile.py}
 
 \section{Opis działania}
-Po uruchomieniu komendą \lstinline{python3 main.py **/*.uwu} programu, program skompiluje wszystkie pliki kończące się rozszerzeniem `.uwu' i wygeneruje dla każdego z nich odpowiedni plik z roszerzeniem `.js'.
+Po uruchomieniu komendą \lstinline{python3 main.py **/*.uwu} programu, program skompiluje wszystkie pliki kończące się rozszerzeniem `.uwu' i wygeneruje dla każdego z nich odpowiedni plik z rozszerzeniem `.js'.
 
 \subsection{Co działa}
 W programie udało się zaimplementować dużą część funkcjonalności potrzebnych do pisania faktycznych programów. Zabrakło jednak kilku początkowo planowanych funkcji: między innymi: rekursji, krotek, rekordów.
 \subsection{Uwagi do działania}
 \subsubsection{Obsługa błędów}
-Błędy zwracane przez program nie są optymalne, nie zaimplementowaliśmy żadnej obsługi błędów w parserze. Błędy wynikające z inferencji typów, zwracają jedynie informacje o błędnych typach, nie o miejscu wystąpienia błędu. Wynika to z braku propagacji numerów linii i kolumn z parsera do drzewa ast.
-\subsubsection{Pattern matching}
-Pattern matching mógłby wyświetlać ostrzeżenie w momencie, gdy jedna ze ścieżek jest nieosiągalna.
+Błędy zwracane przez program nie są optymalne, nie zaimplementowaliśmy żadnej obsługi błędów w parserze. Błędy wynikające z inferencji typów, zwracają jedynie informacje o błędnych typach, nie o miejscu wystąpienia błędu. Wynika to z braku propagacji numerów linii i kolumn z parsera do drzewa syntaktycznego.
+\subsubsection{Dopasowanie do wzorca}
+W przypadku dopasowania do wzorca, kompilator powinnien wyświetlić ostrzeżenie w momencie, gdy jedna ze ścieżek jest nieosiągalna.
 \section{[Podsumowanie]}
-\section{[spisy -- rysunków, tabel, listingów ipt.]}
+\section{[spisy --- rysunków, tabel, listingów itp.]}
 
-\bibliographystyle{plainnat}
+\bibliographystyle{abbrv}
 
 \bibliography{doc}
 
