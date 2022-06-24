@@ -55,7 +55,10 @@ title=\lstname % show the filename of files included with \lstinputlisting; also
 \maketitle
 \tableofcontents
 
-\section*{[Wstęp]}
+\section*{Wstęp}
+Język JavaScript uznawany jest za wysoko podatny na błędy. Jeden nieobsłużony wyjątek jest w stanie przerwać działanie całego programu. Z tego powodu deweloperzy sięgają po narzędzia wykrywające błędy na etapie kompilacji. Często jednak tego typu narzędzia wymagają dodatkowych adnotacji typów co zwiększa ilość pracy i zmniejsza czytelność kodu oraz nie radzą sobie z przesadnie dynamicznym kodem. Dlatego w niniejszej pracy sprawdzimy czy istnieje możliwość stworzenia kompilatora generującego kod w języku JavaScript. Kompilator zbudujemy w języku Python.
+
+W pierwszych trzech rozdziałach przedstawiamy poszczególne elementy kompilatora z teoretycznego punktu widzenia. W rozdziale czwartym spoglądamy na język ReScript realizujący podobne zadania. W rozdziale piątym opisujemy założenia naszego kompilatora oraz prezentujemy opis formalny składni języka. W kolejnym rozdziale przedstawiamy narzędzia i środowiska użyte do stworzenia kompilatora. W rozdziale siódmy opisujemy wybrane fragmenty kodu stanowiące implementację naszego kompilatora. W ostatnim rozdziale dokonujemy refleksji co do zaimplementowanych i niezaimplementowanych funkcjonalności kompilatora.
 
 \section{Ogólne wprowadzenie}
 \subsection{Analiza leksykalna}
@@ -741,8 +744,9 @@ W programie udało się zaimplementować dużą część funkcjonalności potrze
 \subsubsection{Obsługa błędów}
 Błędy zwracane przez program nie są optymalne, nie zaimplementowaliśmy żadnej obsługi błędów w parserze. Błędy wynikające z inferencji typów, zwracają jedynie informacje o błędnych typach, nie o miejscu wystąpienia błędu. Wynika to z braku propagacji numerów linii i kolumn z parsera do drzewa syntaktycznego.
 \subsubsection{Dopasowanie do wzorca}
-W przypadku dopasowania do wzorca, kompilator powinnien wyświetlić ostrzeżenie w momencie, gdy jedna ze ścieżek jest nieosiągalna.
-\section{[Podsumowanie]}
+W przypadku dopasowania do wzorca, kompilator powinien wyświetlić ostrzeżenie w momencie, gdy jedna ze ścieżek jest nieosiągalna.
+\section*{Podsumowanie}
+Udało nam się stworzyć kompilator generujący kod języka JavaScript. Zaimplementowaliśmy lekser oraz parser. Zaimplementowaliśmy typy podstawowe (liczby, ciągi znaków), oraz generyczne (funkcje, tablice). Kompilator dokonuje inferencji typów przy pomocy algorytmu W. Język posiada możliwość dopasowywania danych do wzorca 
 \section{[spisy --- rysunków, tabel, listingów itp.]}
 
 \bibliographystyle{abbrv}
