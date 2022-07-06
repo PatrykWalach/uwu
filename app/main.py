@@ -5,13 +5,13 @@ import glob
 import json
 import logging
 import sys
-from parser import UwuLexer, UwuParser
+from app.parser import UwuLexer, UwuParser
 
-import algorithm_j
-import compile
-import terms
-import typed
-from algorithm_j import Context, NonExhaustiveMatchException, Scheme, type_infer
+import app.algorithm_j as algorithm_j
+import app.compile as compile
+import app.terms as terms
+import app.typed as typed
+from app.algorithm_j import Context, NonExhaustiveMatchException, Scheme, type_infer
 
 
 class AstEncoder(json.JSONEncoder):

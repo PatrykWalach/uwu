@@ -16,9 +16,9 @@ from typing import Any, Callable, Generic, Protocol, TypeAlias, TypeVar, Union, 
 
 from sly import Lexer, Parser
 
-import terms
-import typed
-from algorithm_j import Context, Scheme, fresh_ty_var, type_infer
+import app.terms as terms
+import app.typed as typed
+from app.algorithm_j import Context, Scheme, fresh_ty_var, type_infer
 
 
 def _(fn: str, *args: str) -> Callable[[R], R]:

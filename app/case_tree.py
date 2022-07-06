@@ -1,7 +1,7 @@
 import dataclasses
 import typing
 
-import terms
+import app.terms as terms
 
 
 @dataclasses.dataclass(frozen=True)

@@ -4,9 +4,9 @@ import dataclasses
 import functools
 import typing
 
-import case_tree
-import terms
-import typed
+import app.case_tree as case_tree
+import app.terms as terms
+import app.typed as typed
 
 
 @dataclasses.dataclass

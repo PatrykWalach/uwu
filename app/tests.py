@@ -7,11 +7,11 @@ from typing import Generic
 import pytest
 from sly import lex
 
-import algorithm_j
-import typed
-from compile import compile
-from main import BUILTINS, DEFAULT_CTX, AstEncoder, UwuLexer, UwuParser
-from terms import *
+import app.algorithm_j as algorithm_j
+import app.typed as typed
+from app.compile import compile
+from app.main import BUILTINS, DEFAULT_CTX, AstEncoder, UwuLexer, UwuParser
+from app.terms import *
 
 
 @pytest.fixture

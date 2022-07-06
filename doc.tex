@@ -87,7 +87,7 @@ title=\lstname % show the filename of files included with \lstinputlisting; also
 
   \begin{tabular}{c@{\hspace{21mm}}|@{\hspace{5mm}}l}
     \vspace{-20mm} &                                                                   \\
-    \multicolumn{2}{l}{\hspace{-12.5mm} \includegraphics[width=8cm]{LogoUMCS.jpg}}     \\
+    \multicolumn{2}{l}{\hspace{-12.5mm} \includegraphics[width=8cm]{app/assets/LogoUMCS.jpg}}     \\
     \multicolumn{2}{@{\hspace{20mm}}l}{\vspace{-4mm}}                                  \\
     \multicolumn{2}{@{\hspace{28mm}}l}{\Large \sf UNIWERSYTET MARII
     CURIE-SKŁODOWSKIEJ}                                                                \\
@@ -490,10 +490,10 @@ Porównanie prymitywnych typów danych i często wykonywanych operacji z ich odp
 Chcieliśmy również, by funkcje wieloargumentowe kompilowane były jako funkcje jednoargumentowe zwracające kolejne funkcje, co pozwala na wywoływanie funkcji z niepełną liczbą argumentów w celu zwrócenia funkcji przyjmującej resztę argumentów (ang. \emph{currying}).
 
 
-\lstinputlisting[firstline=15]{examples/currying.uwu}
+\lstinputlisting[firstline=15]{app/examples/currying.uwu}
 \newpage
 
-\lstinputlisting[firstline=15]{examples/currying.uwu.js}
+\lstinputlisting[firstline=15]{app/examples/currying.uwu.js}
 
 \newpage
 Jednym z ważniejszych elementów każdego języka jest możliwość wykonywania różnego zbioru instrukcji warunkowo. W tym celu język powinien posiadać instrukcję \lstinline$if$ oraz \lstinline$case$. Instrukcja \lstinline$case$ wykonywać ma odpowiedni zbiór instrukcji, zależnie do którego wzorca dopasowane zostaną wprowadzone dane. Kompilator, powinien ostrzegać, jeżeli istnieje możliwość niedopasowania danych do żadnego z wzorców.
@@ -501,8 +501,8 @@ Jednym z ważniejszych elementów każdego języka jest możliwość wykonywania
 \begin{itemize}
   
   \item Przykład --- funkcja łącząca dwie posortowane tablice
-        \lstinputlisting[firstline=25]{examples/merge.uwu}\newpage
-        \lstinputlisting[firstline=19]{examples/merge.uwu.js}
+        \lstinputlisting[firstline=25]{app/examples/merge.uwu}\newpage
+        \lstinputlisting[firstline=19]{app/examples/merge.uwu.js}
 \end{itemize}
 
 \newpage
@@ -510,8 +510,8 @@ Kolejnym dość ważnym elementem języka jest brak wyrażenia `return', które 
 
 
 
-\lstinputlisting[firstline=15]{examples/return.uwu}
-\lstinputlisting[firstline=15]{examples/return.uwu.js}
+\lstinputlisting[firstline=15]{app/examples/return.uwu}
+\lstinputlisting[firstline=15]{app/examples/return.uwu.js}
 
 \section{Opis formalny składni języka}
 
@@ -669,23 +669,23 @@ JavaScript jest językiem programowania wykorzystywanym w przeglądarkach intern
 \chapter{Implementacja}
 \section{Lekser}
 Nasz lekser implementował będzie poniższy zbiór tokenów, warto zauważyć, że identyfikatory zaczynające się z dużej litery są identyfikatorami typów.
-\lstinputlisting[firstline=75, lastline=94]{parser.py}
+\lstinputlisting[firstline=75, lastline=94]{app/parser.py}
 \newpage
 Nasz lekser zajmował się również będzie zwracaniem tokena dla znaku nowej linii
 
-\lstinputlisting[firstline=99, lastline=102]{parser.py}
+\lstinputlisting[firstline=99, lastline=102]{app/parser.py}
 Lekser ignorował będzie tokeny komentarza, które zaczynają się od znaku `\#'. Oraz znaki tabulacji i spacji.
-\lstinputlisting[firstline=96, lastline=97]{parser.py}
+\lstinputlisting[firstline=96, lastline=97]{app/parser.py}
 
 Poza tym nasz lekser zwracał będzie poniższy zbiór tokenów
-\lstinputlisting[firstline=55, lastline=74]{parser.py}
+\lstinputlisting[firstline=55, lastline=74]{app/parser.py}
 \newpage
 \section{Parser}
 Implementacja parsera jest bardzo prosta, każda z metod zajmuje jedynie linijkę, gdzie zwracane jest odpowiedne wyrażenie drzewa syntaktycznego.
 
-\lstinputlisting[firstline=188, lastline=195]{parser.py}
+\lstinputlisting[firstline=188, lastline=195]{app/parser.py}
 W przypadku zbiorów wyrażeń zwracane są listy.
-\lstinputlisting[firstline=369, lastline=375]{parser.py}
+\lstinputlisting[firstline=369, lastline=375]{app/parser.py}
 
 \section{Drzewo decyzyjne}
 
@@ -697,63 +697,63 @@ Rekursja ma dwa podstawowe przypadki:
   \item lista przypadków jest pusta, więc generujemy pustą gałąź końcową\newpage
   \item pierwszy przypadek, nie ma już więcej wzorów, więc zwracamy gałąź końcową z blokiem.
 \end{itemize}
-\lstinputlisting[firstline=72, lastline=80]{case_tree.py}
+\lstinputlisting[firstline=72, lastline=80]{app/case_tree.py}
 W innym przypadku wybieramy wzorzec przy pomocy heurystyki
-\lstinputlisting[firstline=81, lastline=88]{case_tree.py}
+\lstinputlisting[firstline=81, lastline=88]{app/case_tree.py}
 
 Następnie tworzymy dwa pod problemy \lstinline{yes} i \lstinline{no} iterując przez wszystkie przypadki. Dla każdego z nich robimy jedną z trzech rzeczy:
 \begin{itemize}
   \item Przypadek nie zawiera wzorca, więc dodajemy go do \lstinline{yes} i \lstinline{no}
-        \lstinputlisting[firstline=90, lastline=95]{case_tree.py}\newpage
+        \lstinputlisting[firstline=90, lastline=95]{app/case_tree.py}\newpage
   \item Przypadek zawiera szukany wzorzec, więc dodajemy go do \lstinline{yes}
-        \lstinputlisting[firstline=97, lastline=108]{case_tree.py}
+        \lstinputlisting[firstline=97, lastline=108]{app/case_tree.py}
   \item Przypadek zawiera wzorzec, więc dodajemy go do \lstinline{no}
-        \lstinputlisting[firstline=110, lastline=111]{case_tree.py}
+        \lstinputlisting[firstline=110, lastline=111]{app/case_tree.py}
 \end{itemize}
 
 Rekursywnie generujemy kod dla \lstinline{yes} i \lstinline{no} i zwracamy gałąź decyzyjną
-\lstinputlisting[firstline=116, lastline=118]{case_tree.py}\newpage
+\lstinputlisting[firstline=116, lastline=118]{app/case_tree.py}\newpage
 \section{Inferencja typów}
 \subsection{Reprezentacja środowiska}
 Implementację inferencji typów zaczynamy przez stworzenie zmiennego typu, który będzie reprezentowany przez unikalny identyfikator.
-\lstinputlisting[firstline=28, lastline=34]{algorithm_j.py}
+\lstinputlisting[firstline=28, lastline=34]{app/algorithm_j.py}
 Substytucje to pary zmiennych i typów
-\lstinputlisting[firstline=25, lastline=25]{algorithm_j.py}
+\lstinputlisting[firstline=25, lastline=25]{app/algorithm_j.py}
 Jednym z argumentów algorytmu J jest środowisko, w naszej implementacji reprezentowane jest one przez zmienną \lstinline$Context$, będący słownikiem identyfikatorów i schematów,
-\lstinputlisting[firstline=26, lastline=26]{algorithm_j.py}
+\lstinputlisting[firstline=26, lastline=26]{app/algorithm_j.py}
 gdzie schemat zawiera informację o typie oraz listę występujących w nim zmiennych typów
 
-\lstinputlisting[firstline=12, lastline=16]{algorithm_j.py}
+\lstinputlisting[firstline=12, lastline=16]{app/algorithm_j.py}
 \newpage
 \subsection{Aplikowanie substytucji}
 Tworzymy funkcję aplikującą substytucje na typie.
 
 Przykład: dla $subt=\{a:Num\}$ i $ty=a\rightarrow b$ funkcja zwraca $Num\rightarrow b$
-\lstinputlisting[firstline=37, lastline=46]{algorithm_j.py}
+\lstinputlisting[firstline=37, lastline=46]{app/algorithm_j.py}
 
 Tworzymy funkcję, unifikującą dwa typy
 
-\lstinputlisting[firstline=95, lastline=112]{algorithm_j.py}\newpage
+\lstinputlisting[firstline=95, lastline=112]{app/algorithm_j.py}\newpage
 wraz z funkcją generującą substytucje w przypadku unifikacji zmiennego typu
-\lstinputlisting[firstline=115, lastline=124]{algorithm_j.py}
+\lstinputlisting[firstline=115, lastline=124]{app/algorithm_j.py}
 Teraz zaczynamy implementację algorytmu J.
 
 \subsection{Literały}
 W przypadku literałów typ jest oczywisty.
 
-\lstinputlisting[firstline=164, lastline=171]{algorithm_j.py}
+\lstinputlisting[firstline=164, lastline=171]{app/algorithm_j.py}
 \subsection{Identyfikatory}
 W przypadku identyfikatorów musimy zastąpić występujące w nich zmienne typy nowymi zmiennymi typami.
-\lstinputlisting[firstline=172, lastline=173]{algorithm_j.py}\newpage
+\lstinputlisting[firstline=172, lastline=173]{app/algorithm_j.py}\newpage
 \subsection{Bloki wyrażeń}
 W przypadku bloku wyrażeń inferujemy typ każdego z nich i zwracamy ostatni typ.
-\lstinputlisting[firstline=185, lastline=192]{algorithm_j.py}
+\lstinputlisting[firstline=185, lastline=192]{app/algorithm_j.py}
 
 \subsection{Operatory binarne}
 Implementacje operatorów binarnych są bardzo podobne.
 
 Na przykład operator \lstinline{|} służący do konkatenacji dwóch list, oczekuje by wyrażenie z lewej i prawej strony były listami tego samego typu i zwraca nową listę tego właśnie typu.
-\lstinputlisting[firstline=257, lastline=263]{algorithm_j.py}
+\lstinputlisting[firstline=257, lastline=263]{app/algorithm_j.py}
 \subsection{Wywołania funkcji}
 W przypadku wywołania funkcji musimy zaimplementować currying.
 
@@ -765,36 +765,36 @@ Przykład: $J(fn)=Num\rightarrow Str\rightarrow Unit\rightarrow Arr<Str>\\ J(arg
   \item Unifikujemy typy $tmp$ i $J(fn)$ co tworzy substytucję $\{\alpha: Unit\rightarrow Arr<Str>\}$
   \item I zwracamy $\alpha$
 \end{itemize}
-\lstinputlisting[firstline=323, lastline=335]{algorithm_j.py}
+\lstinputlisting[firstline=323, lastline=335]{app/algorithm_j.py}
 
 \subsection{Wyrażenia warunkowe}
 W przypadku wyrażeń warunkowych musimy, sprawdzić, czy warunek jest typu \lstinline{Bool} i czy, typy zwracane z każdej gałęzi są takie same, po czym zwracamy ten typ.
-\lstinputlisting[firstline=361, lastline=373]{algorithm_j.py}
+\lstinputlisting[firstline=361, lastline=373]{app/algorithm_j.py}
 \newpage
 \subsection{Definicje funkcji}
 W przypadku definicji funkcji musimy upewnić się że typy generyczne, są przypisywane do środowiska. Musimy sprawdzić, czy typ zwracany z funkcji jest przypisywalny do zadeklarowanego typu oraz zapisać funkcję do środowiska.
 
-\lstinputlisting[firstline=336, lastline=360]{algorithm_j.py}
+\lstinputlisting[firstline=336, lastline=360]{app/algorithm_j.py}
 
 \section{Dopasowanie do wzorca}
 W trakcie dopasowania do wzorca, musimy upewnić się, że konstruktory, posiadają odpowiednią liczbę argumentów. Dodatkowo przeprowadzać będziemy sprawdzanie czy wyrażenie \lstinline$case$ jest wyczerpujące --- czy przewiduje wszystkie przypadki. W tym celu funkcja przyjmuje argument \lstinline$o_alts$ będący bazą zmiennych i ich konstruktorów.
 \newpage
 W przypadku pustej gałęzi końcowej, sprawdzamy, czy każda z list jest pusta i wyrzucamy błąd, jeżeli jest.
 
-\lstinputlisting[firstline=508, lastline=520]{algorithm_j.py}
+\lstinputlisting[firstline=508, lastline=520]{app/algorithm_j.py}
 
 W przypadku gałęzi decyzyjnej inferujemy typ zmiennej i sprawdzanego konstruktora
-\lstinputlisting[firstline=521, lastline=527]{algorithm_j.py}
+\lstinputlisting[firstline=521, lastline=527]{app/algorithm_j.py}
 Następne dwa kroki dopełniają nasze sprawdzenie czy wyrażenie jest wyczerpujące. Wpierw uzupełniamy naszą bazę konstruktorów przy użyciu funkcji \lstinline{alternatives} zwracającej listę wszystkich konstruktorów dla danego typu.
 Następnie usuwamy z bazy konstruktorów konstruktor do którego odnosi się nasza gałąź decyzyjna.
-\lstinputlisting[firstline=530, lastline=534]{algorithm_j.py}
+\lstinputlisting[firstline=530, lastline=534]{app/algorithm_j.py}
 \newpage
 Kolejna część inferuje typy zmiennych dla każdego z argumentów konstruktora.
 Oraz tworzy dla nich zmienne w środowisku.
-\lstinputlisting[firstline=536, lastline=561]{algorithm_j.py}
+\lstinputlisting[firstline=536, lastline=561]{app/algorithm_j.py}
 \newpage
 Reszta funkcji to sprawdzenie, czy typy zwracane z bloków są takie same.
-\lstinputlisting[firstline=564, lastline=578]{algorithm_j.py}
+\lstinputlisting[firstline=564, lastline=578]{app/algorithm_j.py}
 
 
 \section{Windowanie (ang. \emph{Hoisting})}
@@ -808,13 +808,13 @@ W tym celu zaimplementowaliśmy funkcję, która przyjmuje wyrażenie i zwraca, 
 
 \newpage
 W przypadku bloków wyrażeń, listy z wyrażeniami do windowania są łączone z listą wyrażeń danego bloku.
-\lstinputlisting[firstline=46, lastline=56]{compile.py}
-\lstinputlisting[firstline=13, lastline=21]{compile.py}
+\lstinputlisting[firstline=46, lastline=56]{app/compile.py}
+\lstinputlisting[firstline=13, lastline=21]{app/compile.py}
 
 W przypadku deklaracji zmiennych i funkcji, dodajemy elementy do listy wyrażeń do windowania.
-\lstinputlisting[firstline=62, lastline=72]{compile.py}
+\lstinputlisting[firstline=62, lastline=72]{app/compile.py}
 W każdym innym przypadku lista wyrażeń do windowania jest po prostu przepuszczana dalej.
-\lstinputlisting[firstline=81, lastline=89]{compile.py}
+\lstinputlisting[firstline=81, lastline=89]{app/compile.py}
 
 
 \section{Kompilacja}
@@ -822,23 +822,23 @@ Kompilacja opiera się na jednej funkcji zamieniającej drzewo syntaktyczne na k
 
 \section{Literały}
 Jak widać, dla literałów jest to dość trywialne.
-\lstinputlisting[firstline=145, lastline=152]{compile.py}
+\lstinputlisting[firstline=145, lastline=152]{app/compile.py}
 \newpage
 \subsection{Wyrażenia warunkowe}
 Wyrażenia warunkowe wymagają kompilacji do postaci funkcji, gdyż w odróżnieniu od języka JavaScript, w naszym języku zwracają one wartość.
-\lstinputlisting[firstline=170, lastline=171]{compile.py}
+\lstinputlisting[firstline=170, lastline=171]{app/compile.py}
 
 \subsection{Warianty}
 Warianty przyjmują postać obiektów z dyskryminatorem
-\lstinputlisting[firstline=187, lastline=190]{compile.py}
+\lstinputlisting[firstline=187, lastline=190]{app/compile.py}
 
 \subsection{Dopasowanie do wzorca}
 W przypadku pustej gałęzi z blokiem kompilujemy blok.
 W przypadku pustej gałęzi końcowej generujemy wyjątek.
-\lstinputlisting[firstline=262, lastline=267]{compile.py}
+\lstinputlisting[firstline=262, lastline=267]{app/compile.py}
 \newpage
 W przypadku gałęzi decyzyjnej generowany jest blok if sprawdzający zawartość zmiennej. Można też uniknąć generowania bloku else, w przypadku, gdy wygenerowany byłby wyjątek.
-\lstinputlisting[firstline=268, lastline=284]{compile.py}
+\lstinputlisting[firstline=268, lastline=284]{app/compile.py}
 
 \chapter{Opis działania}
 Po uruchomieniu komendą \lstinline{python3 main.py **/*.uwu} programu, program skompiluje wszystkie pliki kończące się rozszerzeniem `.uwu' i wygeneruje dla każdego z nich odpowiedni plik z rozszerzeniem `.js'.
@@ -856,7 +856,7 @@ Udało nam się stworzyć kompilator generujący kod języka JavaScript. Zbadali
 
 \bibliographystyle{abbrv}
 
-\bibliography{doc}
+\bibliography{app/doc.bib}
 \addcontentsline{toc}{chapter}{Bibliografia}
 
 \end{document}

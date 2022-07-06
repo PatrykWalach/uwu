@@ -3,7 +3,7 @@ from __future__ import annotations
 import dataclasses
 import typing
 
-import typed
+import app.typed as typed
 
 A = typing.TypeVar("A")
 B = typing.TypeVar("B")

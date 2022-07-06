@@ -5,9 +5,9 @@ import functools
 import itertools
 from dataclasses import dataclass
 
-import case_tree
-import terms
-import typed
+import app.case_tree as case_tree
+import app.terms as terms
+import app.typed as typed
 
 
 def hoist_expr_list(body: list[terms.Expr]) -> list[terms.Expr]:
