@@ -12,9 +12,9 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "python:dev": "nodemon --exec \"python\" main.py -e .py,.uwu",
-    "dev:prettier": "nodemon -e .js --exec \"prettier --write ./**/*.js\"",
-    "node:dev": "nodemon examples/index.uwu.js",
+    "dev:python": "nodemon --exec \"python\" main.py -e .py,.uwu",
+    "dev:prettier": "nodemon -e .js --exec \"pnpx prettier --write ./**/*.js\"",
+    "dev:node": "nodemon examples/index.uwu.js",
     "pytest:snapshot": "nodemon --delay 3 --exec \"pytest -k snap --snapshot-update\" -e .py,.uwu -vv",
     "pytest": "nodemon --delay 3 --exec pytest -e .py,.js -vv"
   },

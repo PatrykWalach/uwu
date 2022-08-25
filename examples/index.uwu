@@ -258,3 +258,47 @@ end
 #    Some(z) do [id(z=z=z)] end
 #    None() do [id(x=y=2)] end
 #end
+
+
+def chain_do(option, fn) do
+    case option of
+        Some(value) do 
+            case fn(value) of
+                Some(result) do Some(Tuple(value, result)) end
+                None() do None() end
+            end
+        end
+        None() do None() end
+    end
+end
+
+
+def div(a,b) do
+    if b != 0 then Some(a // b) else None() end
+end
+
+def chain_return(option, fn) do
+    case option of
+        Some(value) do 
+            fn(value)
+        end
+        None() do None() end
+    end
+end
+
+a = Some(2)
+b = chain_do(a, div(6))
+
+c = chain_do(b, def chain_1(value) do case value of
+        Tuple(a,b) do
+            Some(a * b)
+        end end end)
+
+d = chain_return(c, def chain_2(value) do case value of
+        Tuple(Tuple(a, b), c) do
+            Some(a + b + c)
+        end end end)
+
+
+
+console_log(d)
