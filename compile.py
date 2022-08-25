@@ -101,7 +101,7 @@ def compile(
         case terms.MaybeOrElseNothing():
             return f"return"
         case terms.EIf(test, then, or_else):
-            return f"(()=>{{if({compile(test)}){{{compile(then)}}}else{{{compile(or_else)}}}}})()"
+            return f"(()=>{{if({compile(test)}){{{compile(then)}}}{compile(or_else)}}})()"
         case terms.ECall(id, args):
             return functools.reduce(
                 lambda acc, arg: f"{acc}({arg})",

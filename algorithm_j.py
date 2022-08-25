@@ -349,8 +349,8 @@ def infer(
             subst = unify_subst(ty_con, typed.TDef(ty_variant, ty), subst)
 
             return subst, ty
-        case terms.ECall(id, args):
-            subst, ty_fn = infer(subst, ctx, id)
+        case terms.ECall(fn, args):
+            subst, ty_fn = infer(subst, ctx, fn)
 
             ty_args = list[typed.Type]()
 
@@ -382,7 +382,7 @@ def infer(
 
             ty = reduce_args(ty_params, ty_hint)
 
-            # t_ctx[id] = Scheme.from_subst(subst, t_ctx, ty)
+            #
             subst, ty_body = infer(subst, t_ctx, body)
 
             subst = unify_subst(ty_body, ty_hint, subst)

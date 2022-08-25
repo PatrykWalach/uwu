@@ -36,13 +36,13 @@ def subst_var_eqs(clause: Clause):
     )
 
 
-k = 0
+# k = 0
 
 
-def fresh():
-    global k
-    k += 1
-    return f"x{k}"
+# def fresh():
+#     global k
+#     k += 1
+#     return f"x{k}"
 
 
 @dataclasses.dataclass

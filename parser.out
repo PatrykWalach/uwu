@@ -17,7 +17,7 @@ Rule 13    expr -> num_literal
 Rule 14    expr -> array
 Rule 15    expr -> variant_call
 Rule 16    expr -> identifier
-Rule 17    expr -> variable_declaration
+Rule 17    expr -> let
 Rule 18    expr -> call
 Rule 19    expr -> case_of
 Rule 20    expr -> binary_expr
@@ -174,7 +174,7 @@ Rule 170   _47_NEWLINE_optional -> NEWLINE
 Rule 171   _47_NEWLINE_optional -> <empty>
 Rule 172   identifier -> IDENTIFIER
 Rule 173   type_identifier -> TYPE_IDENTIFIER
-Rule 174   variable_declaration -> identifier _48_0x3a_type_optional = expr  [precedence=left, level=1]
+Rule 174   let -> identifier _48_0x3a_type_optional = expr  [precedence=left, level=1]
 Rule 175   _48_0x3a_type_optional -> : type
 Rule 176   _48_0x3a_type_optional -> <empty>
 Rule 177   num_literal -> NUMBER
@@ -294,6 +294,7 @@ exprs                : 152 157 162 167
 external             : 24
 identifier           : 16 47 54 109 134 174
 if_expr              : 21
+let                  : 17
 match_as             : 133
 match_variant        : 132
 num_literal          : 13
@@ -306,7 +307,6 @@ program              : 0
 str_literal          : 12
 type                 : 40 52 64 74 79 103 108 110 113 175
 type_identifier      : 54 59 74 80 81 86 86 91 102 103 135 136 159
-variable_declaration : 17
 variant              : 96 99
 variant_call         : 15
 variants             : 84 94 99
@@ -356,7 +356,7 @@ state 2
     (14) expr -> . array
     (15) expr -> . variant_call
     (16) expr -> . identifier
-    (17) expr -> . variable_declaration
+    (17) expr -> . let
     (18) expr -> . call
     (19) expr -> . case_of
     (20) expr -> . binary_expr
@@ -370,7 +370,7 @@ state 2
     (149) array -> . [ _39_NEWLINE_optional _40_exprs_optional ]
     (159) variant_call -> . type_identifier ( _43_NEWLINE_optional _44_exprs_optional )
     (172) identifier -> . IDENTIFIER
-    (174) variable_declaration -> . identifier _48_0x3a_type_optional = expr
+    (174) let -> . identifier _48_0x3a_type_optional = expr
     (154) call -> . expr ( _41_NEWLINE_optional _42_exprs_optional )
     (121) case_of -> . CASE expr OF _30_NEWLINE_optional _31_cases_optional END
     (27) binary_expr -> . expr INT_DIV expr
@@ -416,7 +416,7 @@ state 2
     array                          shift and go to state 11
     variant_call                   shift and go to state 12
     identifier                     shift and go to state 13
-    variable_declaration           shift and go to state 14
+    let                            shift and go to state 14
     call                           shift and go to state 15
     case_of                        shift and go to state 16
     binary_expr                    shift and go to state 17
@@ -508,7 +508,7 @@ state 7
     (14) expr -> . array
     (15) expr -> . variant_call
     (16) expr -> . identifier
-    (17) expr -> . variable_declaration
+    (17) expr -> . let
     (18) expr -> . call
     (19) expr -> . case_of
     (20) expr -> . binary_expr
@@ -522,7 +522,7 @@ state 7
     (149) array -> . [ _39_NEWLINE_optional _40_exprs_optional ]
     (159) variant_call -> . type_identifier ( _43_NEWLINE_optional _44_exprs_optional )
     (172) identifier -> . IDENTIFIER
-    (174) variable_declaration -> . identifier _48_0x3a_type_optional = expr
+    (174) let -> . identifier _48_0x3a_type_optional = expr
     (154) call -> . expr ( _41_NEWLINE_optional _42_exprs_optional )
     (121) case_of -> . CASE expr OF _30_NEWLINE_optional _31_cases_optional END
     (27) binary_expr -> . expr INT_DIV expr
@@ -565,7 +565,7 @@ state 7
     array                          shift and go to state 11
     variant_call                   shift and go to state 12
     identifier                     shift and go to state 13
-    variable_declaration           shift and go to state 14
+    let                            shift and go to state 14
     call                           shift and go to state 15
     case_of                        shift and go to state 16
     binary_expr                    shift and go to state 17
@@ -586,7 +586,7 @@ state 8
     (14) expr -> . array
     (15) expr -> . variant_call
     (16) expr -> . identifier
-    (17) expr -> . variable_declaration
+    (17) expr -> . let
     (18) expr -> . call
     (19) expr -> . case_of
     (20) expr -> . binary_expr
@@ -600,7 +600,7 @@ state 8
     (149) array -> . [ _39_NEWLINE_optional _40_exprs_optional ]
     (159) variant_call -> . type_identifier ( _43_NEWLINE_optional _44_exprs_optional )
     (172) identifier -> . IDENTIFIER
-    (174) variable_declaration -> . identifier _48_0x3a_type_optional = expr
+    (174) let -> . identifier _48_0x3a_type_optional = expr
     (154) call -> . expr ( _41_NEWLINE_optional _42_exprs_optional )
     (121) case_of -> . CASE expr OF _30_NEWLINE_optional _31_cases_optional END
     (27) binary_expr -> . expr INT_DIV expr
@@ -643,7 +643,7 @@ state 8
     array                          shift and go to state 11
     variant_call                   shift and go to state 12
     identifier                     shift and go to state 13
-    variable_declaration           shift and go to state 14
+    let                            shift and go to state 14
     call                           shift and go to state 15
     case_of                        shift and go to state 16
     binary_expr                    shift and go to state 17
@@ -769,7 +769,7 @@ state 12
 state 13
 
     (16) expr -> identifier .
-    (174) variable_declaration -> identifier . _48_0x3a_type_optional = expr
+    (174) let -> identifier . _48_0x3a_type_optional = expr
     (175) _48_0x3a_type_optional -> . : type
     (176) _48_0x3a_type_optional -> .
     NEWLINE         reduce using rule 16 (expr -> identifier .)
@@ -802,30 +802,30 @@ state 13
 
 state 14
 
-    (17) expr -> variable_declaration .
-    NEWLINE         reduce using rule 17 (expr -> variable_declaration .)
-    (               reduce using rule 17 (expr -> variable_declaration .)
-    INT_DIV         reduce using rule 17 (expr -> variable_declaration .)
-    EQUAL           reduce using rule 17 (expr -> variable_declaration .)
-    NOT_EQUAL       reduce using rule 17 (expr -> variable_declaration .)
-    |               reduce using rule 17 (expr -> variable_declaration .)
-    >               reduce using rule 17 (expr -> variable_declaration .)
-    %               reduce using rule 17 (expr -> variable_declaration .)
-    <               reduce using rule 17 (expr -> variable_declaration .)
-    *               reduce using rule 17 (expr -> variable_declaration .)
-    /               reduce using rule 17 (expr -> variable_declaration .)
-    -               reduce using rule 17 (expr -> variable_declaration .)
-    +               reduce using rule 17 (expr -> variable_declaration .)
-    CONCAT          reduce using rule 17 (expr -> variable_declaration .)
-    $end            reduce using rule 17 (expr -> variable_declaration .)
-    )               reduce using rule 17 (expr -> variable_declaration .)
-    OF              reduce using rule 17 (expr -> variable_declaration .)
-    THEN            reduce using rule 17 (expr -> variable_declaration .)
-    END             reduce using rule 17 (expr -> variable_declaration .)
-    ELIF            reduce using rule 17 (expr -> variable_declaration .)
-    ELSE            reduce using rule 17 (expr -> variable_declaration .)
-    ,               reduce using rule 17 (expr -> variable_declaration .)
-    ]               reduce using rule 17 (expr -> variable_declaration .)
+    (17) expr -> let .
+    NEWLINE         reduce using rule 17 (expr -> let .)
+    (               reduce using rule 17 (expr -> let .)
+    INT_DIV         reduce using rule 17 (expr -> let .)
+    EQUAL           reduce using rule 17 (expr -> let .)
+    NOT_EQUAL       reduce using rule 17 (expr -> let .)
+    |               reduce using rule 17 (expr -> let .)
+    >               reduce using rule 17 (expr -> let .)
+    %               reduce using rule 17 (expr -> let .)
+    <               reduce using rule 17 (expr -> let .)
+    *               reduce using rule 17 (expr -> let .)
+    /               reduce using rule 17 (expr -> let .)
+    -               reduce using rule 17 (expr -> let .)
+    +               reduce using rule 17 (expr -> let .)
+    CONCAT          reduce using rule 17 (expr -> let .)
+    $end            reduce using rule 17 (expr -> let .)
+    )               reduce using rule 17 (expr -> let .)
+    OF              reduce using rule 17 (expr -> let .)
+    THEN            reduce using rule 17 (expr -> let .)
+    END             reduce using rule 17 (expr -> let .)
+    ELIF            reduce using rule 17 (expr -> let .)
+    ELSE            reduce using rule 17 (expr -> let .)
+    ,               reduce using rule 17 (expr -> let .)
+    ]               reduce using rule 17 (expr -> let .)
 
 
 state 15
@@ -1178,7 +1178,7 @@ state 28
     (14) expr -> . array
     (15) expr -> . variant_call
     (16) expr -> . identifier
-    (17) expr -> . variable_declaration
+    (17) expr -> . let
     (18) expr -> . call
     (19) expr -> . case_of
     (20) expr -> . binary_expr
@@ -1192,7 +1192,7 @@ state 28
     (149) array -> . [ _39_NEWLINE_optional _40_exprs_optional ]
     (159) variant_call -> . type_identifier ( _43_NEWLINE_optional _44_exprs_optional )
     (172) identifier -> . IDENTIFIER
-    (174) variable_declaration -> . identifier _48_0x3a_type_optional = expr
+    (174) let -> . identifier _48_0x3a_type_optional = expr
     (154) call -> . expr ( _41_NEWLINE_optional _42_exprs_optional )
     (121) case_of -> . CASE expr OF _30_NEWLINE_optional _31_cases_optional END
     (27) binary_expr -> . expr INT_DIV expr
@@ -1235,7 +1235,7 @@ state 28
     array                          shift and go to state 11
     variant_call                   shift and go to state 12
     identifier                     shift and go to state 13
-    variable_declaration           shift and go to state 14
+    let                            shift and go to state 14
     call                           shift and go to state 15
     case_of                        shift and go to state 16
     binary_expr                    shift and go to state 17
@@ -1256,7 +1256,7 @@ state 29
     (14) expr -> . array
     (15) expr -> . variant_call
     (16) expr -> . identifier
-    (17) expr -> . variable_declaration
+    (17) expr -> . let
     (18) expr -> . call
     (19) expr -> . case_of
     (20) expr -> . binary_expr
@@ -1270,7 +1270,7 @@ state 29
     (149) array -> . [ _39_NEWLINE_optional _40_exprs_optional ]
     (159) variant_call -> . type_identifier ( _43_NEWLINE_optional _44_exprs_optional )
     (172) identifier -> . IDENTIFIER
-    (174) variable_declaration -> . identifier _48_0x3a_type_optional = expr
+    (174) let -> . identifier _48_0x3a_type_optional = expr
     (154) call -> . expr ( _41_NEWLINE_optional _42_exprs_optional )
     (121) case_of -> . CASE expr OF _30_NEWLINE_optional _31_cases_optional END
     (27) binary_expr -> . expr INT_DIV expr
@@ -1313,7 +1313,7 @@ state 29
     array                          shift and go to state 11
     variant_call                   shift and go to state 12
     identifier                     shift and go to state 13
-    variable_declaration           shift and go to state 14
+    let                            shift and go to state 14
     call                           shift and go to state 15
     case_of                        shift and go to state 16
     binary_expr                    shift and go to state 17
@@ -1445,7 +1445,7 @@ state 36
     (14) expr -> . array
     (15) expr -> . variant_call
     (16) expr -> . identifier
-    (17) expr -> . variable_declaration
+    (17) expr -> . let
     (18) expr -> . call
     (19) expr -> . case_of
     (20) expr -> . binary_expr
@@ -1459,7 +1459,7 @@ state 36
     (149) array -> . [ _39_NEWLINE_optional _40_exprs_optional ]
     (159) variant_call -> . type_identifier ( _43_NEWLINE_optional _44_exprs_optional )
     (172) identifier -> . IDENTIFIER
-    (174) variable_declaration -> . identifier _48_0x3a_type_optional = expr
+    (174) let -> . identifier _48_0x3a_type_optional = expr
     (154) call -> . expr ( _41_NEWLINE_optional _42_exprs_optional )
     (121) case_of -> . CASE expr OF _30_NEWLINE_optional _31_cases_optional END
     (27) binary_expr -> . expr INT_DIV expr
@@ -1507,7 +1507,7 @@ state 36
     array                          shift and go to state 11
     variant_call                   shift and go to state 12
     identifier                     shift and go to state 13
-    variable_declaration           shift and go to state 14
+    let                            shift and go to state 14
     call                           shift and go to state 15
     case_of                        shift and go to state 16
     binary_expr                    shift and go to state 17
@@ -1551,7 +1551,7 @@ state 38
     (14) expr -> . array
     (15) expr -> . variant_call
     (16) expr -> . identifier
-    (17) expr -> . variable_declaration
+    (17) expr -> . let
     (18) expr -> . call
     (19) expr -> . case_of
     (20) expr -> . binary_expr
@@ -1565,7 +1565,7 @@ state 38
     (149) array -> . [ _39_NEWLINE_optional _40_exprs_optional ]
     (159) variant_call -> . type_identifier ( _43_NEWLINE_optional _44_exprs_optional )
     (172) identifier -> . IDENTIFIER
-    (174) variable_declaration -> . identifier _48_0x3a_type_optional = expr
+    (174) let -> . identifier _48_0x3a_type_optional = expr
     (154) call -> . expr ( _41_NEWLINE_optional _42_exprs_optional )
     (121) case_of -> . CASE expr OF _30_NEWLINE_optional _31_cases_optional END
     (27) binary_expr -> . expr INT_DIV expr
@@ -1608,7 +1608,7 @@ state 38
     array                          shift and go to state 11
     variant_call                   shift and go to state 12
     identifier                     shift and go to state 13
-    variable_declaration           shift and go to state 14
+    let                            shift and go to state 14
     call                           shift and go to state 15
     case_of                        shift and go to state 16
     binary_expr                    shift and go to state 17
@@ -1629,7 +1629,7 @@ state 39
     (14) expr -> . array
     (15) expr -> . variant_call
     (16) expr -> . identifier
-    (17) expr -> . variable_declaration
+    (17) expr -> . let
     (18) expr -> . call
     (19) expr -> . case_of
     (20) expr -> . binary_expr
@@ -1643,7 +1643,7 @@ state 39
     (149) array -> . [ _39_NEWLINE_optional _40_exprs_optional ]
     (159) variant_call -> . type_identifier ( _43_NEWLINE_optional _44_exprs_optional )
     (172) identifier -> . IDENTIFIER
-    (174) variable_declaration -> . identifier _48_0x3a_type_optional = expr
+    (174) let -> . identifier _48_0x3a_type_optional = expr
     (154) call -> . expr ( _41_NEWLINE_optional _42_exprs_optional )
     (121) case_of -> . CASE expr OF _30_NEWLINE_optional _31_cases_optional END
     (27) binary_expr -> . expr INT_DIV expr
@@ -1686,7 +1686,7 @@ state 39
     array                          shift and go to state 11
     variant_call                   shift and go to state 12
     identifier                     shift and go to state 13
-    variable_declaration           shift and go to state 14
+    let                            shift and go to state 14
     call                           shift and go to state 15
     case_of                        shift and go to state 16
     binary_expr                    shift and go to state 17
@@ -1707,7 +1707,7 @@ state 40
     (14) expr -> . array
     (15) expr -> . variant_call
     (16) expr -> . identifier
-    (17) expr -> . variable_declaration
+    (17) expr -> . let
     (18) expr -> . call
     (19) expr -> . case_of
     (20) expr -> . binary_expr
@@ -1721,7 +1721,7 @@ state 40
     (149) array -> . [ _39_NEWLINE_optional _40_exprs_optional ]
     (159) variant_call -> . type_identifier ( _43_NEWLINE_optional _44_exprs_optional )
     (172) identifier -> . IDENTIFIER
-    (174) variable_declaration -> . identifier _48_0x3a_type_optional = expr
+    (174) let -> . identifier _48_0x3a_type_optional = expr
     (154) call -> . expr ( _41_NEWLINE_optional _42_exprs_optional )
     (121) case_of -> . CASE expr OF _30_NEWLINE_optional _31_cases_optional END
     (27) binary_expr -> . expr INT_DIV expr
@@ -1764,7 +1764,7 @@ state 40
     array                          shift and go to state 11
     variant_call                   shift and go to state 12
     identifier                     shift and go to state 13
-    variable_declaration           shift and go to state 14
+    let                            shift and go to state 14
     call                           shift and go to state 15
     case_of                        shift and go to state 16
     binary_expr                    shift and go to state 17
@@ -1785,7 +1785,7 @@ state 41
     (14) expr -> . array
     (15) expr -> . variant_call
     (16) expr -> . identifier
-    (17) expr -> . variable_declaration
+    (17) expr -> . let
     (18) expr -> . call
     (19) expr -> . case_of
     (20) expr -> . binary_expr
@@ -1799,7 +1799,7 @@ state 41
     (149) array -> . [ _39_NEWLINE_optional _40_exprs_optional ]
     (159) variant_call -> . type_identifier ( _43_NEWLINE_optional _44_exprs_optional )
     (172) identifier -> . IDENTIFIER
-    (174) variable_declaration -> . identifier _48_0x3a_type_optional = expr
+    (174) let -> . identifier _48_0x3a_type_optional = expr
     (154) call -> . expr ( _41_NEWLINE_optional _42_exprs_optional )
     (121) case_of -> . CASE expr OF _30_NEWLINE_optional _31_cases_optional END
     (27) binary_expr -> . expr INT_DIV expr
@@ -1842,7 +1842,7 @@ state 41
     array                          shift and go to state 11
     variant_call                   shift and go to state 12
     identifier                     shift and go to state 13
-    variable_declaration           shift and go to state 14
+    let                            shift and go to state 14
     call                           shift and go to state 15
     case_of                        shift and go to state 16
     binary_expr                    shift and go to state 17
@@ -1863,7 +1863,7 @@ state 42
     (14) expr -> . array
     (15) expr -> . variant_call
     (16) expr -> . identifier
-    (17) expr -> . variable_declaration
+    (17) expr -> . let
     (18) expr -> . call
     (19) expr -> . case_of
     (20) expr -> . binary_expr
@@ -1877,7 +1877,7 @@ state 42
     (149) array -> . [ _39_NEWLINE_optional _40_exprs_optional ]
     (159) variant_call -> . type_identifier ( _43_NEWLINE_optional _44_exprs_optional )
     (172) identifier -> . IDENTIFIER
-    (174) variable_declaration -> . identifier _48_0x3a_type_optional = expr
+    (174) let -> . identifier _48_0x3a_type_optional = expr
     (154) call -> . expr ( _41_NEWLINE_optional _42_exprs_optional )
     (121) case_of -> . CASE expr OF _30_NEWLINE_optional _31_cases_optional END
     (27) binary_expr -> . expr INT_DIV expr
@@ -1920,7 +1920,7 @@ state 42
     array                          shift and go to state 11
     variant_call                   shift and go to state 12
     identifier                     shift and go to state 13
-    variable_declaration           shift and go to state 14
+    let                            shift and go to state 14
     call                           shift and go to state 15
     case_of                        shift and go to state 16
     binary_expr                    shift and go to state 17
@@ -1941,7 +1941,7 @@ state 43
     (14) expr -> . array
     (15) expr -> . variant_call
     (16) expr -> . identifier
-    (17) expr -> . variable_declaration
+    (17) expr -> . let
     (18) expr -> . call
     (19) expr -> . case_of
     (20) expr -> . binary_expr
@@ -1955,7 +1955,7 @@ state 43
     (149) array -> . [ _39_NEWLINE_optional _40_exprs_optional ]
     (159) variant_call -> . type_identifier ( _43_NEWLINE_optional _44_exprs_optional )
     (172) identifier -> . IDENTIFIER
-    (174) variable_declaration -> . identifier _48_0x3a_type_optional = expr
+    (174) let -> . identifier _48_0x3a_type_optional = expr
     (154) call -> . expr ( _41_NEWLINE_optional _42_exprs_optional )
     (121) case_of -> . CASE expr OF _30_NEWLINE_optional _31_cases_optional END
     (27) binary_expr -> . expr INT_DIV expr
@@ -1998,7 +1998,7 @@ state 43
     array                          shift and go to state 11
     variant_call                   shift and go to state 12
     identifier                     shift and go to state 13
-    variable_declaration           shift and go to state 14
+    let                            shift and go to state 14
     call                           shift and go to state 15
     case_of                        shift and go to state 16
     binary_expr                    shift and go to state 17
@@ -2019,7 +2019,7 @@ state 44
     (14) expr -> . array
     (15) expr -> . variant_call
     (16) expr -> . identifier
-    (17) expr -> . variable_declaration
+    (17) expr -> . let
     (18) expr -> . call
     (19) expr -> . case_of
     (20) expr -> . binary_expr
@@ -2033,7 +2033,7 @@ state 44
     (149) array -> . [ _39_NEWLINE_optional _40_exprs_optional ]
     (159) variant_call -> . type_identifier ( _43_NEWLINE_optional _44_exprs_optional )
     (172) identifier -> . IDENTIFIER
-    (174) variable_declaration -> . identifier _48_0x3a_type_optional = expr
+    (174) let -> . identifier _48_0x3a_type_optional = expr
     (154) call -> . expr ( _41_NEWLINE_optional _42_exprs_optional )
     (121) case_of -> . CASE expr OF _30_NEWLINE_optional _31_cases_optional END
     (27) binary_expr -> . expr INT_DIV expr
@@ -2076,7 +2076,7 @@ state 44
     array                          shift and go to state 11
     variant_call                   shift and go to state 12
     identifier                     shift and go to state 13
-    variable_declaration           shift and go to state 14
+    let                            shift and go to state 14
     call                           shift and go to state 15
     case_of                        shift and go to state 16
     binary_expr                    shift and go to state 17
@@ -2097,7 +2097,7 @@ state 45
     (14) expr -> . array
     (15) expr -> . variant_call
     (16) expr -> . identifier
-    (17) expr -> . variable_declaration
+    (17) expr -> . let
     (18) expr -> . call
     (19) expr -> . case_of
     (20) expr -> . binary_expr
@@ -2111,7 +2111,7 @@ state 45
     (149) array -> . [ _39_NEWLINE_optional _40_exprs_optional ]
     (159) variant_call -> . type_identifier ( _43_NEWLINE_optional _44_exprs_optional )
     (172) identifier -> . IDENTIFIER
-    (174) variable_declaration -> . identifier _48_0x3a_type_optional = expr
+    (174) let -> . identifier _48_0x3a_type_optional = expr
     (154) call -> . expr ( _41_NEWLINE_optional _42_exprs_optional )
     (121) case_of -> . CASE expr OF _30_NEWLINE_optional _31_cases_optional END
     (27) binary_expr -> . expr INT_DIV expr
@@ -2154,7 +2154,7 @@ state 45
     array                          shift and go to state 11
     variant_call                   shift and go to state 12
     identifier                     shift and go to state 13
-    variable_declaration           shift and go to state 14
+    let                            shift and go to state 14
     call                           shift and go to state 15
     case_of                        shift and go to state 16
     binary_expr                    shift and go to state 17
@@ -2175,7 +2175,7 @@ state 46
     (14) expr -> . array
     (15) expr -> . variant_call
     (16) expr -> . identifier
-    (17) expr -> . variable_declaration
+    (17) expr -> . let
     (18) expr -> . call
     (19) expr -> . case_of
     (20) expr -> . binary_expr
@@ -2189,7 +2189,7 @@ state 46
     (149) array -> . [ _39_NEWLINE_optional _40_exprs_optional ]
     (159) variant_call -> . type_identifier ( _43_NEWLINE_optional _44_exprs_optional )
     (172) identifier -> . IDENTIFIER
-    (174) variable_declaration -> . identifier _48_0x3a_type_optional = expr
+    (174) let -> . identifier _48_0x3a_type_optional = expr
     (154) call -> . expr ( _41_NEWLINE_optional _42_exprs_optional )
     (121) case_of -> . CASE expr OF _30_NEWLINE_optional _31_cases_optional END
     (27) binary_expr -> . expr INT_DIV expr
@@ -2232,7 +2232,7 @@ state 46
     array                          shift and go to state 11
     variant_call                   shift and go to state 12
     identifier                     shift and go to state 13
-    variable_declaration           shift and go to state 14
+    let                            shift and go to state 14
     call                           shift and go to state 15
     case_of                        shift and go to state 16
     binary_expr                    shift and go to state 17
@@ -2253,7 +2253,7 @@ state 47
     (14) expr -> . array
     (15) expr -> . variant_call
     (16) expr -> . identifier
-    (17) expr -> . variable_declaration
+    (17) expr -> . let
     (18) expr -> . call
     (19) expr -> . case_of
     (20) expr -> . binary_expr
@@ -2267,7 +2267,7 @@ state 47
     (149) array -> . [ _39_NEWLINE_optional _40_exprs_optional ]
     (159) variant_call -> . type_identifier ( _43_NEWLINE_optional _44_exprs_optional )
     (172) identifier -> . IDENTIFIER
-    (174) variable_declaration -> . identifier _48_0x3a_type_optional = expr
+    (174) let -> . identifier _48_0x3a_type_optional = expr
     (154) call -> . expr ( _41_NEWLINE_optional _42_exprs_optional )
     (121) case_of -> . CASE expr OF _30_NEWLINE_optional _31_cases_optional END
     (27) binary_expr -> . expr INT_DIV expr
@@ -2310,7 +2310,7 @@ state 47
     array                          shift and go to state 11
     variant_call                   shift and go to state 12
     identifier                     shift and go to state 13
-    variable_declaration           shift and go to state 14
+    let                            shift and go to state 14
     call                           shift and go to state 15
     case_of                        shift and go to state 16
     binary_expr                    shift and go to state 17
@@ -2331,7 +2331,7 @@ state 48
     (14) expr -> . array
     (15) expr -> . variant_call
     (16) expr -> . identifier
-    (17) expr -> . variable_declaration
+    (17) expr -> . let
     (18) expr -> . call
     (19) expr -> . case_of
     (20) expr -> . binary_expr
@@ -2345,7 +2345,7 @@ state 48
     (149) array -> . [ _39_NEWLINE_optional _40_exprs_optional ]
     (159) variant_call -> . type_identifier ( _43_NEWLINE_optional _44_exprs_optional )
     (172) identifier -> . IDENTIFIER
-    (174) variable_declaration -> . identifier _48_0x3a_type_optional = expr
+    (174) let -> . identifier _48_0x3a_type_optional = expr
     (154) call -> . expr ( _41_NEWLINE_optional _42_exprs_optional )
     (121) case_of -> . CASE expr OF _30_NEWLINE_optional _31_cases_optional END
     (27) binary_expr -> . expr INT_DIV expr
@@ -2388,7 +2388,7 @@ state 48
     array                          shift and go to state 11
     variant_call                   shift and go to state 12
     identifier                     shift and go to state 13
-    variable_declaration           shift and go to state 14
+    let                            shift and go to state 14
     call                           shift and go to state 15
     case_of                        shift and go to state 16
     binary_expr                    shift and go to state 17
@@ -2409,7 +2409,7 @@ state 49
     (14) expr -> . array
     (15) expr -> . variant_call
     (16) expr -> . identifier
-    (17) expr -> . variable_declaration
+    (17) expr -> . let
     (18) expr -> . call
     (19) expr -> . case_of
     (20) expr -> . binary_expr
@@ -2423,7 +2423,7 @@ state 49
     (149) array -> . [ _39_NEWLINE_optional _40_exprs_optional ]
     (159) variant_call -> . type_identifier ( _43_NEWLINE_optional _44_exprs_optional )
     (172) identifier -> . IDENTIFIER
-    (174) variable_declaration -> . identifier _48_0x3a_type_optional = expr
+    (174) let -> . identifier _48_0x3a_type_optional = expr
     (154) call -> . expr ( _41_NEWLINE_optional _42_exprs_optional )
     (121) case_of -> . CASE expr OF _30_NEWLINE_optional _31_cases_optional END
     (27) binary_expr -> . expr INT_DIV expr
@@ -2466,7 +2466,7 @@ state 49
     array                          shift and go to state 11
     variant_call                   shift and go to state 12
     identifier                     shift and go to state 13
-    variable_declaration           shift and go to state 14
+    let                            shift and go to state 14
     call                           shift and go to state 15
     case_of                        shift and go to state 16
     binary_expr                    shift and go to state 17
@@ -2552,7 +2552,7 @@ state 51
 
 state 52
 
-    (174) variable_declaration -> identifier _48_0x3a_type_optional . = expr
+    (174) let -> identifier _48_0x3a_type_optional . = expr
     =               shift and go to state 79
 
 
@@ -2581,7 +2581,7 @@ state 54
     (14) expr -> . array
     (15) expr -> . variant_call
     (16) expr -> . identifier
-    (17) expr -> . variable_declaration
+    (17) expr -> . let
     (18) expr -> . call
     (19) expr -> . case_of
     (20) expr -> . binary_expr
@@ -2595,7 +2595,7 @@ state 54
     (149) array -> . [ _39_NEWLINE_optional _40_exprs_optional ]
     (159) variant_call -> . type_identifier ( _43_NEWLINE_optional _44_exprs_optional )
     (172) identifier -> . IDENTIFIER
-    (174) variable_declaration -> . identifier _48_0x3a_type_optional = expr
+    (174) let -> . identifier _48_0x3a_type_optional = expr
     (154) call -> . expr ( _41_NEWLINE_optional _42_exprs_optional )
     (121) case_of -> . CASE expr OF _30_NEWLINE_optional _31_cases_optional END
     (27) binary_expr -> . expr INT_DIV expr
@@ -2641,7 +2641,7 @@ state 54
     array                          shift and go to state 11
     variant_call                   shift and go to state 12
     identifier                     shift and go to state 13
-    variable_declaration           shift and go to state 14
+    let                            shift and go to state 14
     call                           shift and go to state 15
     case_of                        shift and go to state 16
     binary_expr                    shift and go to state 17
@@ -2833,7 +2833,7 @@ state 64
     (14) expr -> . array
     (15) expr -> . variant_call
     (16) expr -> . identifier
-    (17) expr -> . variable_declaration
+    (17) expr -> . let
     (18) expr -> . call
     (19) expr -> . case_of
     (20) expr -> . binary_expr
@@ -2847,7 +2847,7 @@ state 64
     (149) array -> . [ _39_NEWLINE_optional _40_exprs_optional ]
     (159) variant_call -> . type_identifier ( _43_NEWLINE_optional _44_exprs_optional )
     (172) identifier -> . IDENTIFIER
-    (174) variable_declaration -> . identifier _48_0x3a_type_optional = expr
+    (174) let -> . identifier _48_0x3a_type_optional = expr
     (154) call -> . expr ( _41_NEWLINE_optional _42_exprs_optional )
     (121) case_of -> . CASE expr OF _30_NEWLINE_optional _31_cases_optional END
     (27) binary_expr -> . expr INT_DIV expr
@@ -2893,7 +2893,7 @@ state 64
     array                          shift and go to state 11
     variant_call                   shift and go to state 12
     identifier                     shift and go to state 13
-    variable_declaration           shift and go to state 14
+    let                            shift and go to state 14
     call                           shift and go to state 15
     case_of                        shift and go to state 16
     binary_expr                    shift and go to state 17
@@ -3445,7 +3445,7 @@ state 78
 
 state 79
 
-    (174) variable_declaration -> identifier _48_0x3a_type_optional = . expr
+    (174) let -> identifier _48_0x3a_type_optional = . expr
     (10) expr -> . - expr
     (11) expr -> . ( expr )
     (12) expr -> . str_literal
@@ -3453,7 +3453,7 @@ state 79
     (14) expr -> . array
     (15) expr -> . variant_call
     (16) expr -> . identifier
-    (17) expr -> . variable_declaration
+    (17) expr -> . let
     (18) expr -> . call
     (19) expr -> . case_of
     (20) expr -> . binary_expr
@@ -3467,7 +3467,7 @@ state 79
     (149) array -> . [ _39_NEWLINE_optional _40_exprs_optional ]
     (159) variant_call -> . type_identifier ( _43_NEWLINE_optional _44_exprs_optional )
     (172) identifier -> . IDENTIFIER
-    (174) variable_declaration -> . identifier _48_0x3a_type_optional = expr
+    (174) let -> . identifier _48_0x3a_type_optional = expr
     (154) call -> . expr ( _41_NEWLINE_optional _42_exprs_optional )
     (121) case_of -> . CASE expr OF _30_NEWLINE_optional _31_cases_optional END
     (27) binary_expr -> . expr INT_DIV expr
@@ -3510,7 +3510,7 @@ state 79
     num_literal                    shift and go to state 10
     array                          shift and go to state 11
     variant_call                   shift and go to state 12
-    variable_declaration           shift and go to state 14
+    let                            shift and go to state 14
     call                           shift and go to state 15
     case_of                        shift and go to state 16
     binary_expr                    shift and go to state 17
@@ -3621,7 +3621,7 @@ state 85
     (14) expr -> . array
     (15) expr -> . variant_call
     (16) expr -> . identifier
-    (17) expr -> . variable_declaration
+    (17) expr -> . let
     (18) expr -> . call
     (19) expr -> . case_of
     (20) expr -> . binary_expr
@@ -3635,7 +3635,7 @@ state 85
     (149) array -> . [ _39_NEWLINE_optional _40_exprs_optional ]
     (159) variant_call -> . type_identifier ( _43_NEWLINE_optional _44_exprs_optional )
     (172) identifier -> . IDENTIFIER
-    (174) variable_declaration -> . identifier _48_0x3a_type_optional = expr
+    (174) let -> . identifier _48_0x3a_type_optional = expr
     (154) call -> . expr ( _41_NEWLINE_optional _42_exprs_optional )
     (121) case_of -> . CASE expr OF _30_NEWLINE_optional _31_cases_optional END
     (27) binary_expr -> . expr INT_DIV expr
@@ -3682,7 +3682,7 @@ state 85
     array                          shift and go to state 11
     variant_call                   shift and go to state 12
     identifier                     shift and go to state 13
-    variable_declaration           shift and go to state 14
+    let                            shift and go to state 14
     call                           shift and go to state 15
     case_of                        shift and go to state 16
     binary_expr                    shift and go to state 17
@@ -3788,7 +3788,7 @@ state 92
     (14) expr -> . array
     (15) expr -> . variant_call
     (16) expr -> . identifier
-    (17) expr -> . variable_declaration
+    (17) expr -> . let
     (18) expr -> . call
     (19) expr -> . case_of
     (20) expr -> . binary_expr
@@ -3802,7 +3802,7 @@ state 92
     (149) array -> . [ _39_NEWLINE_optional _40_exprs_optional ]
     (159) variant_call -> . type_identifier ( _43_NEWLINE_optional _44_exprs_optional )
     (172) identifier -> . IDENTIFIER
-    (174) variable_declaration -> . identifier _48_0x3a_type_optional = expr
+    (174) let -> . identifier _48_0x3a_type_optional = expr
     (154) call -> . expr ( _41_NEWLINE_optional _42_exprs_optional )
     (121) case_of -> . CASE expr OF _30_NEWLINE_optional _31_cases_optional END
     (27) binary_expr -> . expr INT_DIV expr
@@ -3850,7 +3850,7 @@ state 92
     array                          shift and go to state 11
     variant_call                   shift and go to state 12
     identifier                     shift and go to state 13
-    variable_declaration           shift and go to state 14
+    let                            shift and go to state 14
     call                           shift and go to state 15
     case_of                        shift and go to state 16
     binary_expr                    shift and go to state 17
@@ -3937,7 +3937,7 @@ state 98
 
 state 99
 
-    (174) variable_declaration -> identifier _48_0x3a_type_optional = expr .
+    (174) let -> identifier _48_0x3a_type_optional = expr .
     (154) call -> expr . ( _41_NEWLINE_optional _42_exprs_optional )
     (27) binary_expr -> expr . INT_DIV expr
     (28) binary_expr -> expr . EQUAL expr
@@ -3951,16 +3951,16 @@ state 99
     (36) binary_expr -> expr . - expr
     (37) binary_expr -> expr . + expr
     (38) binary_expr -> expr . CONCAT expr
-    NEWLINE         reduce using rule 174 (variable_declaration -> identifier _48_0x3a_type_optional = expr .)
-    $end            reduce using rule 174 (variable_declaration -> identifier _48_0x3a_type_optional = expr .)
-    )               reduce using rule 174 (variable_declaration -> identifier _48_0x3a_type_optional = expr .)
-    OF              reduce using rule 174 (variable_declaration -> identifier _48_0x3a_type_optional = expr .)
-    THEN            reduce using rule 174 (variable_declaration -> identifier _48_0x3a_type_optional = expr .)
-    END             reduce using rule 174 (variable_declaration -> identifier _48_0x3a_type_optional = expr .)
-    ELIF            reduce using rule 174 (variable_declaration -> identifier _48_0x3a_type_optional = expr .)
-    ELSE            reduce using rule 174 (variable_declaration -> identifier _48_0x3a_type_optional = expr .)
-    ,               reduce using rule 174 (variable_declaration -> identifier _48_0x3a_type_optional = expr .)
-    ]               reduce using rule 174 (variable_declaration -> identifier _48_0x3a_type_optional = expr .)
+    NEWLINE         reduce using rule 174 (let -> identifier _48_0x3a_type_optional = expr .)
+    $end            reduce using rule 174 (let -> identifier _48_0x3a_type_optional = expr .)
+    )               reduce using rule 174 (let -> identifier _48_0x3a_type_optional = expr .)
+    OF              reduce using rule 174 (let -> identifier _48_0x3a_type_optional = expr .)
+    THEN            reduce using rule 174 (let -> identifier _48_0x3a_type_optional = expr .)
+    END             reduce using rule 174 (let -> identifier _48_0x3a_type_optional = expr .)
+    ELIF            reduce using rule 174 (let -> identifier _48_0x3a_type_optional = expr .)
+    ELSE            reduce using rule 174 (let -> identifier _48_0x3a_type_optional = expr .)
+    ,               reduce using rule 174 (let -> identifier _48_0x3a_type_optional = expr .)
+    ]               reduce using rule 174 (let -> identifier _48_0x3a_type_optional = expr .)
     (               shift and go to state 37
     INT_DIV         shift and go to state 38
     EQUAL           shift and go to state 39
@@ -4317,7 +4317,7 @@ state 122
     (14) expr -> . array
     (15) expr -> . variant_call
     (16) expr -> . identifier
-    (17) expr -> . variable_declaration
+    (17) expr -> . let
     (18) expr -> . call
     (19) expr -> . case_of
     (20) expr -> . binary_expr
@@ -4331,7 +4331,7 @@ state 122
     (149) array -> . [ _39_NEWLINE_optional _40_exprs_optional ]
     (159) variant_call -> . type_identifier ( _43_NEWLINE_optional _44_exprs_optional )
     (172) identifier -> . IDENTIFIER
-    (174) variable_declaration -> . identifier _48_0x3a_type_optional = expr
+    (174) let -> . identifier _48_0x3a_type_optional = expr
     (154) call -> . expr ( _41_NEWLINE_optional _42_exprs_optional )
     (121) case_of -> . CASE expr OF _30_NEWLINE_optional _31_cases_optional END
     (27) binary_expr -> . expr INT_DIV expr
@@ -4374,7 +4374,7 @@ state 122
     array                          shift and go to state 11
     variant_call                   shift and go to state 12
     identifier                     shift and go to state 13
-    variable_declaration           shift and go to state 14
+    let                            shift and go to state 14
     call                           shift and go to state 15
     case_of                        shift and go to state 16
     binary_expr                    shift and go to state 17
@@ -4833,7 +4833,7 @@ state 161
     (14) expr -> . array
     (15) expr -> . variant_call
     (16) expr -> . identifier
-    (17) expr -> . variable_declaration
+    (17) expr -> . let
     (18) expr -> . call
     (19) expr -> . case_of
     (20) expr -> . binary_expr
@@ -4847,7 +4847,7 @@ state 161
     (149) array -> . [ _39_NEWLINE_optional _40_exprs_optional ]
     (159) variant_call -> . type_identifier ( _43_NEWLINE_optional _44_exprs_optional )
     (172) identifier -> . IDENTIFIER
-    (174) variable_declaration -> . identifier _48_0x3a_type_optional = expr
+    (174) let -> . identifier _48_0x3a_type_optional = expr
     (154) call -> . expr ( _41_NEWLINE_optional _42_exprs_optional )
     (121) case_of -> . CASE expr OF _30_NEWLINE_optional _31_cases_optional END
     (27) binary_expr -> . expr INT_DIV expr
@@ -4890,7 +4890,7 @@ state 161
     array                          shift and go to state 11
     variant_call                   shift and go to state 12
     identifier                     shift and go to state 13
-    variable_declaration           shift and go to state 14
+    let                            shift and go to state 14
     call                           shift and go to state 15
     case_of                        shift and go to state 16
     binary_expr                    shift and go to state 17

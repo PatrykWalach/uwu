@@ -15,9 +15,8 @@ const is_morning = false;
 const message = (() => {
   if (is_morning) {
     return "Good morning!";
-  } else {
-    return "Hello!";
   }
+  return "Hello!";
 })();
 const result = (() => {
   const arr1 = [1.0, 2.0, 3.0];

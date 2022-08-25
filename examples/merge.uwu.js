@@ -9,12 +9,11 @@ const get_head = (arr) => {
   return (() => {
     if (len(arr) < 1.0) {
       return "Empty";
-    } else {
-      const [_head, ..._rest] = arr;
-      const list_head = _head;
-      const rest = _rest;
-      return { TAG: "Head", _0: list_head, _1: rest };
     }
+    const [_head, ..._rest] = arr;
+    const list_head = _head;
+    const rest = _rest;
+    return { TAG: "Head", _0: list_head, _1: rest };
   })();
 };
 const merge = (a) => (b) => {
@@ -39,9 +38,8 @@ const merge = (a) => (b) => {
           return (() => {
             if (head_a < head_b) {
               return [head_a].concat(merge2(rest_a)(b));
-            } else {
-              return [head_b].concat(merge2(a)(rest_b));
             }
+            return [head_b].concat(merge2(a)(rest_b));
           })();
         }
         throw new Error("Non-exhaustive pattern match");

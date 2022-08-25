@@ -145,7 +145,7 @@ class UwuParser(Parser):
         "binary_expr",
         "case_of",
         "call",
-        "variable_declaration",
+        "let",
         "identifier",
         "variant_call",
         "array",
@@ -388,7 +388,7 @@ class UwuParser(Parser):
         return terms.EIdentifier(p.TYPE_IDENTIFIER)
 
     @_("identifier [ ':' type ] '=' expr")
-    def variable_declaration(self, p: sly.yacc.YaccProduction):
+    def let(self, p):
         return terms.ELet(
             id=p.identifier.name,
             init=p.expr,
