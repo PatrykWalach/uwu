@@ -16,6 +16,12 @@ repos:
         types_or: [javascript]
         exclude: snapshots
 
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v0.942
+    hooks:
+      - id: mypy
+        additional_dependencies: [sly, pytest]
+        args: [--python-version=3.10, --show-error-code]
   # - repo: local
   #   hooks:
   #     - id: pre-commit-chktex

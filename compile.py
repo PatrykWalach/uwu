@@ -10,170 +10,105 @@ import terms
 import typed
 
 
-def hoist_expr_list(body: list[terms.Expr]) -> list[terms.Expr]:
-    body2 = list[terms.Expr]()
+class Hoist(terms.FoldAll):
+    def __init__(self) -> None:
+        super().__init__()
+        self.to_hoist = list[terms.EExpr]()
 
-    for expr in body:
-        let, expr2 = hoist_expr(expr)
-        body2.extend(let)
-        body2.append(expr2)
+    def EExpr(self, n: terms.EExpr):
+        n = n.fold_children_with(self)
+        match n.expr:
+            case terms.ELet(id) | terms.EDef(id):
+                self.to_hoist.append(n)
+                return terms.EIdentifier(id)
 
-    return body2
+        return n
+
+    def EProgram(self, n: terms.EProgram):
+        body2 = self.hoist_expr_list(n.body)
+        return terms.EProgram(filter_identifiers(body2))
+
+    def hoist_expr_list(self, body: list[terms.EExpr]):
+        body2 = list[terms.EExpr]()
+
+        for expr in body:
+            hoist = Hoist()
+            expr2 = expr.fold_with(hoist)
+            body2.extend(hoist.to_hoist)
+            body2.append(expr2)
+
+        return body2
+
+    def EBlock(self, n: terms.EBlock) -> terms.EBlock:
+        body2 = self.hoist_expr_list(n.body)
+        return terms.EBlock(filter_identifiers(body2[:-1:]) + body2[-1::])
 
 
-def filter_identifiers(body: list[terms.Expr]):
+def filter_identifiers(body: list[terms.EExpr]):
     return list(filter(lambda expr: not isinstance(expr, terms.EIdentifier), body))
 
 
-def hoist_do(
-    node: terms.EDo,
-) -> terms.EDo:
-    body2 = hoist_expr_list(node.body)
-
-    return terms.EDo(filter_identifiers(body2[:-1:]) + body2[-1::])
+# def compile(program: terms.EProgram):
+#     ast = program.fold_with(Hoist())
+#     return _compile(ast)
 
 
-def hoist_case(
-    node: terms.ECase,
-) -> terms.ECase:
-
-    return terms.ECase(
-        node.pattern,
-        body=hoist_do(node.body),
-    )
-
-
-def hoist(
-    node: terms.EProgram | terms.EBlock,
-) -> terms.EProgram | terms.EBlock:
-    match node:
-        case terms.EBlock(body):
-            body2 = hoist_expr_list(body)
-            return terms.EBlock(filter_identifiers(body2[:-1:]) + body2[-1::])
-
-        case terms.EProgram(body):
-            body2 = hoist_expr_list(body)
-            return terms.EProgram(filter_identifiers(body2))
-
-        case node:
-            typed.assert_never(node)
-
-
-def hoist_expr(node: terms.Expr) -> tuple[list[terms.Expr], terms.Expr]:
-    match node:
-        case terms.ELet(id, init):
-            let, init2 = hoist_expr(init)
-
-            return let + [dataclasses.replace(node, init=init2)], terms.EIdentifier(id)
-        case terms.EDef(id, params, body, hint):
-
-            return [
-                terms.EDef(id, params, body=hoist_do(body), hint=hint)
-            ], terms.EIdentifier(id)
-        case terms.EIf(test, then, terms.EBlock() as or_else):
-            let_test, test2 = hoist_expr(test)
-            return let_test, dataclasses.replace(
-                node,
-                test=test2,
-                then=hoist(then),
-                or_else=hoist(or_else),
-            )
-        case terms.EIf(test, then, terms.EIf() | terms.EIfNone() as or_else):
-            let_test, test2 = hoist_expr(test)
-            let_or_else, or_else2 = hoist_expr(or_else)
-            return let_test + let_or_else, dataclasses.replace(
-                node,
-                test=test2,
-                then=hoist(then),
-                or_else=or_else2,
-            )
-
-        case terms.ECall(callee, args):
-            lets = list[terms.Expr]()
-            args2 = list[terms.Expr]()
-            for expr in args:
-                let, expr2 = hoist_expr(expr)
-                lets.extend(let)
-                args2.append(expr2)
-
-            return lets, terms.ECall(callee, args=args2)
-        case terms.ECaseOf(expr, cases):
-            let_expr, expr2 = hoist_expr(expr)
-            return let_expr, terms.ECaseOf(expr2, list(map(hoist_case, cases)))
-
-        case terms.EVariantCall(callee, args):
-            lets = list[terms.Expr]()
-            args2 = list[terms.Expr]()
-            for expr in args:
-                let, expr2 = hoist_expr(expr)
-                lets.extend(let)
-                args2.append(expr2)
-
-            return lets, terms.EVariantCall(callee, args=args2)
-
-        case terms.EArray(args):
-            lets = list[terms.Expr]()
-            args2 = list[terms.Expr]()
-            for expr in args:
-                let, expr2 = hoist_expr(expr)
-                lets.extend(let)
-                args2.append(expr2)
-
-            return lets, terms.EArray(args=args2)
-
-        case terms.EBinaryExpr(op, left, right):
-            let_left, left2 = hoist_expr(left)
-            let_right, right2 = hoist_expr(right)
-
-            return let_left + let_right, terms.EBinaryExpr(op, left2, right2)
-        case terms.EEnumDeclaration() | terms.EIdentifier() | terms.EExternal() | terms.ELiteral():
-            return [], node
-        case terms.EUnaryExpr(op, expr):
-            let_expr, expr2 = hoist_expr(expr)
-            return let_expr, terms.EUnaryExpr(op, expr2)
-        case terms.EDo():
-            return [], hoist_do(node)
-        case node:
-            typed.assert_never(node)
-
-
-def compile(program: terms.EProgram):
-    ast = hoist(program)
-    return _compile(ast)
-
-
-def _compile(exp: terms.AstTree) -> str:
+def compile(
+    exp: terms.EIdentifier
+    | terms.EExpr
+    | terms.EProgram
+    | terms.EParam
+    | terms.EUnaryExpr
+    | terms.MaybeOrElse
+    | terms.EVariantCall
+    | terms.ELet
+    | terms.EArray
+    | terms.EBinaryExpr
+    | terms.EBlock
+    | terms.ECall
+    | terms.ECaseOf
+    | terms.EDef
+    | terms.EDo
+    | terms.EEnumDeclaration
+    | terms.EExpr
+    | terms.EExternal
+    | terms.EIf
+    | terms.ENumLiteral
+    | terms.EStrLiteral
+    | terms.MaybeOrElseNothing,
+) -> str:
     match exp:
+        case terms.MaybeOrElse(value):
+            return compile(value)
         case terms.EExternal(value=value):
             return f"{value}"
-        case terms.ELiteral(value=str()):
+        case terms.EStrLiteral(value):
             return f'"{exp.value}"'
-        case terms.ELiteral(value=float()):
+        case terms.ENumLiteral(value):
             return f"{exp.value}"
         case terms.ELet(id, init):
-            return f"const {id}={_compile( init)}"
+            return f"const {id}={compile( init)}"
         case terms.EBlock(body):
-            body = [_compile(expr) for expr in body]
-            if body:
-                body[-1] = "return " + body[-1]
-            return ";".join(body)
-        case terms.EDo(body):
-            body = [_compile(expr) for expr in body]
-            if body:
-                body[-1] = "return " + body[-1]
-            return "(()=>{" + ";".join(body) + "})()"
+            js_body = [compile(expr) for expr in body]
+            if js_body:
+                js_body[-1] = "return " + js_body[-1]
+            return ";".join(js_body)
+        case terms.EDo(block):
+            return "(()=>{" + compile(block) + "})()"
         case terms.EProgram(body):
-            body = [_compile(expr) for expr in body]
-            return ";".join(body)
-        case terms.EIfNone():
+            js_body = [compile(expr) for expr in body]
+            return ";".join(js_body)
+        case terms.MaybeOrElseNothing():
             return f"return"
         case terms.EIf(test, then, or_else):
-            return f"(()=>{{if({_compile(test)}){{{_compile(then)}}}{_compile(or_else)}}})()"
+            return (
+                f"(()=>{{if({compile(test)}){{{compile(then)}}}{compile(or_else)}}})()"
+            )
         case terms.ECall(id, args):
             return functools.reduce(
                 lambda acc, arg: f"{acc}({arg})",
-                [_compile(arg) for arg in args] or [""],
-                _compile(id),
+                [compile(arg) for arg in args] or [""],
+                compile(id),
             )
 
         case terms.EVariantCall("True", []):
@@ -184,32 +119,37 @@ def _compile(exp: terms.AstTree) -> str:
         case terms.EVariantCall(id, []):
             return f"'{id}'"
 
-        case terms.EVariantCall(id, args) if args:
-            args = [f"_{i}:{_compile(arg)}" for i, arg in enumerate(args)]
+        case terms.EVariantCall(id, args):
+            js_var_args = [f"_{i}:{compile(arg)}" for i, arg in enumerate(args)]
 
-            return f"{{TAG:'{id}',{','.join(args)}}}"
+            return f"{{TAG:'{id}',{','.join(js_var_args)}}}"
 
-        case terms.EDef(id, args, terms.EDo(body)):
+        case terms.EDef(id, args, terms.EDo(block)):
 
-            args = functools.reduce(
-                lambda acc, arg: f"{acc}({arg})=>",
-                [_compile(arg) for arg in args] or [""],
+            js_args = functools.reduce(
+                lambda acc, js_arg: f"{acc}({js_arg})=>",
+                [compile(arg) for arg in args] or [""],
                 "",
             )
 
-            return f"const {id}={args}{{{_compile(terms.EBlock(body))}}}"
-        case terms.EBinaryExpr("|", left, right):
-            return f"{_compile( left)}.concat({_compile( right)})"
-        case terms.EBinaryExpr("++", left, right):
-            return f"({_compile( left)}+{_compile( right)})"
-        case terms.EBinaryExpr("//", left, right):
-            return f"Math.floor({_compile( left)}/{_compile( right)})"
-        case terms.EBinaryExpr("!=" | "==" as op, left, right):
-            return f"({_compile( left)}{op}={_compile( right)})"
-        case terms.EBinaryExpr(
-            ">" | "<" | "+" | "-" | "/" | "*" | "%" as op, left, right
-        ):
-            return f"({_compile( left)}{op}{_compile( right)})"
+            return f"const {id}={js_args}{{{compile(block)}}}"
+        case terms.EBinaryExpr(op, left, right):
+            js_left = compile(left)
+            js_right = compile(right)
+            match op:
+                case "|":
+                    return f"{js_left}.concat({js_right})"
+                case "++":
+                    return f"({js_left}+{js_right})"
+                case "//":
+                    return f"Math.floor({js_left}/{js_right})"
+                case "!=" | "==":
+                    return f"({js_left}{op}={js_right})"
+                case ">" | "<" | "+" | "-" | "/" | "*" | "%":
+                    return f"({js_left}{op}{js_right})"
+                case op:
+                    typed.assert_never(op)
+
         case terms.EIdentifier(id):
             return id
         case terms.EEnumDeclaration():
@@ -217,52 +157,41 @@ def _compile(exp: terms.AstTree) -> str:
         case terms.EParam(id):
             return id
         case terms.ECaseOf(expr, cases):
-            return f"(()=>{{const $={_compile(expr)};{_compile_case_tree(case_tree.gen_match(cases))}}})()"
+            return f"(()=>{{const $={compile(expr)};{_compile_case_tree(case_tree.gen_match(cases))}}})()"
             # cases = [f"{_compile(case)}" for case in cases]
             # cases = [*cases, "throw new Error('Unhandled case of')"]
 
             # return f"((__)=>{{{';'.join(cases)}}})({_compile(of)})"
         # case terms.ECase(pattern, body):
         #     return f"if({_compile(pattern)}(__)){{return {_compile(body)}}}"
-        case terms.EMatchAs(id):
-            return f"((__)=>{{{id}=__; return true}})"
-        case terms.EMatchVariant("True", []):
-            return f"((__)=>{{return __===true}})"
-        case terms.EMatchVariant("False", []):
-            return f"((__)=>{{return __===false}})"
-        case terms.EMatchVariant(id, []):
-            return f"((__)=>{{return __==='{id}'}})"
-        case terms.EMatchVariant(id, fields) if fields:
-            fields = [f"{_compile(field)}(__._{i})" for i, field in enumerate(fields)]
-            fields = [f'__.TAG==="{id}"', *fields]
-            fields = "&&".join(fields)
+        # case terms.EMatchAs(id):
+        #     return f"((__)=>{{{id}=__; return true}})"
+        # case terms.EMatchVariant("True", []):
+        #     return f"((__)=>{{return __===true}})"
+        # case terms.EMatchVariant("False", []):
+        #     return f"((__)=>{{return __===false}})"
+        # case terms.EMatchVariant(id, []):
+        #     return f"((__)=>{{return __==='{id}'}})"
+        # case terms.EMatchVariant(id, fields) if fields:
+        #     fields = [f"{compile(field)}(__._{i})" for i, field in enumerate(fields)]
+        #     fields = [f'__.TAG==="{id}"', *fields]
+        #     fields = "&&".join(fields)
 
-            return f"((__)=>{{return {fields}}})"
-        case terms.EArray(args) | terms.ETuple(args):
-            return f"[{','.join(map(_compile, args))}]"
+        #     return f"((__)=>{{return {fields}}})"
+        case terms.EExpr(value):
+            return compile(value)
+        case terms.EArray(args):
+            return f"[{','.join(map(compile, args))}]"
         case terms.EUnaryExpr(op, expr):
-            return f"{op}({_compile(expr)})"
-        case terms.EMatchTuple(patterns) | terms.EMatchArray(patterns):
-
-            patterns = [
-                f"{_compile(pattern)}(__[{i}])" for i, pattern in enumerate(patterns)
-            ]
-            patterns = [
-                f"__.length=={len(patterns)}",
-                *patterns,
-            ]
-
-            patterns = "&&".join(patterns)
-
-            return f"((__)=>{{return {patterns}}})"
-        case _:
-            raise Exception(f"Unsupported expression: {exp}")
+            return f"{op}({compile(expr)})"
+        case exp:
+            typed.assert_never(exp)
 
 
-def _compile_case_tree(tree: case_tree.CaseTree):
+def _compile_case_tree(tree: case_tree.CaseTree) -> str:
     match tree:
         case case_tree.Leaf(body):
-            return _compile(terms.EBlock(body.body))
+            return compile(body.block)
         case case_tree.MissingLeaf():
             return "throw new Error('Non-exhaustive pattern match')"
         case case_tree.Node(var, pattern_name, vars, yes, no):
@@ -282,5 +211,6 @@ def _compile_case_tree(tree: case_tree.CaseTree):
             #     return _compile_case_tree(yes)
 
             return f"if({'&&'.join(conditions)}){{{_compile_case_tree(yes)}}}{_compile_case_tree(no)}"
+
         case _:
-            raise TypeError("Unsupported case")
+            typed.assert_never(tree)
