@@ -55,11 +55,11 @@ BUILTINS: list[terms.EExpr] = [
 ]
 
 DEFAULT_CTX: Context = {
-    "Str": Scheme([], typed.TStr()),
-    "Num": Scheme([], typed.TNum()),
-    "Unit": Scheme([], typed.TUnit()),
-    "Callable": Scheme([], typed.TCallableCon()),
-    "Array": Scheme([], typed.TArrayCon()),
+    "Str": Scheme([], typed.TStr),
+    "Num": Scheme([], typed.TNum),
+    "Unit": Scheme([], typed.TUnit),
+    "Callable": Scheme([], typed.TCallableCon),
+    "Array": Scheme([], typed.TArrayCon),
 }
 
 
