@@ -63,53 +63,44 @@ class KFun:
 
 Kind: TypeAlias = KStar | KFun
 
-
-def TUnit() -> TCon:
-    return TCon("Unit", KStar())
+TUnit = TCon("Unit", KStar())
 
 
-def TStr() -> TCon:
-    return TCon("Str", KStar())
+TStr = TCon("Str", KStar())
 
 
-def TNum() -> TCon:
-    return TCon("Num", KStar())
+TNum = TCon("Num", KStar())
 
 
-def TTupleCon() -> TCon:
-    return TCon("Tuple", KFun(KStar(), KFun(KStar(), KStar())))
+TTupleCon = TCon("Tuple", KFun(KStar(), KFun(KStar(), KStar())))
 
 
 def pair(a: Type, b: Type) -> TAp:
-    return TAp(TAp(TTupleCon(), a), b)
+    return TAp(TAp(TTupleCon, a), b)
 
 
-def TCallableCon() -> TCon:
-    return TCon("Callable", KFun(KStar(), KFun(KStar(), KStar())))
+TCallableCon = TCon("Callable", KFun(KStar(), KFun(KStar(), KStar())))
 
 
 def TDef(arg: Type, ret: Type) -> TAp:
-    return TAp(TAp(TCallableCon(), arg), ret)
+    return TAp(TAp(TCallableCon, arg), ret)
 
 
-def TArrayCon() -> TCon:
-    return TCon("Array", KFun(KStar(), KStar()))
+TArrayCon = TCon("Array", KFun(KStar(), KStar()))
 
 
 def TArray(t: Type) -> TAp:
-    return TAp(TArrayCon(), t)
+    return TAp(TArrayCon, t)
 
 
-def TOptionCon() -> TCon:
-    return TCon("Option", KFun(KStar(), KStar()), ["Some", "None"])
+TOptionCon = TCon("Option", KFun(KStar(), KStar()), ["Some", "None"])
 
 
 def TOption(t: Type) -> TAp:
-    return TAp(TOptionCon(), t)
+    return TAp(TOptionCon, t)
 
 
-def TBool() -> TCon:
-    return TCon("Bool", KStar(), ["True", "False"])
+TBool=TCon("Bool", KStar(), ["True", "False"])
 
 
 def kind(t: Type) -> Kind:

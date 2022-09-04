@@ -91,7 +91,7 @@ class CircularUseException(Exception):
 
 def unify(a: typed.Type, b: typed.Type) -> Substitution:
     match (a, b):
-        case (typed.TCon(), typed.TCon()) if a == b:
+        case (typed.TCon(), typed.TCon()) if a is b:
             return {}
         case (
             typed.TAp(arg0, ret0),
@@ -155,7 +155,7 @@ def unify_subst(a: typed.Type, b: typed.Type, subst: Substitution) -> Substituti
 def reduce_args(ty_items: list[typed.Type], ty_call: typed.Type) -> typed.Type:
     return functools.reduce(
         flip(typed.TDef),
-        ty_items or [typed.TUnit()],
+        ty_items or [typed.TUnit],
         ty_call,
     )
 
@@ -196,9 +196,9 @@ def infer(
 ) -> tuple[Substitution, typed.Type]:
     match node:
         case terms.EStrLiteral(value):
-            return subst, typed.TStr()
+            return subst, typed.TStr
         case terms.ENumLiteral(value):
-            return subst, typed.TNum()
+            return subst, typed.TNum
         case terms.EIdentifier(var):
             return subst, instantiate(ctx[var])
         case terms.EDo(block, hint):
@@ -208,7 +208,7 @@ def infer(
 
             return subst, ty
         case terms.EProgram(body) | terms.EBlock(body):
-            ty = typed.TUnit()
+            ty = typed.TUnit
             ctx = ctx.copy()
 
             for node in body:
@@ -268,17 +268,18 @@ def infer(
                 ty_variant_con = typed.TCon(variant.id, ty_variant_co_kind).w()
                 ty_variant = functools.reduce(typed.TAp, ty_fields, ty_variant_con)
 
+                ctx["$" + variant.id] = Scheme.from_subst(subst, ctx, ty_variant_con)
                 ctx[variant.id] = Scheme.from_subst(
                     subst, ctx, typed.TDef(ty_variant, ty)
                 )
 
             ctx[id] = Scheme.from_subst(subst, ctx, ty_con)
 
-            return subst, typed.TUnit()
+            return subst, typed.TUnit
         case terms.EUnaryExpr("-", expr):
             subst, ty_expr = infer(subst, ctx, expr)
-            subst = unify_subst(ty_expr, typed.TNum(), subst)
-            return subst, typed.TNum()
+            subst = unify_subst(ty_expr, typed.TNum, subst)
+            return subst, typed.TNum
         case terms.EBinaryExpr(op, left, right):
             match op:
                 case "|":
@@ -290,27 +291,27 @@ def infer(
                     return subst, typed.TArray(ty)
                 case "++":
                     subst, ty_left = infer(subst, ctx, left)
-                    subst = unify_subst(ty_left, typed.TStr(), subst)
+                    subst = unify_subst(ty_left, typed.TStr, subst)
                     subst, ty_right = infer(subst, ctx, right)
-                    subst = unify_subst(ty_right, typed.TStr(), subst)
-                    return subst, typed.TStr()
+                    subst = unify_subst(ty_right, typed.TStr, subst)
+                    return subst, typed.TStr
                 case "+" | "-" | "*" | "/" | "//" | "%":
                     subst, ty_left = infer(subst, ctx, left)
-                    subst = unify_subst(ty_left, typed.TNum(), subst)
+                    subst = unify_subst(ty_left, typed.TNum, subst)
                     subst, ty_right = infer(subst, ctx, right)
-                    subst = unify_subst(ty_right, typed.TNum(), subst)
-                    return subst, typed.TNum()
+                    subst = unify_subst(ty_right, typed.TNum, subst)
+                    return subst, typed.TNum
                 case "!=" | "==":
                     subst, ty_left = infer(subst, ctx, left)
                     subst, ty_right = infer(subst, ctx, right)
                     subst = unify_subst(ty_right, ty_left, subst)
-                    return subst, typed.TBool()
+                    return subst, typed.TBool
                 case ">" | "<":
                     subst, ty_left = infer(subst, ctx, left)
-                    subst = unify_subst(ty_left, typed.TNum(), subst)
+                    subst = unify_subst(ty_left, typed.TNum, subst)
                     subst, ty_right = infer(subst, ctx, right)
-                    subst = unify_subst(ty_right, typed.TNum(), subst)
-                    return subst, typed.TBool()
+                    subst = unify_subst(ty_right, typed.TNum, subst)
+                    return subst, typed.TBool
                 case op:
                     typed.assert_never(op)
         case terms.EMatchAs(id):
@@ -340,10 +341,12 @@ def infer(
                 flip(typed.KFun), map(typed.kind, ty_args), typed.KStar().w()
             )
 
+            subst, ty_variant_con = infer(subst, ctx, terms.EIdentifier("$" + id))
+
             ty_variant = functools.reduce(
                 typed.TAp,
                 ty_args,
-                typed.TCon(id, kind_variant).w(),
+                ty_variant_con,
             )
 
             subst = unify_subst(ty_con, typed.TDef(ty_variant, ty), subst)
@@ -394,7 +397,7 @@ def infer(
 
             subst, ty_hint = infer(subst, ctx, hint)
             subst, ty_condition = infer(subst, ctx, test)
-            subst = unify_subst(ty_condition, typed.TBool(), subst)
+            subst = unify_subst(ty_condition, typed.TBool, subst)
 
             subst, ty_then = infer(subst, ctx, then)
             subst = unify_subst(ty_then, ty_hint, subst)
@@ -404,7 +407,7 @@ def infer(
 
             return subst, ty_hint
         case terms.MaybeOrElseNothing():
-            return subst, typed.TUnit()
+            return subst, typed.TUnit
         case terms.MaybeEHintNothing():
             return subst, fresh_ty_var()
 
@@ -511,14 +514,9 @@ def infer_case_tree(
 
             ty_vars = list[typed.Type](fresh_ty_var() for _ in vars)
 
-            pattern_name_con = typed.TCon(
-                pattern_name,
-                functools.reduce(
-                    flip(typed.KFun),
-                    map(typed.kind, ty_vars),
-                    typed.KStar().w(),
-                ),
-            ).w()
+            subst, pattern_name_con = infer(
+                subst, ctx, terms.EIdentifier("$" + pattern_name)
+            )
 
             subst = unify_subst(
                 ty_pattern_name,

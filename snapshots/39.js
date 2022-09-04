@@ -1,0 +1,1 @@
+;;const id=(id)=>{return id};const unit=undefined;;const get=(value)=>{return {VALUE:value}};const value=(a)=>{return a.VALUE};const val=value(get(12.0));console.log(val)

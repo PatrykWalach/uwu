@@ -1,0 +1,1 @@
+;;const id=(id)=>{return id};const unit=undefined;;const get_document=()=>{return 'document'};const eq=(a)=>(b)=>{return (a===b)};console.log(eq(get_document())(get_document()))
