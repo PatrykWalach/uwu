@@ -32,7 +32,8 @@ R = TypeVar("R")
 
 class UwuLexer(Lexer):
     tokens = {
-        "NUMBER",
+        "INT",
+        "FLOAT",
         "STRING",
         "IDENTIFIER",
         "DEF",
@@ -44,11 +45,14 @@ class UwuLexer(Lexer):
         "OF",
         "CONCAT",
         "ELIF",
-        "INT_DIV",
         "ENUM",
         "THEN",
         "TYPE_IDENTIFIER",
         "EXTERNAL",
+        "FLOAT_SUM",
+        "FLOAT_SUB",
+        "FLOAT_DIV",
+        "FLOAT_MUL",
         "NOT_EQUAL",
         "EQUAL",
         "NEWLINE",
@@ -71,14 +75,17 @@ class UwuLexer(Lexer):
         "*",
         "/",
         "|",
-        "%",
     }
     NOT_EQUAL = r"!="
     EQUAL = r"=="
     STRING = r"'[^']*'"
-    NUMBER = r"\d+"
+    FLOAT = r"\d+\.\d*"
+    INT = r"\d+"
     CONCAT = r"\+{2}"
-    INT_DIV = r"/{2}"
+    FLOAT_SUM = r"\+\."
+    FLOAT_SUB = r"-\."
+    FLOAT_DIV = r"/\."
+    FLOAT_MUL = r"\*\."
     TYPE_IDENTIFIER = r"[A-Z\d][\w\d]*"
     IDENTIFIER = r"[a-z_][\w\d]*"
     IDENTIFIER["def"] = "DEF"  # type: ignore[index]
@@ -125,12 +132,13 @@ class UwuParser(Parser):
         return [p.expr]
 
     precedence = (
-        ("left", "="),
+        ("right", "="),
         ("left", "NOT_EQUAL", "EQUAL"),
         ("left", "<", ">"),
-        ("left", "+", "-", "|", "CONCAT"),
-        ("left", "*", "/", "INT_DIV", "%"),
-        ("right", "UMINUS"),
+        ("right", "|", "CONCAT"),
+        ("left", "+", "-", "FLOAT_SUM", "FLOAT_SUB"),
+        ("left", "*", "/", "FLOAT_DIV", "FLOAT_MUL"),
+        ("right", "UNARY"),
         ("left", "(", ")"),
         # ('left', 'V_CALL'),
         # ('right', 'CALL')
@@ -149,8 +157,10 @@ class UwuParser(Parser):
         "identifier",
         "variant_call",
         "array",
-        "num_literal",
+        "int_literal",
+        "float_literal",
         "str_literal",
+        "unary_expr",
     )
     def expr(self, p: sly.yacc.YaccProduction) -> terms.EExpr:
         return terms.EExpr(p[0])
@@ -162,10 +172,10 @@ class UwuParser(Parser):
         return p[1]
 
     @_(  # type: ignore[no-redef]
-        "'-' expr %prec UMINUS",
+        "'-' expr %prec UNARY",
     )
-    def expr(self, p: sly.yacc.YaccProduction) -> terms.EExpr:
-        return terms.EExpr(terms.EUnaryExpr(p[0], p.expr))
+    def unary_expr(self, p: sly.yacc.YaccProduction) -> terms.EUnaryExpr:
+        return terms.EUnaryExpr(p[0], p.expr)
 
     @_("EXTERNAL")
     def external(self, p: sly.yacc.YaccProduction) -> terms.EExternal:
@@ -178,12 +188,15 @@ class UwuParser(Parser):
         "expr '/' expr",
         "expr '*' expr",
         "expr '<' expr",
-        "expr '%' expr",
+        "expr FLOAT_SUM expr",
+        "expr FLOAT_SUB expr",
+        "expr FLOAT_DIV expr",
+        "expr FLOAT_MUL expr",
         "expr '>' expr",
         "expr '|' expr",
         "expr NOT_EQUAL expr",
         "expr EQUAL expr",
-        "expr INT_DIV expr",
+
     )
     def binary_expr(self, p: sly.yacc.YaccProduction):
         return terms.EBinaryExpr(p[1], p[0], p[2])
@@ -395,9 +408,13 @@ class UwuParser(Parser):
             hint=terms.MaybeEHint(p.type or terms.MaybeEHintNothing()),
         )
 
-    @_("NUMBER")
-    def num_literal(self, p: sly.yacc.YaccProduction) -> terms.ENumLiteral:
-        return terms.ENumLiteral(float(p.NUMBER))
+    @_("INT")
+    def int_literal(self, p: sly.yacc.YaccProduction) -> terms.EIntLiteral:
+        return terms.EIntLiteral(float(p.INT))
+
+    @_("FLOAT")
+    def float_literal(self, p: sly.yacc.YaccProduction) -> terms.EFloatLiteral:
+        return terms.EFloatLiteral(float(p.FLOAT))
 
     @_("STRING")
     def str_literal(self, p: sly.yacc.YaccProduction) -> terms.EStrLiteral:

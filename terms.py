@@ -97,7 +97,9 @@ class EProgram(Node):
 
 @dataclasses.dataclass(frozen=True)
 class EBinaryExpr(Node):
-    op: typing.Literal["++", "+", "-", "/", "*", "%", "//", ">", "<", "|", "!=", "=="]
+    op: typing.Literal[
+        "++", "+", "-", "/", "*", "+.", "-.", "/.", "*.", ">", "<", "|", "!=", "=="
+    ]
     left: EExpr
     right: EExpr
 
@@ -108,7 +110,12 @@ class EIdentifier(Node):
 
 
 @dataclasses.dataclass(frozen=True)
-class ENumLiteral(Node):
+class EIntLiteral(Node):
+    value: float
+
+
+@dataclasses.dataclass(frozen=True)
+class EFloatLiteral(Node):
     value: float
 
 
@@ -244,7 +251,8 @@ def compose(
 class EExpr(Node):
     expr: (
         EDo
-        | ENumLiteral
+        | EIntLiteral
+        | EFloatLiteral
         | EStrLiteral
         | EDef
         | EIf
