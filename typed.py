@@ -70,6 +70,7 @@ TStr = TCon("Str", KStar())
 
 
 TNum = TCon("Num", KStar())
+TFloat = TCon("Float", KStar())
 
 
 TTupleCon = TCon("Tuple", KFun(KStar(), KFun(KStar(), KStar())))
@@ -100,7 +101,7 @@ def TOption(t: Type) -> TAp:
     return TAp(TOptionCon, t)
 
 
-TBool=TCon("Bool", KStar(), ["True", "False"])
+TBool = TCon("Bool", KStar(), ["True", "False"])
 
 
 def kind(t: Type) -> Kind:

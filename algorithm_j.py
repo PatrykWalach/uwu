@@ -185,6 +185,7 @@ Inferable = (
     | terms.MaybeOrElseNothing
     | terms.EStrLiteral
     | terms.ENumLiteral
+    | terms.EFloatLiteral
     | terms.MaybeEHintNothing
 )
 
@@ -199,6 +200,8 @@ def infer(
             return subst, typed.TStr
         case terms.ENumLiteral(value):
             return subst, typed.TNum
+        case terms.EFloatLiteral(value):
+            return subst, typed.TFloat
         case terms.EIdentifier(var):
             return subst, instantiate(ctx[var])
         case terms.EDo(block, hint):
@@ -295,12 +298,18 @@ def infer(
                     subst, ty_right = infer(subst, ctx, right)
                     subst = unify_subst(ty_right, typed.TStr, subst)
                     return subst, typed.TStr
-                case "+" | "-" | "*" | "/" | "//" | "%":
+                case "+" | "-" | "*" | "/":
                     subst, ty_left = infer(subst, ctx, left)
                     subst = unify_subst(ty_left, typed.TNum, subst)
                     subst, ty_right = infer(subst, ctx, right)
                     subst = unify_subst(ty_right, typed.TNum, subst)
                     return subst, typed.TNum
+                case "+." | "-." | "*." | "/.":
+                    subst, ty_left = infer(subst, ctx, left)
+                    subst = unify_subst(ty_left, typed.TFloat, subst)
+                    subst, ty_right = infer(subst, ctx, right)
+                    subst = unify_subst(ty_right, typed.TFloat, subst)
+                    return subst, typed.TFloat
                 case "!=" | "==":
                     subst, ty_left = infer(subst, ctx, left)
                     subst, ty_right = infer(subst, ctx, right)

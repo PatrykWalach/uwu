@@ -15,20 +15,22 @@ class Hoist(terms.FoldAll):
         super().__init__()
         self.to_hoist = list[terms.EExpr]()
 
-    def EExpr(self, n: terms.EExpr):
+    def EExpr(self, n: terms.EExpr) -> terms.EExpr:
+
         n = n.fold_children_with(self)
         match n.expr:
             case terms.ELet(id) | terms.EDef(id):
                 self.to_hoist.append(n)
-                return terms.EIdentifier(id)
+                return terms.EExpr(terms.EIdentifier(id))
 
         return n
 
-    def EProgram(self, n: terms.EProgram):
+    def EProgram(self, n: terms.EProgram) -> terms.EProgram:
+
         body2 = self.hoist_expr_list(n.body)
         return terms.EProgram(filter_identifiers(body2))
 
-    def hoist_expr_list(self, body: list[terms.EExpr]):
+    def hoist_expr_list(self, body: list[terms.EExpr]) -> list[terms.EExpr]:
         body2 = list[terms.EExpr]()
 
         for expr in body:
@@ -44,8 +46,8 @@ class Hoist(terms.FoldAll):
         return terms.EBlock(filter_identifiers(body2[:-1:]) + body2[-1::])
 
 
-def filter_identifiers(body: list[terms.EExpr]):
-    return list(filter(lambda expr: not isinstance(expr, terms.EIdentifier), body))
+def filter_identifiers(body: list[terms.EExpr]) -> list[terms.EExpr]:
+    return list(filter(lambda expr: not isinstance(expr.expr, terms.EIdentifier), body))
 
 
 # def compile(program: terms.EProgram):
@@ -75,6 +77,7 @@ def compile(
     | terms.EIf
     | terms.ENumLiteral
     | terms.EStrLiteral
+    | terms.EFloatLiteral
     | terms.MaybeOrElseNothing,
 ) -> str:
     match exp:
@@ -84,7 +87,7 @@ def compile(
             return f"{value}"
         case terms.EStrLiteral(value):
             return f'"{exp.value}"'
-        case terms.ENumLiteral(value):
+        case terms.ENumLiteral(value) | terms.EFloatLiteral(value):
             return f"{exp.value}"
         case terms.ELet(id, init):
             return f"const {id}={compile( init)}"
@@ -141,12 +144,14 @@ def compile(
                     return f"{js_left}.concat({js_right})"
                 case "++":
                     return f"({js_left}+{js_right})"
-                case "//":
+                case "/":
                     return f"Math.floor({js_left}/{js_right})"
                 case "!=" | "==":
                     return f"({js_left}{op}={js_right})"
-                case ">" | "<" | "+" | "-" | "/" | "*" | "%":
+                case ">" | "<" | "+" | "-" | "/" | "*":
                     return f"({js_left}{op}{js_right})"
+                case "+." | "-." | "/." | "*.":
+                    return f"({js_left}{op[:-1:]}{js_right})"
                 case op:
                     typed.assert_never(op)
 

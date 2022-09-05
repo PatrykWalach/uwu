@@ -24,6 +24,6 @@ result = do
     arr2 = map(arr1, add_one)
 
     filter(arr2, def is_even(x) do
-        x % 2 == 0
+        `x % 2` == 0
     end)
 end
