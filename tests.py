@@ -882,8 +882,16 @@ def test_infer(program, expected_type, parser, lexer):
                 ("35", "`console.log`([1]|[2])", "[ 1, 2 ]"),
                 ("36", "`console.log`(-2+2)", "0"),
                 ("37", "`console.log`(if 2*2 == 4 then 0 else 1 end)", "0"),
-                ("38", "enum Document {}\ndef get_document(): Document do `'document'` end\ndef eq(a: Document, b: Document) do a == b end\n`console.log`(eq(get_document(), get_document()))", "true"),
-                ("39", "enum Obj<A> {}\ndef get(value: A): Obj<A> do `{VALUE:value}` end\ndef value(a: Obj<A>): A do `a.VALUE` end\nval: Obj<Num> = value(get(12))\n`console.log`(val)", "12"),
+                (
+                    "38",
+                    "enum Document {}\ndef get_document(): Document do `'document'` end\ndef eq(a: Document, b: Document) do a == b end\n`console.log`(eq(get_document(), get_document()))",
+                    "true",
+                ),
+                (
+                    "39",
+                    "enum Obj<A> {}\ndef get(value: A): Obj<A> do `{VALUE:value}` end\ndef value(a: Obj<A>): A do `a.VALUE` end\nval: Obj<Num> = value(get(12))\n`console.log`(val)",
+                    "12",
+                ),
             ]
         )
     ),

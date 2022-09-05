@@ -196,7 +196,6 @@ class UwuParser(Parser):
         "expr '|' expr",
         "expr NOT_EQUAL expr",
         "expr EQUAL expr",
-
     )
     def binary_expr(self, p: sly.yacc.YaccProduction):
         return terms.EBinaryExpr(p[1], p[0], p[2])
@@ -409,8 +408,8 @@ class UwuParser(Parser):
         )
 
     @_("INT")
-    def int_literal(self, p: sly.yacc.YaccProduction) -> terms.EIntLiteral:
-        return terms.EIntLiteral(float(p.INT))
+    def int_literal(self, p: sly.yacc.YaccProduction) -> terms.ENumLiteral:
+        return terms.ENumLiteral(float(p.INT))
 
     @_("FLOAT")
     def float_literal(self, p: sly.yacc.YaccProduction) -> terms.EFloatLiteral:

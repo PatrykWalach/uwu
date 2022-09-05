@@ -110,7 +110,7 @@ class EIdentifier(Node):
 
 
 @dataclasses.dataclass(frozen=True)
-class EIntLiteral(Node):
+class ENumLiteral(Node):
     value: float
 
 
@@ -251,7 +251,7 @@ def compose(
 class EExpr(Node):
     expr: (
         EDo
-        | EIntLiteral
+        | ENumLiteral
         | EFloatLiteral
         | EStrLiteral
         | EDef

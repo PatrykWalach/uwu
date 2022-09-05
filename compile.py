@@ -19,7 +19,7 @@ class Hoist(terms.FoldAll):
 
         n = n.fold_children_with(self)
         match n.expr:
-            case terms.ELet(id)| terms.EDef(id):
+            case terms.ELet(id) | terms.EDef(id):
                 self.to_hoist.append(n)
                 return terms.EExpr(terms.EIdentifier(id))
 
@@ -150,7 +150,7 @@ def compile(
                     return f"({js_left}{op}={js_right})"
                 case ">" | "<" | "+" | "-" | "/" | "*":
                     return f"({js_left}{op}{js_right})"
-                case "+." | "-." | "/." | "*." :
+                case "+." | "-." | "/." | "*.":
                     return f"({js_left}{op[:-1:]}{js_right})"
                 case op:
                     typed.assert_never(op)
