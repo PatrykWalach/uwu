@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 from dataclasses import dataclass
 from pathlib import WindowsPath
@@ -8,7 +10,7 @@ import pytest
 
 import algorithm_j
 import typed
-from compile import Hoist, compile
+from compile import DefCleaner, Hoister, compile
 from main import BUILTINS, DEFAULT_CTX, AstEncoder, UwuLexer, UwuParser
 from terms import *
 
@@ -540,6 +542,39 @@ def lexer():
                 "def x() do\ny\n\n#comment\n\nend",
                 [EExpr ** EDef("x", [], EDo(EBlock([EExpr ** EIdentifier("y")])))],
             ),
+            (
+                "x:Option<Option<Num>>=None()",
+                [
+                    EExpr
+                    ** ELet(
+                        "x",
+                        EExpr ** EVariantCall("None"),
+                        MaybeEHint
+                        ** EHint("Option", [EHint("Option", [EHint("Num")])]),
+                    )
+                ],
+            ),
+            (
+                "x:Either<Num, Either<Num, Either<Num>>>=None()",
+                [
+                    EExpr
+                    ** ELet(
+                        "x",
+                        EExpr ** EVariantCall("None"),
+                        MaybeEHint
+                        ** EHint(
+                            "Either",
+                            [
+                                EHint("Num"),
+                                EHint(
+                                    "Either",
+                                    [EHint("Num"), EHint("Either", [EHint("Num")])],
+                                ),
+                            ],
+                        ),
+                    )
+                ],
+            ),
             # (
             #     "case [Some(1), None()] of [Some(value), None()] do value end end",
             #     [
@@ -763,8 +798,8 @@ def test_parser(program, ast, parser, lexer):
 )
 def test_infer(program, expected_type, parser, lexer):
     program = parser.parse(lexer.tokenize(program))
-
-    assert algorithm_j.type_infer(DEFAULT_CTX, program) == expected_type
+    ast = EProgram([*BUILTINS, *program.body])
+    assert algorithm_j.type_infer(DEFAULT_CTX, ast) == expected_type
 
 
 @pytest.mark.parametrize(
@@ -878,8 +913,8 @@ def test_infer(program, expected_type, parser, lexer):
                 # ("31", "`console.log`(case {1,2} of {x,_} do x end end)", "1"),
                 # ("32", "`console.log`(case {1,2} of {_,y} do y end end)", "2"),
                 ("33", "`console.log`(if 2*2 != 4 then 0 else 1 end)", "1"),
-                ("34", "`console.log`('a'++'b')", "ab"),
-                ("35", "`console.log`([1]|[2])", "[ 1, 2 ]"),
+                ("34", "`console.log`('a'<>'b')", "ab"),
+                ("35", "`console.log`([1]++[2])", "[ 1, 2 ]"),
                 ("36", "`console.log`(-2+2)", "0"),
                 ("37", "`console.log`(if 2*2 == 4 then 0 else 1 end)", "0"),
                 (
@@ -892,20 +927,60 @@ def test_infer(program, expected_type, parser, lexer):
                     "enum Obj<A> {}\ndef get(value: A): Obj<A> do `{VALUE:value}` end\ndef value(a: Obj<A>): A do `a.VALUE` end\nval: Obj<Num> = value(get(12))\n`console.log`(val)",
                     "12",
                 ),
+                (
+                    "40",
+                    "def ~>> <A> (a: Int, b: Int): Int do `a>>b` end \n `console.log`(5 ~>> 2)",
+                    "1",
+                ),
             ]
         )
     ),
 )
-def test_compile_with_snapshot(id, program, expected_output, snapshot, parser, lexer):
+def test_compile_with_snapshot(
+    id, program, expected_output, snapshot, parser, lexer
+) -> None:
     id = id + ".js"
     program = parser.parse(lexer.tokenize(program))
     snapshot.snapshot_dir = "snapshots"
     ast = EProgram([*BUILTINS, *program.body])
-    snapshot.assert_match(compile(ast.fold_with(Hoist())), id)
+    snapshot.assert_match(compile(ast.fold_with(Hoister()).fold_with(DefCleaner())), id)
     # path: WindowsPath = snapshot.snapshot_dir
     assert check_output(
         ["node", snapshot.snapshot_dir / id]
     ) == f"{expected_output}\n".encode("UTF-8")
+
+
+@pytest.mark.parametrize(
+    "ast, expected",
+    [
+        (
+            EProgram(
+                [
+                    EExpr(
+                        ECall(
+                            EExpr(EIdentifier("fn")),
+                            [EExpr(ELet("x", EExpr(EIdentifier("y"))))],
+                        )
+                    )
+                ]
+            ),
+            EProgram(
+                [
+                    EExpr(ELet("x", EExpr(EIdentifier("y")))),
+                    EExpr(
+                        ECall(
+                            EExpr(EIdentifier("fn")),
+                            [EExpr(EIdentifier("x"))],
+                        )
+                    ),
+                ]
+            ),
+        )
+    ],
+)
+def test_hoist(ast, expected) -> None:
+
+    assert (ast.fold_with(Hoister())) == (expected)
 
 
 @pytest.mark.parametrize(

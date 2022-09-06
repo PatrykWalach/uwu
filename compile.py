@@ -10,7 +10,45 @@ import terms
 import typed
 
 
-class Hoist(terms.FoldAll):
+class IdGetter(terms.FoldAll):
+    def __init__(self) -> None:
+        self.ids = set[str]()
+        super().__init__()
+
+    def EIdentifier(self, n: terms.EIdentifier) -> terms.EIdentifier:
+        self.ids.add(n.name)
+        return n
+
+    def EBinaryExpr(self, n: terms.EBinaryExpr) -> terms.EBinaryExpr:
+        self.ids.add(n.op)
+        return n.fold_children_with(self)
+
+
+class DefCleaner(terms.FoldAll):
+    def EProgram(self, n: terms.EProgram) -> terms.EProgram:
+        getter = IdGetter()
+        n = n.fold_children_with(self).fold_with(getter)
+        next_body = [
+            expr
+            for expr in n.body
+            if (not isinstance(expr.expr, (terms.EDef, terms.EBinaryOpDef)))
+            or expr.expr.identifier in getter.ids
+        ]
+        return terms.EProgram(next_body)
+
+    def EBlock(self, n: terms.EBlock) -> terms.EBlock:
+        getter = IdGetter()
+        n = n.fold_children_with(self).fold_with(getter)
+        next_body = [
+            expr
+            for expr in n.body[:-1:]
+            if (not isinstance(expr.expr, (terms.EDef, terms.EBinaryOpDef)))
+            or expr.expr.identifier in getter.ids
+        ] + n.body[-1::]
+        return terms.EBlock(next_body)
+
+
+class Hoister(terms.FoldAll):
     def __init__(self) -> None:
         super().__init__()
         self.to_hoist = list[terms.EExpr]()
@@ -19,7 +57,7 @@ class Hoist(terms.FoldAll):
 
         n = n.fold_children_with(self)
         match n.expr:
-            case terms.ELet(id) | terms.EDef(id):
+            case terms.ELet(id) | terms.EDef(id) | terms.EBinaryOpDef(id):
                 self.to_hoist.append(n)
                 return terms.EExpr(terms.EIdentifier(id))
 
@@ -34,7 +72,7 @@ class Hoist(terms.FoldAll):
         body2 = list[terms.EExpr]()
 
         for expr in body:
-            hoist = Hoist()
+            hoist = Hoister()
             expr2 = expr.fold_with(hoist)
             body2.extend(hoist.to_hoist)
             body2.append(expr2)
@@ -53,6 +91,15 @@ def filter_identifiers(body: list[terms.EExpr]) -> list[terms.EExpr]:
 # def compile(program: terms.EProgram):
 #     ast = program.fold_with(Hoist())
 #     return _compile(ast)
+
+i = 0
+
+
+@functools.cache
+def hash_id(id: str) -> str:
+    global i
+    i += 1
+    return "op" + str(i) + "/*" + id + "*/"
 
 
 def compile(
@@ -78,7 +125,8 @@ def compile(
     | terms.ENumLiteral
     | terms.EStrLiteral
     | terms.EFloatLiteral
-    | terms.MaybeOrElseNothing,
+    | terms.MaybeOrElseNothing
+    | terms.EBinaryOpDef,
 ) -> str:
     match exp:
         case terms.MaybeOrElse(value):
@@ -136,25 +184,12 @@ def compile(
             )
 
             return f"const {id}={js_args}{{{compile(block)}}}"
+        case terms.EBinaryOpDef(id, args, do):
+            return compile(terms.EDef(hash_id(id), args, do))
         case terms.EBinaryExpr(op, left, right):
             js_left = compile(left)
             js_right = compile(right)
-            match op:
-                case "|":
-                    return f"{js_left}.concat({js_right})"
-                case "++":
-                    return f"({js_left}+{js_right})"
-                case "/":
-                    return f"Math.floor({js_left}/{js_right})"
-                case "!=" | "==":
-                    return f"({js_left}{op}={js_right})"
-                case ">" | "<" | "+" | "-" | "/" | "*":
-                    return f"({js_left}{op}{js_right})"
-                case "+." | "-." | "/." | "*.":
-                    return f"({js_left}{op[:-1:]}{js_right})"
-                case op:
-                    typed.assert_never(op)
-
+            return f"{hash_id(op)}({js_left})({js_right})"
         case terms.EIdentifier(id):
             return id
         case terms.EEnumDeclaration():

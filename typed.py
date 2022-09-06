@@ -64,6 +64,7 @@ class KFun:
 Kind: TypeAlias = KStar | KFun
 
 TUnit = TCon("Unit", KStar())
+TRegex = TCon("Regex", KStar())
 
 
 TStr = TCon("Str", KStar())
@@ -94,14 +95,18 @@ def TArray(t: Type) -> TAp:
     return TAp(TArrayCon, t)
 
 
-TOptionCon = TCon("Option", KFun(KStar(), KStar()), ["Some", "None"])
+SomeCon = TCon("Some", KFun(KStar(), KStar()))
+NoneCon = TCon("None", KStar())
+TOptionCon = TCon("Option", KFun(KStar(), KStar()), [SomeCon.id, NoneCon.id])
 
 
 def TOption(t: Type) -> TAp:
     return TAp(TOptionCon, t)
 
 
-TBool = TCon("Bool", KStar(), ["True", "False"])
+TrueCon = TCon("True", KStar())
+FalseCon = TCon("False", KStar())
+TBool = TCon("Bool", KStar(), [TrueCon.id, FalseCon.id])
 
 
 def kind(t: Type) -> Kind:

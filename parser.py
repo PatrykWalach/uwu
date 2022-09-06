@@ -56,6 +56,33 @@ class UwuLexer(Lexer):
         "NOT_EQUAL",
         "EQUAL",
         "NEWLINE",
+        "STRICT_OR",
+        "STRICT_AND",
+        "STRICT_NOT",
+        "OR",
+        "AND",
+        "TEXT_MATCH",
+        "LESS_OR_EQ",
+        "MORE_OR_EQ",
+        "ARRAY_CONCAT",
+        "ARRAY_SUB",
+        "POW",
+        "FLOAT_POW",
+        "BIT_OR",
+        "BIT_AND",
+        "BIT_SHIFT_LEFT",
+        # "BIT_SHIFT_RIGHT", TODO 1: fix A<A<A<B>>> +bug
+        "DOUBLE_ARROW_LEFT",
+        "DOUBLE_ARROW_RIGHT",
+        "ARROW_LEFT",
+        "ARROW_RIGHT",
+        "ARROW_BOTH",
+        "SOME_CONCAT",
+        "SOME_SUB",
+        "FLOAT_LESS_OR_EQ",
+        "FLOAT_LESS",
+        "FLOAT_MORE_OR_EQ",
+        "FLOAT_MORE",
     }
     literals = {
         "=",
@@ -75,13 +102,40 @@ class UwuLexer(Lexer):
         "*",
         "/",
         "|",
+        "!",
     }
+    OR = r"\|\|"
+    AND = r"&&"
+    TEXT_MATCH = r"=~"
+    FLOAT_LESS_OR_EQ = r"<=\."
+    FLOAT_LESS = r"<\."
+    FLOAT_MORE_OR_EQ = r">=\."
+    FLOAT_MORE = r">\."
+    LESS_OR_EQ = r"<="
+    MORE_OR_EQ = r">="
+    ARRAY_CONCAT = r"\+\+"
+    ARRAY_SUB = r"--"
+    FLOAT_POW = r"\*\*\."
+    POW = r"\*\*"
+
+    BIT_OR = r"\|\|\|"
+    BIT_AND = r"&&&"
+    BIT_SHIFT_LEFT = r"<<<"
+    # BIT_SHIFT_RIGHT = r">>>"
+    DOUBLE_ARROW_LEFT = r"<<~"
+    DOUBLE_ARROW_RIGHT = r"~>>"
+    ARROW_LEFT = r"<~"
+    ARROW_RIGHT = r"~>"
+    ARROW_BOTH = r"<~>"
+    SOME_CONCAT = r"\+\+\+"
+    SOME_SUB = r"---"
+
     NOT_EQUAL = r"!="
     EQUAL = r"=="
     STRING = r"'[^']*'"
-    FLOAT = r"\d+\.\d*"
-    INT = r"\d+"
-    CONCAT = r"\+{2}"
+    FLOAT = r"\d[\d_]*\.[\d_]*"
+    INT = r"\d[\d_]*"
+    CONCAT = r"<>"
     FLOAT_SUM = r"\+\."
     FLOAT_SUB = r"-\."
     FLOAT_DIV = r"/\."
@@ -98,6 +152,9 @@ class UwuLexer(Lexer):
     IDENTIFIER["enum"] = "ENUM"  # type: ignore[index]
     IDENTIFIER["then"] = "THEN"  # type: ignore[index]
     IDENTIFIER["of"] = "OF"  # type: ignore[index]
+    IDENTIFIER["or"] = "STRICT_OR"  # type: ignore[index]
+    IDENTIFIER["and"] = "STRICT_AND"  # type: ignore[index]
+    IDENTIFIER["not"] = "STRICT_NOT"  # type: ignore[index]
     EXTERNAL = r"`[^`]*`"
 
     ignore_comment = r"\#.*"
@@ -133,15 +190,26 @@ class UwuParser(Parser):
 
     precedence = (
         ("right", "="),
-        ("left", "NOT_EQUAL", "EQUAL"),
-        ("left", "<", ">"),
-        ("right", "|", "CONCAT"),
+        ("left", "OR", "STRICT_OR", "BIT_OR"),
+        ("left", "AND", "STRICT_AND", "BIT_AND"),
+        ("left", "NOT_EQUAL", "EQUAL", "TEXT_MATCH"),
+        ("left", "<", ">", "LESS_OR_EQ", "MORE_OR_EQ"),
+        (
+            "left",
+            # "BIT_SHIFT_RIGHT",
+            "BIT_SHIFT_LEFT",
+            "DOUBLE_ARROW_RIGHT",
+            "DOUBLE_ARROW_LEFT",
+            "ARROW_RIGHT",
+            "ARROW_LEFT",
+            "ARROW_BOTH",
+        ),
+        ("right", "CONCAT", "ARRAY_CONCAT", "ARRAY_SUB", "SOME_CONCAT", "SOME_SUB"),
         ("left", "+", "-", "FLOAT_SUM", "FLOAT_SUB"),
         ("left", "*", "/", "FLOAT_DIV", "FLOAT_MUL"),
+        ("left", "POW", "FLOAT_POW"),
         ("right", "UNARY"),
         ("left", "(", ")"),
-        # ('left', 'V_CALL'),
-        # ('right', 'CALL')
     )
 
     @_(
@@ -161,6 +229,7 @@ class UwuParser(Parser):
         "float_literal",
         "str_literal",
         "unary_expr",
+        "binary_op_def",
     )
     def expr(self, p: sly.yacc.YaccProduction) -> terms.EExpr:
         return terms.EExpr(p[0])
@@ -173,6 +242,9 @@ class UwuParser(Parser):
 
     @_(  # type: ignore[no-redef]
         "'-' expr %prec UNARY",
+        "STRICT_NOT expr %prec UNARY",
+        "'!' expr %prec UNARY",
+        "'+' expr %prec UNARY",
     )
     def unary_expr(self, p: sly.yacc.YaccProduction) -> terms.EUnaryExpr:
         return terms.EUnaryExpr(p[0], p.expr)
@@ -193,12 +265,102 @@ class UwuParser(Parser):
         "expr FLOAT_DIV expr",
         "expr FLOAT_MUL expr",
         "expr '>' expr",
-        "expr '|' expr",
         "expr NOT_EQUAL expr",
         "expr EQUAL expr",
+        "expr OR expr",
+        "expr STRICT_OR expr",
+        "expr AND expr",
+        "expr STRICT_AND expr",
+        "expr TEXT_MATCH expr",
+        "expr LESS_OR_EQ expr",
+        "expr MORE_OR_EQ expr",
+        "expr ARRAY_CONCAT expr",
+        "expr ARRAY_SUB expr",
+        "expr POW expr",
+        "expr FLOAT_POW expr",
+        "expr BIT_OR expr",
+        "expr BIT_AND expr",
+        "expr BIT_SHIFT_LEFT expr",
+        # "expr BIT_SHIFT_RIGHT expr",
+        "expr DOUBLE_ARROW_LEFT expr",
+        "expr DOUBLE_ARROW_RIGHT expr",
+        "expr ARROW_LEFT expr",
+        "expr ARROW_RIGHT expr",
+        "expr ARROW_BOTH expr",
+        "expr SOME_CONCAT expr",
+        "expr SOME_SUB expr",
+        "expr FLOAT_LESS_OR_EQ expr",
+        "expr FLOAT_LESS expr",
+        "expr FLOAT_MORE_OR_EQ expr",
+        "expr FLOAT_MORE expr",
     )
     def binary_expr(self, p: sly.yacc.YaccProduction):
         return terms.EBinaryExpr(p[1], p[0], p[2])
+
+    @_(
+        "CONCAT",
+        "'+'",
+        "'-'",
+        "'/'",
+        "'*'",
+        "'<'",
+        "FLOAT_SUM",
+        "FLOAT_SUB",
+        "FLOAT_DIV",
+        "FLOAT_MUL",
+        "'>'",
+        "NOT_EQUAL",
+        "EQUAL",
+        "OR",
+        "STRICT_OR",
+        "AND",
+        "STRICT_AND",
+        "TEXT_MATCH",
+        "LESS_OR_EQ",
+        "MORE_OR_EQ",
+        "ARRAY_CONCAT",
+        "ARRAY_SUB",
+        "POW",
+        "FLOAT_POW",
+        "BIT_OR",
+        "BIT_AND",
+        "BIT_SHIFT_LEFT",
+        # "BIT_SHIFT_RIGHT",
+        "DOUBLE_ARROW_LEFT",
+        "DOUBLE_ARROW_RIGHT",
+        "ARROW_LEFT",
+        "ARROW_RIGHT",
+        "ARROW_BOTH",
+        "SOME_CONCAT",
+        "SOME_SUB",
+        "FLOAT_LESS_OR_EQ",
+        "FLOAT_LESS",
+        "FLOAT_MORE_OR_EQ",
+        "FLOAT_MORE",
+    )
+    def binary_op(self, p: sly.yacc.YaccProduction) -> str:
+        return p[0]
+
+    @_(
+        "DEF binary_op '<' type_identifier { ',' type_identifier } '>' '(' [ NEWLINE ] param ',' [ NEWLINE ] param [ NEWLINE ] ')' [ ':' type ] do"
+    )
+    def binary_op_def(self, p: sly.yacc.YaccProduction):
+        return terms.EBinaryOpDef(
+            p.binary_op,
+            [p.param0, p.param1],
+            body=p.do,
+            hint=terms.MaybeEHint(p.type or terms.MaybeEHintNothing()),
+            generics=concat(p.type_identifier0, p.type_identifier1),
+        )
+
+    @_("DEF binary_op '(' [ NEWLINE ] param ',' [ NEWLINE ] param [ NEWLINE ] ')' [ ':' type ] do")  # type: ignore[no-redef]
+    def binary_op_def(self, p: sly.yacc.YaccProduction):
+        return terms.EBinaryOpDef(
+            p.binary_op,
+            [p.param0, p.param1],
+            body=p.do,
+            hint=terms.MaybeEHint(p.type or terms.MaybeEHintNothing()),
+        )
 
     @_(
         "DO [ ':' type ] block_statement END",
@@ -407,13 +569,23 @@ class UwuParser(Parser):
             hint=terms.MaybeEHint(p.type or terms.MaybeEHintNothing()),
         )
 
+    @_("identifier ':' type_identifier '<' type { ',' type } MORE_OR_EQ expr")
+    def let(self, p):
+        return terms.ELet(
+            id=p.identifier.name,
+            init=p.expr,
+            hint=terms.MaybeEHint(
+                terms.EHint(p.type_identifier.name, concat(p.type0, p.type1))
+            ),
+        )
+
     @_("INT")
     def int_literal(self, p: sly.yacc.YaccProduction) -> terms.ENumLiteral:
-        return terms.ENumLiteral(float(p.INT))
+        return terms.ENumLiteral(float(p.INT.replace("_", "")))
 
     @_("FLOAT")
     def float_literal(self, p: sly.yacc.YaccProduction) -> terms.EFloatLiteral:
-        return terms.EFloatLiteral(float(p.FLOAT))
+        return terms.EFloatLiteral(float(p.FLOAT.replace("_", "")))
 
     @_("STRING")
     def str_literal(self, p: sly.yacc.YaccProduction) -> terms.EStrLiteral:

@@ -1,1 +1,1 @@
-;;const id=(id)=>{return id};const unit=undefined;;const get_document=()=>{return 'document'};const eq=(a)=>(b)=>{return (a===b)};console.log(eq(get_document())(get_document()))
+const unit=undefined;const op8/*==*/=(a)=>(b)=>{return Object.is(a,b)};;const get_document=()=>{return 'document'};const eq=(a)=>(b)=>{return op8/*==*/(a)(b)};console.log(eq(get_document())(get_document()))
