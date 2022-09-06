@@ -1,1 +1,1 @@
-;;const id=(id)=>{return id};const unit=undefined;console.log((()=>{if(((2.0*2.0)!==4.0)){return 0.0}return 1.0})())
+function id (id) {return id};const unit=undefined;function op2/***/ (a) {return b=>a*b};function op5/*!=*/ (a) {return b=>!Object.is(a,b)};console.log((()=>{if(op5/*!=*/(op2/***/(2.0)(2.0))(4.0)){return 0.0}return 1.0})())

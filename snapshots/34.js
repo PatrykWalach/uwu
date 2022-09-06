@@ -1,1 +1,1 @@
-;;const id=(id)=>{return id};const unit=undefined;console.log(("a"+"b"))
+function id (id) {return id};const unit=undefined;function op6/*<>*/ (a) {return b=>a+b};console.log(op6/*<>*/("a")("b"))

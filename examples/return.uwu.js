@@ -1,16 +1,16 @@
-const id = (id) => {
+function id(id) {
   return id;
-};
+}
 const unit = undefined;
-const add_one = (x) => {
+function add_one(x) {
   return x + 1.0;
-};
-const map = (arr) => (func) => {
-  return arr.map(func);
-};
-const filter = (arr) => (func) => {
-  return arr.filter(func);
-};
+}
+function map(arr) {
+  return (func) => arr.map(func);
+}
+function filter(arr) {
+  return (func) => arr.filter(func);
+}
 const is_morning = false;
 const message = (() => {
   if (is_morning) {
@@ -21,8 +21,7 @@ const message = (() => {
 const result = (() => {
   const arr1 = [1.0, 2.0, 3.0];
   const arr2 = map(arr1)(add_one);
-  const is_even = (x) => {
-    return x % 2.0 === 0.0;
-  };
-  return filter(arr2)(is_even);
+  return filter(arr2)(function is_even(x) {
+    return Object.is(x % 2, 0.0);
+  });
 })();

@@ -1,0 +1,1 @@
+function id (id) {return id};const unit=undefined;const x="Hello";const y="World";console.log("a "+x+" b "+y+" c")

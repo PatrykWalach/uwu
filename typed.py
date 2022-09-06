@@ -67,11 +67,11 @@ TUnit = TCon("Unit", KStar())
 
 
 TStr = TCon("Str", KStar())
+TRegex = TCon("TRegex", KStar())
 
 
 TNum = TCon("Num", KStar())
 TFloat = TCon("Float", KStar())
-
 
 TTupleCon = TCon("Tuple", KFun(KStar(), KFun(KStar(), KStar())))
 
@@ -80,11 +80,11 @@ def pair(a: Type, b: Type) -> TAp:
     return TAp(TAp(TTupleCon, a), b)
 
 
-TCallableCon = TCon("Callable", KFun(KStar(), KFun(KStar(), KStar())))
+TCallable = TCon("Callable", KFun(KStar(), KFun(KStar(), KStar())))
 
 
 def TDef(arg: Type, ret: Type) -> TAp:
-    return TAp(TAp(TCallableCon, arg), ret)
+    return TAp(TAp(TCallable, arg), ret)
 
 
 TArrayCon = TCon("Array", KFun(KStar(), KStar()))
@@ -94,14 +94,18 @@ def TArray(t: Type) -> TAp:
     return TAp(TArrayCon, t)
 
 
-TOptionCon = TCon("Option", KFun(KStar(), KStar()), ["Some", "None"])
+SomeCon = TCon("Some", KFun(KStar(), KStar()))
+NoneCon = TCon("None", KStar())
+TOptionCon = TCon("Option", KFun(KStar(), KStar()), [SomeCon.id, NoneCon.id])
 
 
 def TOption(t: Type) -> TAp:
     return TAp(TOptionCon, t)
 
 
-TBool = TCon("Bool", KStar(), ["True", "False"])
+TrueCon = TCon("True", KStar())
+FalseCon = TCon("False", KStar())
+TBool = TCon("Bool", KStar(), [TrueCon.id, FalseCon.id])
 
 
 def kind(t: Type) -> Kind:

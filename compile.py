@@ -1,4 +1,5 @@
 from __future__ import annotations
+from cmath import exp
 
 import dataclasses
 import functools
@@ -10,7 +11,47 @@ import terms
 import typed
 
 
-class Hoist(terms.FoldAll):
+class UnnestDo(terms.FoldAll):
+    def EDo(self, n: terms.EDo) -> terms.EDo:
+        n = n.fold_children_with(self)
+
+        match n.block:
+            case [terms.EDo() as do]:
+                return do
+
+        return n
+
+
+class IdGetter(terms.FoldAll):
+    def __init__(self) -> None:
+        self.ids = set[str]()
+        super().__init__()
+
+    def EIdentifier(self, n: terms.EIdentifier) -> terms.EIdentifier:
+        self.ids.add(n.name)
+        return n
+
+    def EBinaryExpr(self, n: terms.EBinaryExpr) -> terms.EBinaryExpr:
+        self.ids.add(n.op)
+        return n.fold_children_with(self)
+
+class DefCleaner(terms.FoldAll):
+    def EProgram(self, n: terms.EProgram) -> terms.EProgram:
+        getter = IdGetter()
+        n = n.fold_children_with(self).fold_with(getter)
+        next_body = [expr for expr in n.body if (not isinstance(expr.expr, terms.EDef) and not isinstance(expr.expr, terms.EBinaryOpDef)) or expr.expr.identifier in getter.ids]
+        return terms.EProgram(next_body, n.ctx)
+    
+    def EBlock(self, n: terms.EBlock) -> terms.EBlock:
+        getter = IdGetter()
+        n = n.fold_children_with(self).fold_with(getter)
+        next_body = [expr for expr in n.body[:-1:] if (not isinstance(expr.expr, terms.EDef) and not isinstance(expr.expr, terms.EBinaryOpDef)) or expr.expr.identifier in getter.ids]+n.body[-1::]
+        return terms.EBlock(next_body)
+
+
+
+
+class Hoister(terms.FoldAll):
     def __init__(self) -> None:
         super().__init__()
         self.to_hoist = list[terms.EExpr]()
@@ -19,7 +60,7 @@ class Hoist(terms.FoldAll):
 
         n = n.fold_children_with(self)
         match n.expr:
-            case terms.ELet(id) | terms.EDef(id):
+            case terms.ELet(id):
                 self.to_hoist.append(n)
                 return terms.EExpr(terms.EIdentifier(id))
 
@@ -31,10 +72,11 @@ class Hoist(terms.FoldAll):
         return terms.EProgram(filter_identifiers(body2))
 
     def hoist_expr_list(self, body: list[terms.EExpr]) -> list[terms.EExpr]:
+
         body2 = list[terms.EExpr]()
 
         for expr in body:
-            hoist = Hoist()
+            hoist = Hoister()
             expr2 = expr.fold_with(hoist)
             body2.extend(hoist.to_hoist)
             body2.append(expr2)
@@ -54,34 +96,21 @@ def filter_identifiers(body: list[terms.EExpr]) -> list[terms.EExpr]:
 #     ast = program.fold_with(Hoist())
 #     return _compile(ast)
 
+i = 0
+id_dict = dict[str, str]()
 
-def compile(
-    exp: terms.EIdentifier
-    | terms.EExpr
-    | terms.EProgram
-    | terms.EParam
-    | terms.EUnaryExpr
-    | terms.MaybeOrElse
-    | terms.EVariantCall
-    | terms.ELet
-    | terms.EArray
-    | terms.EBinaryExpr
-    | terms.EBlock
-    | terms.ECall
-    | terms.ECaseOf
-    | terms.EDef
-    | terms.EDo
-    | terms.EEnumDeclaration
-    | terms.EExpr
-    | terms.EExternal
-    | terms.EIf
-    | terms.ENumLiteral
-    | terms.EStrLiteral
-    | terms.EFloatLiteral
-    | terms.MaybeOrElseNothing,
-) -> str:
+
+
+@functools.cache
+def hash_id(id: str) -> str:
+    global i
+    i += 1
+    return "op" + str(i) + "/*" + id + "*/"
+
+
+def compile(exp: terms.AstNode) -> str:
     match exp:
-        case terms.MaybeOrElse(value):
+        case terms.EMaybeOrElse(value):
             return compile(value)
         case terms.EExternal(value=value):
             return f"{value}"
@@ -96,12 +125,14 @@ def compile(
             if js_body:
                 js_body[-1] = "return " + js_body[-1]
             return ";".join(js_body)
+        case terms.EDo(terms.EBlock([expr])):
+            return compile(expr)
         case terms.EDo(block):
             return "(()=>{" + compile(block) + "})()"
         case terms.EProgram(body):
             js_body = [compile(expr) for expr in body]
             return ";".join(js_body)
-        case terms.MaybeOrElseNothing():
+        case terms.EMaybeOrElseNothing():
             return f"return"
         case terms.EIf(test, then, or_else):
             return (
@@ -127,30 +158,64 @@ def compile(
 
             return f"{{TAG:'{id}',{','.join(js_var_args)}}}"
 
+        case terms.EBinaryOpDef(id, args, do):
+            return compile(terms.EDef(hash_id(id), args, do))
         case terms.EDef(id, args, terms.EDo(block)):
 
-            js_args = functools.reduce(
-                lambda acc, js_arg: f"{acc}({js_arg})=>",
-                [compile(arg) for arg in args] or [""],
-                "",
-            )
+            js_args = list(f"{compile(arg)}=>" for arg in args[1::])
+            js_args2 = "".join(js_args)
 
-            return f"const {id}={js_args}{{{compile(block)}}}"
+            match (block.body, len(js_args2)):
+                case [terms.EExpr(terms.EIf(test, then, or_else))], 0:
+                    js_fn_body = (
+                        f"if({compile(test)}){{{compile(then)}}}{compile(or_else)}"
+                    )
+                case [terms.EExpr(terms.EIf(test, then, or_else))], _:
+                    js_fn_body = f"return {js_args2} {{if({compile(test)}){{{compile(then)}}}{compile(or_else)}}}"
+                case [expr], 0:
+                    js_fn_body = f"return {compile(expr)}"
+                case [expr], _:
+                    js_fn_body = f"return {js_args2}{compile(expr)}"
+                case _, 0:
+                    js_fn_body = compile(block)
+                case _:
+                    js_fn_body = f"return {js_args2}{{{compile(block)}}}"
+
+            arg = compile(args[0]) if args else ""
+
+            return f"function {id} ({arg}) {{{js_fn_body}}}"
+        case terms.EInter(left, mid, right):
+            return f'"{left}"+{compile(mid)}+{compile(right)}'
+
+        case terms.EInterOrStr(value):
+            return compile(value)
+
         case terms.EBinaryExpr(op, left, right):
             js_left = compile(left)
             js_right = compile(right)
+
+            return f"{hash_id(op)}({js_left})({js_right})"
+
             match op:
-                case "|":
-                    return f"{js_left}.concat({js_right})"
                 case "++":
+                    return f"{js_left}.concat({js_right})"
+                case "<>":
                     return f"({js_left}+{js_right})"
                 case "/":
                     return f"Math.floor({js_left}/{js_right})"
-                case "!=" | "==":
-                    return f"({js_left}{op}={js_right})"
-                case ">" | "<" | "+" | "-" | "/" | "*":
+                case "!=":
+                    return f"!Object.is({js_left},{js_right})"
+                case "==":
+                    return f"Object.is({js_left},{js_right})"
+                case "and":
+                    return f"({js_left}&&{js_right})"
+                case "or":
+                    return f"({js_left}||{js_right})"
+                case "=~":
+                    return f"{js_left}.match({js_right})"
+                case ">" | "<" | "+" | "-" | "*" | "**" | "&&" | "||" | "<=" | ">=":
                     return f"({js_left}{op}{js_right})"
-                case "+." | "-." | "/." | "*.":
+                case "+." | "-." | "/." | "*." | "**.":
                     return f"({js_left}{op[:-1:]}{js_right})"
                 case op:
                     typed.assert_never(op)
@@ -188,7 +253,15 @@ def compile(
         case terms.EArray(args):
             return f"[{','.join(map(compile, args))}]"
         case terms.EUnaryExpr(op, expr):
-            return f"{op}({compile(expr)})"
+            match op:
+                case "not":
+                    return f"!{compile(expr)}"
+                case "-" | "+" | "!":
+                    return f"{op}{compile(expr)}"
+                case op:
+                    typed.assert_never(op)
+        case terms.EMaybeHint() | terms.EHint() | terms.EMaybeHintNothing():
+            return ""
         case exp:
             typed.assert_never(exp)
 

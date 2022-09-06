@@ -1,0 +1,1 @@
+function id (id) {return id};const unit=undefined;function op9/*>>>*/ (a) {return b=>a>>b};console.log(op9/*>>>*/(5.0)(2.0))

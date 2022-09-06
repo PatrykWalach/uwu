@@ -1,1 +1,1 @@
-;;const id=(id)=>{return id};const unit=undefined;const partial=(fn)=>(arg)=>{const thunk=()=>{return fn(arg)};return thunk};partial(console.log)(0.0)()
+function id (id) {return id};const unit=undefined;function partial (fn) {return arg=>function thunk () {return fn(arg)}};partial(console.log)(0.0)()

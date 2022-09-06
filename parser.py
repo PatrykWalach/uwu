@@ -1,33 +1,19 @@
 from __future__ import annotations
 
-import dataclasses
-import functools
-import json
-import operator
-import random
-import sys
-
-# from watchdog.events import FileSystemEventHandler
-# from watchdog.observers import Observer
-import time
-from functools import partial, reduce, wraps
-from itertools import product
-from typing import Any, Callable, Generic, Protocol, TypeAlias, TypeVar, Union, overload
+import typing
 
 import sly  # type: ignore[import]
 from sly import Lexer, Parser
 
 import terms
-import typed
-from algorithm_j import Context, Scheme, fresh_ty_var, type_infer
 
 
-def _(fn: str, *args: str) -> Callable[[R], R]:
+def _(fn: str, *args: str) -> typing.Callable[[R], R]:
     raise Exception
 
 
-A = TypeVar("A")
-R = TypeVar("R")
+A = typing.TypeVar("A")
+R = typing.TypeVar("R")
 
 
 class UwuLexer(Lexer):
@@ -56,6 +42,33 @@ class UwuLexer(Lexer):
         "NOT_EQUAL",
         "EQUAL",
         "NEWLINE",
+        "STRICT_OR",
+        "STRICT_AND",
+        "STRICT_NOT",
+        "OR",
+        "AND",
+        "TYPE",
+        "TEXT_MATCH",
+        "LESS_OR_EQ",
+        "MORE_OR_EQ",
+        "ARRAY_CONCAT",
+        "POW",
+        "FLOAT_POW",
+        "BIT_OR",
+        "BIT_AND",
+        "BIT_SHIFT_LEFT",
+        "BIT_SHIFT_RIGHT",
+        "DOUBLE_ARROW_LEFT",
+        "DOUBLE_ARROW_RIGHT",
+        "ARROW_LEFT",
+        "ARROW_RIGHT",
+        "ARROW_BOTH",
+        "SOME_CONCAT",
+        "SOME_SUB",
+        "ARRAY_SUB",
+        "INTERPOLATION_LEFT",
+        "INTERPOLATION_RIGHT",
+        "INTERPOLATION_BOTH",'LINE'
     }
     literals = {
         "=",
@@ -72,16 +85,45 @@ class UwuLexer(Lexer):
         "-",
         ">",
         "<",
+        "!",
         "*",
         "/",
-        "|",
+
     }
+
+    LINE = r"\|"
+
+    OR = r"\|\|"
+    AND = r"&&"
+    TEXT_MATCH = r"=~"
+    LESS_OR_EQ = r"<="
+    MORE_OR_EQ = r">="
+    ARRAY_CONCAT = r"\+\+"
+    ARRAY_SUB = r"--"
+    FLOAT_POW = r"\*\*\."
+    POW = r"\*\*"
+
+    BIT_OR = r"\|\|\|"
+    BIT_AND = r"&&&"
+    BIT_SHIFT_LEFT = r"<<<"
+    BIT_SHIFT_RIGHT = r">>>"
+    DOUBLE_ARROW_LEFT = r"<<~"
+    DOUBLE_ARROW_RIGHT = r"~>>"
+    ARROW_LEFT = r"<~"
+    ARROW_RIGHT = r"~>"
+    ARROW_BOTH = r"<~>"
+    SOME_CONCAT = r"\+\+\+"
+    SOME_SUB = r"---"
+
     NOT_EQUAL = r"!="
     EQUAL = r"=="
-    STRING = r"'[^']*'"
-    FLOAT = r"\d+\.\d*"
-    INT = r"\d+"
-    CONCAT = r"\+{2}"
+    STRING = r"'[^']*'|\"[^\"{}]*\""
+    INTERPOLATION_LEFT = r"\"[^{]*{"
+    INTERPOLATION_BOTH = r"}[^{]*{"
+    INTERPOLATION_RIGHT = r"}[^\"]*\""
+    FLOAT = r"\d[\d_]*\.[\d_]*"
+    INT = r"\d[\d_]*"
+    CONCAT = r"<>"
     FLOAT_SUM = r"\+\."
     FLOAT_SUB = r"-\."
     FLOAT_DIV = r"/\."
@@ -98,6 +140,10 @@ class UwuLexer(Lexer):
     IDENTIFIER["enum"] = "ENUM"  # type: ignore[index]
     IDENTIFIER["then"] = "THEN"  # type: ignore[index]
     IDENTIFIER["of"] = "OF"  # type: ignore[index]
+    IDENTIFIER["or"] = "STRICT_OR"  # type: ignore[index]
+    IDENTIFIER["and"] = "STRICT_AND"  # type: ignore[index]
+    IDENTIFIER["not"] = "STRICT_NOT"  # type: ignore[index]
+    IDENTIFIER["type"] = "TYPE"  # type: ignore[index]
     EXTERNAL = r"`[^`]*`"
 
     ignore_comment = r"\#.*"
@@ -133,15 +179,26 @@ class UwuParser(Parser):
 
     precedence = (
         ("right", "="),
-        ("left", "NOT_EQUAL", "EQUAL"),
-        ("left", "<", ">"),
-        ("right", "|", "CONCAT"),
+        ("left", "OR", "STRICT_OR", "BIT_OR"),
+        ("left", "AND", "STRICT_AND", "BIT_AND"),
+        ("left", "NOT_EQUAL", "EQUAL", "TEXT_MATCH"),
+        ("left", "<", ">", "LESS_OR_EQ", "MORE_OR_EQ"),
+        (
+            "left",
+            "BIT_SHIFT_RIGHT",
+            "BIT_SHIFT_LEFT",
+            "DOUBLE_ARROW_RIGHT",
+            "DOUBLE_ARROW_LEFT",
+            "ARROW_RIGHT",
+            "ARROW_LEFT",
+            "ARROW_BOTH",
+        ),
+        ("right", "CONCAT", "ARRAY_CONCAT", "ARRAY_SUB", "SOME_CONCAT", "SOME_SUB"),
         ("left", "+", "-", "FLOAT_SUM", "FLOAT_SUB"),
         ("left", "*", "/", "FLOAT_DIV", "FLOAT_MUL"),
+        ("left", "POW", "FLOAT_POW"),
         ("right", "UNARY"),
         ("left", "(", ")"),
-        # ('left', 'V_CALL'),
-        # ('right', 'CALL')
     )
 
     @_(
@@ -161,6 +218,8 @@ class UwuParser(Parser):
         "float_literal",
         "str_literal",
         "unary_expr",
+        "binary_op_def",
+        "str_inter",
     )
     def expr(self, p: sly.yacc.YaccProduction) -> terms.EExpr:
         return terms.EExpr(p[0])
@@ -173,6 +232,9 @@ class UwuParser(Parser):
 
     @_(  # type: ignore[no-redef]
         "'-' expr %prec UNARY",
+        "STRICT_NOT expr %prec UNARY",
+        "'!' expr %prec UNARY",
+        "'+' expr %prec UNARY",
     )
     def unary_expr(self, p: sly.yacc.YaccProduction) -> terms.EUnaryExpr:
         return terms.EUnaryExpr(p[0], p.expr)
@@ -193,12 +255,94 @@ class UwuParser(Parser):
         "expr FLOAT_DIV expr",
         "expr FLOAT_MUL expr",
         "expr '>' expr",
-        "expr '|' expr",
         "expr NOT_EQUAL expr",
         "expr EQUAL expr",
+        "expr OR expr",
+        "expr STRICT_OR expr",
+        "expr AND expr",
+        "expr STRICT_AND expr",
+        "expr TEXT_MATCH expr",
+        "expr LESS_OR_EQ expr",
+        "expr MORE_OR_EQ expr",
+        "expr ARRAY_CONCAT expr",
+        "expr ARRAY_SUB expr",
+        "expr POW expr",
+        "expr FLOAT_POW expr",
+        "expr BIT_OR expr",
+        "expr BIT_AND expr",
+        "expr BIT_SHIFT_LEFT expr",
+        "expr BIT_SHIFT_RIGHT expr",
+        "expr DOUBLE_ARROW_LEFT expr",
+        "expr DOUBLE_ARROW_RIGHT expr",
+        "expr ARROW_LEFT expr",
+        "expr ARROW_RIGHT expr",
+        "expr ARROW_BOTH expr",
+        "expr SOME_CONCAT expr",
+        "expr SOME_SUB expr",
     )
     def binary_expr(self, p: sly.yacc.YaccProduction):
         return terms.EBinaryExpr(p[1], p[0], p[2])
+
+    @_(
+        "CONCAT",
+        "'+'",
+        "'-'",
+        "'/'",
+        "'*'",
+        "'<'",
+        "FLOAT_SUM",
+        "FLOAT_SUB",
+        "FLOAT_DIV",
+        "FLOAT_MUL",
+        "'>'",
+        "NOT_EQUAL",
+        "EQUAL",
+        "OR",
+        "STRICT_OR",
+        "AND",
+        "STRICT_AND",
+        "TEXT_MATCH",
+        "LESS_OR_EQ",
+        "MORE_OR_EQ",
+        "ARRAY_CONCAT",
+        "ARRAY_SUB",
+        "POW",
+        "FLOAT_POW",
+        "BIT_OR",
+        "BIT_AND",
+        "BIT_SHIFT_LEFT",
+        "BIT_SHIFT_RIGHT",
+        "DOUBLE_ARROW_LEFT",
+        "DOUBLE_ARROW_RIGHT",
+        "ARROW_LEFT",
+        "ARROW_RIGHT",
+        "ARROW_BOTH",
+        "SOME_CONCAT",
+        "SOME_SUB",
+    )
+    def binary_op(self, p: sly.yacc.YaccProduction) -> str:
+        return p[0]
+
+    @_(
+        "DEF binary_op '<' type_identifier { ',' type_identifier } '>' '(' [ NEWLINE ] param ',' [ NEWLINE ] param [ NEWLINE ] ')' [ ':' type ] do"
+    )
+    def binary_op_def(self, p: sly.yacc.YaccProduction):
+        return terms.EBinaryOpDef(
+            p.binary_op,
+            [p.param0, p.param1],
+            body=p.do,
+            hint=terms.EMaybeHint(p.type or terms.EMaybeHintNothing()),
+            generics=concat(p.type_identifier0, p.type_identifier1),
+        )
+
+    @_("DEF binary_op '(' [ NEWLINE ] param ',' [ NEWLINE ] param [ NEWLINE ] ')' [ ':' type ] do")  # type: ignore[no-redef]
+    def binary_op_def(self, p: sly.yacc.YaccProduction):
+        return terms.EBinaryOpDef(
+            p.binary_op,
+            [p.param0, p.param1],
+            body=p.do,
+            hint=terms.EMaybeHint(p.type or terms.EMaybeHintNothing()),
+        )
 
     @_(
         "DO [ ':' type ] block_statement END",
@@ -206,7 +350,7 @@ class UwuParser(Parser):
     def do(self, p: sly.yacc.YaccProduction):
         return terms.EDo(
             p.block_statement,
-            hint=terms.MaybeEHint(p.type or terms.MaybeEHintNothing()),
+            hint=terms.EMaybeHint(p.type or terms.EMaybeHintNothing()),
         )
 
     @_(
@@ -223,7 +367,7 @@ class UwuParser(Parser):
             p.identifier.name,
             p.params or [],
             body=p.do,
-            hint=terms.MaybeEHint(p.type or terms.MaybeEHintNothing()),
+            hint=terms.EMaybeHint(p.type or terms.EMaybeHintNothing()),
             generics=concat(p.type_identifier0, p.type_identifier1),
         )
 
@@ -233,7 +377,7 @@ class UwuParser(Parser):
             p.identifier.name,
             p.params or [],
             body=p.do,
-            hint=terms.MaybeEHint(p.type or terms.MaybeEHintNothing()),
+            hint=terms.EMaybeHint(p.type or terms.EMaybeHintNothing()),
         )
 
     @_("params ',' [ NEWLINE ] param [ NEWLINE ]")
@@ -248,9 +392,19 @@ class UwuParser(Parser):
     def type(self, p: sly.yacc.YaccProduction):
         return terms.EHint(p.type_identifier.name, [])
 
-    @_("type_identifier '<' type { ',' type } '>'")  # type: ignore[no-redef]
+    @_("type_identifier '<' type { ',' type } '>'")
     def type(self, p: sly.yacc.YaccProduction):
-        return terms.EHint(p.type_identifier.name, concat(p.type0, p.type1))
+        return terms.EHint(p.type_identifier.name, [])
+
+    # @_(
+    #     "type_identifier '<' type_identifier '<' type_identifier '<' type { ',' type } BIT_SHIFT_RIGHT"
+    # )
+    # def type(self, p: sly.yacc.YaccProduction):
+    #     return terms.EHint(p.type_identifier.name, [])
+
+    # @_("open_type open_type open_type type BIT_SHIFT_RIGHT")
+    # def type(self, p: sly.yacc.YaccProduction):
+    #     return terms.EHint(p.type_identifier.name, concat(p.type0, p.type1))
 
     @_(
         "ENUM type_identifier '<' type_identifier { ',' type_identifier } '>' '{' [ NEWLINE ] [ variants ] '}'"
@@ -262,6 +416,36 @@ class UwuParser(Parser):
             generics=concat(p.type_identifier1, p.type_identifier2),
         )
 
+    @_("ENUM type_identifier '{' [ NEWLINE ] [ variants ] '}'")  # type: ignore[no-redef]
+    def enum(self, p: sly.yacc.YaccProduction):
+        return terms.EEnumDeclaration(p.type_identifier.name, variants=p.variants or [])
+
+    @_(
+        "TYPE type_identifier '<' type_identifier { ',' type_identifier } '>' '=' [ NEWLINE ] [ type_variants ] '}'"
+    )
+    def enum(self, p: sly.yacc.YaccProduction):
+        return terms.EEnumDeclaration(
+            p.type_identifier0.name,
+            variants=p.variants or [],
+            generics=concat(p.type_identifier1, p.type_identifier2),
+        )
+
+    @_("TYPE type_identifier '=' [ NEWLINE ] [ type_variants ]")  # type: ignore[no-redef]
+    def enum(self, p: sly.yacc.YaccProduction):
+        return terms.EEnumDeclaration(p.type_identifier.name, variants=p.variants or [])
+
+    @_("TYPE type_identifier")  # type: ignore[no-redef]
+    def enum(self, p: sly.yacc.YaccProduction):
+        return terms.EEnumDeclaration(p.type_identifier.name, variants=p.variants or [])
+
+    @_("type_variants LINE variant [ NEWLINE ]")
+    def type_variants(self, p: sly.yacc.YaccProduction):
+        return p.variants + [p.variant]
+
+    @_("variant [ NEWLINE ]")  # type: ignore[no-redef]
+    def type_variants(self, p: sly.yacc.YaccProduction):
+        return [p.variant]
+
     @_("variants variant [ NEWLINE ]")
     def variants(self, p: sly.yacc.YaccProduction):
         return p.variants + [p.variant]
@@ -269,10 +453,6 @@ class UwuParser(Parser):
     @_("variant [ NEWLINE ]")  # type: ignore[no-redef]
     def variants(self, p: sly.yacc.YaccProduction):
         return [p.variant]
-
-    @_("ENUM type_identifier '{' [ NEWLINE ] [ variants ] '}'")  # type: ignore[no-redef]
-    def enum(self, p: sly.yacc.YaccProduction):
-        return terms.EEnumDeclaration(p.type_identifier.name, variants=p.variants or [])
 
     @_("type_identifier '(' type  { ',' type } ')'")
     def variant(self, p: sly.yacc.YaccProduction):
@@ -289,7 +469,7 @@ class UwuParser(Parser):
     @_("identifier [ ':' type ]")
     def param(self, p: sly.yacc.YaccProduction):
         return terms.EParam(
-            p.identifier.name, terms.MaybeEHint(p.type or terms.MaybeEHintNothing())
+            p.identifier.name, terms.EMaybeHint(p.type or terms.EMaybeHintNothing())
         )
 
     @_("IF expr THEN [ ':' type ] block_statement [ or_else ] END")
@@ -297,8 +477,8 @@ class UwuParser(Parser):
         return terms.EIf(
             p.expr,
             then=p.block_statement,
-            or_else=terms.MaybeOrElse(p.or_else),
-            hint=terms.MaybeEHint(p.type or terms.MaybeEHintNothing()),
+            or_else=terms.EMaybeOrElse(p.or_else),
+            hint=terms.EMaybeHint(p.type or terms.EMaybeHintNothing()),
         )
 
     @_("ELSE block_statement")
@@ -308,7 +488,7 @@ class UwuParser(Parser):
     @_("ELIF expr THEN block_statement [ or_else ]")  # type: ignore[no-redef]
     def or_else(self, p: sly.yacc.YaccProduction):
         return terms.EIf(
-            p.expr, then=p.block_statement, or_else=terms.MaybeOrElse(p.or_else)
+            p.expr, then=p.block_statement, or_else=terms.EMaybeOrElse(p.or_else)
         )
 
     @_("CASE expr OF [ NEWLINE ] [ cases ] END")
@@ -404,17 +584,41 @@ class UwuParser(Parser):
         return terms.ELet(
             id=p.identifier.name,
             init=p.expr,
-            hint=terms.MaybeEHint(p.type or terms.MaybeEHintNothing()),
+            hint=terms.EMaybeHint(p.type or terms.EMaybeHintNothing()),
+        )
+
+    @_("identifier ':' type_identifier '<' type { ',' type } MORE_OR_EQ expr")
+    def let(self, p):
+        return terms.ELet(
+            id=p.identifier.name,
+            init=p.expr,
+            hint=terms.EMaybeHint(
+                terms.EHint(p.type_identifier.name, concat(p.type0, p.type1))
+            ),
         )
 
     @_("INT")
     def int_literal(self, p: sly.yacc.YaccProduction) -> terms.ENumLiteral:
-        return terms.ENumLiteral(float(p.INT))
+        return terms.ENumLiteral(float(p.INT.replace("_", "")))
 
     @_("FLOAT")
     def float_literal(self, p: sly.yacc.YaccProduction) -> terms.EFloatLiteral:
-        return terms.EFloatLiteral(float(p.FLOAT))
+        return terms.EFloatLiteral(float(p.FLOAT.replace("_", "")))
 
     @_("STRING")
     def str_literal(self, p: sly.yacc.YaccProduction) -> terms.EStrLiteral:
         return terms.EStrLiteral(p.STRING[1:-1])
+
+    @_("INTERPOLATION_LEFT expr inter_or_str")
+    def str_inter(self, p: sly.yacc.YaccProduction) -> terms.EInter:
+        return terms.EInter(p.INTERPOLATION_LEFT[1:-1], p.expr, p.inter_or_str)
+
+    @_("INTERPOLATION_RIGHT")
+    def inter_or_str(self, p: sly.yacc.YaccProduction) -> terms.EInterOrStr:
+        return terms.EInterOrStr(terms.EStrLiteral(p.INTERPOLATION_RIGHT[1:-1]))
+
+    @_("INTERPOLATION_BOTH expr inter_or_str")
+    def inter_or_str(self, p: sly.yacc.YaccProduction) -> terms.EInterOrStr:
+        return terms.EInterOrStr(
+            terms.EInter(p.INTERPOLATION_BOTH[1:-1], p.expr, p.inter_or_str)
+        )

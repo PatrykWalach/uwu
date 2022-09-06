@@ -1,1 +1,1 @@
-;;const id=(id)=>{return id};const unit=undefined;console.log([1.0].concat([2.0]))
+function id (id) {return id};const unit=undefined;function op7/*++*/ (a) {return b=>a.concat(b)};console.log(op7/*++*/([1.0])([2.0]))

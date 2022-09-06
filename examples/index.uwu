@@ -26,7 +26,7 @@ def traverse(arr, fn) do
             None() do None() end
             Some(acc_value) do 
                 case fn(value) of 
-                    Some(next_value) do Some(acc_value | [next_value]) end
+                    Some(next_value) do Some(acc_value ++ [next_value]) end
                     None() do None() end
                 end
             end
@@ -122,9 +122,9 @@ end
 ##console_log(js__array__reduce(arr, add, 0))
 #
 #
-##x: Callable<Callable<Num, Str>, Bool> = 2
-##x: Array<Callable<Num, Str>> = 2
-##x: Callable<Num, Callable<Num, Str>> = 2
+##x: Callable<Callable<Int, Str>, Bool> = 2
+##x: Array<Callable<Int, Str>> = 2
+##x: Callable<Int, Callable<Int, Str>> = 2
 
 def min(a, b) do
     if a < b then
@@ -142,7 +142,7 @@ def max(a, b) do
     end
 end
 
-def len<A>(arr: Array<A>): Num do
+def len<A>(arr: Array<A>): Int do
     `arr.length`
 end
 
@@ -160,8 +160,8 @@ def head<A>(arr: Array<A>) do
         Empty()
     else
         `const [_head, ..._rest] = arr`
-        list_head: Num = `_head` 
-        rest: Array<Num> = `_rest` 
+        list_head: Int = `_head` 
+        rest: Array<Int> = `_rest` 
         Head(list_head, rest)
     end
 end
@@ -169,15 +169,15 @@ end
 def bubble_sort(cmp, arr) do
     
     def swap_till(acc, value) do
-        swap_till2: Callable<Array<Num>, Callable<Num, Array<Num>>> = `swap_till`
+        swap_till2: Callable<Array<Int>, Callable<Int, Array<Int>>> = `swap_till`
 
         case head(acc) of
             Empty() do [value] end
             Head(arr_head, rest) do
                 if cmp(value, arr_head) < 0 then
-                    [value] | swap_till2(rest, arr_head)
+                    [value] ++ swap_till2(rest, arr_head)
                 else
-                    [arr_head] | swap_till2(rest, value)
+                    [arr_head] ++ swap_till2(rest, value)
                 end
             end
         end
@@ -200,20 +200,20 @@ def merge<A>(a, b) do
         Tuple(_, Empty()) do a end
         Tuple(Head(head_a, rest_a), Head(head_b, rest_b)) do
             if head_a < head_b then
-                [head_a] | merge2(rest_a, b)
+                [head_a] ++ merge2(rest_a, b)
             else
-                [head_b] | merge2(a, rest_b)
+                [head_b] ++ merge2(a, rest_b)
             end
         end
     end
 end
 
 
-def take<A>(arr: Array<A>, n: Num): Array<A> do
+def take<A>(arr: Array<A>, n: Int): Array<A> do
     `arr.slice(0, n)`
 end
 
-def drop<A>(arr: Array<A>, n: Num): Array<A> do
+def drop<A>(arr: Array<A>, n: Int): Array<A> do
     `arr.slice(n)`
 end
 
@@ -224,8 +224,8 @@ def merge_sort<A>(arr) do
     if len(arr) < 2 then
         arr
     else
-        right = merge_sort2(take(arr, len(arr) // 2))
-        left = merge_sort2(drop(arr, len(arr) // 2))
+        right = merge_sort2(take(arr, len(arr) / 2))
+        left = merge_sort2(drop(arr, len(arr) / 2))
 
         merge(right, left)
     end 
@@ -274,7 +274,7 @@ end
 
 
 def div(a,b) do
-    if b != 0 then Some(a // b) else None() end
+    if b != 0 then Some(a / b) else None() end
 end
 
 def chain_return(option, fn) do

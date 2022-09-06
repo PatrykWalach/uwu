@@ -1,4 +1,4 @@
-abs: Callable<Num, Num> = `Math.abs`
+abs: Callable<Int, Int> = `Math.abs`
 
 def add(a, b) do
     a + b
@@ -13,7 +13,7 @@ def to_upper(s: Str): Str do
 end
 
 def classy_greeting(first_name, last_name) do
-    `"The name's "` ++ last_name ++ ', ' ++ first_name ++ ' ' ++ last_name
+    "The name's { last_name }, { first_name } { last_name }"
 end
 
 def compose1(f, g, a) do

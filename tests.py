@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 from dataclasses import dataclass
 from pathlib import WindowsPath
@@ -8,8 +10,8 @@ import pytest
 
 import algorithm_j
 import typed
-from compile import Hoist, compile
-from main import BUILTINS, DEFAULT_CTX, AstEncoder, UwuLexer, UwuParser
+from compile import DefCleaner, Hoister, compile
+from main import AstEncoder, Builtin, UwuLexer, UwuParser
 from terms import *
 
 
@@ -211,7 +213,7 @@ def lexer():
                         ** ECall(
                             EExpr ** EIdentifier("x"), [EExpr ** EIdentifier("n")]
                         ),
-                        hint=MaybeEHint(EHint("Num")),
+                        hint=EMaybeHint(EHint("Num")),
                     ),
                     EExpr ** EIdentifier("x"),
                 ],
@@ -329,7 +331,40 @@ def lexer():
                     ** ELet(
                         "x",
                         EExpr ** EVariantCall("None"),
-                        MaybeEHint ** EHint("Option", [EHint("Num")]),
+                        EMaybeHint ** EHint("Option", [EHint("Num")]),
+                    )
+                ],
+            ),
+            (
+                "x:Option<Option<Num>>=None()",
+                [
+                    EExpr
+                    ** ELet(
+                        "x",
+                        EExpr ** EVariantCall("None"),
+                        EMaybeHint
+                        ** EHint("Option", [EHint("Option", [EHint("Num")])]),
+                    )
+                ],
+            ),
+            (
+                "x:Either<Num, Either<Num, Either<Num>>>=None()",
+                [
+                    EExpr
+                    ** ELet(
+                        "x",
+                        EExpr ** EVariantCall("None"),
+                        EMaybeHint
+                        ** EHint(
+                            "Either",
+                            [
+                                EHint("Num"),
+                                EHint(
+                                    "Either",
+                                    [EHint("Num"), EHint("Either", [EHint("Num")])],
+                                ),
+                            ],
+                        ),
                     )
                 ],
             ),
@@ -540,6 +575,55 @@ def lexer():
                 "def x() do\ny\n\n#comment\n\nend",
                 [EExpr ** EDef("x", [], EDo(EBlock([EExpr ** EIdentifier("y")])))],
             ),
+            (
+                '"The name\'s { last_name }, { first_name } { last_name }"',
+                [
+                    EExpr(
+                        EInter(
+                            "The name's ",
+                            EExpr(EIdentifier("last_name")),
+                            EInterOrStr(
+                                EInter(
+                                    ", ",
+                                    EExpr(EIdentifier("first_name")),
+                                    EInterOrStr(
+                                        EInter(
+                                            " ",
+                                            EExpr(EIdentifier("last_name")),
+                                            EInterOrStr(EStrLiteral("")),
+                                        )
+                                    ),
+                                )
+                            ),
+                        )
+                    )
+                ],
+            ),
+            (
+                'x="Hello"\ny="World"\nz="a {x} b {y} c"',
+                [
+                    EExpr(ELet("x", EExpr(EStrLiteral("Hello")))),
+                    EExpr(ELet("y", EExpr(EStrLiteral("World")))),
+                    EExpr(
+                        ELet(
+                            "z",
+                            EExpr(
+                                EInter(
+                                    "a ",
+                                    EExpr(EIdentifier("x")),
+                                    EInterOrStr(
+                                        EInter(
+                                            " b ",
+                                            EExpr(EIdentifier("y")),
+                                            EInterOrStr(EStrLiteral(" c")),
+                                        )
+                                    ),
+                                )
+                            ),
+                        )
+                    ),
+                ],
+            )
             # (
             #     "case [Some(1), None()] of [Some(value), None()] do value end end",
             #     [
@@ -764,7 +848,7 @@ def test_parser(program, ast, parser, lexer):
 def test_infer(program, expected_type, parser, lexer):
     program = parser.parse(lexer.tokenize(program))
 
-    assert algorithm_j.type_infer(DEFAULT_CTX, program) == expected_type
+    assert algorithm_j.type_infer({},Builtin+ program) == expected_type
 
 
 @pytest.mark.parametrize(
@@ -878,8 +962,8 @@ def test_infer(program, expected_type, parser, lexer):
                 # ("31", "`console.log`(case {1,2} of {x,_} do x end end)", "1"),
                 # ("32", "`console.log`(case {1,2} of {_,y} do y end end)", "2"),
                 ("33", "`console.log`(if 2*2 != 4 then 0 else 1 end)", "1"),
-                ("34", "`console.log`('a'++'b')", "ab"),
-                ("35", "`console.log`([1]|[2])", "[ 1, 2 ]"),
+                ("34", "`console.log`('a'<>'b')", "ab"),
+                ("35", "`console.log`([1]++[2])", "[ 1, 2 ]"),
                 ("36", "`console.log`(-2+2)", "0"),
                 ("37", "`console.log`(if 2*2 == 4 then 0 else 1 end)", "0"),
                 (
@@ -892,6 +976,16 @@ def test_infer(program, expected_type, parser, lexer):
                     "enum Obj<A> {}\ndef get(value: A): Obj<A> do `{VALUE:value}` end\ndef value(a: Obj<A>): A do `a.VALUE` end\nval: Obj<Num> = value(get(12))\n`console.log`(val)",
                     "12",
                 ),
+                (
+                    "40",
+                    "def >>> <A> (a: Int, b: Int): Int do `a>>b` end \n `console.log`(5 >>> 2)",
+                    "1",
+                ),
+                (
+                    "41",
+                    'x="Hello"\ny="World"\n`console.log`("a {x} b {y} c")',
+                    "a Hello b World c",
+                ),
             ]
         )
     ),
@@ -900,12 +994,46 @@ def test_compile_with_snapshot(id, program, expected_output, snapshot, parser, l
     id = id + ".js"
     program = parser.parse(lexer.tokenize(program))
     snapshot.snapshot_dir = "snapshots"
-    ast = EProgram([*BUILTINS, *program.body])
-    snapshot.assert_match(compile(ast.fold_with(Hoist())), id)
+    ast = Builtin+program
+    snapshot.assert_match(compile(ast.fold_with(Hoister()).fold_with(DefCleaner())), id)
     # path: WindowsPath = snapshot.snapshot_dir
     assert check_output(
         ["node", snapshot.snapshot_dir / id]
     ) == f"{expected_output}\n".encode("UTF-8")
+
+
+@pytest.mark.parametrize(
+    "ast, expected",
+    [
+        (
+            EProgram(
+                [
+                    EExpr(
+                        ECall(
+                            EExpr(EIdentifier("fn")),
+                            [EExpr(ELet("x", EExpr(EIdentifier("y"))))],
+                        )
+                    )
+                ]
+            ),
+            EProgram(
+                [
+                    EExpr(ELet("x", EExpr(EIdentifier("y")))),
+                    EExpr(
+                        ECall(
+                            EExpr(EIdentifier("fn")),
+                            [EExpr(EIdentifier("x"))],
+                        )
+                    ),
+                ]
+            ),
+        )
+    ],
+)
+def test_hoist(ast, expected) -> None:
+    import print
+
+    assert print.to_string(ast.fold_with(Hoister())) == print.to_string(expected)
 
 
 @pytest.mark.parametrize(
@@ -951,4 +1079,4 @@ def test_compile_with_snapshot(id, program, expected_output, snapshot, parser, l
 def test_do_expection(program, parser, lexer, exception):
     program = parser.parse(lexer.tokenize(program))
     with pytest.raises(exception):
-        algorithm_j.type_infer(DEFAULT_CTX, program)
+        algorithm_j.type_infer({}, Builtin+ program)

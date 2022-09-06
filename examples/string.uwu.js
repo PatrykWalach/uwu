@@ -1,5 +1,5 @@
-const id = (id) => {
+function id(id) {
   return id;
-};
+}
 const unit = undefined;
 const greeting = "Hello world!";

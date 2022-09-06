@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 import dataclasses
-import re
 import typing
 
-import terms
+
 
 T = typing.TypeVar("T")
 
@@ -68,38 +67,69 @@ class EHint(Node):
 
 
 @dataclasses.dataclass(frozen=True)
-class MaybeEHintNothing(Node):
+class EMaybeHintNothing(Node):
     pass
 
 
 @dataclasses.dataclass(frozen=True)
-class MaybeEHint(Node):
-    value: MaybeEHintNothing | EHint = MaybeEHintNothing()
+class EMaybeHint(Node):
+    value: EMaybeHintNothing | EHint = EMaybeHintNothing()
 
 
 @dataclasses.dataclass(frozen=True)
 class ELet(Node):
     id: str
     init: EExpr
-    hint: MaybeEHint = MaybeEHint()
+    hint: EMaybeHint = EMaybeHint()
 
 
 @dataclasses.dataclass(frozen=True)
 class EDo(Node):
     block: EBlock = EBlock()
-    hint: MaybeEHint = MaybeEHint()
+    hint: EMaybeHint = EMaybeHint()
 
-
+import Ctx
 @dataclasses.dataclass(frozen=True)
 class EProgram(Node):
     body: list[EExpr] = dataclasses.field(default_factory=list)
+    ctx: Ctx.Context = dataclasses.field(default_factory=dict)
+
+    def __add__(self, program: EProgram) -> EProgram:
+        assert isinstance(program, EProgram)
+        return EProgram(self.body + program.body, self.ctx | program.ctx)
+
+
+BinaryOp = typing.Literal[
+    "<>",
+    "+",
+    "-",
+    "/",
+    "*",
+    "<",
+    ">",
+    "!=",
+    "==",
+    "||",
+    "or",
+    "&&",
+    "and",
+    "=~",
+    "<=",
+    ">=",
+    "++",
+    "+.",
+    "-.",
+    "/.",
+    "*.",
+    "**",
+    "**.",
+]
 
 
 @dataclasses.dataclass(frozen=True)
 class EBinaryExpr(Node):
-    op: typing.Literal[
-        "++", "+", "-", "/", "*", "+.", "-.", "/.", "*.", ">", "<", "|", "!=", "=="
-    ]
+
+    op: BinaryOp
     left: EExpr
     right: EExpr
 
@@ -125,6 +155,18 @@ class EStrLiteral(Node):
 
 
 @dataclasses.dataclass(frozen=True)
+class EInter(Node):
+    left: str
+    mid: "EExpr"
+    right: EInterOrStr
+
+
+@dataclasses.dataclass(frozen=True)
+class EInterOrStr(Node):
+    value: EInter | EStrLiteral
+
+
+@dataclasses.dataclass(frozen=True)
 class EExternal(Node):
     value: str
 
@@ -134,19 +176,28 @@ class EDef(Node):
     identifier: str
     params: list[EParam]
     body: EDo
-    hint: MaybeEHint = MaybeEHint()
+    hint: EMaybeHint = EMaybeHint()
+    generics: list[EIdentifier] = dataclasses.field(default_factory=list)
+
+
+@dataclasses.dataclass(frozen=True)
+class EBinaryOpDef(Node):
+    identifier: BinaryOp
+    params: list[EParam]
+    body: EDo
+    hint: EMaybeHint = EMaybeHint()
     generics: list[EIdentifier] = dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass(frozen=True)
 class EParam(Node):
     identifier: str
-    hint: MaybeEHint = MaybeEHint()
+    hint: EMaybeHint = EMaybeHint()
 
 
 @dataclasses.dataclass(frozen=True)
 class EUnaryExpr(Node):
-    op: typing.Literal["-"]
+    op: typing.Literal["-", "+", "!", "not"]
     expr: EExpr
 
 
@@ -194,19 +245,19 @@ class EArray(Node):
 class EIf(Node):
     test: EExpr
     then: EBlock
-    or_else: MaybeOrElse = dataclasses.field(default_factory=lambda: MaybeOrElse())
-    hint: MaybeEHint = MaybeEHint()
+    or_else: EMaybeOrElse = dataclasses.field(default_factory=lambda: EMaybeOrElse())
+    hint: EMaybeHint = EMaybeHint()
 
 
 @dataclasses.dataclass(frozen=True)
-class MaybeOrElseNothing(Node):
+class EMaybeOrElseNothing(Node):
     pass
 
 
 @dataclasses.dataclass(frozen=True)
-class MaybeOrElse(Node):
+class EMaybeOrElse(Node):
 
-    value: EBlock | EIf | MaybeOrElseNothing = MaybeOrElseNothing()
+    value: EBlock | EIf | EMaybeOrElseNothing = EMaybeOrElseNothing()
 
 
 @dataclasses.dataclass(frozen=True)
@@ -252,8 +303,10 @@ class EExpr(Node):
     expr: (
         EDo
         | ENumLiteral
+        | EBinaryOpDef
         | EFloatLiteral
         | EStrLiteral
+        | EInter
         | EDef
         | EIf
         | ECall
@@ -269,53 +322,62 @@ class EExpr(Node):
     )
 
 
-K = typing.TypeVar("K", bound=terms.FoldWith)
+K = typing.TypeVar("K", bound=FoldWith)
 
 
 class FoldMeta(type):
     def __new__(cls, name, bases, namespace, **kwargs):
+        # nodes = globals().keys()
+        # import terms
+        # nodes = terms.__dict__.keys()
         nodes = namespace.get("_nodes_", [])
+
         for node in nodes:
+            if not node.startswith("E"):
+                continue
             exec(f"def {node}(self, n): return self.fold(n)", globals(), namespace)
 
         return super().__new__(cls, name, bases, namespace, **kwargs)
 
 
 class NodeFold(metaclass=FoldMeta):
-
-    _nodes_ = [
-        "EExpr",
-        "EBlock",
-        "EProgram",
-        "EBinaryExpr",
-        "EDo",
-        "ENumLiteral",
-        "EStrLiteral",
-        "EDef",
-        "EIf",
-        "ECall",
-        "EVariant",
-        "EVariantCall",
-        "ECaseOf",
-        "ELet",
-        "EIdentifier",
-        "EArray",
-        "EVariantCall",
-        "EExternal",
-        "EUnaryExpr",
-        "EPattern",
-        "EEnumDeclaration",
-        "EHint",
-        "EParam",
-        "MaybeEHint",
-        "ECase",
-        "EMatchVariant",
-        "EMatchAs",
-        "MaybeOrElse",
-        "MaybeEHintNothing",
-        "EStrLiteral",
-        "ENumLiteral",
-    ]
+    _nodes_ = {
+        EExpr.__name__,
+        EBlock.__name__,
+        EProgram.__name__,
+        EBinaryExpr.__name__,
+        EDo.__name__,
+        ENumLiteral.__name__,
+        EFloatLiteral.__name__,
+        EStrLiteral.__name__,
+        EDef.__name__,
+        EIf.__name__,
+        ECall.__name__,
+        EVariant.__name__,
+        EVariantCall.__name__,
+        ECaseOf.__name__,
+        ELet.__name__,
+        EIdentifier.__name__,
+        EArray.__name__,
+        EVariantCall.__name__,
+        EExternal.__name__,
+        EUnaryExpr.__name__,
+        EPattern.__name__,
+        EEnumDeclaration.__name__,
+        EHint.__name__,
+        EParam.__name__,
+        EMaybeHint.__name__,
+        ECase.__name__,
+        EMatchVariant.__name__,
+        EMatchAs.__name__,
+        EMaybeOrElse.__name__,
+        EInter.__name__,
+        EMaybeHintNothing.__name__,
+        EStrLiteral.__name__,
+        ENumLiteral.__name__,
+        EBinaryOpDef.__name__,
+        EInterOrStr.__name__,
+    }
 
 
 class Fold(NodeFold):
@@ -326,3 +388,44 @@ class Fold(NodeFold):
 class FoldAll(NodeFold):
     def fold(self, n: K) -> K:
         return n.fold_children_with(self)
+
+
+AstNode: typing.TypeAlias = (
+    EIdentifier
+    | EExpr
+    | EInter
+    | EMaybeHint
+    | EProgram
+    | EBinaryOpDef
+    | EParam
+    | EInterOrStr
+    | EUnaryExpr
+    | EMaybeOrElse
+    | EMaybeOrElse
+    | EVariantCall
+    | EArray
+    | EBinaryExpr
+    | EBlock
+    | EHint
+    | EMaybeHintNothing
+    | ECall
+    | ECaseOf
+    | EDef
+    | EDo
+    | EEnumDeclaration
+    | EExpr
+    | EIf
+    | EStrLiteral
+    | EMaybeOrElseNothing
+    | ENumLiteral
+    | EFloatLiteral
+    | ECall
+    | ECaseOf
+    | ELet
+    | EIdentifier
+    | EBinaryExpr
+    | EArray
+    | EVariantCall
+    | EExternal
+    | EUnaryExpr
+)
