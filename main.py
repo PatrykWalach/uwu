@@ -11,7 +11,13 @@ import algorithm_j
 import compile
 import terms
 import typed
-from algorithm_j import Context, NonExhaustiveMatchException, Scheme, type_infer
+from algorithm_j import (
+    Context,
+    NonExhaustiveMatchException,
+    Scheme,
+    fresh_ty_var,
+    type_infer,
+)
 
 
 class AstEncoder(json.JSONEncoder):
@@ -25,26 +31,42 @@ class AstEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
+def SimpleBinaryOpDef(
+    op: terms.BinaryOp, ext: str, a: str, b: str, ret: str, generics: list[str] = []
+):
+    return BinaryOpDef(
+        op, ext, terms.EHint(a), terms.EHint(b), terms.EHint(ret), generics=generics
+    )
+
+
+def BinaryOpDef(
+    op: terms.BinaryOp,
+    ext: str,
+    a: terms.EHint,
+    b: terms.EHint,
+    ret: terms.EHint,
+    generics: list[str] = [],
+):
+    return terms.EExpr(
+        terms.EBinaryOpDef(
+            op,
+            [
+                terms.EParam("a", hint=terms.MaybeEHint((a))),
+                terms.EParam("b", hint=terms.MaybeEHint((b))),
+            ],
+            terms.EDo(terms.EBlock([terms.EExpr(terms.EExternal(ext))])),
+            terms.MaybeEHint((ret)),
+            generics=list(map(terms.EIdentifier, generics)),
+        )
+    )
+
+
 BUILTINS: list[terms.EExpr] = [
-    terms.EExpr
-    ** terms.EEnumDeclaration(
-        "Option",
-        variants=[
-            terms.EVariant("Some", [terms.EHint("VALUE")]),
-            terms.EVariant("None"),
-        ],
-        generics=[terms.EIdentifier("VALUE")],
-    ),
-    terms.EExpr
-    ** terms.EEnumDeclaration(
-        "Bool",
-        variants=[terms.EVariant("True"), terms.EVariant("False")],
-    ),
     terms.EExpr
     ** terms.EDef(
         "id",
-        [terms.EParam("id")],
-        terms.EDo ** terms.EBlock([terms.EExpr ** terms.EIdentifier("id")]),
+        [terms.EParam("x")],
+        terms.EDo ** terms.EBlock([terms.EExpr ** terms.EIdentifier("x")]),
     ),
     terms.EExpr
     ** terms.ELet(
@@ -52,15 +74,107 @@ BUILTINS: list[terms.EExpr] = [
         terms.EExpr ** terms.EExternal("undefined"),
         terms.MaybeEHint ** terms.EHint("Unit"),
     ),
+    # int
+    SimpleBinaryOpDef("+", "a+b", typed.TNum.id, typed.TNum.id, typed.TNum.id),
+    SimpleBinaryOpDef(
+        "/", "Math.floor(a/b)", typed.TNum.id, typed.TNum.id, typed.TNum.id
+    ),
+    SimpleBinaryOpDef("*", "a*b", typed.TNum.id, typed.TNum.id, typed.TNum.id),
+    SimpleBinaryOpDef("**", "a**b", typed.TNum.id, typed.TNum.id, typed.TNum.id),
+    SimpleBinaryOpDef("-", "a-b", typed.TNum.id, typed.TNum.id, typed.TNum.id),
+    # int eq
+    SimpleBinaryOpDef("<", "a<b", typed.TNum.id, typed.TNum.id, typed.TBool.id),
+    SimpleBinaryOpDef(">", "a>b", typed.TNum.id, typed.TNum.id, typed.TBool.id),
+    SimpleBinaryOpDef(">=", "a>=b", typed.TNum.id, typed.TNum.id, typed.TBool.id),
+    SimpleBinaryOpDef("<=", "a<=b", typed.TNum.id, typed.TNum.id, typed.TBool.id),
+    # float
+    SimpleBinaryOpDef("+.", "a+b", typed.TFloat.id, typed.TFloat.id, typed.TFloat.id),
+    SimpleBinaryOpDef("/.", "a/b", typed.TFloat.id, typed.TFloat.id, typed.TFloat.id),
+    SimpleBinaryOpDef("*.", "a*b", typed.TFloat.id, typed.TFloat.id, typed.TFloat.id),
+    SimpleBinaryOpDef("**.", "a**b", typed.TFloat.id, typed.TFloat.id, typed.TFloat.id),
+    SimpleBinaryOpDef("-.", "a-b", typed.TFloat.id, typed.TFloat.id, typed.TFloat.id),
+    # float eq
+    SimpleBinaryOpDef("<.", "a<b", typed.TFloat.id, typed.TFloat.id, typed.TBool.id),
+    SimpleBinaryOpDef(">.", "a>b", typed.TFloat.id, typed.TFloat.id, typed.TBool.id),
+    SimpleBinaryOpDef(">=.", "a>=b", typed.TFloat.id, typed.TFloat.id, typed.TBool.id),
+    SimpleBinaryOpDef("<=.", "a<=b", typed.TFloat.id, typed.TFloat.id, typed.TBool.id),
+    # str
+    SimpleBinaryOpDef("<>", "a+b", typed.TStr.id, typed.TStr.id, typed.TStr.id),
+    SimpleBinaryOpDef(
+        "=~", "b.test(a)", typed.TStr.id, typed.TRegex.id, typed.TBool.id
+    ),
+    # eq
+    SimpleBinaryOpDef(
+        "==",
+        "Object.is(a,b)",
+        ("A"),
+        ("A"),
+        (typed.TBool.id),
+        generics=[("A")],
+    ),
+    SimpleBinaryOpDef(
+        "!=",
+        "!Object.is(a,b)",
+        ("A"),
+        ("A"),
+        (typed.TBool.id),
+        generics=[("A")],
+    ),
+    # array
+    BinaryOpDef(
+        "++",
+        "a.concat(b)",
+        terms.EHint(typed.TArrayCon.id, [terms.EHint("A")]),
+        terms.EHint(typed.TArrayCon.id, [terms.EHint("A")]),
+        terms.EHint(typed.TArrayCon.id, [terms.EHint("A")]),
+        generics=[("A")],
+    ),
+    # bool
+    SimpleBinaryOpDef(
+        "&&",
+        "a&&b",
+        generics=["A"],
+        a="A",
+        b="A",
+        ret="A",
+    ),
+    SimpleBinaryOpDef("and", "a&&b", typed.TBool.id, typed.TBool.id, typed.TBool.id),
+    SimpleBinaryOpDef(
+        "||",
+        "a||b",
+        generics=["A"],
+        a="A",
+        b="A",
+        ret="A",
+    ),
+    SimpleBinaryOpDef("or", "a||b", typed.TBool.id, typed.TBool.id, typed.TBool.id),
 ]
 
+v = fresh_ty_var()
+
+
 DEFAULT_CTX: Context = {
-    "Str": Scheme([], typed.TStr),
-    "Num": Scheme([], typed.TNum),
-    "Float": Scheme([], typed.TFloat),
-    "Unit": Scheme([], typed.TUnit),
-    "Callable": Scheme([], typed.TCallableCon),
-    "Array": Scheme([], typed.TArrayCon),
+    typed.TStr.id: Scheme([], typed.TStr),
+    typed.TNum.id: Scheme([], typed.TNum),
+    typed.TFloat.id: Scheme([], typed.TFloat),
+    typed.TUnit.id: Scheme([], typed.TUnit),
+    typed.TRegex.id: Scheme([], typed.TRegex),
+    typed.TCallableCon.id: Scheme([], typed.TCallableCon),
+    typed.TArrayCon.id: Scheme([], typed.TArrayCon),
+    # Bool
+    typed.TBool.id: Scheme([], typed.TBool),
+    f"${typed.TrueCon.id}": Scheme([], typed.TrueCon),
+    f"${typed.FalseCon.id}": Scheme([], typed.FalseCon),
+    f"{typed.TrueCon.id}": Scheme([], typed.TDef(typed.TrueCon, typed.TBool)),
+    f"{typed.FalseCon.id}": Scheme([], typed.TDef(typed.FalseCon, typed.TBool)),
+    # Option
+    typed.TOptionCon.id: Scheme([], typed.TOptionCon),
+    f"${typed.SomeCon.id}": Scheme([], typed.SomeCon),
+    f"${typed.NoneCon.id}": Scheme([], typed.NoneCon),
+    typed.SomeCon.id: Scheme(
+        [v.id], typed.TDef(typed.TAp(typed.SomeCon, v), typed.TOption(v))
+    ),
+    typed.NoneCon.id: Scheme([v.id], typed.TDef(typed.NoneCon, typed.TOption(v))),
 }
 
 
@@ -106,7 +220,7 @@ def main():
 
         logging.info(f"Inferred {src_path}")
 
-        ast = ast.fold_with(compile.Hoist())
+        ast = ast.fold_with(compile.Hoister()).fold_with(compile.DefCleaner())
         js = compile.compile(ast)
 
         logging.info(f"Compiled {src_path}")

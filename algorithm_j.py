@@ -181,6 +181,7 @@ Inferable = (
     | terms.EExternal
     | terms.MaybeEHint
     | terms.EIf
+    | terms.EBinaryOpDef
     | terms.EHint
     | terms.MaybeOrElseNothing
     | terms.EStrLiteral
@@ -279,50 +280,32 @@ def infer(
             ctx[id] = Scheme.from_subst(subst, ctx, ty_con)
 
             return subst, typed.TUnit
-        case terms.EUnaryExpr("-", expr):
-            subst, ty_expr = infer(subst, ctx, expr)
-            subst = unify_subst(ty_expr, typed.TNum, subst)
-            return subst, typed.TNum
-        case terms.EBinaryExpr(op, left, right):
+        case terms.EUnaryExpr(op, expr):
             match op:
-                case "|":
-                    ty = fresh_ty_var()
-                    subst, ty_left = infer(subst, ctx, left)
-                    subst = unify_subst(ty_left, typed.TArray(ty), subst)
-                    subst, ty_right = infer(subst, ctx, right)
-                    subst = unify_subst(ty_right, typed.TArray(ty), subst)
-                    return subst, typed.TArray(ty)
-                case "++":
-                    subst, ty_left = infer(subst, ctx, left)
-                    subst = unify_subst(ty_left, typed.TStr, subst)
-                    subst, ty_right = infer(subst, ctx, right)
-                    subst = unify_subst(ty_right, typed.TStr, subst)
-                    return subst, typed.TStr
-                case "+" | "-" | "*" | "/":
-                    subst, ty_left = infer(subst, ctx, left)
-                    subst = unify_subst(ty_left, typed.TNum, subst)
-                    subst, ty_right = infer(subst, ctx, right)
-                    subst = unify_subst(ty_right, typed.TNum, subst)
+                case "-" | "+":
+                    subst, ty_expr = infer(subst, ctx, expr)
+                    subst = unify_subst(ty_expr, typed.TNum, subst)
                     return subst, typed.TNum
-                case "+." | "-." | "*." | "/.":
-                    subst, ty_left = infer(subst, ctx, left)
-                    subst = unify_subst(ty_left, typed.TFloat, subst)
-                    subst, ty_right = infer(subst, ctx, right)
-                    subst = unify_subst(ty_right, typed.TFloat, subst)
-                    return subst, typed.TFloat
-                case "!=" | "==":
-                    subst, ty_left = infer(subst, ctx, left)
-                    subst, ty_right = infer(subst, ctx, right)
-                    subst = unify_subst(ty_right, ty_left, subst)
+                case "!":
+                    subst, _ = infer(subst, ctx, expr)
                     return subst, typed.TBool
-                case ">" | "<":
-                    subst, ty_left = infer(subst, ctx, left)
-                    subst = unify_subst(ty_left, typed.TNum, subst)
-                    subst, ty_right = infer(subst, ctx, right)
-                    subst = unify_subst(ty_right, typed.TNum, subst)
+                case "not":
+                    subst, ty_expr = infer(subst, ctx, expr)
+                    subst = unify_subst(ty_expr, typed.TBool, subst)
                     return subst, typed.TBool
                 case op:
                     typed.assert_never(op)
+        case terms.EBinaryExpr(op, left, right):
+            subst, ty_op = infer(subst, ctx, terms.EIdentifier(op))
+            subst, ty_left = infer(subst, ctx, left)
+            subst, ty_right = infer(subst, ctx, right)
+            ty_ret = fresh_ty_var()
+
+            subst = unify_subst(
+                ty_op, typed.TDef(ty_left, typed.TDef(ty_right, ty_ret)), subst
+            )
+
+            return subst, ty_ret
         case terms.EMatchAs(id):
             ty = fresh_ty_var()
             ctx[id] = Scheme([], ty)
@@ -377,7 +360,9 @@ def infer(
 
         case terms.MaybeOrElse(value) | terms.MaybeEHint(value) | terms.EExpr(value):
             return infer(subst, ctx, value)
-        case terms.EDef(id, params, body, hint, generics):
+        case terms.EBinaryOpDef(id, params, body, hint, generics) | terms.EDef(
+            id, params, body, hint, generics
+        ):
             t_ctx = ctx.copy()
 
             for generic in generics:

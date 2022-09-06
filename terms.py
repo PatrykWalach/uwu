@@ -95,13 +95,60 @@ class EProgram(Node):
     body: list[EExpr] = dataclasses.field(default_factory=list)
 
 
+BinaryOp = typing.Literal[
+    "<>",
+    "+",
+    "-",
+    "/",
+    "*",
+    "<",
+    ">",
+    "!=",
+    "==",
+    "||",
+    "or",
+    "&&",
+    "and",
+    "=~",
+    "<=",
+    ">=",
+    "++",
+    "+.",
+    "-.",
+    "/.",
+    "*.",
+    "**",
+    "**.",
+    # '>>>',
+    "<<<",
+    "|||",
+    "&&&",
+    "<~>",
+    "<~",
+    "~>",
+    "<<~",
+    "~>>",
+    ">.",
+    "<.",
+    ">=.",
+    "<=.",
+]
+
+
 @dataclasses.dataclass(frozen=True)
 class EBinaryExpr(Node):
-    op: typing.Literal[
-        "++", "+", "-", "/", "*", "+.", "-.", "/.", "*.", ">", "<", "|", "!=", "=="
-    ]
+    op: BinaryOp
     left: EExpr
     right: EExpr
+
+
+@dataclasses.dataclass(frozen=True)
+class EBinaryOpDef(Node):
+    identifier: BinaryOp
+    params: list[EParam]
+    body: EDo
+    hint: MaybeEHint = MaybeEHint()
+    generics: list[EIdentifier] = dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -146,7 +193,7 @@ class EParam(Node):
 
 @dataclasses.dataclass(frozen=True)
 class EUnaryExpr(Node):
-    op: typing.Literal["-"]
+    op: typing.Literal["-", "+", "!", "not"]
     expr: EExpr
 
 
@@ -266,6 +313,7 @@ class EExpr(Node):
         | EExternal
         | EUnaryExpr
         | EEnumDeclaration
+        | EBinaryOpDef
     )
 
 
@@ -283,39 +331,40 @@ class FoldMeta(type):
 
 class NodeFold(metaclass=FoldMeta):
 
-    _nodes_ = [
-        "EExpr",
-        "EBlock",
-        "EProgram",
-        "EBinaryExpr",
-        "EDo",
-        "ENumLiteral",
-        "EStrLiteral",
-        "EDef",
-        "EIf",
-        "ECall",
-        "EVariant",
-        "EVariantCall",
-        "ECaseOf",
-        "ELet",
-        "EIdentifier",
-        "EArray",
-        "EVariantCall",
-        "EExternal",
-        "EUnaryExpr",
-        "EPattern",
-        "EEnumDeclaration",
-        "EHint",
-        "EParam",
-        "MaybeEHint",
-        "ECase",
-        "EMatchVariant",
-        "EMatchAs",
-        "MaybeOrElse",
-        "MaybeEHintNothing",
-        "EStrLiteral",
-        "ENumLiteral",
-    ]
+    _nodes_ = {
+        EExpr.__name__,
+        EBlock.__name__,
+        EProgram.__name__,
+        EBinaryExpr.__name__,
+        EDo.__name__,
+        ENumLiteral.__name__,
+        EStrLiteral.__name__,
+        EDef.__name__,
+        EIf.__name__,
+        ECall.__name__,
+        EVariant.__name__,
+        EVariantCall.__name__,
+        ECaseOf.__name__,
+        ELet.__name__,
+        EIdentifier.__name__,
+        EArray.__name__,
+        EVariantCall.__name__,
+        EExternal.__name__,
+        EUnaryExpr.__name__,
+        EPattern.__name__,
+        EEnumDeclaration.__name__,
+        EHint.__name__,
+        EParam.__name__,
+        MaybeEHint.__name__,
+        ECase.__name__,
+        EMatchVariant.__name__,
+        EMatchAs.__name__,
+        MaybeOrElse.__name__,
+        MaybeEHintNothing.__name__,
+        EStrLiteral.__name__,
+        ENumLiteral.__name__,
+        EBinaryOpDef.__name__,
+    }
 
 
 class Fold(NodeFold):

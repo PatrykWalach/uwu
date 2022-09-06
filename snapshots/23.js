@@ -1,1 +1,1 @@
-;;const id=(id)=>{return id};const unit=undefined;const add=(a)=>{const add=(b)=>{return (a+b)};return add};const addTwo=add(2.0);console.log(addTwo(3.0))
+const unit=undefined;const op1/*+*/=(a)=>(b)=>{return a+b};const add=(a)=>{const add=(b)=>{return op1/*+*/(a)(b)};return add};const addTwo=add(2.0);console.log(addTwo(3.0))
