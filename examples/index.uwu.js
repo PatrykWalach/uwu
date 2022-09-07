@@ -1,61 +1,43 @@
-const id = (id) => {
-  return id;
+const id = (x) => {
+  return x;
 };
 const unit = undefined;
+const /* + */ op1 = (a) => (b) => {
+    return a + b;
+  };
+const /* / */ op4 = (a) => (b) => {
+    return Math.floor(a / b);
+  };
+const /* * */ op2 = (a) => (b) => {
+    return a * b;
+  };
+const /* - */ op5 = (a) => (b) => {
+    return a - b;
+  };
+const /* < */ op6 = (a) => (b) => {
+    return a < b;
+  };
+const /* > */ op7 = (a) => (b) => {
+    return a > b;
+  };
+const /* != */ op8 = (a) => (b) => {
+    return !Object.is(a, b);
+  };
+const /* ++ */ op9 = (a) => (b) => {
+    return a.concat(b);
+  };
 const reduce = (arr) => (reducer) => (acc) => {
   return arr.reduce((acc, v) => reducer(acc)(v), acc);
 };
 const console_log = (value) => {
   return console.log(value);
 };
-const traverse = (arr) => (fn) => {
-  const reducer = (acc) => (value) => {
-    return (() => {
-      const $ = id(acc);
-      if ($ === "None") {
-        return "None";
-      }
-      if (typeof $ !== "string" && $.TAG === "Some") {
-        const acc_value = $._0;
-        return (() => {
-          const $ = fn(value);
-          if (typeof $ !== "string" && $.TAG === "Some") {
-            const next_value = $._0;
-            return { TAG: "Some", _0: acc_value.concat([next_value]) };
-          }
-          if ($ === "None") {
-            return "None";
-          }
-          throw new Error("Non-exhaustive pattern match");
-        })();
-      }
-      throw new Error("Non-exhaustive pattern match");
-    })();
-  };
-  return reduce(arr)(reducer)({ TAG: "Some", _0: [] });
-};
-const min = (a) => (b) => {
-  return (() => {
-    if (a < b) {
-      return a;
-    }
-    return b;
-  })();
-};
-const max = (a) => (b) => {
-  return (() => {
-    if (a > b) {
-      return a;
-    }
-    return b;
-  })();
-};
 const len = (arr) => {
   return arr.length;
 };
 const head = (arr) => {
   return (() => {
-    if (len(arr) < 1.0) {
+    if (op6(len(arr))(/* < */ 1.0)) {
       return "Empty";
     }
     const [_head, ..._rest] = arr;
@@ -76,10 +58,10 @@ const bubble_sort = (cmp) => (arr) => {
         const arr_head = $._0;
         const rest = $._1;
         return (() => {
-          if (cmp(value)(arr_head) < 0.0) {
-            return [value].concat(swap_till2(rest)(arr_head));
+          if (op6(cmp(value)(arr_head))(/* < */ 0.0)) {
+            return op9([value])(/* ++ */ swap_till2(rest)(arr_head));
           }
-          return [arr_head].concat(swap_till2(rest)(value));
+          return op9([arr_head])(/* ++ */ swap_till2(rest)(value));
         })();
       }
       throw new Error("Non-exhaustive pattern match");
@@ -107,10 +89,10 @@ const merge = (a) => (b) => {
           const head_a = $._0._0;
           const rest_a = $._0._1;
           return (() => {
-            if (head_a < head_b) {
-              return [head_a].concat(merge2(rest_a)(b));
+            if (op6(head_a)(/* < */ head_b)) {
+              return op9([head_a])(/* ++ */ merge2(rest_a)(b));
             }
-            return [head_b].concat(merge2(a)(rest_b));
+            return op9([head_b])(/* ++ */ merge2(a)(rest_b));
           })();
         }
         throw new Error("Non-exhaustive pattern match");
@@ -129,16 +111,16 @@ const drop = (arr) => (n) => {
 const merge_sort = (arr) => {
   const merge_sort2 = merge_sort;
   return (() => {
-    if (len(arr) < 2.0) {
+    if (op6(len(arr))(/* < */ 2.0)) {
       return arr;
     }
-    const right = merge_sort2(take(arr)(Math.floor(len(arr) / 2.0)));
-    const left = merge_sort2(drop(arr)(Math.floor(len(arr) / 2.0)));
+    const right = merge_sort2(take(arr)(op4(len(arr))(/* / */ 2.0)));
+    const left = merge_sort2(drop(arr)(op4(len(arr))(/* / */ 2.0)));
     return merge(right)(left);
   })();
 };
 const number__cmp = (a) => (b) => {
-  return a - b;
+  return op5(a)(/* - */ b);
 };
 const number__bubble_sort = bubble_sort(number__cmp);
 console_log(number__bubble_sort([17.0, 9.0, 21.0, 3.0, 0.0]));
@@ -162,3 +144,78 @@ console_log(merge_sort([17.0, 9.0, 21.0, 3.0, 0.0]));
   }
   throw new Error("Non-exhaustive pattern match");
 })();
+const chain_do = (option) => (fn) => {
+  return (() => {
+    const $ = option;
+    if (typeof $ !== "string" && $.TAG === "Some") {
+      const value = $._0;
+      return (() => {
+        const $ = fn(value);
+        if (typeof $ !== "string" && $.TAG === "Some") {
+          const result = $._0;
+          return { TAG: "Some", _0: { TAG: "Tuple", _0: value, _1: result } };
+        }
+        if ($ === "None") {
+          return "None";
+        }
+        throw new Error("Non-exhaustive pattern match");
+      })();
+    }
+    if ($ === "None") {
+      return "None";
+    }
+    throw new Error("Non-exhaustive pattern match");
+  })();
+};
+const div = (a) => (b) => {
+  return (() => {
+    if (op8(b)(/* != */ 0.0)) {
+      return { TAG: "Some", _0: op4(a)(/* / */ b) };
+    }
+    return "None";
+  })();
+};
+const chain_return = (option) => (fn) => {
+  return (() => {
+    const $ = option;
+    if (typeof $ !== "string" && $.TAG === "Some") {
+      const value = $._0;
+      return fn(value);
+    }
+    if ($ === "None") {
+      return "None";
+    }
+    throw new Error("Non-exhaustive pattern match");
+  })();
+};
+const a = { TAG: "Some", _0: 2.0 };
+const b = chain_do(a)(div(6.0));
+const chain_1 = (value) => {
+  return (() => {
+    const $ = value;
+    if (typeof $ !== "string" && $.TAG === "Tuple") {
+      const a = $._0;
+      const b = $._1;
+      return { TAG: "Some", _0: op2(a)(/* * */ b) };
+    }
+    throw new Error("Non-exhaustive pattern match");
+  })();
+};
+const c = chain_do(b)(chain_1);
+const chain_2 = (value) => {
+  return (() => {
+    const $ = value;
+    if (typeof $ !== "string" && $.TAG === "Tuple") {
+      if (typeof $._0 !== "string" && $._0.TAG === "Tuple") {
+        const a = $._0._0;
+        const b = $._0._1;
+        const c = $._1;
+        return { TAG: "Some", _0: op1(op1(a)(/* + */ b))(/* + */ c) };
+      }
+      throw new Error("Non-exhaustive pattern match");
+    }
+    throw new Error("Non-exhaustive pattern match");
+  })();
+};
+const d = chain_return(c)(chain_2);
+console_log(d);
