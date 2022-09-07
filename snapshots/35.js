@@ -1,1 +1,1 @@
-const unit=undefined;const op7/*++*/=(a)=>(b)=>{return a.concat(b)};console.log(op7/*++*/([1.0])([2.0]))
+const unit=undefined;const /* ++ */op7=(a)=>(b)=>{return a.concat(b)};console.log(op7([1.0])/* ++ */([2.0]))

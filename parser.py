@@ -101,7 +101,6 @@ class UwuLexer(Lexer):
         "<",
         "*",
         "/",
-        "|",
         "!",
     }
     OR = r"\|\|"
@@ -193,7 +192,17 @@ class UwuParser(Parser):
         ("left", "OR", "STRICT_OR", "BIT_OR"),
         ("left", "AND", "STRICT_AND", "BIT_AND"),
         ("left", "NOT_EQUAL", "EQUAL", "TEXT_MATCH"),
-        ("left", "<", ">", "LESS_OR_EQ", "MORE_OR_EQ"),
+        (
+            "left",
+            "<",
+            ">",
+            "LESS_OR_EQ",
+            "MORE_OR_EQ",
+            "FLOAT_LESS",
+            "FLOAT_MORE",
+            "FLOAT_LESS_OR_EQ",
+            "FLOAT_MORE_OR_EQ",
+        ),
         (
             "left",
             # "BIT_SHIFT_RIGHT",
@@ -569,7 +578,7 @@ class UwuParser(Parser):
             hint=terms.MaybeEHint(p.type or terms.MaybeEHintNothing()),
         )
 
-    @_("identifier ':' type_identifier '<' type { ',' type } MORE_OR_EQ expr")
+    @_("identifier ':' type_identifier '<' type { ',' type } MORE_OR_EQ expr")  # type: ignore[no-redef]
     def let(self, p):
         return terms.ELet(
             id=p.identifier.name,

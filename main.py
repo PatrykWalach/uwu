@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import builtins
 import dataclasses
 import glob
 import json
@@ -182,7 +183,20 @@ for builitin in BUILTINS:
     type_infer(DEFAULT_CTX, builitin)
 
 
+def green(text: str) -> str:
+    return "\033[92m{}\033[00m".format(text)
+
+
+def yellow(text: str) -> str:
+    return "\033[93m{}\033[00m".format(text)
+
+
+def print(s: str, end: str = ""):
+    builtins.print(f"\r{s}", end=end, flush=True)
+
+
 def main():
+
     lexer = UwuLexer()
     parser = UwuParser()
 
@@ -197,15 +211,17 @@ def main():
         with open(src_path, "r") as f:
             data = f.read()
 
+        print(f"{yellow('Parsing')} {src_path}")
+
         ast = parser.parse(lexer.tokenize(data))
 
         if not isinstance(ast, terms.EProgram):
-            logging.error(f"Failed {src_path} to parse")
+            print(f"Failed parse")
             return
 
         ast = terms.EProgram([*BUILTINS, *ast.body])
 
-        logging.info(f"Parsed {src_path}")
+        print(f"{green('Parsed')} {src_path}")
 
         try:
             type_infer(
@@ -213,23 +229,23 @@ def main():
                 ast,
             )
         except NonExhaustiveMatchException as e:
-            logging.warning(e)
+            print(e)
         except Exception as e:
-            logging.exception(e)
+            print(e)
             return
 
-        logging.info(f"Inferred {src_path}")
+        print(f"{green('Inferred')} {src_path}")
 
         ast = ast.fold_with(compile.Hoister()).fold_with(compile.DefCleaner())
         js = compile.compile(ast)
 
-        logging.info(f"Compiled {src_path}")
+        print(f"{green('Compiled')} {src_path}")
 
         path = src_path + ".js"
         with open(path, "w") as f:
             f.write(js)
 
-        logging.info(f"Written {src_path}")
+        print(f"{green('Compiled')} {src_path} to {(path)}", end="\n")
 
 
 if __name__ == "__main__":

@@ -30,9 +30,9 @@ def merge<A>(a, b) do
         Tuple(_, Empty()) do a end
         Tuple(Head(head_a, rest_a), Head(head_b, rest_b)) do
             if head_a < head_b then
-                [head_a] | merge2(rest_a, b)
+                [head_a] ++ merge2(rest_a, b)
             else
-                [head_b] | merge2(a, rest_b)
+                [head_b] ++ merge2(a, rest_b)
             end
         end
     end

@@ -1,1 +1,1 @@
-const unit=undefined;const op6/*<>*/=(a)=>(b)=>{return a+b};console.log(op6/*<>*/("a")("b"))
+const unit=undefined;const /* <> */op6=(a)=>(b)=>{return a+b};console.log(op6("a")/* <> */("b"))
