@@ -24,28 +24,25 @@ class IdGetter(terms.FoldAll):
         return n.fold_children_with(self)
 
 
+def is_free(expr: terms.EExpr, ids: set[str]) -> bool:
+    return (
+        isinstance(expr.expr, (terms.EDef, terms.EBinaryOpDef))
+        and expr.expr.identifier not in ids
+    )  # or (isinstance(expr.expr, terms.ELet) and expr.expr.id not in ids)
+
+
 class DefCleaner(terms.FoldAll):
     def EProgram(self, n: terms.EProgram) -> terms.EProgram:
         getter = IdGetter()
         n = n.fold_children_with(self).fold_with(getter)
-        next_body = [
-            expr
-            for expr in n.body
-            if (not isinstance(expr.expr, (terms.EDef, terms.EBinaryOpDef)))
-            or expr.expr.identifier in getter.ids
-        ]
+        next_body = [expr for expr in n.body if not is_free(expr, getter.ids)]
         return terms.EProgram(next_body)
 
     def EBlock(self, n: terms.EBlock) -> terms.EBlock:
         getter = IdGetter()
         n = n.fold_children_with(self).fold_with(getter)
-        next_body = [
-            expr
-            for expr in n.body[:-1:]
-            if (not isinstance(expr.expr, (terms.EDef, terms.EBinaryOpDef)))
-            or expr.expr.identifier in getter.ids
-        ] + n.body[-1::]
-        return terms.EBlock(next_body)
+        next_body = [expr for expr in n.body[:-1:] if not is_free(expr, getter.ids)]
+        return terms.EBlock(next_body + n.body[-1::])
 
 
 class Hoister(terms.FoldAll):

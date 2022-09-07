@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import builtins
 import dataclasses
 import glob
 import json
@@ -190,9 +191,6 @@ def yellow(text: str) -> str:
     return "\033[93m{}\033[00m".format(text)
 
 
-import builtins
-
-
 def print(s: str, end: str = ""):
     builtins.print(f"\r{s}", end=end, flush=True)
 
@@ -238,10 +236,7 @@ def main():
 
         print(f"{green('Inferred')} {src_path}")
 
-        ast = (
-            ast.fold_with(compile.Hoister())
-            .fold_with(compile.DefCleaner())
-        )
+        ast = ast.fold_with(compile.Hoister()).fold_with(compile.DefCleaner())
         js = compile.compile(ast)
 
         print(f"{green('Compiled')} {src_path}")
