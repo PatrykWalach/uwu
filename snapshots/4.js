@@ -1,1 +1,1 @@
-const unit=undefined;const op1/*+*/=(a)=>(b)=>{return a+b};const op2/***/=(a)=>(b)=>{return a*b};console.log(op1/*+*/(1.0)(op2/***/(2.0)(3.0)))
+const unit=undefined;const /* + */op1=(a)=>(b)=>{return a+b};const /* * */op2=(a)=>(b)=>{return a*b};console.log(op1(1.0)/* + */(op2(2.0)/* * */(3.0)))
