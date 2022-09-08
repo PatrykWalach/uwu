@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import dataclasses
 import functools
+import itertools
 import typing
 
 import case_tree
@@ -23,7 +24,21 @@ class Scheme:
 
 
 Substitution: typing.TypeAlias = dict[int, typed.Type]
-Context: typing.TypeAlias = dict[str, Scheme]
+
+
+@dataclasses.dataclass
+class Context:
+    vars: dict[str, Scheme] = dataclasses.field(default_factory=dict)
+    types: dict[str, Scheme] = dataclasses.field(default_factory=dict)
+
+
+
+    def values(self) -> typing.Iterator[Scheme]:
+        return itertools.chain(self.vars.values(), self.types.values())
+
+    def copy(self) -> Context:
+        return Context(self.vars.copy(), self.types.copy())
+
 
 counter = 0
 
@@ -132,8 +147,12 @@ def apply_subst_scheme(subst: Substitution, scheme: Scheme) -> Scheme:
 
 
 def apply_subst_ctx(subst: Substitution, ctx: Context) -> Context:
-    for key in ctx.keys():
-        ctx[key] = apply_subst_scheme(subst, ctx[key])
+    for key, value in ctx.vars.items():
+        ctx.vars[key] = apply_subst_scheme(subst, value)
+
+    for key, value in ctx.types.items():
+        ctx.types[key] = apply_subst_scheme(subst, value)
+
     return ctx
     # return ctx
     # next_ctx = [apply_subst_scheme(subst, scheme) for scheme in ctx.values()]
@@ -188,6 +207,7 @@ Inferable = (
     | terms.ENumLiteral
     | terms.EFloatLiteral
     | terms.MaybeEHintNothing
+    | terms.ETypeIdentifier
 )
 
 
@@ -204,7 +224,9 @@ def infer(
         case terms.EFloatLiteral(value):
             return subst, typed.TFloat
         case terms.EIdentifier(var):
-            return subst, instantiate(ctx[var])
+            return subst, instantiate(ctx.vars[var])
+        case terms.ETypeIdentifier(var):
+            return subst, instantiate(ctx.types[var])
         case terms.EDo(block, hint):
             subst, ty_hint = infer(subst, ctx, hint)
             subst, ty = infer(subst, ctx, block)
@@ -224,7 +246,7 @@ def infer(
             subst, ty_hint = infer(subst, ctx, hint)
             subst = unify_subst(ty_init, ty_hint, subst)
 
-            ctx[id] = Scheme.from_subst(subst, ctx, ty_hint)
+            ctx.vars[id] = Scheme.from_subst(subst, ctx, ty_hint)
 
             return subst, ty_hint
         case terms.EExternal():
@@ -244,7 +266,7 @@ def infer(
             for generic in generics:
 
                 ty_generic = fresh_ty_var()
-                t_ctx[generic.name] = Scheme([], ty_generic)
+                t_ctx.types[generic.name] = Scheme([], ty_generic)
                 ty_generics.append(ty_generic)
 
             ty_kind = functools.reduce(
@@ -272,12 +294,12 @@ def infer(
                 ty_variant_con = typed.TCon(variant.id, ty_variant_co_kind).w()
                 ty_variant = functools.reduce(typed.TAp, ty_fields, ty_variant_con)
 
-                ctx["$" + variant.id] = Scheme.from_subst(subst, ctx, ty_variant_con)
-                ctx[variant.id] = Scheme.from_subst(
+                ctx.types["$" + variant.id] = Scheme.from_subst(subst, ctx, ty_variant_con)
+                ctx.types[variant.id] = Scheme.from_subst(
                     subst, ctx, typed.TDef(ty_variant, ty)
                 )
 
-            ctx[id] = Scheme.from_subst(subst, ctx, ty_con)
+            ctx.types[id] = Scheme.from_subst(subst, ctx, ty_con)
 
             return subst, typed.TUnit
         case terms.EUnaryExpr(op, expr):
@@ -308,11 +330,11 @@ def infer(
             return subst, ty_ret
         case terms.EMatchAs(id):
             ty = fresh_ty_var()
-            ctx[id] = Scheme([], ty)
+            ctx.vars[id] = Scheme([], ty)
             return subst, ty
         case terms.EParam(id, hint):
             subst, ty = infer(subst, ctx, hint)
-            ctx[id] = Scheme([], ty)
+            ctx.vars[id] = Scheme([], ty)
             return subst, ty
         case terms.EVariantCall(id, args):
             # option_con = TCon('Option', KFun(KStar(),KStar()))
@@ -321,7 +343,7 @@ def infer(
             # ty_variant = TAp<ty_var_con, var1>
             # ty_con = ty_variant -> ty
             ty = fresh_ty_var()
-            subst, ty_con = infer(subst, ctx, terms.EIdentifier(id))
+            subst, ty_con = infer(subst, ctx, terms.ETypeIdentifier(id))
 
             ty_args = list[typed.Type]()
 
@@ -333,7 +355,7 @@ def infer(
                 flip(typed.KFun), map(typed.kind, ty_args), typed.KStar().w()
             )
 
-            subst, ty_variant_con = infer(subst, ctx, terms.EIdentifier("$" + id))
+            subst, ty_variant_con = infer(subst, ctx, terms.ETypeIdentifier("$" + id))
 
             ty_variant = functools.reduce(
                 typed.TAp,
@@ -367,7 +389,7 @@ def infer(
 
             for generic in generics:
                 ty_generic = fresh_ty_var()
-                t_ctx[generic.name] = Scheme([], ty_generic)
+                t_ctx.types[generic.name] = Scheme([], ty_generic)
 
             subst, ty_hint = infer(subst, t_ctx, hint)
 
@@ -384,7 +406,7 @@ def infer(
 
             subst = unify_subst(ty_body, ty_hint, subst)
 
-            ctx[id] = Scheme.from_subst(subst, ctx, ty)
+            ctx.vars[id] = Scheme.from_subst(subst, ctx, ty)
 
             return subst, ty
         case terms.EIf(test, then, or_else, hint=hint):
@@ -406,7 +428,7 @@ def infer(
             return subst, fresh_ty_var()
 
         case terms.EHint(id, args):
-            subst, ty_con = infer(subst, ctx, terms.EIdentifier(id))
+            subst, ty_con = infer(subst, ctx, terms.ETypeIdentifier(id))
 
             ty_args = list[typed.Type]()
             for hint_arg in args:
@@ -424,7 +446,7 @@ def infer(
         case terms.ECaseOf(expr, cases=cases):
 
             subst, ty_expr = infer(subst, ctx, expr)
-            ctx["$"] = Scheme.from_subst(subst, ctx, ty_expr)
+            ctx.vars["$"] = Scheme.from_subst(subst, ctx, ty_expr)
 
             tree = case_tree.gen_match(cases)
 
@@ -495,7 +517,7 @@ def infer_case_tree(
 
             subst, ty_var = infer(subst, ctx, terms.EIdentifier(var))  # x | x.0
             subst, ty_pattern_name = infer(
-                subst, ctx, terms.EIdentifier(pattern_name)
+                subst, ctx, terms.ETypeIdentifier(pattern_name)
             )  # Some() | None()
             t_ctx = ctx.copy()
 
@@ -509,7 +531,7 @@ def infer_case_tree(
             ty_vars = list[typed.Type](fresh_ty_var() for _ in vars)
 
             subst, pattern_name_con = infer(
-                subst, ctx, terms.EIdentifier("$" + pattern_name)
+                subst, ctx, terms.ETypeIdentifier("$" + pattern_name)
             )
 
             subst = unify_subst(
@@ -526,7 +548,7 @@ def infer_case_tree(
             )
 
             for var2, ty_var in zip(vars, ty_vars):
-                t_ctx[var2] = Scheme.from_subst(subst, t_ctx, ty_var)
+                t_ctx.vars[var2] = Scheme.from_subst(subst, t_ctx, ty_var)
 
             # subst return type
             ty = fresh_ty_var()
@@ -536,7 +558,7 @@ def infer_case_tree(
                 t_ctx,
                 yes,
                 {key: value for key, value in alts.items() if key != var}
-                | {var2: alternatives(t_ctx[var2].ty) for var2 in vars},
+                | {var2: alternatives(t_ctx.vars[var2].ty) for var2 in vars},
             )
             subst = unify_subst(ty_yes, ty, subst)
 

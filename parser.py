@@ -154,6 +154,7 @@ class UwuLexer(Lexer):
     IDENTIFIER["or"] = "STRICT_OR"  # type: ignore[index]
     IDENTIFIER["and"] = "STRICT_AND"  # type: ignore[index]
     IDENTIFIER["not"] = "STRICT_NOT"  # type: ignore[index]
+
     EXTERNAL = r"`[^`]*`"
 
     ignore_comment = r"\#.*"
@@ -445,13 +446,13 @@ class UwuParser(Parser):
     def enum(self, p: sly.yacc.YaccProduction):
         return terms.EEnumDeclaration(p.type_identifier.name, variants=p.variants or [])
 
-    @_("type_identifier '(' type  { ',' type } ')'")
+    @_("TYPE_IDENTIFIER '(' type  { ',' type } ')'")
     def variant(self, p: sly.yacc.YaccProduction):
-        return terms.EVariant(p.type_identifier.name, concat(p.type0, p.type1))
+        return terms.EVariant(p.TYPE_IDENTIFIER, concat(p.type0, p.type1))
 
-    @_("type_identifier")  # type: ignore[no-redef]
+    @_("TYPE_IDENTIFIER")  # type: ignore[no-redef]
     def variant(self, p: sly.yacc.YaccProduction):
-        return terms.EVariant(p.type_identifier.name)
+        return terms.EVariant(p.TYPE_IDENTIFIER)
 
     # @_("identifier { ',' identifier }")
     # def fields_unnamed(self, p:sly.yacc.YaccProduction):
@@ -522,13 +523,13 @@ class UwuParser(Parser):
     # def tuple_pattern(self, p:sly.yacc.YaccProduction):
     #     return terms.EMatchTuple(concat(p.pattern0, p.pattern1))
 
-    @_("type_identifier '(' [ NEWLINE ] [ patterns ] ')'")
+    @_("TYPE_IDENTIFIER '(' [ NEWLINE ] [ patterns ] ')'")
     def match_variant(self, p: sly.yacc.YaccProduction):
-        return terms.EMatchVariant(p.type_identifier.name, p.patterns or [])
+        return terms.EMatchVariant(p.TYPE_IDENTIFIER, p.patterns or [])
 
-    @_("type_identifier")  # type: ignore[no-redef]
+    @_("TYPE_IDENTIFIER")  # type: ignore[no-redef]
     def match_variant(self, p: sly.yacc.YaccProduction):
-        return terms.EMatchVariant(p.type_identifier.name, [])
+        return terms.EMatchVariant(p.TYPE_IDENTIFIER, [])
 
     @_("patterns ',' [ NEWLINE ] pattern [ NEWLINE ]")
     def patterns(self, p: sly.yacc.YaccProduction):
@@ -550,9 +551,9 @@ class UwuParser(Parser):
     def call(self, p: sly.yacc.YaccProduction):
         return terms.ECall(p.expr, p.exprs or [])
 
-    @_("type_identifier '(' [ NEWLINE ] [ exprs ] ')'")
+    @_("TYPE_IDENTIFIER '(' [ NEWLINE ] [ exprs ] ')'")
     def variant_call(self, p: sly.yacc.YaccProduction):
-        return terms.EVariantCall(p.type_identifier.name, p.exprs or [])
+        return terms.EVariantCall(p.TYPE_IDENTIFIER, p.exprs or [])
 
     @_("exprs ',' [ NEWLINE ] expr [ NEWLINE ]")
     def exprs(self, p: sly.yacc.YaccProduction):
@@ -568,7 +569,11 @@ class UwuParser(Parser):
 
     @_("TYPE_IDENTIFIER")
     def type_identifier(self, p: sly.yacc.YaccProduction):
-        return terms.EIdentifier(p.TYPE_IDENTIFIER)
+        return terms.ETypeIdentifier(p.TYPE_IDENTIFIER)
+
+    @_("IDENTIFIER")
+    def type_identifier(self, p: sly.yacc.YaccProduction):
+        return terms.ETypeIdentifier(p.IDENTIFIER)
 
     @_("identifier [ ':' type ] '=' expr")
     def let(self, p):

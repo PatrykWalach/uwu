@@ -575,6 +575,37 @@ def lexer():
                     )
                 ],
             ),
+            (
+                "enum tuple<a, b> { Tuple(a,b) }\ntuple: tuple<Int, Float> = Tuple(1, 12.)",
+                [
+                    EExpr(
+                        EEnumDeclaration(
+                            "tuple",
+                            generics=[ETypeIdentifier("a"), ETypeIdentifier("b")],
+                            variants=[EVariant("Tuple", [EHint("a"), EHint("b")])],
+                        )
+                    ),
+                    EExpr(
+                        ELet(
+                            "tuple",
+                            hint=MaybeEHint(
+                                EHint("tuple", [EHint("Int"), EHint("Float")])
+                            ),
+                            init=EExpr(
+                                EVariantCall(
+                                    "Tuple",
+                                    [
+                                        EExpr(
+                                            ENumLiteral(1),
+                                        ),
+                                        EExpr(EFloatLiteral(12.0)),
+                                    ],
+                                )
+                            ),
+                        )
+                    ),
+                ],
+            )
             # (
             #     "case [Some(1), None()] of [Some(value), None()] do value end end",
             #     [
@@ -793,6 +824,21 @@ def test_parser(program, ast, parser, lexer):
             "enum TupleType<A, B>{Tuple(A, B)}\ncase Tuple(Some(1), Some(2)) of Tuple(None(), Some(a)) do a end Tuple(None(), None()) do 3 end Tuple(_, None()) do 3 end Tuple(Some(a), Some(b)) do a + b end end",
             typed.TNum,
         ),
+        (
+            "enum tuple<a, b> { Tuple(a,b) }\ntuple=12\nx: tuple<Int, Float> = Tuple(1, 12.)",
+            typed.TAp(
+                typed.TAp(
+                    typed.TCon(
+                        "tuple",
+                        typed.KFun(
+                            typed.KStar(), typed.KFun(typed.KStar(), typed.KStar())
+                        ),alts=['Tuple']
+                    ),
+                    typed.TNum,
+                ),
+                typed.TFloat,
+            ),
+        )
         # ("{1,'2'}", typed.TTuple([typed.TNum, typed.TStr])),
     ],
 )
@@ -931,6 +977,11 @@ def test_infer(program, expected_type, parser, lexer):
                     "40",
                     "def ~>> <A> (a: Int, b: Int): Int do `a>>b` end \n `console.log`(5 ~>> 2)",
                     "1",
+                ),
+                (
+                    "41",
+                    "enum tuple<a, b> { Tuple(a,b) }\ntuple=12\nx: tuple<Int, Float> = Tuple(1, 12.)\n`console.log`(tuple)",
+                    "12",
                 ),
             ]
         )
