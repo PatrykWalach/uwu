@@ -154,29 +154,33 @@ BUILTINS: list[terms.EExpr] = [
 v = fresh_ty_var()
 
 
-DEFAULT_CTX: Context = {
-    typed.TStr.id: Scheme([], typed.TStr),
-    typed.TNum.id: Scheme([], typed.TNum),
-    typed.TFloat.id: Scheme([], typed.TFloat),
-    typed.TUnit.id: Scheme([], typed.TUnit),
-    typed.TRegex.id: Scheme([], typed.TRegex),
-    typed.TCallableCon.id: Scheme([], typed.TCallableCon),
-    typed.TArrayCon.id: Scheme([], typed.TArrayCon),
-    # Bool
-    typed.TBool.id: Scheme([], typed.TBool),
-    f"${typed.TrueCon.id}": Scheme([], typed.TrueCon),
-    f"${typed.FalseCon.id}": Scheme([], typed.FalseCon),
-    f"{typed.TrueCon.id}": Scheme([], typed.TDef(typed.TrueCon, typed.TBool)),
-    f"{typed.FalseCon.id}": Scheme([], typed.TDef(typed.FalseCon, typed.TBool)),
-    # Option
-    typed.TOptionCon.id: Scheme([], typed.TOptionCon),
-    f"${typed.SomeCon.id}": Scheme([], typed.SomeCon),
-    f"${typed.NoneCon.id}": Scheme([], typed.NoneCon),
-    typed.SomeCon.id: Scheme(
-        [v.id], typed.TDef(typed.TAp(typed.SomeCon, v), typed.TOption(v))
-    ),
-    typed.NoneCon.id: Scheme([v.id], typed.TDef(typed.NoneCon, typed.TOption(v))),
-}
+DEFAULT_CTX = Context(
+    {},
+    {
+        typed.TStr.id: Scheme([], typed.TStr),
+        typed.TNum.id: Scheme([], typed.TNum),
+        "Int": Scheme([], typed.TNum),
+        typed.TFloat.id: Scheme([], typed.TFloat),
+        typed.TUnit.id: Scheme([], typed.TUnit),
+        typed.TRegex.id: Scheme([], typed.TRegex),
+        typed.TCallableCon.id: Scheme([], typed.TCallableCon),
+        typed.TArrayCon.id: Scheme([], typed.TArrayCon),
+        # Bool
+        typed.TBool.id: Scheme([], typed.TBool),
+        f"${typed.TrueCon.id}": Scheme([], typed.TrueCon),
+        f"${typed.FalseCon.id}": Scheme([], typed.FalseCon),
+        f"{typed.TrueCon.id}": Scheme([], typed.TDef(typed.TrueCon, typed.TBool)),
+        f"{typed.FalseCon.id}": Scheme([], typed.TDef(typed.FalseCon, typed.TBool)),
+        # Option
+        typed.TOptionCon.id: Scheme([], typed.TOptionCon),
+        f"${typed.SomeCon.id}": Scheme([], typed.SomeCon),
+        f"${typed.NoneCon.id}": Scheme([], typed.NoneCon),
+        typed.SomeCon.id: Scheme(
+            [v.id], typed.TDef(typed.TAp(typed.SomeCon, v), typed.TOption(v))
+        ),
+        typed.NoneCon.id: Scheme([v.id], typed.TDef(typed.NoneCon, typed.TOption(v))),
+    },
+)
 
 
 for builitin in BUILTINS:

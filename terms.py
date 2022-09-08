@@ -155,6 +155,10 @@ class EBinaryOpDef(Node):
 class EIdentifier(Node):
     name: str
 
+@dataclasses.dataclass(frozen=True)
+class ETypeIdentifier(Node):
+    name: str
+
 
 @dataclasses.dataclass(frozen=True)
 class ENumLiteral(Node):
@@ -261,7 +265,7 @@ class EEnumDeclaration(Node):
     id: str
     _: dataclasses.KW_ONLY
     variants: list[EVariant] = dataclasses.field(default_factory=list)
-    generics: list[EIdentifier] = dataclasses.field(default_factory=list)
+    generics: list[ETypeIdentifier] = dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -364,6 +368,8 @@ class NodeFold(metaclass=FoldMeta):
         EStrLiteral.__name__,
         ENumLiteral.__name__,
         EBinaryOpDef.__name__,
+ETypeIdentifier.__name__,
+        EFloatLiteral.__name__,
     }
 
 
